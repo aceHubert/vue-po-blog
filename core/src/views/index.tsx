@@ -10,7 +10,7 @@ export default class Home extends Vue {
   render() {
     return (
       <div class="home">
-        <p style="text-align:center;padding: 20px;">请在主题文件中配置主页</p>
+        <p style="text-align:center;padding: 20px;">使用说明</p>
       </div>
     );
   }

@@ -8,7 +8,7 @@
     "start": "nuxt start"
   },
   "dependencies": {
-    "@vue-async/module-loader": "^1.0.7",
+    "@vue-async/module-loader": "^1.0.8",
     "@vue-async/utils": "^1.0.5",
     "axios": "^0.20.0",
     "core-js": "^3.6.5",

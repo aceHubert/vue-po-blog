@@ -31,7 +31,7 @@ const plugin: Plugin = (cxt) => {
 
   let locale = defaultLocale;
 
-  if (cxt.isServer && (cxt as any).ssrContext && (cxt as any).ssrContext.lang) {
+  if (process.server && (cxt as any).ssrContext && (cxt as any).ssrContext.lang) {
     locale = (cxt as any).ssrContext.lang;
   } else if (hasDocument) {
     locale = document.documentElement.lang;
@@ -112,6 +112,8 @@ const plugin: Plugin = (cxt) => {
   });
 
   cxt.app.i18n = i18n;
+
+  // 添加 i18n 到 Context
   cxt.$i18n = i18n;
 };
 

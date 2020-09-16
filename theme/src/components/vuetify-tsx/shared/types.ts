@@ -98,10 +98,10 @@ export type Maskable = {
 
 export type Measurable = {
   aspectRatio?: string;
-  height?: number;
-  width?: number;
-  maxHeight?: number;
-  maxWidth?: number;
+  height?: string | number;
+  width?: string | number;
+  maxHeight?: string | number;
+  maxWidth?: string | number;
 };
 
 export type Positionable = {

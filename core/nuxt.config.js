@@ -78,11 +78,11 @@ module.exports = {
       },
     },
     '/api/blog': {
-      target: 'https://preview.plumemo.com/',
+      target: 'https://preview.plumemo.com',
     },
   },
   plugins: [
-    { src: 'plugins/global' }, // global
+    { src: 'plugins/pre-init' }, // pre-init
     { src: 'plugins/i18n' }, // locale
     { src: 'plugins/router' }, // router
     { src: 'plugins/module-loader', mode: 'client' },

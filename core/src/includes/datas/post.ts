@@ -39,19 +39,28 @@ function formatPost(post: any) {
   };
 }
 
-export function getPosts({ page = 1, size = 10, ...rest }: PostsQuery = {}): Promise<PostsResponse> {
-  return http
-    .get('posts/posts/v1/list', { params: { page, size, ...rest } })
-    .then(({ data: { models, pageInfos } = {} }) => {
-      return {
-        rows: models.map(formatPost),
-        pager: pageInfos,
-      };
+export const post = {
+  /**
+   * 获取文章列表
+   * @param param
+   */
+  getList({ page = 1, size = 10, ...rest }: PostsQuery = {}): Promise<PostsResponse> {
+    return http
+      .get('posts/posts/v1/list', { params: { page, size, ...rest } })
+      .then(({ data: { models, pageInfo } = {} }) => {
+        return {
+          rows: models.map(formatPost),
+          pager: pageInfo,
+        };
+      });
+  },
+  /**
+   * 获取文章详情
+   * @param id
+   */
+  get(id: number): Promise<Post> {
+    return http.get(`posts/posts/v1/${id}`).then(({ data: { models } }) => {
+      return formatPost(models);
     });
-}
-
-export function getPost(id: number): Promise<Post> {
-  return http.get(`posts/posts/v1/${id}`).then(({ data: { models } }) => {
-    return formatPost(models);
-  });
-}
+  },
+};

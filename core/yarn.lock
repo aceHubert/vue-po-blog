@@ -1561,10 +1561,10 @@
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
 
-"@vue-async/module-loader@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@vue-async/module-loader/-/module-loader-1.0.7.tgz#87b250081bba4a0998c8a8723b32537605993ac5"
-  integrity sha512-zJ0LJXNqFGHXLt43ys3QbWyHE4lq714U68WlghePJ8KBvlq/tXpVvm+uof8Ne2OJmuPBheDVrMlmSybRdX2kJA==
+"@vue-async/module-loader@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@vue-async/module-loader/-/module-loader-1.0.8.tgz#6cb4556716fd64d478db3326503f0162bb1cc307"
+  integrity sha512-6B8+EjpJdBFckbup9nWGHL4YINcZHUu4hgQUPGPvFDo4gyWYhqVSmLG2bruW6Do6WjU2RXtfimrbwoiCSNlnLw==
   dependencies:
     "@vue-async/utils" "^1.0.5"
 

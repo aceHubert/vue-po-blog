@@ -36,10 +36,35 @@ export function getApiPath() {
   );
 }
 
-export function getLogo() {
-  return '';
+/**
+ * @author Hubert
+ * @since 2020-09-04
+ * @version 0.0.1
+ * Copyright
+ */
+export function getCopyright() {
+  return AppStore.settings.copyright;
 }
 
-export function getLocale() {
-  return '';
+/**
+ * @author Hubert
+ * @since 2020-09-04
+ * @version 0.0.1
+ * ICP
+ */
+export function getICP() {
+  return AppStore.settings.icp;
+}
+
+/**
+ * @author Hubert
+ * @since 2020-09-04
+ * @version 0.0.1
+ * 配置的 Logo, todo:扩展支持图片
+ */
+export function getLogo() {
+  return {
+    type: 'text',
+    content: AppStore.settings.name,
+  };
 }

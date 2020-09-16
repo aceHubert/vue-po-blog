@@ -19,6 +19,6 @@
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": ["src"],
+  "include": ["src", "../plugins/src/widgets/widgets"],
   "exclude": ["node_modules"]
 }

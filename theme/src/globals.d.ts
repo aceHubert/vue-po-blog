@@ -6,6 +6,8 @@ declare module '@nuxt/types' {
     axios: AxiosStatic;
     $http: AxiosInstance;
     $i18n: VueI18n & IVueI18n;
+    post: any;
+    site: any;
     addRoutes: (routes: RouteConfig[]) => void;
   }
 }

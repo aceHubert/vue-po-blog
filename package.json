@@ -1,9 +1,9 @@
 {
-  "name": "blog",
+  "name": "vue-plumemo-blog",
   "version": "0.0.1-alpha",
-  "description": "blog demo",
-  "main": "index.js",
+  "description": "frontend app for plumemo blog",
   "scripts": {
+    "postinstall": "concurrently --raw \"cd ./core && yarn install\" \"cd ./theme && yarn install\" \"cd ./plugins && yarn install\"",
     "serve": "concurrently --raw \"cd ./plugins && yarn serve\" \"cd ./theme && yarn serve\" \"cd ./core && yarn serve\""
   },
   "author": "Hubert<yi.xiang@live.cn>",

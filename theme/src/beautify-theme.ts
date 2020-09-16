@@ -4,7 +4,7 @@ import routes from './router';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
-import Vuetify, { VApp } from 'vuetify/lib';
+import Vuetify, { VApp, VMain } from 'vuetify/lib';
 import { Ripple } from 'vuetify/lib/directives';
 
 // Types
@@ -38,13 +38,18 @@ export default function (Vue: VueConstructor, opts: any = {}) {
     // routes
     addRoutes(routes);
 
-    app.vuetify = new Vuetify({});
+    app.vuetify = new Vuetify({
+      theme: {
+        dark: opts.isDark(),
+        themes: opts.getThemes(),
+      },
+    });
   });
 
   // layout
   opts.hook('layout', (layout: any) => {
     layout.rootWarp = VApp;
-    // layout.mainWarp = Home;
+    layout.mainWarp = VMain;
     layout.header = Header;
     layout.footer = Footer;
   });

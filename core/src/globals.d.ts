@@ -1,6 +1,8 @@
-import { RawLocation, RouteConfig } from 'vue-router';
+import { RouteConfig } from 'vue-router';
 import { AxiosStatic, AxiosInstance } from 'axios';
 import VueI18n, { IVueI18n } from 'vue-i18n';
+import { post } from 'src/includes/datas/post';
+import { site } from 'src/includes/datas/site';
 
 declare global {
   type LangConfig = {
@@ -10,13 +12,13 @@ declare global {
     alternate?: string;
   };
 
-  interface Menu {
-    title: string;
-    icon: string;
-    to: RawLocation;
-    index: number;
-    children?: Array<Menu>;
-  }
+  // interface Menu {
+  //   title: string;
+  //   icon: string;
+  //   to: RawLocation;
+  //   index: number;
+  //   children?: Array<Menu>;
+  // }
 
   export type Dictionary<T> = Record<string, T>;
 }
@@ -46,6 +48,8 @@ declare module '@nuxt/types' {
     axios: AxiosStatic;
     $http: AxiosInstance;
     $i18n: VueI18n & IVueI18n;
+    post: typeof post;
+    site: typeof site;
     addRoutes: (routes: RouteConfig[]) => void;
   }
 }

@@ -20,7 +20,7 @@ const globalThemeArgs: {
       warning: '#FB8C00',
     },
     dark: {
-      primary: '#2196F3',
+      primary: '#41444b',
       secondary: '#424242',
       accent: '#FF4081',
       error: '#FF5252',

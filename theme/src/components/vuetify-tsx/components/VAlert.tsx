@@ -1,9 +1,12 @@
 import { ofType } from 'vue-tsx-support';
-import { VAlert } from 'vuetify/lib';
+import { VAlert as _VAlert } from 'vuetify/lib';
 
 import { Colorable, Transitionable } from '../shared/types';
 
-export default ofType<Props, Events>().convert(VAlert as any);
+const VAlert = ofType<Props, Events>().convert(_VAlert as any);
+
+export { VAlert };
+export default VAlert;
 
 type Props = Colorable &
   Transitionable & {

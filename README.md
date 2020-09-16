@@ -1,1 +1,1 @@
-# Plumemo blog
+# frontend app for plumemo blog

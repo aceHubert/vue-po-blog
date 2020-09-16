@@ -7,7 +7,7 @@ export default ofType<Props>().convert(VAppBar as any);
 
 type Props = Colorable &
   Themable & {
-    absolute?: boolean;
     app?: boolean;
+    absolute?: boolean;
     fixed?: boolean;
   };

@@ -27,14 +27,15 @@ const plugin: Plugin = async (cxt) => {
       },
       // plugin's entry
       {
-        moduleName: 'footer-widget',
-        entry: '/content/plugins/footer-widget/footer-widget.umd.js',
+        moduleName: 'comment-plugin',
+        entry: '/content/plugins/comment-plugin/comment-plugin.umd.js',
         args: {
           ...pluginArgs,
         },
       },
     ],
     {
+      sync: true,
       error: (msg: string) => {
         // 此处只会提示错误，不会阻止 success 执行
         // eslint-disable-next-line no-console

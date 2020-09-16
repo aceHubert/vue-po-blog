@@ -26,13 +26,16 @@ class AppStore extends VuexModule {
   };
 
   settings: Settings = {
-    domain: 'http://localhost/',
+    name: '',
+    domain: '',
+    icp: null,
+    copyright: null,
     staticDir: 'static/',
     apiPath: 'api/blog/',
   };
 
   @Mutation
-  SET_SETTINGS(settings: Settings) {
+  SET_SETTINGS(settings: Partial<Settings>) {
     merge(this.settings, settings);
   }
 
@@ -46,7 +49,7 @@ class AppStore extends VuexModule {
    * @param settings
    */
   @Action
-  SetSetting(settings: Settings) {
+  SetSetting(settings: Partial<Settings>) {
     this.SET_SETTINGS(settings);
   }
 

@@ -1,5 +1,8 @@
 export type Settings = {
+  name: string;
   domain: string;
+  icp: string | null;
+  copyright: string | null;
   staticDir: string;
   apiPath: string;
 };

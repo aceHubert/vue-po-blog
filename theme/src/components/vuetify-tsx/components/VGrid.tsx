@@ -1,9 +1,47 @@
 import { ofType } from 'vue-tsx-support';
-import { VFlex } from 'vuetify/lib';
+import {
+  VContainer as _VContainer,
+  VRow as _VRow,
+  VCol as _VCol,
+  VSpacer as _VSpacer,
+  VFlex as _VFlex,
+} from 'vuetify/lib';
 
-export default ofType<Props>().convert(VFlex as any);
+const VContainer = ofType<ContainerProps>().convert(_VContainer as any);
+const VRow = ofType<RowProps>().convert(_VRow as any);
+const VCol = ofType<ColProps>().convert(_VCol as any);
+const VSpacer = ofType().convert(_VSpacer as any);
+const VFlex = ofType<FlexProps>().convert(_VFlex as any);
 
-interface Props {
+export { VContainer, VRow, VCol, VSpacer, VFlex };
+
+export default {
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  $_vuetify_subcomponents: {
+    VContainer,
+    VRow,
+    VCol,
+    VSpacer,
+    VFlex,
+  },
+};
+
+type ContainerProps = {
+  'fill-height'?: boolean;
+  fluid?: boolean;
+};
+
+// todo
+type RowProps = {
+  'no-gutters'?: boolean;
+};
+
+// todo
+type ColProps = {
+  cols?: boolean | string | number;
+};
+
+interface FlexProps {
   xs1?: boolean;
   xs2?: boolean;
   xs3?: boolean;
