@@ -2,7 +2,7 @@
  * 传递给主题的方法
  */
 
-export { getCurrentTheme, getThemes, isDark, setDark, setTheme } from './functions/theme';
+export { getCurrentTheme, getThemes, isDark, setDark, setThemes } from './functions/theme';
 export {
   hasLayout,
   getLayout,

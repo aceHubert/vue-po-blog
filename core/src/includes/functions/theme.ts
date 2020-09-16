@@ -73,6 +73,17 @@ export function getThemes(): Themes {
  * @since 2020-09-04
  * 设置主题
  */
-export function setTheme(themes: Themes) {
-  globalThemeArgs.themes = Merge({}, globalThemeArgs, themes);
+export function setThemes(themes: Partial<Themes>): void;
+export function setThemes(dark: boolean, themes: Partial<Theme>): void;
+export function setThemes(dark: boolean | Partial<Themes>, themes?: Partial<Theme>) {
+  if (typeof dark === 'boolean') {
+    globalThemeArgs.themes[dark ? 'dark' : 'light'] = Merge(
+      {},
+      globalThemeArgs.themes[dark ? 'dark' : 'light'],
+      themes,
+    ) as Theme;
+  } else {
+    const themes = dark;
+    globalThemeArgs.themes = Merge({}, globalThemeArgs, themes) as Themes;
+  }
 }

@@ -15,6 +15,7 @@ import * as prototypeArgs from '@/includes/prototype';
 // Types
 import { Plugin } from '@nuxt/types';
 import { Settings } from 'types/functions/site';
+import { setThemes } from '@/includes/theme';
 
 // 注入 http 到 Vue
 Vue.axios = Axios;
@@ -62,7 +63,8 @@ const plugin: Plugin = async (cxt) => {
    * 加载主题配置
    */
   try {
-    // todo:
+    const configs = await site.getThemeConfigs();
+    setThemes(configs.dark, configs.themes);
   } catch (err) {
     globalError(process.env.NODE_ENV === 'production', `[core] 主题配置文件加载失败, 错误：${err.message}`);
     // error({ statusCode: 500, message: '主题配置文件加载失败' });
