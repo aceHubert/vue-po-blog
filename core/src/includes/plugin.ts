@@ -10,5 +10,5 @@ export {
   setDefaultLocale,
   setLocale,
 } from './functions/locale';
-export { hasLayout, getLayout, getLayouts, hasTemplate, getTemplate, getTemplates } from './functions/layout';
-export { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP } from './functions/settings';
+export { hasLayout, getLayouts, hasWidget, getWidgets, hasTemplate, getTemplates } from './functions/layout';
+export { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } from './functions/settings';

@@ -20,6 +20,6 @@
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  // "include": ["src", "types"],
+  "include": ["src", "types"],
   "exclude": ["node_modules"]
 }

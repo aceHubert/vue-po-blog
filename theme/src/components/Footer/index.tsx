@@ -1,5 +1,6 @@
 import { Vue, Component } from 'vue-property-decorator';
-import { VContainer, VFooter } from '../vuetify-tsx';
+import { VContainer, VFooter, VCard, VDivider } from '../vuetify-tsx';
+
 // Types
 import { Component as VueComponent, CreateElement } from 'vue';
 
@@ -11,14 +12,15 @@ export default class Footer extends Vue {
   copyright = '';
   icp = '';
 
-  // beforeCreate() {
-  //   // @ts-ignore
-  //   this.hook('footer_widgets')
-  //     .filter(this.widgets)
-  //     .then((widgets: VueComponent[]) => {
-  //       this.widgets = widgets;
-  //     });
-  // }
+  get supportParams() {
+    return {
+      from: this.$route.name,
+    };
+  }
+
+  get footerWidgets() {
+    return this.getWidgets('footer').sort((a, b) => (a.order === b.order ? 0 : a.order > b.order ? 1 : -1));
+  }
 
   created() {
     this.copyright = this.getCopyright();
@@ -29,17 +31,27 @@ export default class Footer extends Vue {
     return (
       <VFooter>
         <VContainer class="text-center">
-          {this.widgets.length ? (
-            <ul class="widgets">
-              {this.widgets.map((widget) => (
-                <li>{h(widget)}</li>
-              ))}
-            </ul>
-          ) : null}
+          {this.footerWidgets && this.footerWidgets.length
+            ? this.footerWidgets.map((widget) => (
+                <VCard class="mb-3">
+                  {widget.title ? [<p class="caption pa-3 mb-0">{widget.title}</p>, <VDivider />] : null}
+                  <div class="pa-3">
+                    <plugin-holder
+                      support-params={this.supportParams}
+                      component-configs={widget.config}
+                    ></plugin-holder>
+                  </div>
+                  ))
+                </VCard>
+              ))
+            : null}
           <p class="copyright caption mb-0 grey--text">{this.copyright}</p>
           <p class="caption mb-0 grey--text">
             <span>
-              <a href="">beautify-theme</a> by Hubert
+              <a href="https://github.com/aceHubert/vue-plumemo-blog" target="_blank">
+                beautify-theme
+              </a>
+              by Hubert
             </span>
             <span class="ml-2">{this.icp}</span>
           </p>

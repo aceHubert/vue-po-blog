@@ -17,6 +17,10 @@ export type Roundable = {
   tile?: boolean;
 };
 
+export type Draggable = {
+  draggable?: boolean;
+};
+
 export type Detachable = {
   attach?: any;
   contentClass?: string;

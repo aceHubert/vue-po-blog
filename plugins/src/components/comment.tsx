@@ -5,6 +5,6 @@ import { Vue, Component } from 'vue-property-decorator';
 })
 export default class Comment extends Vue {
   render() {
-    return <div>Comment</div>;
+    return <div>Comment Plugin</div>;
   }
 }

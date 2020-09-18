@@ -3,6 +3,8 @@
  */
 // import { RouteConfig } from 'vue-router';
 
+import { Route } from 'vue-router';
+
 export function interopDefault(promise: Promise<any>) {
   return promise.then((m) => m.default || m);
 }
@@ -17,12 +19,6 @@ const routes: any = [
     path: 'article/:id',
     name: 'theme-article',
     component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/article')),
-  },
-  {
-    path: 'tag/:id',
-    name: 'theme-tag',
-    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/tag')),
-    props: true,
   },
   {
     path: 'archive',
@@ -41,9 +37,21 @@ const routes: any = [
   },
   {
     path: 'search/:keywords',
-    name: 'theme-search-result',
+    name: 'theme-search-keywords',
     component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/search-result')),
     props: true,
+  },
+  {
+    path: 'category/:id',
+    name: 'theme-search-category',
+    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/search-result')),
+    props: (to: Route) => ({ type: 'category', id: to.params.id }),
+  },
+  {
+    path: 'tag/:id',
+    name: 'theme-search-tag',
+    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/search-result')),
+    props: (to: Route) => ({ type: 'tag', id: to.params.id }),
   },
 ];
 

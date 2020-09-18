@@ -1,11 +1,16 @@
 import Vue, { Component, AsyncComponent } from 'vue';
 import { hasOwn } from '@vue-async/utils';
 
-const globalLayoutArgs: {
+// Types
+import { Widget } from 'types/functions/widget';
+
+export const globalLayoutArgs: {
   layouts: Dictionary<Component | AsyncComponent>;
+  widgets: Dictionary<Widget[]>;
   templates: Dictionary<Component | AsyncComponent>;
 } = Vue.observable({
   layouts: {},
+  widgets: {},
   templates: {},
 });
 
@@ -25,19 +30,14 @@ export function hasLayout(name: string) {
  * @version 0.0.1
  * 获取布局
  */
-export function getLayout(name: string) {
-  if (!hasLayout(name)) return;
-  return globalLayoutArgs.layouts[name];
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 获取所有布局
- */
-export function getLayouts() {
-  return globalLayoutArgs.layouts;
+export function getLayouts(): Record<string, Component | AsyncComponent>;
+export function getLayouts(name: string): Component | AsyncComponent | null;
+export function getLayouts(name?: string) {
+  if (name) {
+    return hasLayout(name) ? globalLayoutArgs.layouts[name] : null;
+  } else {
+    return globalLayoutArgs.layouts;
+  }
 }
 
 /**
@@ -66,6 +66,42 @@ export function addLayouts(layouts: Record<string, Component | AsyncComponent>, 
  * @author Hubert
  * @since 2020-09-04
  * @version 0.0.1
+ * 是否在在小部件
+ */
+export function hasWidget(placement: string) {
+  return hasOwn(globalLayoutArgs.widgets, placement) && globalLayoutArgs.widgets[placement].length;
+}
+
+/**
+ * @author Hubert
+ * @since 2020-09-04
+ * @version 0.0.1
+ * 获取小部件
+ */
+export function getWidgets(): Record<string, Widget[]>;
+export function getWidgets(placement: string): Widget[];
+export function getWidgets(placement?: string) {
+  if (placement) {
+    return hasWidget(placement) ? globalLayoutArgs.widgets[placement] : [];
+  } else {
+    return globalLayoutArgs.widgets;
+  }
+}
+
+/**
+ * @author Hubert
+ * @since 2020-09-04
+ * @version 0.0.1
+ * 添加小部件
+ */
+export function addWidgets(placement: string, widgets: Widget | Widget[]) {
+  globalLayoutArgs.widgets[placement] = (globalLayoutArgs.widgets[placement] || []).concat(widgets);
+}
+
+/**
+ * @author Hubert
+ * @since 2020-09-04
+ * @version 0.0.1
  * 是否在在模版
  */
 export function hasTemplate(name: string) {
@@ -78,19 +114,14 @@ export function hasTemplate(name: string) {
  * @version 0.0.1
  * 获取模版
  */
-export function getTemplate(name: string) {
-  if (!hasTemplate(name)) return;
-  return globalLayoutArgs.templates[name];
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 获取所有模版
- */
-export function getTemplates() {
-  return globalLayoutArgs.templates;
+export function getTemplates(): Record<string, Component | AsyncComponent>;
+export function getTemplates(name: string): Component | AsyncComponent | null;
+export function getTemplates(name?: string) {
+  if (name) {
+    return hasTemplate(name) ? globalLayoutArgs.templates[name] : null;
+  } else {
+    return globalLayoutArgs.templates;
+  }
 }
 
 /**

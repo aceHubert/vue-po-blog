@@ -7,11 +7,12 @@ import routes from './router';
 
 // Layout components
 import RootWarp from './components/root-warp';
+import MainWarp from './components/main-warp';
 import Header from './components/header';
 import Footer from './components/footer';
 
 // Vuetiry components
-import Vuetify, { VMain } from 'vuetify/lib';
+import Vuetify from 'vuetify/lib';
 import { Ripple } from 'vuetify/lib/directives';
 
 // Types
@@ -59,7 +60,7 @@ export default function (Vue: VueConstructor, opts: any = {}) {
   // 设置布局
   opts.hook('layout', (layout: any) => {
     layout.rootWarp = RootWarp;
-    layout.mainWarp = VMain;
+    layout.mainWarp = MainWarp;
     layout.header = Header;
     layout.footer = Footer;
   });

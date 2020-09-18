@@ -54,13 +54,19 @@ export const postApi = {
         };
       });
   },
+
+  /**
+   * 获取文章数量
+   */
+  getCount(): Promise<number> {
+    return http.get('posts/posts/v1/count').then(({ data: { model = 0 } }) => model);
+  },
+
   /**
    * 获取文章详情
    * @param id
    */
   get(id: number): Promise<Post> {
-    return http.get(`posts/posts/v1/${id}`).then(({ data: { model } }) => {
-      return formatPost(model);
-    });
+    return http.get(`posts/posts/v1/${id}`).then(({ data: { model } }) => formatPost(model));
   },
 };

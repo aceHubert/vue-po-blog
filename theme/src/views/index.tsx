@@ -1,4 +1,5 @@
 import { Vue, Component } from 'vue-property-decorator';
+import moment from 'moment';
 import {
   VContainer,
   VRow,
@@ -13,9 +14,14 @@ import {
   VPagination,
   VProgressCircular,
   VDialog,
-  VCardText,
+  VSheet,
+  VDivider,
 } from '@/components/vuetify-tsx';
-import moment from 'moment';
+
+// Default widgets (如果用户设置则按用户设置，用户设置可排序)
+import WidgetMyInfo from '@/widgets/my-info';
+import WidgetCategory from '@/widgets/category';
+import WidgetTag from '@/widgets/tag';
 
 // Types
 import { Route } from 'vue-router';
@@ -23,11 +29,11 @@ import { Route } from 'vue-router';
 @Component({
   name: 'home',
   head: {
-    title: 'Home',
+    title: '首页',
   },
   asyncData({ query, postApi }) {
     const { page = 1 } = query;
-    return postApi.getList({ page, size: 3, from: 'home' }).then((posts: any) => ({ posts }));
+    return postApi.getList({ page, from: 'home' }).then((posts: any) => ({ posts }));
   },
 })
 export default class ThemeHome extends Vue {
@@ -35,7 +41,7 @@ export default class ThemeHome extends Vue {
     const { page = 1 } = to.query;
     this.loading = true;
     this.postApi
-      .getList({ page, size: 3, from: 'home' })
+      .getList({ page, from: 'home' })
       .then((posts: any) => {
         this.posts = posts;
       })
@@ -46,7 +52,6 @@ export default class ThemeHome extends Vue {
   }
 
   loading = false;
-  sidebars = [];
   posts = {
     rows: [],
     pager: {
@@ -57,7 +62,13 @@ export default class ThemeHome extends Vue {
   };
 
   get supportParams() {
-    return {};
+    return {
+      from: 'home',
+    };
+  }
+
+  get sidebarWidgets() {
+    return this.getWidgets('sidebar').sort((a, b) => (a.order === b.order ? 0 : a.order > b.order ? 1 : -1));
   }
 
   get pageLength() {
@@ -91,7 +102,7 @@ export default class ThemeHome extends Vue {
                           {summary}
                           <div>
                             {tags.map((tag: any) => (
-                              <nuxt-link to={{ name: 'theme-tag', params: { id: tag.id } }} class="mr-2">
+                              <nuxt-link to={{ name: 'theme-search-tag', params: { id: tag.id } }} class="mr-2">
                                 {`#${tag.name}`}
                               </nuxt-link>
                             ))}
@@ -129,17 +140,49 @@ export default class ThemeHome extends Vue {
                 ) : null,
               ]
             ) : (
-              <VCard>
-                <VCardText class="text-center">
-                  <VIcon>mdi-information-outline</VIcon>
-                  没有内容啦！
-                </VCardText>
-              </VCard>
+              <VSheet class="caption text-center pa-2">
+                <VIcon size="1.25em">mdi-information-outline</VIcon> 没有内容啦！
+              </VSheet>
             )}
           </VCol>
-          <VCol cols={false} md="4" class="hidden-sm-and-down">
-            <h1>Sidebar</h1>
-          </VCol>
+          {this.$vuetify.breakpoint.mdAndUp ? (
+            <VCol cols="4">
+              {this.sidebarWidgets && this.sidebarWidgets.length
+                ? this.sidebarWidgets.map((widget) => (
+                    <VCard class="mb-3">
+                      {widget.title ? [<p class="caption pa-3 mb-0">{widget.title}</p>, <VDivider />] : null}
+                      <div class="pa-3">
+                        <plugin-holder
+                          support-params={this.supportParams}
+                          component-configs={widget.config}
+                        ></plugin-holder>
+                      </div>
+                      ))
+                    </VCard>
+                  ))
+                : [
+                    <VCard class="mb-3">
+                      <div class="pa-3">
+                        <WidgetMyInfo />
+                      </div>
+                    </VCard>,
+                    <VCard class="mb-3">
+                      <p class="caption pa-3 mb-0">分类</p>
+                      <VDivider />
+                      <div class="pa-3">
+                        <WidgetCategory />
+                      </div>
+                    </VCard>,
+                    <VCard class="mb-3">
+                      <p class="caption pa-3 mb-0">标签</p>
+                      <VDivider />
+                      <div class="pa-3">
+                        <WidgetTag />
+                      </div>
+                    </VCard>,
+                  ]}
+            </VCol>
+          ) : null}
         </VRow>
 
         <VDialog

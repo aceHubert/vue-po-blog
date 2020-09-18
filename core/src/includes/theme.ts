@@ -13,15 +13,16 @@ export {
 } from './functions/locale';
 export {
   hasLayout,
-  getLayout,
   getLayouts,
   addLayout,
   addLayouts,
+  hasWidget,
+  getWidgets,
+  addWidgets,
   hasTemplate,
-  getTemplate,
   getTemplates,
   addTemplate,
   addTemplates,
   removeTemplates,
 } from './functions/layout';
-export { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP } from './functions/settings';
+export { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } from './functions/settings';

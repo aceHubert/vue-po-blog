@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Axios from 'axios';
 import { error as globalError, hasOwn } from '@vue-async/utils';
-import { http, postApi, siteApi, globalSettings, setSettings } from '@/includes';
+import { http, categoryApi, tagApi, postApi, siteApi, globalSettings, setSiteSettings, setUserInfo } from '@/includes';
 
 // components
 import PluginHolder from '@/components/plugin-holder';
@@ -11,7 +11,7 @@ import * as prototypeArgs from '@/includes/prototype';
 
 // Types
 import { Plugin } from '@nuxt/types';
-import { Settings } from 'types/functions/site';
+import { SiteSettings } from 'types/functions/settings';
 import { setThemes } from '@/includes/theme';
 
 // 注入 http 到 Vue
@@ -27,11 +27,11 @@ const plugin: Plugin = async (cxt) => {
   const metas: Array<{ name: string; content: any }> = []; // 提升给后面使用
   try {
     const configs = await siteApi.getConfigs();
-    const settings: Partial<Settings> = {};
+    const settings: Partial<SiteSettings> = {};
 
     Object.keys(configs).forEach((key) => {
       if (hasOwn(globalSettings, key)) {
-        settings[key as keyof Settings] = configs[key];
+        settings[key as keyof SiteSettings] = configs[key];
       } else if (metaKeys.some((metaKey) => metaKey === key)) {
         metas.push({
           name: key,
@@ -40,31 +40,10 @@ const plugin: Plugin = async (cxt) => {
       }
     });
 
-    setSettings(settings);
+    setSiteSettings(settings);
   } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] 站点配置文件加载失败, 错误：${err.message}`);
-    // error({ statusCode: 500, message: '站点配置文件加载失败' });
-  }
-
-  /**
-   * 加载用户配置
-   */
-  try {
-    // todo:
-  } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] 用户配置文件加载失败, 错误：${err.message}`);
-    // error({ statusCode: 500, message: '用户配置文件加载失败' });
-  }
-
-  /**
-   * 加载主题配置
-   */
-  try {
-    const configs = await site.getThemeConfigs();
-    setThemes(configs.dark, configs.themes);
-  } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] 主题配置文件加载失败, 错误：${err.message}`);
-    // error({ statusCode: 500, message: '主题配置文件加载失败' });
+    globalError(process.env.NODE_ENV === 'production', `[core] 站点配置加载失败, 错误：${err.message}`);
+    // error({ statusCode: 500, message: '站点配置加载失败' });
   }
 
   /**
@@ -75,8 +54,40 @@ const plugin: Plugin = async (cxt) => {
       (app.head! as any).meta.push(meta);
     });
   } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] SEO配置文件加载失败, 错误：${err.message}`);
+    globalError(process.env.NODE_ENV === 'production', `[core] SEO配置加载失败, 错误：${err.message}`);
     // ignore error
+  }
+
+  /**
+   * 加载用户配置
+   */
+  try {
+    const configs = await siteApi.getUserInfo();
+    setUserInfo(configs);
+  } catch (err) {
+    globalError(process.env.NODE_ENV === 'production', `[core] 用户配置加载失败, 错误：${err.message}`);
+    // error({ statusCode: 500, message: '用户配置加载失败' });
+  }
+
+  /**
+   * 加载 Theme 配置
+   */
+  try {
+    const configs = await siteApi.getTheme();
+    setThemes(configs.dark, configs.themes);
+  } catch (err) {
+    globalError(process.env.NODE_ENV === 'production', `[core] Theme配置加载失败, 错误：${err.message}`);
+    // error({ statusCode: 500, message: 'Theme配置加载失败' });
+  }
+
+  /**
+   * 加载 Widgets 配置
+   */
+  try {
+    // todo
+  } catch (err) {
+    globalError(process.env.NODE_ENV === 'production', `[core] Widget配置加载失败, 错误：${err.message}`);
+    // error({ statusCode: 500, message: 'Widget配置加载失败' });
   }
 
   /**
@@ -109,6 +120,12 @@ const plugin: Plugin = async (cxt) => {
    */
   cxt.axios = Axios;
   cxt.$http = http;
+
+  /**
+   * for asyncData
+   */
+  cxt.categoryApi = categoryApi;
+  cxt.tagApi = tagApi;
   cxt.postApi = postApi;
   cxt.siteApi = siteApi;
 };

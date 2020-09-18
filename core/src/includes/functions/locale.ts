@@ -2,7 +2,7 @@ import Vue from 'vue';
 import merge from 'lodash.merge';
 
 // Types
-import { Locale, SupportLanguage } from 'types/functions/site';
+import { Locale, SupportLanguage } from 'types/functions/settings';
 
 export const globalLocale: Locale = Vue.observable({
   default: 'en',

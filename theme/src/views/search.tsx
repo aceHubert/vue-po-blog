@@ -1,25 +1,25 @@
 import { Vue, Component } from 'vue-property-decorator';
-import { VContainer, VForm, VSheet, VTextField } from '@/components/vuetify-tsx';
+import { VContainer, VForm, VTextField, VBtn, VIcon } from '@/components/vuetify-tsx';
 
 @Component({
   name: 'theme-search',
   layout: 'fullscreen',
   transition: 'dialog-bottom-transition',
   head: {
-    title: 'Search',
+    title: '搜索',
   },
 })
 export default class ThemeSearch extends Vue {
   searchText = '';
 
   render() {
-    return (
+    const container = (
       <VContainer class="search">
         <VForm>
           <VTextField
             v-model={this.searchText}
             solo
-            dense
+            dense={!this.$vuetify.breakpoint.mdAndUp}
             placeholder="Search"
             appendIcon="mdi-magnify"
             {...{
@@ -31,11 +31,22 @@ export default class ThemeSearch extends Vue {
               },
             }}
           ></VTextField>
-          <VSheet>
-            <p class="mb-2 caption">histories:</p>
-          </VSheet>
+          <p class="mb-2 caption">历史记录:</p>
         </VForm>
       </VContainer>
+    );
+
+    return this.$vuetify.breakpoint.mdAndUp ? (
+      <div>
+        <div class="mb-10 text-right">
+          <VBtn icon large class="mt-5 mr-5" onClick={() => this.$router.back()}>
+            <VIcon>mdi-close</VIcon>
+          </VBtn>
+        </div>
+        {container}
+      </div>
+    ) : (
+      container
     );
   }
 }

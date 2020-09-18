@@ -44,7 +44,7 @@ export default class Header extends Vue {
         <VToolbarTitle>{this.logo}</VToolbarTitle>
         <VSpacer />
         {this.$vuetify.breakpoint.mdAndUp ? (
-          <div class="subtitle-2 hidden-sm-and-down" style="padding: 13px 20px 13px 0;align-self: flex-end;">
+          <div class="subtitle-2 hidden-sm-and-down" style="padding: 10px 20px 10px 0;align-self: flex-end;">
             {RootParams.menus.map((menu) => (
               <nuxt-link
                 to={menu.to}

@@ -12,7 +12,8 @@ export {
   setDefaultLocale,
   setLocale,
 } from './functions/locale';
-export { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP } from './functions/settings';
+export { hasWidget, getWidgets } from './functions/layout';
+export { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } from './functions/settings';
 
 // api
-export { postApi, siteApi } from './datas';
+export { categoryApi, tagApi, postApi, siteApi } from './datas';

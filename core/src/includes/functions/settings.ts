@@ -3,15 +3,22 @@ import merge from 'lodash.merge';
 import { trailingSlash, isAbsoluteUrl } from '@/utils/path';
 
 // Types
-import { Settings } from 'types/functions/site';
+import { SiteSettings, UserInfo } from 'types/functions/settings';
 
-export const globalSettings: Settings = Vue.observable({
+export const globalSettings: SiteSettings = Vue.observable({
   name: '',
   domain: '',
   icp: null,
   copyright: null,
   staticDir: 'static/',
   apiPath: 'api/blog/',
+});
+
+export const globalUserInfo: UserInfo = Vue.observable({
+  name: '',
+  avatar: undefined,
+  email: undefined,
+  introduction: undefined,
 });
 
 /**
@@ -86,8 +93,28 @@ export function getLogo() {
  * @author Hubert
  * @since 2020-09-04
  * @version 0.0.1
+ * 获取用户信息
+ */
+export function getUserInfo() {
+  return globalUserInfo;
+}
+
+/**
+ * @author Hubert
+ * @since 2020-09-04
+ * @version 0.0.1
  * 设置网站配置
  */
-export function setSettings(settings: Partial<Settings>) {
+export function setSiteSettings(settings: Partial<SiteSettings>) {
   merge(globalSettings, settings);
+}
+
+/**
+ * @author Hubert
+ * @since 2020-09-04
+ * @version 0.0.1
+ * 设置用户信息
+ */
+export function setUserInfo(userInfo: Partial<UserInfo>) {
+  merge(globalUserInfo, userInfo);
 }

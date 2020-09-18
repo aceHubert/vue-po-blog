@@ -7,7 +7,7 @@ import kebabCase from 'lodash.kebabcase';
 import { trailingSlash } from '@/utils/path';
 
 // Types
-import { Locale } from 'types/functions/site';
+import { Locale } from 'types/functions/settings';
 
 /**
  * layouts

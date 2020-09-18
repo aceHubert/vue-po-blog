@@ -22,6 +22,9 @@ export type Post = {
 
 export type PostPagerQuery = PagerQuery<{
   from?: string; // 路由名称
+  keywords?: string;
+  categoryId?: number;
+  tagId?: number;
 }>;
 
 export type PostPagerResponse = {

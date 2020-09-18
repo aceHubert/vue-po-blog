@@ -3,7 +3,7 @@ import { Vue, Component } from 'vue-property-decorator';
 @Component({
   name: 'theme-archive',
   head: {
-    title: 'Archive',
+    title: '归档',
   },
 })
 export default class ThemeArchive extends Vue {

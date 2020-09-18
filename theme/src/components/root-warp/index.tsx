@@ -6,8 +6,11 @@ import {
   VListItem,
   VListItemTitle,
   VListItemIcon,
-  VIcon,
   VListItemContent,
+  VIcon,
+  VAvatar,
+  VImg,
+  VDivider,
 } from '../vuetify-tsx';
 
 export const RootParams: {
@@ -20,19 +23,19 @@ export const RootParams: {
       label: '首页',
       icon: 'mdi-home',
       to: { name: 'index' },
-      index: 0,
+      order: 0,
     },
     {
       label: '归档',
       icon: 'mdi-archive',
       to: { name: 'theme-archive' },
-      index: 2,
+      order: 1,
     },
     {
-      label: '关于我',
+      label: '关于',
       icon: 'mdi-account',
       to: { name: 'theme-about-me' },
-      index: 3,
+      order: 2,
     },
   ],
 });
@@ -41,7 +44,9 @@ export const RootParams: {
   name: 'theme-root-warp',
 })
 export default class RootWarp extends Vue {
-  searchText = 'Search';
+  get userInfo() {
+    return this.getUserInfo();
+  }
 
   @Watch('$vuetify.breakpoint.mdAndUp')
   watchIsMobile(val: boolean) {
@@ -54,7 +59,7 @@ export default class RootWarp extends Vue {
     this.hook('header-menus')
       .filter(RootParams.menus)
       .then((menus: Menu[]) => {
-        RootParams.menus = menus.sort((a, b) => (a.index > b.index ? 1 : -1));
+        RootParams.menus = menus.sort((a, b) => (a.order === b.order ? 0 : a.order > b.order ? 1 : -1));
       });
   }
 
@@ -63,7 +68,16 @@ export default class RootWarp extends Vue {
       <VApp>
         <VNavigationDrawer v-model={RootParams.drawerShown} app disableResizeWatcher disableRouteWatcher>
           <VList dense flat>
-            {RootParams.menus.map((menu) => (
+            <VListItem class="text-center py-4">
+              <div style="width: 100%">
+                <VAvatar size="46" class="mb-2">
+                  <VImg src={this.userInfo.avatar || 'https://api.adorable.io/avatars/80/abott@adorable.png'} />
+                </VAvatar>
+                <VListItemTitle>{this.userInfo.email}</VListItemTitle>
+              </div>
+            </VListItem>
+            <VDivider />
+            {RootParams.menus.map((menu) => [
               <VListItem
                 to={menu.to}
                 exact
@@ -77,8 +91,9 @@ export default class RootWarp extends Vue {
                 <VListItemContent>
                   <VListItemTitle>{menu.label}</VListItemTitle>
                 </VListItemContent>
-              </VListItem>
-            ))}
+              </VListItem>,
+              <VDivider />,
+            ])}
           </VList>
         </VNavigationDrawer>
         {this.$slots.default}
