@@ -1,6 +1,6 @@
 {
   "restartable": "rs",
-  "ignore": [".git", ".svn", "node_modules"],
+  "ignore": [".git", ".svn", "*.d.ts", "node_modules"],
   "verbose": true,
   "watch": ["./src"],
   "env": {

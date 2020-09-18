@@ -1,12 +1,24 @@
 import { ofType } from 'vue-tsx-support';
-import { VImg } from 'vuetify/lib';
+import { VImg as _VImg } from 'vuetify/lib';
 
-import { Measurable } from '../shared/types';
+import { Measurable, Themable } from '../shared/types';
 
-export default ofType<Props>().convert(VImg as any);
+const VImg = ofType<Props>().convert(_VImg);
 
-type Props = Measurable & {
-  aspectRatio?: string;
-  contain?: boolean;
-  src?: string;
-};
+export { VImg };
+export default VImg;
+
+type Props = Measurable &
+  Themable & {
+    alt?: string;
+    aspectRatio?: string;
+    contain?: boolean;
+    src?: string;
+    lazySrc?: string;
+    gradient?: string;
+    eager?: boolean;
+    options?: Record<string, any>;
+    position?: string;
+    srcset?: string;
+    sizes?: string;
+  };

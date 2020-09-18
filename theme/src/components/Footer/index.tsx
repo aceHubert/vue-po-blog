@@ -1,12 +1,10 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { VContainer, VFooter } from '../vuetify-tsx';
-import './styles.scss';
-
 // Types
 import { Component as VueComponent, CreateElement } from 'vue';
 
 @Component({
-  name: 'Footer',
+  name: 'theme-footer',
 })
 export default class Footer extends Vue {
   widgets: VueComponent[] = [];
@@ -23,9 +21,7 @@ export default class Footer extends Vue {
   // }
 
   created() {
-    // @ts-ignore
     this.copyright = this.getCopyright();
-    // @ts-ignore
     this.icp = this.getICP();
   }
 
@@ -40,8 +36,8 @@ export default class Footer extends Vue {
               ))}
             </ul>
           ) : null}
-          <p class="copyright caption mb-0 grey--text text--darken-1">{this.copyright}</p>
-          <p class="caption mb-0 grey--text text--darken-1">
+          <p class="copyright caption mb-0 grey--text">{this.copyright}</p>
+          <p class="caption mb-0 grey--text">
             <span>
               <a href="">beautify-theme</a> by Hubert
             </span>

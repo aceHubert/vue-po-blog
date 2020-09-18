@@ -34,7 +34,7 @@ export function route(path: string, name: string, file: string) {
   const folder = (file || `${kebabCase(name)}`).toLowerCase();
 
   return {
-    component: () => import(`@/views/${folder}/index.vue`),
+    component: () => import(`@/views/${folder}/index`),
     name,
     path,
   };
@@ -42,7 +42,7 @@ export function route(path: string, name: string, file: string) {
 
 /**
  * 子模块路由处理方式一
- * 判断前缀
+ * 判断前缀"/"
  */
 export function root(routes: RouteConfig[]) {
   // Add start slash
@@ -51,6 +51,7 @@ export function root(routes: RouteConfig[]) {
     return route;
   });
 }
+
 /**
  * 子模块路由处理方式一
  * 添加多语言到 params
@@ -103,6 +104,31 @@ export function localeRoot(children: RouteConfig[], locale: Locale) {
 export function redirect(redirect: (to: Route) => string) {
   return { path: '*', redirect };
 }
+
+// 合并路由（将新路由配置合并到老路由配置中）
+export const megreRoutes = (oldRoutes: RouteConfig[], newRoutes: RouteConfig[]) => {
+  newRoutes.forEach((current: RouteConfig) => {
+    const matchRoute = oldRoutes.find(
+      (route: RouteConfig) => (current.name && route.name === current.name) || route.path === current.path,
+    );
+    if (matchRoute) {
+      // 如果找到已在在的
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { children, name, ...restOptions } = current;
+      Object.assign(matchRoute, restOptions); // 合并路由参数
+
+      if (children) {
+        !matchRoute.children && (matchRoute.children = []);
+        megreRoutes(matchRoute.children, children);
+      }
+    } else {
+      // 插入到 path:'*'之前
+      const insertIndex = oldRoutes.findIndex((route: RouteConfig) => route.path === '*');
+      // 如果没找到
+      oldRoutes.splice(insertIndex < 0 ? 0 : insertIndex, 0, current);
+    }
+  });
+};
 
 /**
  * vue-router 不支持异步组件 loading

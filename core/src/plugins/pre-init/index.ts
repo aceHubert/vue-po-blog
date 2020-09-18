@@ -1,13 +1,10 @@
 import Vue from 'vue';
 import Axios from 'axios';
-import { http, post, site } from '@/includes';
 import { error as globalError, hasOwn } from '@vue-async/utils';
-
-// stores
-import AppStore from '@/store/modules/app';
+import { http, postApi, siteApi, globalSettings, setSettings } from '@/includes';
 
 // components
-import PluginHolder from '@/components/PluginHolder';
+import PluginHolder from '@/components/plugin-holder';
 
 // 添加到 Vue.protytype 上的属性和方法
 import * as prototypeArgs from '@/includes/prototype';
@@ -29,11 +26,11 @@ const plugin: Plugin = async (cxt) => {
   const metaKeys = ['description', 'keywords'];
   const metas: Array<{ name: string; content: any }> = []; // 提升给后面使用
   try {
-    const configs = await site.getConfigs();
+    const configs = await siteApi.getConfigs();
     const settings: Partial<Settings> = {};
 
     Object.keys(configs).forEach((key) => {
-      if (hasOwn(AppStore.settings, key)) {
+      if (hasOwn(globalSettings, key)) {
         settings[key as keyof Settings] = configs[key];
       } else if (metaKeys.some((metaKey) => metaKey === key)) {
         metas.push({
@@ -43,7 +40,7 @@ const plugin: Plugin = async (cxt) => {
       }
     });
 
-    AppStore.SetSetting(settings);
+    setSettings(settings);
   } catch (err) {
     globalError(process.env.NODE_ENV === 'production', `[core] 站点配置文件加载失败, 错误：${err.message}`);
     // error({ statusCode: 500, message: '站点配置文件加载失败' });
@@ -90,6 +87,7 @@ const plugin: Plugin = async (cxt) => {
   /**
    *  注册全局方法
    * (global mixin 必须在 created 之后才可以被调用, 所以这里使用 defineProperties)
+   * prototypeAres 已包含 api 部分
    */
   ((methods: Dictionary<any> = {}) => {
     Object.defineProperties(
@@ -107,12 +105,12 @@ const plugin: Plugin = async (cxt) => {
   })({ ...prototypeArgs, axios: Axios, $http: http });
 
   /**
-   * 添加 http 到 Context
+   * 添加 http and apis 到 Context
    */
   cxt.axios = Axios;
   cxt.$http = http;
-  cxt.post = post;
-  cxt.site = site;
+  cxt.postApi = postApi;
+  cxt.siteApi = siteApi;
 };
 
 export default plugin;

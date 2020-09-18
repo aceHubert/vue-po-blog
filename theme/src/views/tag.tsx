@@ -1,16 +1,16 @@
 import { Vue, Component } from 'vue-property-decorator';
 
 @Component({
-  name: 'theme-post',
+  name: 'theme-tag',
   head: {
-    title: 'Post',
+    title: 'Tag',
   },
 })
-export default class ThemePost extends Vue {
+export default class ThemeTag extends Vue {
   render() {
     return (
-      <div class="post">
-        <h1>Post</h1>
+      <div class="tag">
+        <h1>Tag</h1>
       </div>
     );
   }

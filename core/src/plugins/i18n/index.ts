@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { Route } from 'vue-router';
-import AppStore from '@/store/modules/app';
 import en from '@/lang/en';
+import { getDefaultLocale, getSupportLanguages } from '@/includes';
 
 // Types
 import { Plugin } from '@nuxt/types';
@@ -23,7 +23,7 @@ Object.defineProperties(VueI18n.prototype, {
 });
 
 const plugin: Plugin = (cxt) => {
-  const defaultLocale = AppStore.locale.default;
+  const defaultLocale = getDefaultLocale();
   const fallbackLocale = defaultLocale;
   const globalLanguages: { [locale: string]: any } = {};
   const hasDocument = typeof document !== 'undefined';
@@ -64,10 +64,10 @@ const plugin: Plugin = (cxt) => {
     if (i18n.locale !== lang) {
       if (!loadedLanguages.includes(lang)) {
         const { locale } =
-          AppStore.locale.supportLanguages.find((l: LangConfig) => lang === l.alternate || lang === l.locale) || {};
+          getSupportLanguages().find((l: LangConfig) => lang === l.alternate || lang === l.locale) || {};
 
         if (locale) {
-          return import(/* webpackChunkName: "lang-[request]" */ `@/lang/${locale}`).then((msgs) => {
+          return import(/* webpackChunkName: "locale-[request]" */ `@/lang/${locale}`).then((msgs) => {
             const { default: translates, dateTimeFormat, numberFormat } = msgs;
             loadedLanguages.push(lang);
             globalLanguages[lang] = translates;

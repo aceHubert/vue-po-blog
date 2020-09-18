@@ -7,11 +7,13 @@ import {
   VFlex as _VFlex,
 } from 'vuetify/lib';
 
-const VContainer = ofType<ContainerProps>().convert(_VContainer as any);
-const VRow = ofType<RowProps>().convert(_VRow as any);
-const VCol = ofType<ColProps>().convert(_VCol as any);
-const VSpacer = ofType().convert(_VSpacer as any);
-const VFlex = ofType<FlexProps>().convert(_VFlex as any);
+import { Denseable, Tagable } from '../shared/types';
+
+const VContainer = ofType<ContainerProps>().convert(_VContainer);
+const VRow = ofType<RowProps>().convert(_VRow);
+const VCol = ofType<ColProps>().convert(_VCol);
+const VSpacer = ofType().convert(_VSpacer);
+const VFlex = ofType<FlexProps>().convert(_VFlex);
 
 export { VContainer, VRow, VCol, VSpacer, VFlex };
 
@@ -27,19 +29,77 @@ export default {
 };
 
 type ContainerProps = {
-  'fill-height'?: boolean;
+  fillHeight?: boolean;
   fluid?: boolean;
 };
+type Alignment = 'start' | 'end' | 'center';
 
-// todo
-type RowProps = {
-  'no-gutters'?: boolean;
+type AlignItems = Alignment | 'baseline' | 'stretch';
+type AlignContent = Alignment | 'space-between' | 'space-around' | 'stretch';
+type Justify = Alignment | 'space-between' | 'space-around';
+
+type AlignProps = {
+  align?: AlignItems;
+  'align-sm'?: AlignItems;
+  'align-md'?: AlignItems;
+  'align-lg'?: AlignItems;
+  'align-xl'?: AlignItems;
 };
 
-// todo
-type ColProps = {
-  cols?: boolean | string | number;
+type AlignContentProps = {
+  'align-content'?: AlignContent;
+  'align-content-sm'?: AlignContent;
+  'align-content-md'?: AlignContent;
+  'align-content-lg'?: AlignContent;
+  'align-content-xl'?: AlignContent;
 };
+
+type JustifyProps = {
+  justify?: Justify;
+  'justify-sm'?: Justify;
+  'justify-md'?: Justify;
+  'justify-lg'?: Justify;
+  'justify-xl'?: Justify;
+};
+
+type RowProps = Denseable &
+  AlignProps &
+  AlignContentProps &
+  JustifyProps &
+  Tagable & {
+    noGutters?: boolean;
+  };
+
+type BreakpointsProps = {
+  sm?: boolean | string | number;
+  md?: boolean | string | number;
+  lg?: boolean | string | number;
+  xl?: boolean | string | number;
+};
+
+type OffsetProps = {
+  offset?: string | number;
+  'offset-sm'?: string | number;
+  'offset-md'?: string | number;
+  'offset-lg'?: string | number;
+  'offset-xl'?: string | number;
+};
+
+type OrderProps = {
+  order?: string | number;
+  'order-sm'?: string | number;
+  'order-md'?: string | number;
+  'order-lg'?: string | number;
+  'order-xl'?: string | number;
+};
+
+type ColProps = BreakpointsProps &
+  OffsetProps &
+  OrderProps &
+  Tagable & {
+    cols?: boolean | string | number;
+    alignSelf?: 'auto' | AlignItems;
+  };
 
 interface FlexProps {
   xs1?: boolean;

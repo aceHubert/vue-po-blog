@@ -3,17 +3,9 @@ import { http } from '../functions/http';
 function formatThemeConfig(config: any) {
   const {
     dark,
-    themes: {
-      primary,
-      secondary,
-      accent,
-      error,
-      info,
-      success,
-      warning,
-    },
+    themes: { primary, secondary, accent, error, info, success, warning },
   } = config;
-  return{
+  return {
     dark,
     themes: {
       primary,
@@ -24,11 +16,10 @@ function formatThemeConfig(config: any) {
       success,
       warning,
     },
-  } ;
+  };
 }
 
-export const site = {
-
+export const siteApi = {
   /**
    * 获取网站配置
    */
@@ -47,6 +38,15 @@ export const site = {
   getThemeConfigs(): Promise<Dictionary<any>> {
     return http.get('config/theme/v1/list').then(({ data: { model = [] } = {} }) => {
       return formatThemeConfig(model);
+    });
+  },
+
+  /**
+   * 获取用户配置
+   */
+  getUserInfo(): Promise<Dictionary<any>> {
+    return http.get('auth/master/v1/get').then(({ data: { model = {} } = {} }) => {
+      return model;
     });
   },
 };

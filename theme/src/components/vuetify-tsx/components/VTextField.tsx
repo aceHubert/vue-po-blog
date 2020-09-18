@@ -4,6 +4,7 @@ import { VTextField } from 'vuetify/lib';
 import {
   Colorable,
   CommonEvents,
+  Denseable,
   Disableable,
   Inputable,
   Maskable,
@@ -15,6 +16,7 @@ import {
 export default ofType<Props, Events>().convert(VTextField as any);
 
 type Props = Colorable &
+  Denseable &
   Disableable &
   Inputable &
   Maskable &

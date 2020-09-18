@@ -8,6 +8,15 @@ export type Denseable = {
   dense?: boolean;
 };
 
+export type Tagable = {
+  tag?: string;
+};
+
+export type Roundable = {
+  rounded?: boolean;
+  tile?: boolean;
+};
+
 export type Detachable = {
   attach?: any;
   contentClass?: string;

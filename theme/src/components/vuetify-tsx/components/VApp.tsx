@@ -1,4 +1,7 @@
 import { ofType } from 'vue-tsx-support';
-import { VApp } from 'vuetify/lib';
+import { VApp as _VApp } from 'vuetify/lib';
 
-export default ofType().convert(VApp as any);
+const VApp = ofType().convert(_VApp);
+
+export { VApp };
+export default VApp;

@@ -54,6 +54,7 @@ module.exports = {
     ],
     script: [],
     link: [],
+    style:[],
   },
   modules: ['@nuxtjs/proxy'],
   proxy: {

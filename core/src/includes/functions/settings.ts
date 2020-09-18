@@ -1,5 +1,18 @@
-import AppStore from '@/store/modules/app';
+import Vue from 'vue';
+import merge from 'lodash.merge';
 import { trailingSlash, isAbsoluteUrl } from '@/utils/path';
+
+// Types
+import { Settings } from 'types/functions/site';
+
+export const globalSettings: Settings = Vue.observable({
+  name: '',
+  domain: '',
+  icp: null,
+  copyright: null,
+  staticDir: 'static/',
+  apiPath: 'api/blog/',
+});
 
 /**
  * @author Hubert
@@ -8,7 +21,7 @@ import { trailingSlash, isAbsoluteUrl } from '@/utils/path';
  * 配置的域名（末尾带有"/"
  */
 export function getDomain() {
-  return trailingSlash(AppStore.settings.domain);
+  return trailingSlash(globalSettings.domain);
 }
 
 /**
@@ -18,7 +31,7 @@ export function getDomain() {
  * 相对于配置域名的静态文件目录（末尾带有"/"）
  */
 export function getStaticDir() {
-  return trailingSlash(AppStore.settings.staticDir);
+  return trailingSlash(globalSettings.staticDir);
 }
 
 /**
@@ -29,10 +42,10 @@ export function getStaticDir() {
  */
 export function getApiPath() {
   return trailingSlash(
-    isAbsoluteUrl(AppStore.settings.apiPath)
-      ? AppStore.settings.apiPath
+    isAbsoluteUrl(globalSettings.apiPath)
+      ? globalSettings.apiPath
       : getDomain() +
-          (AppStore.settings.apiPath.startsWith('/') ? AppStore.settings.apiPath.substr(1) : AppStore.settings.apiPath),
+          (globalSettings.apiPath.startsWith('/') ? globalSettings.apiPath.substr(1) : globalSettings.apiPath),
   );
 }
 
@@ -43,7 +56,7 @@ export function getApiPath() {
  * Copyright
  */
 export function getCopyright() {
-  return AppStore.settings.copyright;
+  return globalSettings.copyright;
 }
 
 /**
@@ -53,7 +66,7 @@ export function getCopyright() {
  * ICP
  */
 export function getICP() {
-  return AppStore.settings.icp;
+  return globalSettings.icp;
 }
 
 /**
@@ -65,6 +78,16 @@ export function getICP() {
 export function getLogo() {
   return {
     type: 'text',
-    content: AppStore.settings.name,
+    content: globalSettings.name,
   };
+}
+
+/**
+ * @author Hubert
+ * @since 2020-09-04
+ * @version 0.0.1
+ * 设置网站配置
+ */
+export function setSettings(settings: Partial<Settings>) {
+  merge(globalSettings, settings);
 }

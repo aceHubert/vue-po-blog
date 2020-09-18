@@ -4,32 +4,26 @@ import { hook } from '@/includes';
 
 type Layout = {
   rootWarp: string | VueComponent;
-  mainWarp?: string | VueComponent | null;
-  header?: string | VueComponent | null;
-  footer?: string | VueComponent | null;
+  mainWarp: string | VueComponent | null;
 };
 
 @Component({
-  name: 'layout-default',
+  name: 'layout-fullscreen',
 })
-export default class LayoutDefault extends Vue {
+export default class LayoutFullscreen extends Vue {
   layout: Layout = {
     rootWarp: 'div',
     mainWarp: null,
-    header: null,
-    footer: null,
   };
 
   created() {
-    hook('layout').exec(this.layout, 'default');
+    hook('layout').exec(this.layout, 'fullscreen');
   }
 
   render(h: CreateElement) {
-    const { rootWarp = 'div', header, mainWarp, footer } = this.layout;
+    const { rootWarp = 'div', mainWarp } = this.layout;
     return h(rootWarp, { staticClass: 'layout', domProps: { id: 'default-layout' } }, [
-      header ? h(header) : null,
       mainWarp ? h(mainWarp, [h('nuxt')]) : h('nuxt'),
-      footer ? h(footer) : null,
     ]);
   }
 }

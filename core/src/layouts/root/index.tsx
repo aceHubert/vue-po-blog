@@ -5,6 +5,6 @@ import { Vue, Component } from 'vue-property-decorator';
 })
 export default class LayoutRoot extends Vue {
   render(h: any) {
-    return <router-view />;
+    return <nuxt />;
   }
 }

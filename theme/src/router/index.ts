@@ -14,9 +14,36 @@ const routes: any = [
     component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views')),
   },
   {
-    path: 'post',
-    name: 'theme-post',
-    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/post')),
+    path: 'article/:id',
+    name: 'theme-article',
+    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/article')),
+  },
+  {
+    path: 'tag/:id',
+    name: 'theme-tag',
+    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/tag')),
+    props: true,
+  },
+  {
+    path: 'archive',
+    name: 'theme-archive',
+    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/archive')),
+  },
+  {
+    path: 'about',
+    name: 'theme-about-me',
+    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/about-me')),
+  },
+  {
+    path: 'search',
+    name: 'theme-search',
+    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/search')),
+  },
+  {
+    path: 'search/:keywords',
+    name: 'theme-search-result',
+    component: () => interopDefault(import(/* webpackChunkName: "views" */ '@/views/search-result')),
+    props: true,
   },
 ];
 

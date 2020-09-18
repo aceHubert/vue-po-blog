@@ -20,11 +20,11 @@ export type Post = {
   createTime: Date;
 };
 
-export type PostsQuery = PagerQuery<{
-  route?: string; // 路由名称
+export type PostPagerQuery = PagerQuery<{
+  from?: string; // 路由名称
 }>;
 
-export type PostsResponse = {
+export type PostPagerResponse = {
   rows: Array<Omit<Post, 'content'>>;
   pager: PagerInfo;
 };

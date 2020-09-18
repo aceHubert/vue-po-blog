@@ -1,7 +1,7 @@
 import { http } from '../functions/http';
 
 // Types
-import { PostsQuery, Post, PostsResponse } from 'types/datas/post';
+import { PostPagerQuery, PostPagerResponse, Post } from 'types/datas/post';
 
 function formatPost(post: any) {
   const {
@@ -39,12 +39,12 @@ function formatPost(post: any) {
   };
 }
 
-export const post = {
+export const postApi = {
   /**
    * 获取文章列表
    * @param param
    */
-  getList({ page = 1, size = 10, ...rest }: PostsQuery = {}): Promise<PostsResponse> {
+  getList({ page = 1, size = 10, ...rest }: PostPagerQuery = {}): Promise<PostPagerResponse> {
     return http
       .get('posts/posts/v1/list', { params: { page, size, ...rest } })
       .then(({ data: { models, pageInfo } = {} }) => {
@@ -59,8 +59,8 @@ export const post = {
    * @param id
    */
   get(id: number): Promise<Post> {
-    return http.get(`posts/posts/v1/${id}`).then(({ data: { models } }) => {
-      return formatPost(models);
+    return http.get(`posts/posts/v1/${id}`).then(({ data: { model } }) => {
+      return formatPost(model);
     });
   },
 };
