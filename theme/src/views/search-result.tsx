@@ -162,7 +162,7 @@ export default class ThemeSearchResult extends Vue {
                               </VIcon>
                               {views}
                             </span>
-                            <span class="ml-2">发布于 {moment(createTime).format('yyyy-MM-DD')}</span>
+                            <span class="ml-2">发布于 {moment(createTime).format('YYYY-MM-DD')}</span>
                           </p>
                         </VCardActions>
                       </div>

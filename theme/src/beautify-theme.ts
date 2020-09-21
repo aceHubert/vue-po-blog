@@ -31,8 +31,8 @@ export default function (Vue: VueConstructor, opts: any = {}) {
   // 添加路由
   opts.addRoutes(routes);
 
-  // 使用黑色主题
-  opts.setDark(true);
+  // 使用黑色主题(强制使用黑色主题)
+  opts.setDarkTheme(true);
 
   // 注册 init 勾子
   opts.hook('init', ({ app }: Context) => {
@@ -51,7 +51,7 @@ export default function (Vue: VueConstructor, opts: any = {}) {
 
     app.vuetify = new Vuetify({
       theme: {
-        dark: opts.isDark(),
+        dark: opts.isDarkTheme(),
         themes: opts.getThemes(),
       },
     });

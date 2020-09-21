@@ -1,6 +1,7 @@
 import { Vue, Component } from 'vue-property-decorator';
-import { VContainer, VCol, VRow } from '@/components/vuetify-tsx';
 import moment from 'moment';
+import marked from 'marked';
+import { VContainer, VCol, VRow } from '@/components/vuetify-tsx';
 
 // Styles
 import classes from './styles/article.module.scss';
@@ -10,10 +11,10 @@ import { Component as VueComponent, AsyncComponent, CreateElement } from 'vue';
 
 @Component({
   name: 'theme-article',
-  head: {
-    title(this: ThemeArticle) {
-      return this.title;
-    },
+  head(this: ThemeArticle) {
+    return {
+      title: this.title,
+    };
   },
   asyncData({ params, postApi }) {
     return postApi.get(params.id);
@@ -35,6 +36,10 @@ export default class ThemeArticle extends Vue {
 
   get hasSidebar() {
     return this.pageSidebarPlugins && this.pageSidebarPlugins.length;
+  }
+
+  get markedContent() {
+    return this.content ? marked(this.content) : '';
   }
 
   created() {
@@ -59,11 +64,10 @@ export default class ThemeArticle extends Vue {
             {this.pageBeforePlugins && this.pageBeforePlugins.length
               ? this.pageBeforePlugins.map((plugin) => h(plugin))
               : null}
-            <h1>{this.title}</h1>
-            <p class="caption text--grey">
-              <span>{moment(this.createTime).format('yyyy-MM-DD')}</span>
-            </p>
-            <div domPropsInnerHTML={this.content} class={classes.content}></div>
+
+            <h2 class="text-center">{this.title}</h2>
+            <p class="caption grey--text text-center">{moment(this.createTime).format('YYYY-MM-DD')}</p>
+            <div domPropsInnerHTML={this.markedContent} class={['body-2', classes.content]}></div>
             {this.pageAfterPlugins && this.pageAfterPlugins.length
               ? this.pageAfterPlugins.map((plugin) => h(plugin))
               : null}

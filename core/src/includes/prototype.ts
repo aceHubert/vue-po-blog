@@ -4,7 +4,7 @@
 
 // functions
 export { hook } from './functions/hooks';
-export { getCurrentTheme, getThemes, isDark } from './functions/theme';
+export { getCurrentTheme, getThemes, isDarkTheme } from './functions/theme';
 export {
   getDefaultLocale,
   getSupportLanguages,

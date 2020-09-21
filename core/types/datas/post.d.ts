@@ -31,3 +31,9 @@ export type PostPagerResponse = {
   rows: Array<Omit<Post, 'content'>>;
   pager: PagerInfo;
 };
+
+export type PostArchive = {
+  date: Date;
+  posts: Array<Omit<Post, 'content'>>;
+  total: number;
+};

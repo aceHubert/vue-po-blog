@@ -34,6 +34,17 @@ const plugin: Plugin = async (cxt) => {
     (app.router as any).matcher = (newRouter as any).matcher;
   };
 
+  // 传递到主题模块的参数
+  const _themeArgs = Object.freeze({
+    ...themeArgs,
+    addRoutes,
+  });
+
+  // 传递到插件模块的参数
+  const _pluginArgs = Object.freeze({
+    ...pluginArgs,
+  });
+
   /**
    * 加载 theme 和 plugins, 按顺序执行
    */
@@ -44,19 +55,13 @@ const plugin: Plugin = async (cxt) => {
         moduleName: 'beautify-theme',
         entry: '/content/theme/beautify-theme/beautify-theme.umd.js',
         styles: ['/content/theme/beautify-theme/beautify-theme.css'],
-        args: {
-          ...themeArgs,
-          addRoutes,
-        },
+        args: _themeArgs,
       },
       // plugin's entry
       {
         moduleName: 'comment-plugin',
         entry: '/content/plugins/comment-plugin/comment-plugin.umd.js',
-        args: {
-          ...pluginArgs,
-          addRoutes,
-        },
+        args: _pluginArgs,
       },
     ],
     {

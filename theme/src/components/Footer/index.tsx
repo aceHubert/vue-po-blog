@@ -51,7 +51,7 @@ export default class Footer extends Vue {
               <a href="https://github.com/aceHubert/vue-plumemo-blog" target="_blank">
                 beautify-theme
               </a>
-              by Hubert
+              &nbsp; by Hubert
             </span>
             <span class="ml-2">{this.icp}</span>
           </p>

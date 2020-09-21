@@ -38,7 +38,7 @@ export const globalThemes: {
  * @since 2020-09-04
  * 是否深色主题
  */
-export function isDark() {
+export function isDarkTheme() {
   return globalThemes.dark;
 }
 
@@ -48,7 +48,7 @@ export function isDark() {
  * 设置主题
  * @param dark 深色主题
  */
-export function setDark(dark = true) {
+export function setDarkTheme(dark = true) {
   globalThemes.dark = dark;
 }
 

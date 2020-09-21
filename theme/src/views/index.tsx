@@ -93,7 +93,7 @@ export default class ThemeHome extends Vue {
             {this.posts.rows && this.posts.rows.length ? (
               [
                 this.posts.rows.map(({ id, title, summary, thumbnail, tags = [], views, createTime }) => (
-                  <VCard min-height="100" class="mb-3" to={{ name: 'theme-article', params: { id } }} nuxt>
+                  <VCard min-height="100" class="mb-3" hover nuxt to={{ name: 'theme-article', params: { id } }}>
                     <div class="d-flex flex-no-wrap justify-space-between">
                       <div style="width:100%">
                         {thumbnail ? <VImg src={thumbnail} class="hidden-sm-and-up" aspectRatio="1.7" /> : null}
@@ -102,7 +102,10 @@ export default class ThemeHome extends Vue {
                           {summary}
                           <div>
                             {tags.map((tag: any) => (
-                              <nuxt-link to={{ name: 'theme-search-tag', params: { id: tag.id } }} class="mr-2">
+                              <nuxt-link
+                                to={{ name: 'theme-search-tag', params: { id: tag.id } }}
+                                class="mr-2 accent--text"
+                              >
                                 {`#${tag.name}`}
                               </nuxt-link>
                             ))}
@@ -116,7 +119,7 @@ export default class ThemeHome extends Vue {
                               </VIcon>
                               {views}
                             </span>
-                            <span class="ml-2">发布于 {moment(createTime).format('yyyy-MM-DD')}</span>
+                            <span class="ml-2">{moment(createTime).format('YYYY-MM-DD')}</span>
                           </p>
                         </VCardActions>
                       </div>

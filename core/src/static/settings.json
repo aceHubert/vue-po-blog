@@ -1,5 +1,0 @@
-{
-  "domain": "http://localhost:8000", // 站点域名
-  "static_dir": "static", // 静态文件目录
-  "api_path": "api/blog" // api地址，相对 domain 地址或 http 绝对地址
-}

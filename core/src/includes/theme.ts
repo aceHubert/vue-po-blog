@@ -3,7 +3,7 @@
  */
 
 export { hook } from './functions/hooks';
-export { getCurrentTheme, getThemes, isDark, setDark, setThemes } from './functions/theme';
+export { getCurrentTheme, getThemes, isDarkTheme, setDarkTheme, setThemes } from './functions/theme';
 export {
   getDefaultLocale,
   getSupportLanguages,

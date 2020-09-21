@@ -7,7 +7,7 @@ import {
   VCardActions as _VCardActions,
 } from 'vuetify/lib';
 
-import { Colorable, Disableable, Measurable, Rippleable, Routable } from '../shared/types';
+import { Colorable, Disableable, Measurable, Rippleable, Roundable, Routable, Tagable } from '../shared/types';
 
 const VCard = ofType<CardProps>().convert(_VCard as any);
 const VCardTitle = ofType().convert(_VCardTitle as any);
@@ -31,7 +31,14 @@ type CardProps = Colorable &
   Disableable &
   Measurable &
   Rippleable &
+  Roundable &
+  Tagable &
   Routable & {
-    title?: boolean;
+    hover?: boolean;
+    img?: string;
+    loaderHeight?: string | number;
+    loading?: boolean;
+    outlined?: boolean;
     raised?: boolean;
+    shaped?: boolean;
   };
