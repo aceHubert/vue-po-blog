@@ -2,15 +2,27 @@
   "name": "vue-plumemo-blog",
   "version": "0.0.1-alpha",
   "description": "frontend app for plumemo blog",
-  "scripts": {
-    "postinstall": "concurrently --raw \"cd ./core && yarn install\" \"cd ./theme && yarn install\" \"cd ./plugins && yarn install\"",
-    "serve": "concurrently --raw \"cd ./plugins && yarn serve\" \"cd ./theme && yarn serve\" \"cd ./core && yarn serve\""
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aceHubert/vue-plumemo-blog.git"
   },
-  "author": "Hubert<yi.xiang@live.cn>",
-  "license": "MIT",
+  "scripts": {
+    "build:es": "lerna run build:es --sort --parallel",
+    "build": "lerna run build --sort --stream --scope=@vue-async/*",
+    "clean": "lerna clean --yes",
+    "lint": "lerna run lint --parallel --stream",
+    "lint:fix": "lerna run lint:fix --parallel",
+    "prettier": "node ./scripts/prettier.js",
+    "prettier:all": "node ./scripts/prettier.js write",
+    "changelog": "node ./scripts/genChangelog.js",
+    "commit": "git-cz",
+    "prepublishOnly": "yarn install && yarn changelog && yarn build",
+    "release": "lerna publish"
+  },
   "config": {
     "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
+      "path": "./node_modules/cz-lerna-changelog"
     }
   },
   "dependencies": {},
@@ -30,15 +42,18 @@
     "concurrently": "^5.1.0",
     "core-js": "^3.6.5",
     "cross-env": "^6.0.3",
-    "cz-conventional-changelog": "^3.1.0",
+    "cz-lerna-changelog": "^2.0.3",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-jest": "^24.0.2",
     "eslint-plugin-local": "^1.0.0",
     "eslint-plugin-prettier": "^3.1.2",
     "express": "^4.17.1",
     "glob-gitignore": "^1.0.14",
     "husky": ">=1",
     "jest": "^24.9.0",
+    "lerna": "^3.22.1",
+    "lerna-changelog": "^1.0.1",
     "lint-staged": ">=8",
     "nodemon": "^2.0.4",
     "prettier": "^2.0.5",
@@ -48,18 +63,14 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
+      "pre-commit": "lint-staged && yarn lerna run test",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
-  "lint-staged": {
-    "*.js(x)": [
-      "prettier --write",
-      "git add"
-    ],
-    "*.ts(x)": [
-      "prettier --parser=typescript --write",
-      "git add"
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "themes/*"
     ]
   }
 }

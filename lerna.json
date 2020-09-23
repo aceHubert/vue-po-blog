@@ -1,0 +1,25 @@
+{
+  "packages": ["packages/*", "themes/*"],
+  "npmClient": "yarn",
+  "useWorkspaces": true,
+  "command": {
+    "publish": {
+      "conventionalCommits": false,
+      "gitTagVersion": false,
+      "gitReset": false,
+      "allowBranch": ["master"],
+      "ignoreChanges": ["**/CHANGELOG.md", "**/node_modules/**", "**/package.json", "**/*.md", "**/test/**"],
+      "message": "chore(release): publish"
+    }
+  },
+  "version": "independent",
+  "changelog": {
+    "repo": "aceHubert/vue-plumemo-blog",
+    "labels": {
+      "feat": ":rocket: New Feature",
+      "bug": ":bug: Bug Fix",
+      "breaking": ":boom: Breaking Change"
+    },
+    "cacheDir": ".changelog"
+  }
+}

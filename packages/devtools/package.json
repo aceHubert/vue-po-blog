@@ -1,0 +1,29 @@
+{
+  "name": "@plumemo/devtools",
+  "version": "0.0.1-alpha",
+  "author": "Hubert<yi.xiang@live.cn>",
+  "description": "plumemo devtools",
+  "bin": {
+    "po": "./bin/cli.js"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aceHubert/vue-plumemo-blog.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/aceHubert/vue-plumemo-blog/issues"
+  },
+  "dependencies": {
+    "execa": "^4.0.3",
+    "yargs": "^16.0.3"
+  },
+  "peerDependencies": {
+    "@plumemo/core": "0.0.1-alpha",
+    "@vue/cli-service": "^4.2.0"
+  },
+  "devDependencies": {
+    "express": "^4.17.1"
+  }
+}
