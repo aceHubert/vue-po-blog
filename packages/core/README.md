@@ -1,4 +1,4 @@
-# core
+# @plumemo/core
 
 ### hooks
 

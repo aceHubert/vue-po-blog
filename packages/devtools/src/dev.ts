@@ -47,7 +47,7 @@ export async function run(
 
   // build module and watch
   exec(entry, { name, filename, dest, watch: true }).stdout!.pipe(process.stdout);
-  console.log(staticPath);
+
   const app = express();
   // 静态文件服务器
   app.use('/', express.static(staticPath));

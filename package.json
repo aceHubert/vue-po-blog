@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build:es": "lerna run build:es --sort --parallel",
-    "build": "lerna run build --sort --stream --scope=@vue-async/*",
+    "build": "lerna run build --sort --stream --scope=@plumemo/*",
     "clean": "lerna clean --yes",
     "lint": "lerna run lint --parallel --stream",
     "lint:fix": "lerna run lint:fix --parallel",
@@ -69,9 +69,7 @@
   },
   "workspaces": {
     "packages": [
-      "packages/*",
-      "themes/*",
-      "plugins/*"
+      "packages/devtools"
     ]
   }
 }

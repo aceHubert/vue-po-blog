@@ -4,7 +4,10 @@ import fs from 'fs';
 import camelCase from 'lodash.camelcase';
 import { exec, findExecFile, startLoading } from './utils';
 
-export async function run(file: string, args: { name?: string; filename?: string; dest?: string; info?: string } = {}) {
+export async function run(
+  file: string,
+  args: { name?: string; filename?: string; dest?: string; info?: boolean } = {},
+) {
   const entry = path.resolve(process.cwd(), file);
   const name = args.name;
   const filename = args.filename;
