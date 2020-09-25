@@ -2,6 +2,7 @@ import Vue, { Component, AsyncComponent } from 'vue';
 import { hasOwn } from '@vue-async/utils';
 
 // Types
+import { LayoutFunctions } from 'types/functions/layout';
 import { Widget } from 'types/functions/widget';
 
 export const globalLayoutArgs: {
@@ -14,151 +15,151 @@ export const globalLayoutArgs: {
   templates: {},
 });
 
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 是否在在布局
- */
-export function hasLayout(name: string) {
-  return hasOwn(globalLayoutArgs.layouts, name);
-}
+const layoutFunctions: LayoutFunctions = {
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 是否在在布局
+   */
+  hasLayout: function (name) {
+    return hasOwn(globalLayoutArgs.layouts, name);
+  },
 
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 获取布局
- */
-export function getLayouts(): Record<string, Component | AsyncComponent>;
-export function getLayouts(name: string): Component | AsyncComponent | null;
-export function getLayouts(name?: string) {
-  if (name) {
-    return hasLayout(name) ? globalLayoutArgs.layouts[name] : null;
-  } else {
-    return globalLayoutArgs.layouts;
-  }
-}
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 获取布局
+   */
 
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 添加布局
- * replace 为 false 时，如而已已在在，则返回 false。否则 undefined
- */
-export function addLayout(name: string, layout: Component | AsyncComponent, replace = true) {
-  if (hasLayout(name) && !replace) return false;
-  return (globalLayoutArgs.layouts[name] = layout);
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 添加多个布局
- */
-export function addLayouts(layouts: Record<string, Component | AsyncComponent>, replace = true) {
-  Object.keys(layouts).forEach((name: string) => addLayout(name, layouts[name], replace));
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 是否在在小部件
- */
-export function hasWidget(placement: string) {
-  return hasOwn(globalLayoutArgs.widgets, placement) && globalLayoutArgs.widgets[placement].length;
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 获取小部件
- */
-export function getWidgets(): Record<string, Widget[]>;
-export function getWidgets(placement: string): Widget[];
-export function getWidgets(placement?: string) {
-  if (placement) {
-    return hasWidget(placement) ? globalLayoutArgs.widgets[placement] : [];
-  } else {
-    return globalLayoutArgs.widgets;
-  }
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 添加小部件
- */
-export function addWidgets(placement: string, widgets: Widget | Widget[]) {
-  globalLayoutArgs.widgets[placement] = (globalLayoutArgs.widgets[placement] || []).concat(widgets);
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 是否在在模版
- */
-export function hasTemplate(name: string) {
-  return hasOwn(globalLayoutArgs.templates, name);
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 获取模版
- */
-export function getTemplates(): Record<string, Component | AsyncComponent>;
-export function getTemplates(name: string): Component | AsyncComponent | null;
-export function getTemplates(name?: string) {
-  if (name) {
-    return hasTemplate(name) ? globalLayoutArgs.templates[name] : null;
-  } else {
-    return globalLayoutArgs.templates;
-  }
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 添加模版
- * replace 为 false 时，如而已已在在，则返回 false。否则 undefined
- */
-export function addTemplate(name: string, template: Component | AsyncComponent, replace = true) {
-  if (hasLayout(name) && !replace) return false;
-  return (globalLayoutArgs.templates[name] = template);
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 添加多个模版
- */
-export function addTemplates(templates: Record<string, Component | AsyncComponent>, replace = true) {
-  Object.keys(templates).forEach((name: string) => addTemplate(name, templates[name], replace));
-}
-
-/**
- * @author Hubert
- * @since 2020-09-04
- * @version 0.0.1
- * 移除模版
- */
-export function removeTemplates(names: string | string[]) {
-  if (typeof names === 'string') {
-    names = [names];
-  }
-  names.forEach((name: string) => {
-    if (hasTemplate(name)) {
-      delete globalLayoutArgs.templates[name];
+  getLayouts: function (this: LayoutFunctions, name?: string) {
+    if (name) {
+      return this.hasLayout(name) ? globalLayoutArgs.layouts[name] : null;
+    } else {
+      return globalLayoutArgs.layouts;
     }
-  });
-}
+  } as LayoutFunctions['getLayouts'], // 方法重载问题
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 添加布局
+   * replace 为 false 时，如而已已在在，则返回 false。否则 undefined
+   */
+  addLayout: function (name: string, layout: Component | AsyncComponent, replace = true) {
+    if (this.hasLayout(name) && !replace) return false;
+    return (globalLayoutArgs.layouts[name] = layout);
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 添加多个布局
+   */
+  addLayouts: function (layouts: Record<string, Component | AsyncComponent>, replace = true) {
+    Object.keys(layouts).forEach((name: string) => this.addLayout(name, layouts[name], replace));
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 是否在在小部件
+   */
+  hasWidget: function (placement: string) {
+    return hasOwn(globalLayoutArgs.widgets, placement) && !!globalLayoutArgs.widgets[placement].length;
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 获取小部件
+   */
+  getWidgets: function (this: LayoutFunctions, placement?: string) {
+    if (placement) {
+      return this.hasWidget(placement) ? globalLayoutArgs.widgets[placement] : [];
+    } else {
+      return globalLayoutArgs.widgets;
+    }
+  } as LayoutFunctions['getWidgets'], // 方法重载问题
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 添加小部件
+   */
+  addWidgets: function (placement: string, widgets: Widget | Widget[]) {
+    return (globalLayoutArgs.widgets[placement] = (globalLayoutArgs.widgets[placement] || []).concat(widgets));
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 是否在在模版
+   */
+  hasTemplate: function (name: string) {
+    return hasOwn(globalLayoutArgs.templates, name);
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 获取模版
+   */
+
+  getTemplates: function (this: LayoutFunctions, name?: string) {
+    if (name) {
+      return this.hasTemplate(name) ? globalLayoutArgs.templates[name] : null;
+    } else {
+      return globalLayoutArgs.templates;
+    }
+  } as LayoutFunctions['getTemplates'], // 方法重载问题
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 添加模版
+   * replace 为 false 时，如而已已在在，则返回 false。否则 undefined
+   */
+  addTemplate: function (name: string, template: Component | AsyncComponent, replace = true) {
+    if (this.hasLayout(name) && !replace) return false;
+    return (globalLayoutArgs.templates[name] = template);
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 添加多个模版
+   */
+  addTemplates: function (templates: Record<string, Component | AsyncComponent>, replace = true) {
+    Object.keys(templates).forEach((name: string) => this.addTemplate(name, templates[name], replace));
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 移除模版
+   */
+  removeTemplates: function (names: string | string[]) {
+    if (typeof names === 'string') {
+      names = [names];
+    }
+    names.forEach((name: string) => {
+      if (this.hasTemplate(name)) {
+        delete globalLayoutArgs.templates[name];
+      }
+    });
+  },
+};
+
+export default layoutFunctions;

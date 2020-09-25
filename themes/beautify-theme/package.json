@@ -3,7 +3,12 @@
   "version": "0.0.1-alpha",
   "description": "",
   "private": true,
-  "main": "dist/beautify-theme/beautify-theme.umd.js",
+  "main": "dist/beautify-theme/index.umd.js",
+  "main:styles": [
+    "//fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900",
+    "//cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css",
+    "dist/beautify-theme/index.css"
+  ],
   "admin:main": {
     "moduleName": "index",
     "entry": "dist/admin/index.umd.js"
@@ -18,7 +23,7 @@
     "src"
   ],
   "scripts": {
-    "serve": "po dev src/beautify-theme.ts",
+    "serve": "po dev --name beautifyTheme --filename index --dest dist/beautify-theme src/beautify-theme.ts",
     "build:front": "po build --name beautifyTheme --filename index --dest dist/beautify-theme src/beautify-theme.ts",
     "build:widgets": "po build --dest dist/widgets src/widgets",
     "build:admin": "po build --name beautifyThemeAdmin --filename index --dest dist/admin  src/admin/index.ts",
@@ -27,7 +32,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@plumemo/devtools": "^0.0.1-alpha",
+    "@nuxt/types": "^2.14.6",
     "@vue-async/utils": "^1.0.3",
     "core-js": "^3.6.4",
     "marked": "^1.1.1",
@@ -38,7 +43,7 @@
     "vuetify": "^2.3.10"
   },
   "devDependencies": {
-    "@nuxt/types": "^2.14.5",
+    "@plumemo/devtools": "^0.0.1-alpha",
     "@types/marked": "^1.1.0",
     "@vue-async/module-loader-typing": "^0.0.2",
     "@vue/cli-plugin-babel": "^4.2.0",

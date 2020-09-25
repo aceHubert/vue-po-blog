@@ -1,6 +1,6 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { Component as VueComponent, CreateElement } from 'vue';
-import { hook } from '@/includes';
+import { hook } from '@/includes/functions';
 
 type Layout = {
   rootWarp: string | VueComponent;

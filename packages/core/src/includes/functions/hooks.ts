@@ -2,22 +2,18 @@ import { hasOwn } from '@vue-async/utils';
 import POHook from '../classes/hook';
 
 // Types
-// import { Callback } from 'types/hook';
 import { HookResult } from 'types/functions/hook';
 
-export const globalFilters = POHook.buildPreinitializedHook({});
+const globalFilters = POHook.buildPreinitializedHook({});
 
-export function hook(tag: string): HookResult;
-export function hook(tag: string, functionToAdd: Function, priority?: number, acceptedArgs?: number): void;
-export function hook(tag: string, ...args: unknown[]): void | HookResult {
-  if (args.length) {
+function hook(tag: string): HookResult;
+function hook(tag: string, functionToAdd: Function, priority?: number, acceptedArgs?: number): void;
+function hook(tag: string, functionToAdd?: Function, priority?: number, acceptedArgs?: number): HookResult | void {
+  if (functionToAdd) {
     if (!hasOwn(globalFilters, tag)) {
       globalFilters[tag] = new POHook();
     }
 
-    const functionToAdd = args[0] as Function;
-    const priority = args[1] as number;
-    const acceptedArgs = args[2] as number;
     globalFilters[tag].addFilter(functionToAdd, priority, acceptedArgs);
   } else {
     return {
@@ -57,6 +53,8 @@ export function hook(tag: string, ...args: unknown[]): void | HookResult {
         }
         return Promise.resolve();
       },
-    };
+    } as HookResult;
   }
 }
+
+export default hook;

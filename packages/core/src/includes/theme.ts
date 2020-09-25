@@ -2,16 +2,17 @@
  * 传递给主题的方法
  */
 
-export { hook } from './functions/hooks';
-export { getCurrentTheme, getThemes, isDarkTheme, setDarkTheme, setThemes } from './functions/theme';
-export {
-  getDefaultLocale,
-  getSupportLanguages,
-  addSupportLanguages,
-  setDefaultLocale,
-  setLocale,
-} from './functions/locale';
-export {
+import hook from './functions/hooks';
+import themeFunctions from './functions/theme';
+import localeFunctions from './functions/locale';
+import layoutFunctions from './functions/layout';
+import settingsFunctions from './functions/settings';
+
+// Types
+import { ThemeOptions } from 'types/theme-options';
+
+const { getCurrentTheme, getThemes, isDarkTheme, setDarkTheme, setThemes } = themeFunctions;
+const {
   hasLayout,
   getLayouts,
   addLayout,
@@ -24,5 +25,42 @@ export {
   addTemplate,
   addTemplates,
   removeTemplates,
-} from './functions/layout';
-export { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } from './functions/settings';
+} = layoutFunctions;
+const { getDefaultLocale, getSupportLanguages, addSupportLanguages, setDefaultLocale, setLocale } = localeFunctions;
+const { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } = settingsFunctions;
+
+// addRoutes 在外部添加
+const themeOptions: Omit<ThemeOptions, 'addRoutes'> = {
+  hook,
+  getCurrentTheme,
+  getThemes,
+  isDarkTheme,
+  setDarkTheme,
+  setThemes,
+  getDefaultLocale,
+  getSupportLanguages,
+  addSupportLanguages,
+  setDefaultLocale,
+  setLocale,
+  hasLayout,
+  getLayouts,
+  addLayout,
+  addLayouts,
+  hasWidget,
+  getWidgets,
+  addWidgets,
+  hasTemplate,
+  getTemplates,
+  addTemplate,
+  addTemplates,
+  removeTemplates,
+  getDomain,
+  getLogo,
+  getStaticDir,
+  getApiPath,
+  getCopyright,
+  getICP,
+  getUserInfo,
+};
+
+export default themeOptions;

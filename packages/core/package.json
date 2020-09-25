@@ -3,6 +3,8 @@
   "version": "0.0.1-alpha",
   "description": "plumemo core",
   "author": "Hubert<yi.xiang@live.cn>",
+  "private": true,
+  "typeings": "types/index.d.ts",
   "files": [
     "src",
     "dist",
@@ -11,14 +13,14 @@
   "scripts": {
     "serve": "nuxt",
     "build": "nuxt build",
-    "build:devtools": "nuxt build --c nuxt.devtools.config",
+    "build:devtools": "nuxt build && node ./scripts/copyToDevtools.js",
     "start": "nuxt start",
     "generate": "nuxt generate"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aceHubert/vue-plumemo-blog.git",
+    "url": "git@github.com:aceHubert/vue-plumemo-blog.git",
     "directory": "packages/core"
   },
   "bugs": {

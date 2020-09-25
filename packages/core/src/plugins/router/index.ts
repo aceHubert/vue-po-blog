@@ -1,5 +1,5 @@
 import { Route } from 'vue-router';
-import { globalLocale } from '@/includes';
+import { globalLocale } from '@/includes/functions';
 
 // Types
 import { Plugin } from '@nuxt/types';

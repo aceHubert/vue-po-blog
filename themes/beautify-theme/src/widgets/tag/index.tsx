@@ -1,6 +1,9 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { VAvatar, VChip } from '@/components/vuetify-tsx';
 
+// Types
+import { Tag } from '@plumemo/devtools';
+
 @Component({
   name: 'widget-tag',
 })

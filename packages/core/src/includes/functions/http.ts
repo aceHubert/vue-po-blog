@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { getApiPath } from './settings';
-import { hook } from './hooks';
+import settingsFuncs from './settings';
+import hook from './hooks';
 
 // Types
 import { Response } from 'types/datas/response';
@@ -14,7 +14,7 @@ import { Response } from 'types/datas/response';
  * timeout 10s
  */
 const instance = axios.create({
-  baseURL: getApiPath(),
+  baseURL: settingsFuncs.getApiPath(),
   timeout: 10000,
 });
 
@@ -84,4 +84,4 @@ instance.interceptors.response.use(
   },
 );
 
-export const http = instance;
+export default instance;

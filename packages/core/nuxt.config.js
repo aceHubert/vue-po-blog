@@ -56,10 +56,27 @@ module.exports = (configContext) => {
     modules: ['@nuxtjs/proxy'],
     proxy: {
       // 在 devtools 时调试模块代理
-      ...(configContext.proxyModuleTarget
+      ...(configContext.proxyThemeTarget
         ? {
-            '/api/blog/config/module/v1/list': {
-              target: configContext.proxyModuleTarget,
+            '/api/blog/module/theme/v1/get': {
+              target: configContext.proxyThemeTarget,
+              changeOrigin: false,
+              ws: false,
+              pathRewrite: {
+                '^/api/blog/module/theme/v1/get': '',
+              },
+            },
+          }
+        : null),
+      ...(configContext.proxyPluginTarget
+        ? {
+            '/api/blog/module/plugin/v1/list': {
+              target: configContext.proxyPluginTarget,
+              changeOrigin: false,
+              ws: false,
+              pathRewrite: {
+                '^/api/blog/module/plugin/v1/list': '',
+              },
             },
           }
         : null),

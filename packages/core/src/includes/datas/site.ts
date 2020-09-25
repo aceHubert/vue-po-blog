@@ -1,7 +1,7 @@
 /**
  * core 内部使用
  */
-import { http } from '../functions/http';
+import { http } from '../functions';
 
 // Types
 import { Theme } from 'types/functions/theme';
@@ -34,8 +34,13 @@ export const siteApi = {
     return http.get('auth/master/v1/get').then(({ data: { model = {} } = {} }) => model);
   },
 
-  /** 主题和插件 */
-  getModules(): Promise<ModuleConfig[]> {
-    return http.get('config/module/v1/list').then(({ data: { models = [] } = {} }) => models);
+  /** 获取主题模块 */
+  getThemeModule(): Promise<ModuleConfig> {
+    return http.get('module/theme/v1/get').then(({ data: { model } = {} }) => model);
+  },
+
+  /** 获取插件模块 */
+  getPluginModules(): Promise<ModuleConfig[]> {
+    return http.get('module/plugin/v1/list').then(({ data: { models = [] } = {} }) => models);
   },
 };

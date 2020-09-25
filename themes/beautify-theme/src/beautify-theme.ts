@@ -16,9 +16,9 @@ import Vuetify from 'vuetify/lib';
 import { Ripple } from 'vuetify/lib/directives';
 
 // Types
-import { Context } from '@nuxt/types';
+import { InitContext, ThemeOptions } from '@plumemo/devtools';
 
-export default function (Vue: VueConstructor, opts: any = {}) {
+export default function (Vue: VueConstructor, opts: ThemeOptions) {
   print('beautify-theme', '加载成功');
 
   Vue.use(Vuetify, {
@@ -35,21 +35,7 @@ export default function (Vue: VueConstructor, opts: any = {}) {
   opts.setDarkTheme(true);
 
   // 注册 init 勾子
-  opts.hook('init', ({ app }: Context) => {
-    const head = app.head as any;
-    head!.link = (head!.link || []).concat([
-      {
-        rel: 'stylesheet',
-        href: '//fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900',
-        'data-style-for': 'beautify-theme',
-      },
-      {
-        rel: 'stylesheet',
-        href: '//cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css',
-        'data-style-for': 'beautify-theme',
-      },
-    ]);
-
+  opts.hook('init', ({ app }: InitContext) => {
     app.vuetify = new Vuetify({
       theme: {
         dark: opts.isDarkTheme(),

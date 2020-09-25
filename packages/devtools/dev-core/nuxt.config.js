@@ -41,10 +41,6 @@ module.exports = (configContext) => {
     dir: {
       pages: 'views',
     },
-    css: [
-      // '//fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900',
-      // '//cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css',
-    ],
     head: {
       titleTemplate: (title) => (title ? `${title} | Plumemo` : 'Plumemo'),
       meta: [
@@ -60,10 +56,27 @@ module.exports = (configContext) => {
     modules: ['@nuxtjs/proxy'],
     proxy: {
       // 在 devtools 时调试模块代理
-      ...(configContext.proxyModuleTarget
+      ...(configContext.proxyThemeTarget
         ? {
-            '/api/blog/config/module/v1/list': {
-              target: configContext.proxyModuleTarget,
+            '/api/blog/module/theme/v1/get': {
+              target: configContext.proxyThemeTarget,
+              changeOrigin: false,
+              ws: false,
+              pathRewrite: {
+                '^/api/blog/module/theme/v1/get': '',
+              },
+            },
+          }
+        : null),
+      ...(configContext.proxyPluginTarget
+        ? {
+            '/api/blog/module/plugin/v1/list': {
+              target: configContext.proxyPluginTarget,
+              changeOrigin: false,
+              ws: false,
+              pathRewrite: {
+                '^/api/blog/module/plugin/v1/list': '',
+              },
             },
           }
         : null),

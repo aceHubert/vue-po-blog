@@ -5,7 +5,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/aceHubert/vue-plumemo-blog.git"
+    "url": "git@github.com:aceHubert/vue-plumemo-blog.git"
   },
   "scripts": {
     "build:es": "lerna run build:es --sort --parallel",
@@ -70,7 +70,8 @@
   "workspaces": {
     "packages": [
       "packages/*",
-      "themes/*"
+      "themes/*",
+      "plugins/*"
     ]
   }
 }

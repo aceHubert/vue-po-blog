@@ -1,7 +1,7 @@
-import { http } from '../functions/http';
+import { http } from '../functions';
 
 // Types
-import { PostPagerQuery, PostPagerResponse, PostArchive, Post } from 'types/datas/post';
+import { PostApi } from 'types/datas/post';
 
 /**
  * 格式化 Post
@@ -45,12 +45,12 @@ function formatPost(post: any, includeContent = false) {
   );
 }
 
-export const postApi = {
+export const postApi: PostApi = {
   /**
    * 获取文章列表
    * @param param
    */
-  getList({ page = 1, size = 10, ...rest }: PostPagerQuery = {}): Promise<PostPagerResponse> {
+  getList({ page = 1, size = 10, ...rest } = {}) {
     return http
       .get('posts/posts/v1/list', { params: { page, size, ...rest } })
       .then(({ data: { models, pageInfo } = {} }) => {
@@ -64,14 +64,14 @@ export const postApi = {
   /**
    * 获取文章数量
    */
-  getCount(): Promise<number> {
+  getCount() {
     return http.get('posts/posts/v1/count').then(({ data: { model = 0 } }) => model);
   },
 
   /**
    * 获取文章归档
    */
-  getArchive(): Promise<PostArchive[]> {
+  getArchive() {
     return http.get('posts/archive/v1/list').then(({ data: { models = [] } }) =>
       models.map((item: any) => ({
         date: item.archiveDate,
@@ -85,7 +85,7 @@ export const postApi = {
    * 获取文章详情
    * @param id
    */
-  get(id: number): Promise<Post> {
+  get(id) {
     return http.get(`posts/posts/v1/${id}`).then(({ data: { model } }) => formatPost(model, true));
   },
 };

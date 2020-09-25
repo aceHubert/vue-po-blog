@@ -1,20 +1,20 @@
-import { http } from '../functions/http';
+import { http } from '../functions';
 
 // Types
-import { Category } from 'types/datas/category';
+import { CategoryApi } from 'types/datas/category';
 
-export const categoryApi = {
+export const categoryApi: CategoryApi = {
   /**
    * 获取分类列表
    */
-  getList(): Promise<Category[]> {
+  getList() {
     return http.get('category/category/v1/list').then(({ data: { models } = {} }) => models);
   },
 
   /**
    * 获取分类数量
    */
-  getCount(): Promise<number> {
+  getCount() {
     return http.get('category/category/v1/count').then(({ data: { model = 0 } }) => model);
   },
 
@@ -22,7 +22,7 @@ export const categoryApi = {
    * 获取分类详情
    * @param id 标签 ID
    */
-  get(id: number): Promise<Category | null> {
+  get(id) {
     return http.get(`category/category/v1/${id}`).then(({ data: { model } }) => model);
   },
 };

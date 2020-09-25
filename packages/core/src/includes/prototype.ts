@@ -3,17 +3,45 @@
  */
 
 // functions
-export { hook } from './functions/hooks';
-export { getCurrentTheme, getThemes, isDarkTheme } from './functions/theme';
-export {
+import hook from './functions/hooks';
+import themeFunctions from './functions/theme';
+import localeFunctions from './functions/locale';
+import layoutFunctions from './functions/layout';
+import settingsFunctions from './functions/settings';
+
+// apis
+import { categoryApi, tagApi, postApi } from './datas';
+
+// Types
+import { VueExtraPrototypes } from 'types/vue';
+
+const { getCurrentTheme, getThemes, isDarkTheme } = themeFunctions;
+const { hasWidget, getWidgets } = layoutFunctions;
+const { getDefaultLocale, getSupportLanguages, addSupportLanguages, setDefaultLocale, setLocale } = localeFunctions;
+const { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } = settingsFunctions;
+
+const prototypes: VueExtraPrototypes = {
+  hook,
+  getCurrentTheme,
+  getThemes,
+  isDarkTheme,
   getDefaultLocale,
   getSupportLanguages,
   addSupportLanguages,
   setDefaultLocale,
   setLocale,
-} from './functions/locale';
-export { hasWidget, getWidgets } from './functions/layout';
-export { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } from './functions/settings';
+  hasWidget,
+  getWidgets,
+  getDomain,
+  getLogo,
+  getStaticDir,
+  getApiPath,
+  getCopyright,
+  getICP,
+  getUserInfo,
+  categoryApi,
+  tagApi,
+  postApi,
+};
 
-// api
-export { categoryApi, tagApi, postApi, siteApi } from './datas';
+export default prototypes;

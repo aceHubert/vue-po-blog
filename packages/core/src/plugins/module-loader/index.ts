@@ -1,19 +1,22 @@
 import Vue from 'vue';
 import { MetaInfo } from 'vue-meta';
-import VueRouter, { RouteConfig } from 'vue-router';
+import VueRouter from 'vue-router';
 import ModuleLoader from '@vue-async/module-loader';
 import { isUndef, error as globalError } from '@vue-async/utils';
-import { hook, siteApi, globalThemes, genCssVariables } from '@/includes';
+import { hook, globalThemes, themeFuncs } from '@/includes/functions';
+import { siteApi } from '@/includes/datas';
 
 // megre routes
 import { megreRoutes, root } from '../router/utils';
 
 // args
-import * as themeArgs from '@/includes/theme';
-import * as pluginArgs from '@/includes/plugin';
+import themeArgs from '@/includes/theme';
+import pluginArgs from '@/includes/plugin';
 
 // Types
 import { Plugin } from '@nuxt/types';
+import { ThemeOptions } from 'types/theme-options';
+import { PluginOptions } from 'types/plugin-options';
 
 Vue.use(ModuleLoader);
 
@@ -24,10 +27,7 @@ const plugin: Plugin = async (cxt) => {
    * 放在模块入口文件 options 中，而不入在 Context 中，因为 Context 会传递到组件中
    * todo: 是否初始化多语言
    */
-  const addRoutes = (
-    routes: RouteConfig[],
-    megreFn: (oldRoutes: RouteConfig[], newRoutes: RouteConfig[]) => void = megreRoutes,
-  ) => {
+  const addRoutes: ThemeOptions['addRoutes'] = (routes, megreFn = megreRoutes) => {
     const options = (app.router as any).options;
     megreFn(options.routes, root(routes));
     const newRouter = new VueRouter(options);
@@ -35,28 +35,36 @@ const plugin: Plugin = async (cxt) => {
   };
 
   // 传递到主题模块的参数
-  const _themeArgs = Object.freeze({
+  const _themeArgs: ThemeOptions = Object.freeze({
     ...themeArgs,
     addRoutes,
   });
 
+  let themeModule: ModuleConfig | null = null;
+  try {
+    themeModule = await siteApi.getThemeModule();
+    if (!themeModule) {
+      globalError(process.env.NODE_ENV === 'production', `[core] 未配置主题模块`);
+    } else {
+      (themeModule as any).args = _themeArgs;
+    }
+  } catch {
+    // todo:因为接口不通，暂时处理掉异常
+  }
+
   // 传递到插件模块的参数
-  const _pluginArgs = Object.freeze({
+  const _pluginArgs: PluginOptions = Object.freeze({
     ...pluginArgs,
   });
-
-  const modules = await siteApi.getModules();
-  const themeModule = modules.find((module) => module.isTheme);
-  if (!themeModule) {
-    globalError(process.env.NODE_ENV === 'production', `[core] 未配置主题模块`);
-  } else {
-    (themeModule as any).args = _themeArgs;
-  }
-  const pluginModules = modules
-    .filter((module) => !module.isTheme)
-    .map((module) => {
+  let pluginModules = [] as ModuleConfig[];
+  try {
+    pluginModules = await siteApi.getPluginModules();
+    pluginModules.map((module) => {
       (module as any).args = _pluginArgs;
     });
+  } catch {
+    // todo:因为接口不通，暂时处理掉异常
+  }
 
   // [
   //   // theme
@@ -97,9 +105,12 @@ const plugin: Plugin = async (cxt) => {
   // cxt.app.moduleLoader = moduleLoader;
   // cxt.$moduleLoader = moduleLoader
 
+  //
+  // -- theme 与 plugins 加载完成，入口文件中的方法全部执行完成 --
+  //
+
   /**
-   * theme 与 plugins 加载完成之后，入口文件中的方法全部执行完成
-   * 1, 生成 css 变量
+   * 生成 css 变量
    */
   new Vue().$watch(
     () => globalThemes,
@@ -110,12 +121,13 @@ const plugin: Plugin = async (cxt) => {
         _head.style = [];
       }
       if (_head.style!.length && (themeSheet = _head.style!.find(({ id }) => id === 'plumemo-theme-stylesheet'))) {
-        themeSheet.cssText = genCssVariables();
+        themeSheet.cssText = themeFuncs.genCssVariables();
       } else {
         _head.style!.push({
           id: 'plumemo-theme-stylesheet',
           type: 'text/css',
-          cssText: genCssVariables(),
+          'data-n-head': 'plumemo',
+          cssText: themeFuncs.genCssVariables(),
         });
       }
     },
@@ -124,7 +136,9 @@ const plugin: Plugin = async (cxt) => {
     },
   );
 
-  // 初始化（网站，用户，SEO 等配置加载完成）
+  /**
+   * 初始化（网站，用户，SEO 等配置加载完成）
+   */
   await hook('init').exec(cxt);
 };
 

@@ -13,7 +13,7 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": ["webpack-env", "@nuxt/types", "vuetify"],
+    "types": ["webpack-env", "@plumemo/devtools", "vuetify"],
     "paths": {
       "@/*": ["src/*"]
     },

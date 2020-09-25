@@ -5,7 +5,6 @@ declare global {
     moduleName: string;
     entry: string;
     styles?: string | string[];
-    isTheme: boolean;
   };
 
   export type Dictionary<T> = Record<string, T>;

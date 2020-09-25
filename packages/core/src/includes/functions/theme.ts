@@ -2,7 +2,7 @@ import Vue from 'vue';
 import merge from 'lodash.merge';
 
 // Types
-import { Theme, Themes } from 'types/functions/theme';
+import { ThemeFunctions, Theme, Themes } from 'types/functions/theme';
 
 export const globalThemes: {
   dark: boolean;
@@ -33,72 +33,74 @@ export const globalThemes: {
   },
 });
 
-/**
- * @author Hubert
- * @since 2020-09-04
- * 是否深色主题
- */
-export function isDarkTheme() {
-  return globalThemes.dark;
-}
+const themeFunctions: ThemeFunctions = {
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * 是否深色主题
+   */
+  isDarkTheme: function () {
+    return globalThemes.dark;
+  },
 
-/**
- * @author Hubert
- * @since 2020-09-04
- * 设置主题
- * @param dark 深色主题
- */
-export function setDarkTheme(dark = true) {
-  globalThemes.dark = dark;
-}
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * 设置主题
+   * @param dark 深色主题
+   */
+  setDarkTheme: function (dark = true) {
+    globalThemes.dark = dark;
+  },
 
-/**
- * @author Hubert
- * @since 2020-09-04
- * 获取当前主题配置
- */
-export function getCurrentTheme(): Theme {
-  return globalThemes.themes[globalThemes.dark ? 'dark' : 'light'];
-}
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * 获取当前主题配置
+   */
+  getCurrentTheme: function () {
+    return globalThemes.themes[globalThemes.dark ? 'dark' : 'light'];
+  },
 
-/**
- * @author Hubert
- * @since 2020-09-04
- * 获取主题配置
- */
-export function getThemes(): Themes {
-  return globalThemes.themes;
-}
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * 获取主题配置
+   */
+  getThemes: function () {
+    return globalThemes.themes;
+  },
 
-/**
- * @author Hubert
- * @since 2020-09-04
- * 设置主题
- */
-export function setThemes(themes: Partial<Themes>): void;
-export function setThemes(dark: boolean, themes: Partial<Theme>): void;
-export function setThemes(dark: boolean | Partial<Themes>, themes?: Partial<Theme>) {
-  if (typeof dark === 'boolean') {
-    globalThemes.themes[dark ? 'dark' : 'light'] = merge(
-      {},
-      globalThemes.themes[dark ? 'dark' : 'light'],
-      themes,
-    ) as Theme;
-  } else {
-    const themes = dark;
-    globalThemes.themes = merge({}, globalThemes, themes) as Themes;
-  }
-}
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * 设置主题
+   */
+  setThemes: function (dark: boolean | Partial<Themes>, themes?: Partial<Theme>) {
+    if (typeof dark === 'boolean') {
+      globalThemes.themes[dark ? 'dark' : 'light'] = merge(
+        {},
+        globalThemes.themes[dark ? 'dark' : 'light'],
+        themes,
+      ) as Theme;
+    } else {
+      const themes = dark;
+      globalThemes.themes = merge({}, globalThemes, themes) as Themes;
+    }
+  },
 
-/**
- * @author Hubert
- * @since 2020-09-04
- * 生成 css variables
- */
-export function genCssVariables() {
-  const current = getCurrentTheme();
-  const variables = Object.keys(current)
-    .map((key) => `--color-${key}:${current[key]}`)
-    .join(';');
-  return `:root{${variables}}`;
-}
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * 生成 css variables
+   */
+  genCssVariables: function () {
+    const current = this.getCurrentTheme();
+    const variables = Object.keys(current)
+      .map((key) => `--color-${key}:${current[key]}`)
+      .join(';');
+    return `:root{${variables}}`;
+  },
+};
+
+export default themeFunctions;

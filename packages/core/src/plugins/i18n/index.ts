@@ -2,7 +2,7 @@ import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { Route } from 'vue-router';
 import en from '@/lang/en';
-import { getDefaultLocale, getSupportLanguages } from '@/includes';
+import { localeFuncs } from '@/includes/functions';
 
 // Types
 import { Plugin } from '@nuxt/types';
@@ -24,7 +24,7 @@ Object.defineProperties(VueI18n.prototype, {
 });
 
 const plugin: Plugin = (cxt) => {
-  const defaultLocale = getDefaultLocale();
+  const defaultLocale = localeFuncs.getDefaultLocale();
   const fallbackLocale = defaultLocale;
   const globalLanguages: { [locale: string]: any } = {};
   const hasDocument = typeof document !== 'undefined';
@@ -65,7 +65,7 @@ const plugin: Plugin = (cxt) => {
     if (i18n.locale !== lang) {
       if (!loadedLanguages.includes(lang)) {
         const { locale } =
-          getSupportLanguages().find((l: LangConfig) => lang === l.alternate || lang === l.locale) || {};
+          localeFuncs.getSupportLanguages().find((l: LangConfig) => lang === l.alternate || lang === l.locale) || {};
 
         if (locale) {
           return import(/* webpackChunkName: "locale-[request]" */ `@/lang/${locale}`).then((msgs) => {

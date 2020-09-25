@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "public",
+    "outDir": "dist",
     "jsx": "preserve",
     "types": ["@types/node", "@nuxt/types"],
     "paths": {
