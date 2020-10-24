@@ -36,11 +36,11 @@ export const siteApi = {
 
   /** 获取主题模块 */
   getThemeModule(): Promise<ModuleConfig> {
-    return http.get('module/theme/v1/get').then(({ data: { model } = {} }) => model);
+    return http.get('v1/plumemo/plugins/themes/component').then(({ data: { model } = {} }) => model);
   },
 
   /** 获取插件模块 */
   getPluginModules(): Promise<ModuleConfig[]> {
-    return http.get('module/plugin/v1/list').then(({ data: { models = [] } = {} }) => models);
+    return http.get('v1/plumemo/plugins/plugins/component').then(({ data: { models = [] } = {} }) => models);
   },
 };
