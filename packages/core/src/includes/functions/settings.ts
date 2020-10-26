@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import merge from 'lodash.merge';
-import { trailingSlash, isAbsoluteUrl } from '@/utils/path';
+import { trailingSlash } from '@/utils/path';
 
 // Types
 import { SettingsFunctions, SiteSettings, UserInfo } from 'types/functions/settings';
@@ -11,7 +11,6 @@ export const globalSettings: SiteSettings = Vue.observable({
   icp: null,
   copyright: null,
   staticDir: 'static/',
-  apiPath: 'api/blog/',
 });
 
 export const globalUserInfo: UserInfo = Vue.observable({
@@ -26,7 +25,7 @@ const settingsFunctions: SettingsFunctions = {
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 配置的域名（末尾带有"/"
+   * 配置的域名（末尾带有"/")
    */
   getDomain: function () {
     return trailingSlash(globalSettings.domain);
@@ -49,12 +48,7 @@ const settingsFunctions: SettingsFunctions = {
    * API 地址，如果不是http(s) 绝对路径，则会以当前域名为绝对路径
    */
   getApiPath: function () {
-    return trailingSlash(
-      isAbsoluteUrl(globalSettings.apiPath)
-        ? globalSettings.apiPath
-        : this.getDomain() +
-            (globalSettings.apiPath.startsWith('/') ? globalSettings.apiPath.substr(1) : globalSettings.apiPath),
-    );
+    return trailingSlash(process.env.baseUrl!) + 'api/blog/';
   },
 
   /**

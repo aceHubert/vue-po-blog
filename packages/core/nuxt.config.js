@@ -23,6 +23,9 @@ const assetsCDN = {
   ],
 };
 
+const port = process.env.PORT || 5006;
+const host = process.env.HOST || 'localhost';
+
 module.exports = (configContext) => {
   return {
     vue: {
@@ -32,9 +35,13 @@ module.exports = (configContext) => {
       },
     },
     server: {
-      port: 8000, // default: 3000
-      host: '0.0.0.0', // default: localhost,
+      port, // default: 3000
+      host, // default: localhost,
       https: false,
+    },
+    env: {
+      // axios baseUrl (服务端 axios 请求时必须有前缀)
+      baseUrl: process.env.BASE_URL || `http://${host}:${port}`,
     },
     ssr: false,
     srcDir: 'src/',
@@ -50,9 +57,11 @@ module.exports = (configContext) => {
         { hid: 'description', name: 'description', content: 'Plumemo Blog' },
       ],
       script: [],
-      link: [],
+      link: [{ rel: 'icon', type: 'image/x-icon', href: 'favicon.ico' }],
       style: [],
     },
+    css: ['~/assets/styles/index.scss'],
+    loading: '~/components/PageLoading',
     modules: ['@nuxtjs/proxy'],
     proxy: {
       // 在 devtools 时调试模块代理
@@ -93,6 +102,7 @@ module.exports = (configContext) => {
       { src: 'plugins/pre-init' }, // pre-init
       { src: 'plugins/i18n' }, // locale
       { src: 'plugins/router' }, // router
+      // 自定义扩展应该加在此之前
       { src: 'plugins/module-loader', ssr: false },
     ],
     router: {
@@ -103,19 +113,22 @@ module.exports = (configContext) => {
         });
       },
     },
-    babel: {
-      babelrc: true,
-      cacheDirectory: undefined,
-    },
     buildModules: ['@nuxt/typescript-build'],
     build: {
+      babel: {
+        // use babel.config.js
+        babelrc: true,
+        configFile: true,
+        cacheDirectory: undefined,
+      },
+      transpile: ['@vue-async/utils', '@vue-async/module-loader'],
       extractCSS: true,
       loaders: {
         scss: {
           // implementation: require('sass'),
           // fiber: require('fibers'),
           data: `
-        @import "./src/assets/styles/variables.scss";
+        @import "./src/assets/styles/fn.scss";
         `,
         },
         cssModules: {

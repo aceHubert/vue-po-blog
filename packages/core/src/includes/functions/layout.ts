@@ -3,7 +3,7 @@ import { hasOwn } from '@vue-async/utils';
 
 // Types
 import { LayoutFunctions } from 'types/functions/layout';
-import { Widget } from 'types/functions/widget';
+import { Widget } from 'packages/core/src/components/PluginHolder/node_modules/types/functions/widget';
 
 export const globalLayoutArgs: {
   layouts: Dictionary<Component | AsyncComponent>;

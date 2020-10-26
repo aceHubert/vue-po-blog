@@ -20,6 +20,8 @@ Object.defineProperties(VueI18n.prototype, {
       return (this.t && this.te ? (this.te(key, locale) ? this.t(key, locale) : fallbackStr) : fallbackStr) || key;
     },
     writable: false,
+    enumerable: true,
+    configurable: true,
   },
 });
 

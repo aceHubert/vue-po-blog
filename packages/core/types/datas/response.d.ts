@@ -1,14 +1,14 @@
 export type PagerInfo = {
   page: number;
   size: number;
-  total: numver;
+  total: number;
 };
 
 export interface Response<T> {
   success: boolean;
   message: string;
   resultCode: string;
-  models: T;
+  model: T;
 }
 
 export interface PagerResponse<T> extends Response<T> {

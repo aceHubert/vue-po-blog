@@ -13,7 +13,7 @@
   "scripts": {
     "serve": "nuxt",
     "build": "nuxt build",
-    "build:devtools": "nuxt build && node ./scripts/copyToDevtools.js",
+    "build:devtools": "cross-env BASE_URL=http://localhost:5005 nuxt build && node ./scripts/copyToDevtools.js",
     "start": "nuxt start",
     "generate": "nuxt generate"
   },
@@ -27,11 +27,10 @@
     "url": "https://github.com/aceHubert/vue-plumemo-blog/issues"
   },
   "dependencies": {
-    "@vue-async/module-loader": "^1.0.8",
-    "@vue-async/utils": "^1.0.5",
+    "@vue-async/module-loader": "^1.0.9",
+    "@vue-async/utils": "^1.0.6",
     "axios": "^0.20.0",
     "core-js": "^3.6.5",
-    "lodash.camelcase": "^4.3.0",
     "lodash.kebabcase": "^4.1.1",
     "lodash.merge": "^4.6.2",
     "nuxt": "^2.14.4",
@@ -48,11 +47,15 @@
     "@types/lodash.kebabcase": "^4.1.6",
     "@types/lodash.merge": "^4.6.6",
     "@types/node": "^14.6.4",
-    "fork-ts-checker-webpack-plugin": "^5.2.0",
+    "cross-env": "^7.0.2",
     "sass": "^1.26.10",
     "sass-loader": "^7.3.0",
     "ts-loader": "^8.0.3",
     "typescript": "~3.9.3",
     "vue-template-compiler": "^2.6.12"
+  },
+  "engines": {
+    "node": ">=8.9.0",
+    "yarn": "^1.0.0"
   }
 }

@@ -1,35 +1,39 @@
 import { Vue, Component } from 'vue-property-decorator';
-import { Component as VueComponent, CreateElement } from 'vue';
-import { hook } from '@/includes/functions';
+import { hook, themeFuncs } from '@/includes/functions';
 
-type Layout = {
-  rootWarp: string | VueComponent;
-  mainWarp?: string | VueComponent | null;
-  header?: string | VueComponent | null;
-  footer?: string | VueComponent | null;
-};
+// Types
+import { CreateElement } from 'vue';
+import { DefaultLayouts } from 'types/functions/hook';
 
 @Component({
   name: 'layout-default',
 })
 export default class LayoutDefault extends Vue {
-  layout: Layout = {
-    rootWarp: 'div',
-    mainWarp: null,
-    header: null,
-    footer: null,
+  layout: Partial<DefaultLayouts> = {
+    rootWarp: undefined,
+    mainWarp: undefined,
+    header: undefined,
+    footer: undefined,
   };
 
+  get isDark() {
+    return themeFuncs.isDarkTheme();
+  }
+
   created() {
-    hook('layout').exec(this.layout, 'default');
+    hook('layouts').exec(this.layout, 'default');
   }
 
   render(h: CreateElement) {
     const { rootWarp = 'div', header, mainWarp, footer } = this.layout;
-    return h(rootWarp, { staticClass: 'layout', domProps: { id: 'default-layout' } }, [
-      header ? h(header) : null,
-      mainWarp ? h(mainWarp, [h('nuxt')]) : h('nuxt'),
-      footer ? h(footer) : null,
-    ]);
+    return h(
+      rootWarp,
+      {
+        staticClass: 'layout layout--default',
+        class: `theme--${this.isDark ? 'dark' : 'light'}`,
+        domProps: { id: 'default-layout', 'data-app': 'true' },
+      },
+      [header ? h(header) : null, mainWarp ? h(mainWarp, [h('nuxt')]) : h('nuxt'), footer ? h(footer) : null],
+    );
   }
 }

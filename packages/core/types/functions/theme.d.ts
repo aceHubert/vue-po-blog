@@ -2,6 +2,7 @@ export type Theme = {
   primary: string;
   secondary: string;
   accent: string;
+  anchor: string;
   error: string;
   info: string;
   success: string;
@@ -21,5 +22,5 @@ export interface ThemeFunctions {
   getThemes(): Themes;
   setThemes(themes: Partial<Themes>): void;
   setThemes(dark: boolean, themes: Partial<Theme>): void;
-  genCssVariables(): string;
+  genCssStyles(): string;
 }

@@ -6,7 +6,7 @@ import { tagApi, postApi, siteApi, categoryApi } from '@/includes/datas';
 import themeFn from '@/includes/theme';
 
 // components
-import PluginHolder from '@/components/plugin-holder';
+import PluginHolder from '~/components/PluginHolder';
 
 // 添加到 Vue.protytype 上的属性和方法
 import prototypeArgs from '@/includes/prototype';
@@ -71,7 +71,7 @@ const plugin: Plugin = async (cxt) => {
   }
 
   /**
-   * 加载 Theme 配置
+   * 加载主题色配置
    */
   try {
     const configs = await siteApi.getTheme();
@@ -110,6 +110,8 @@ const plugin: Plugin = async (cxt) => {
             get() {
               return methods[name];
             },
+            enumerable: true,
+            configurable: true,
           });
         return prev;
       }, {} as PropertyDescriptorMap),

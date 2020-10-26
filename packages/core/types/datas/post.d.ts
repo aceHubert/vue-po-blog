@@ -1,5 +1,4 @@
-import { PagerQuery } from './request';
-import { PagerInfo } from './response';
+import { PagerQuery, PagerResponse } from './request';
 import { Tag } from './tag';
 import { Category } from './category';
 
@@ -27,10 +26,7 @@ export type PostPagerQuery = PagerQuery<{
   tagId?: number;
 }>;
 
-export type PostPagerResponse = {
-  rows: Array<Omit<Post, 'content'>>;
-  pager: PagerInfo;
-};
+export type PostPagerResponse = PagerResponse<Omit<Post, 'content'>>;
 
 export type PostArchive = {
   date: Date;

@@ -92,14 +92,46 @@ const themeFunctions: ThemeFunctions = {
   /**
    * @author Hubert
    * @since 2020-09-04
-   * 生成 css variables
+   * 生成 css styles
+   * 注意模块字符串换行格式
    */
-  genCssVariables: function () {
+  genCssStyles: function () {
     const current = this.getCurrentTheme();
-    const variables = Object.keys(current)
-      .map((key) => `--color-${key}:${current[key]}`)
-      .join(';');
-    return `:root{${variables}}`;
+    const variables = `
+    :root{${Object.keys(current)
+      .map(
+        (key) => `
+      --color-${key}:${current[key]};`,
+      )
+      .join('')}
+    }\n`;
+
+    const basicThemes = `
+    [data-app].theme--light{
+      background:#fff;
+      color:rgba(0,0,0,0.87);
+    }\n 
+    [data-app].theme--dark{
+      background: #121212; 
+      color:#fff;
+    }\n
+    a{
+      color: ${current.anchor}
+    }\n`;
+
+    const colors = Object.keys(current)
+      .map(
+        (key) => `
+    .${key}{
+      background-color:${current[key]} !important;
+      border-color:${current[key]} !important;
+    }\n
+    .${key}--text{
+      color:${current[key]} !important;
+    }\n`,
+      )
+      .join('');
+    return variables + basicThemes + colors;
   },
 };
 

@@ -1,3 +1,6 @@
+import { Context } from '@nuxt/types';
+import { Component } from 'vue';
+
 export type Callback = {
   func: Function;
   acceptedArgs: number;
@@ -15,3 +18,21 @@ export interface HookFunction {
   (tag: string): HookResult;
   (tag: string, functionToAdd: Function, priority?: number, acceptedArgs?: number): void;
 }
+
+/** hooks params */
+
+// init hook
+export interface InitContext extends Context {
+  // no-empty-interface
+  __hookInitContext: '';
+}
+
+// layout hook
+export type DefaultLayouts = {
+  rootWarp: string | Component;
+  mainWarp: string | Component;
+  header: string | Component;
+  footer: string | Component;
+};
+
+export type FullScreenLayouts = Pick<DefaultLayouts, 'rootWarp' | 'mainWarp'>;

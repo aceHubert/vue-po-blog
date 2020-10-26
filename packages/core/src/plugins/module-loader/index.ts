@@ -3,7 +3,7 @@ import { MetaInfo } from 'vue-meta';
 import VueRouter from 'vue-router';
 import ModuleLoader from '@vue-async/module-loader';
 import { isUndef, error as globalError } from '@vue-async/utils';
-import { hook, globalThemes, themeFuncs } from '@/includes/functions';
+import { hook, themeFuncs } from '@/includes/functions';
 import { siteApi } from '@/includes/datas';
 
 // megre routes
@@ -21,7 +21,7 @@ import { PluginOptions } from 'types/plugin-options';
 Vue.use(ModuleLoader);
 
 const plugin: Plugin = async (cxt) => {
-  const { app } = cxt;
+  const { app, store } = cxt;
   /**
    * 添加路由
    * 放在模块入口文件 options 中，而不入在 Context 中，因为 Context 会传递到组件中
@@ -40,16 +40,11 @@ const plugin: Plugin = async (cxt) => {
     addRoutes,
   });
 
-  let themeModule: ModuleConfig | null = null;
-  try {
-    themeModule = await siteApi.getThemeModule();
-    if (!themeModule) {
-      globalError(process.env.NODE_ENV === 'production', `[core] 未配置主题模块`);
-    } else {
-      (themeModule as any).args = _themeArgs;
-    }
-  } catch {
-    // todo:因为接口不通，暂时处理掉异常
+  const themeModule = await siteApi.getThemeModule();
+  if (!themeModule) {
+    globalError(process.env.NODE_ENV === 'production', `[core] 未配置主题模块`);
+  } else {
+    themeModule.args = _themeArgs;
   }
 
   // 传递到插件模块的参数
@@ -60,32 +55,23 @@ const plugin: Plugin = async (cxt) => {
   try {
     pluginModules = await siteApi.getPluginModules();
     pluginModules.map((module) => {
-      (module as any).args = _pluginArgs;
+      module.args = _pluginArgs;
     });
   } catch {
     // todo:因为接口不通，暂时处理掉异常
   }
 
-  // [
-  //   // theme
-  //   {
-  //     moduleName: 'beautify-theme',
-  //     entry: '/content/themes/plumemo-dev.umd.js',
-  //     styles: ['/content/themes/plumemo-dev.css'],
-  //     args: _themeArgs,
-  //   },
-  //   // plugin's entry
-  //   {
-  //     moduleName: 'comment-plugin',
-  //     entry: '/content/plugins/comment-plugin/comment-plugin.umd.js',
-  //     args: _pluginArgs,
-  //   },
-  // ],
+  const moduleLoader = new ModuleLoader({
+    // 重写 addRouter，阻止 plugin 中调用
+    addRoutes: () => {
+      /** do nothing */
+    },
+  }).registerDynamicComponent(store);
 
   /**
    * 加载 theme 和 plugins, 按顺序执行
    */
-  await Vue.prototype.$moduleLoader([themeModule, ...pluginModules], {
+  await moduleLoader.load([themeModule, ...pluginModules], {
     sync: true,
     error: (msg: string) => {
       // 此处只会提示错误，不会阻止 success 执行
@@ -94,15 +80,7 @@ const plugin: Plugin = async (cxt) => {
     },
   });
 
-  // const moduleLoader = function createModuleLoader(ssrContext: any) {
-  //   const moduleLoader = new ModuleLoader({
-  //     addRoutes, // 重写 addRouter
-  //   });
-
-  //   return moduleLoader;
-  // };
-
-  // cxt.app.moduleLoader = moduleLoader;
+  cxt.app.moduleLoader = moduleLoader;
   // cxt.$moduleLoader = moduleLoader
 
   //
@@ -110,31 +88,31 @@ const plugin: Plugin = async (cxt) => {
   //
 
   /**
-   * 生成 css 变量
+   * 生成 theme css 变量
    */
-  new Vue().$watch(
-    () => globalThemes,
-    () => {
-      const _head = app.head! as MetaInfo;
-      let themeSheet = null;
-      if (isUndef(_head.style)) {
-        _head.style = [];
-      }
-      if (_head.style!.length && (themeSheet = _head.style!.find(({ id }) => id === 'plumemo-theme-stylesheet'))) {
-        themeSheet.cssText = themeFuncs.genCssVariables();
-      } else {
-        _head.style!.push({
-          id: 'plumemo-theme-stylesheet',
-          type: 'text/css',
-          'data-n-head': 'plumemo',
-          cssText: themeFuncs.genCssVariables(),
-        });
-      }
-    },
-    {
-      immediate: true,
-    },
-  );
+  const _head = app.head! as MetaInfo;
+  let themeSheet = null;
+  if (isUndef(_head.style)) {
+    _head.style = [];
+  }
+  if (_head.style!.length && (themeSheet = _head.style!.find(({ id }) => id === 'plumemo-theme-stylesheet'))) {
+    themeSheet.cssText = themeFuncs.genCssStyles();
+  } else {
+    _head.style!.push({
+      id: 'plumemo-theme-stylesheet',
+      type: 'text/css',
+      'data-n-head': 'plumemo',
+      cssText: themeFuncs.genCssStyles(),
+    });
+  }
+
+  if (hook('title_template').has()) {
+    await hook('title_template')
+      .filter(_head.titleTemplate)
+      .then((template) => {
+        _head.titleTemplate = template;
+      });
+  }
 
   /**
    * 初始化（网站，用户，SEO 等配置加载完成）

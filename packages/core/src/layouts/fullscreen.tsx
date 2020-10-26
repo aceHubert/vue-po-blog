@@ -1,29 +1,37 @@
 import { Vue, Component } from 'vue-property-decorator';
-import { Component as VueComponent, CreateElement } from 'vue';
-import { hook } from '@/includes/functions';
+import { hook, themeFuncs } from '@/includes/functions';
 
-type Layout = {
-  rootWarp: string | VueComponent;
-  mainWarp: string | VueComponent | null;
-};
+// Types
+import { CreateElement } from 'vue';
+import { FullScreenLayouts } from 'types/functions/hook';
 
 @Component({
   name: 'layout-fullscreen',
 })
 export default class LayoutFullscreen extends Vue {
-  layout: Layout = {
-    rootWarp: 'div',
-    mainWarp: null,
+  layout: Partial<FullScreenLayouts> = {
+    rootWarp: undefined,
+    mainWarp: undefined,
   };
 
+  get isDark() {
+    return themeFuncs.isDarkTheme();
+  }
+
   created() {
-    hook('layout').exec(this.layout, 'fullscreen');
+    hook('layouts').exec(this.layout, 'fullscreen');
   }
 
   render(h: CreateElement) {
     const { rootWarp = 'div', mainWarp } = this.layout;
-    return h(rootWarp, { staticClass: 'layout', domProps: { id: 'default-layout' } }, [
-      mainWarp ? h(mainWarp, [h('nuxt')]) : h('nuxt'),
-    ]);
+    return h(
+      rootWarp,
+      {
+        staticClass: 'layout layout--fullscreen',
+        class: `theme--${this.isDark ? 'dark' : 'light'}`,
+        domProps: { id: 'fullscreen-layout', 'data-app': 'true' },
+      },
+      [mainWarp ? h(mainWarp, [h('nuxt')]) : h('nuxt')],
+    );
   }
 }
