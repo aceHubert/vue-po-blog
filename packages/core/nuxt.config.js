@@ -144,5 +144,10 @@ module.exports = (configContext) => {
       // eslint-disable-next-line no-unused-vars
       extend(config, ctx) {},
     },
+    loadingIndicator: {
+      name: 'three-bounce',
+      color: '#f67280',
+      background: 'white',
+    },
   };
 };

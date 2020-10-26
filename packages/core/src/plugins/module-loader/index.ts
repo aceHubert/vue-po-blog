@@ -2,7 +2,7 @@ import Vue from 'vue';
 import { MetaInfo } from 'vue-meta';
 import VueRouter from 'vue-router';
 import ModuleLoader from '@vue-async/module-loader';
-import { isUndef, error as globalError } from '@vue-async/utils';
+import { error as globalError, warn as globalWarn } from '@vue-async/utils';
 import { hook, themeFuncs } from '@/includes/functions';
 import { siteApi } from '@/includes/datas';
 
@@ -51,15 +51,11 @@ const plugin: Plugin = async (cxt) => {
   const _pluginArgs: PluginOptions = Object.freeze({
     ...pluginArgs,
   });
-  let pluginModules = [] as ModuleConfig[];
-  try {
-    pluginModules = await siteApi.getPluginModules();
-    pluginModules.map((module) => {
-      module.args = _pluginArgs;
-    });
-  } catch {
-    // todo:因为接口不通，暂时处理掉异常
-  }
+
+  const pluginModules = await siteApi.getPluginModules();
+  pluginModules.map((module) => {
+    module.args = _pluginArgs;
+  });
 
   const moduleLoader = new ModuleLoader({
     // 重写 addRouter，阻止 plugin 中调用
@@ -72,11 +68,10 @@ const plugin: Plugin = async (cxt) => {
    * 加载 theme 和 plugins, 按顺序执行
    */
   await moduleLoader.load([themeModule, ...pluginModules], {
-    sync: true,
+    sync: true, // 同步执行，theme 优先加载，然后加载插件
     error: (msg: string) => {
       // 此处只会提示错误，不会阻止 success 执行
-      // eslint-disable-next-line no-console
-      console.error(`[core] 模块加载中出错，忽略。 ${msg}`);
+      globalWarn(false, `[core] 模块加载中出错，已忽略。 ${msg}`);
     },
   });
 
@@ -89,25 +84,25 @@ const plugin: Plugin = async (cxt) => {
 
   /**
    * 生成 theme css 变量
+   * todo: ssr
+   */
+  const _mounted = app.mounted;
+  app.mounted = function () {
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.id = 'plumemo-theme-stylesheet';
+    style.setAttribute('data-n-head', 'plumemo');
+    style.innerHTML = themeFuncs.genCssStyles();
+    document.getElementsByTagName('head')[0].appendChild(style);
+    _mounted && _mounted.call(this);
+  };
+
+  /**
+   * 自定义 head title template
    */
   const _head = app.head! as MetaInfo;
-  let themeSheet = null;
-  if (isUndef(_head.style)) {
-    _head.style = [];
-  }
-  if (_head.style!.length && (themeSheet = _head.style!.find(({ id }) => id === 'plumemo-theme-stylesheet'))) {
-    themeSheet.cssText = themeFuncs.genCssStyles();
-  } else {
-    _head.style!.push({
-      id: 'plumemo-theme-stylesheet',
-      type: 'text/css',
-      'data-n-head': 'plumemo',
-      cssText: themeFuncs.genCssStyles(),
-    });
-  }
-
-  if (hook('title_template').has()) {
-    await hook('title_template')
+  if (hook('head_title_template').has()) {
+    await hook('head_title_template')
       .filter(_head.titleTemplate)
       .then((template) => {
         _head.titleTemplate = template;
