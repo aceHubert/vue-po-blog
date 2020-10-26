@@ -17,7 +17,7 @@ import { Component as VueComponent, AsyncComponent, CreateElement } from 'vue';
     };
   },
   asyncData({ params, postApi }) {
-    return postApi.get(params.id);
+    return postApi.get(parseInt(params.id));
   },
 })
 export default class ThemeArticle extends Vue {

@@ -1,7 +1,7 @@
 /**
  * routes
  */
-// import { RouteConfig } from 'vue-router';
+import { RouteConfig } from 'vue-router';
 
 import { Route } from 'vue-router';
 
@@ -9,7 +9,7 @@ export function interopDefault(promise: Promise<any>) {
   return promise.then((m) => m.default || m);
 }
 
-const routes: any = [
+const routes: RouteConfig[] = [
   {
     path: '',
     name: 'index',

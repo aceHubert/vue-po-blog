@@ -1,24 +1,25 @@
 import './class-component-hooks';
-import { VueConstructor } from 'vue';
 import { print } from '@vue-async/utils';
 
 // Routes
 import routes from './router';
 
 // Layout components
-import RootWarp from './components/root-warp';
-import MainWarp from './components/main-warp';
-import Header from './components/header';
-import Footer from './components/footer';
+import { RootWarp, MainWarp, Header, Footer } from './components';
 
 // Vuetiry components
 import Vuetify from 'vuetify/lib';
 import { Ripple } from 'vuetify/lib/directives';
 
-// Types
-import { InitContext, ThemeOptions } from '@plumemo/devtools';
+// Styles
+import './assets/styles.scss';
 
-export default function (Vue: VueConstructor, opts: ThemeOptions) {
+// Types
+import { VueConstructor } from 'vue';
+import { ModuleContext } from '@plumemo/devtools';
+import { ThemeOptions, InitContext, DefaultLayouts } from '@plumemo/devtools/dev-core';
+
+export default function (this: ModuleContext, Vue: VueConstructor, opts: ThemeOptions) {
   print('beautify-theme', '加载成功');
 
   Vue.use(Vuetify, {
@@ -31,9 +32,6 @@ export default function (Vue: VueConstructor, opts: ThemeOptions) {
   // 添加路由
   opts.addRoutes(routes);
 
-  // 使用黑色主题(强制使用黑色主题)
-  opts.setDarkTheme(true);
-
   // 注册 init 勾子
   opts.hook('init', ({ app }: InitContext) => {
     app.vuetify = new Vuetify({
@@ -45,10 +43,10 @@ export default function (Vue: VueConstructor, opts: ThemeOptions) {
   });
 
   // 设置布局
-  opts.hook('layout', (layout: any) => {
-    layout.rootWarp = RootWarp;
-    layout.mainWarp = MainWarp;
-    layout.header = Header;
-    layout.footer = Footer;
+  opts.hook('layouts', (layouts: DefaultLayouts) => {
+    layouts.rootWarp = RootWarp;
+    layouts.mainWarp = MainWarp;
+    layouts.header = Header;
+    layouts.footer = Footer;
   });
 }

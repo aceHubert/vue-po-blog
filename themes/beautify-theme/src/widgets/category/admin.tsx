@@ -1,7 +1,7 @@
 import { Vue, Component } from 'vue-property-decorator';
 
 // Types
-import { Category } from '@plumemo/devtools';
+import { Category } from '@plumemo/devtools/dev-core';
 
 @Component({
   name: 'widget-category-admin',

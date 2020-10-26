@@ -9,8 +9,8 @@ import { Component as VueComponent, CreateElement } from 'vue';
 })
 export default class Footer extends Vue {
   widgets: VueComponent[] = [];
-  copyright = '';
-  icp = '';
+  copyright: string | null = '';
+  icp: string | null = '';
 
   get supportParams() {
     return {

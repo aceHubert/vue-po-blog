@@ -22,6 +22,7 @@ import WidgetTag from '@/widgets/tag';
 
 // Types
 import { Route } from 'vue-router';
+import { Category, Tag, PostPagerResponse } from '@plumemo/devtools/dev-core';
 
 @Component({
   name: 'theme-search-result',
@@ -47,7 +48,9 @@ import { Route } from 'vue-router';
       extendParams.keywords = keywords;
     }
 
-    return postApi.getList({ page, from: 'search', ...extendParams }).then((posts: any) => ({ posts }));
+    return postApi
+      .getList({ page: page as number, from: 'search', ...extendParams })
+      .then((posts: PostPagerResponse) => ({ posts }));
   },
 })
 export default class ThemeSearchResult extends Vue {
@@ -63,7 +66,7 @@ export default class ThemeSearchResult extends Vue {
     }
     this.loading = true;
     this.postApi
-      .getList({ page, from: 'search', ...extendParams })
+      .getList({ page: page as number, from: 'search', ...extendParams })
       .then((posts: any) => {
         this.posts = posts;
       })
@@ -79,7 +82,7 @@ export default class ThemeSearchResult extends Vue {
 
   loading = false;
   resultTip = '';
-  posts = {
+  posts: PostPagerResponse = {
     rows: [],
     pager: {
       page: 1,
@@ -109,13 +112,13 @@ export default class ThemeSearchResult extends Vue {
   created() {
     // todo: 没有单独查询
     if (this.type === 'category') {
-      this.categoryApi.get(this.id).then((category: Category | null) => {
+      this.categoryApi.get(this.id! as number).then((category: Category | null) => {
         this.resultTip = category
           ? `分类 "${category.name}"， 搜索到 ${this.posts.pager.total} 条记录`
           : `搜索到 ${this.posts.pager.total} 条记录`;
       });
     } else if (this.type === 'tag') {
-      this.tagApi.get(this.id).then((tag: Tag | null) => {
+      this.tagApi.get(this.id! as number).then((tag: Tag | null) => {
         this.resultTip = tag
           ? `标签 "${tag.name}"， 搜索到 ${this.posts.pager.total} 条记录`
           : `搜索到 ${this.posts.pager.total} 条记录`;
@@ -138,7 +141,7 @@ export default class ThemeSearchResult extends Vue {
             {this.posts.rows && this.posts.rows.length ? (
               [
                 this.posts.rows.map(({ id, title, summary, thumbnail, tags = [], views, createTime }) => (
-                  <VCard min-height="100" class="mb-3" to={{ name: 'theme-article', params: { id } }} nuxt>
+                  <VCard min-height="100" class="mb-3" to={{ name: 'theme-article', params: { id: String(id) } }} nuxt>
                     <div class="d-flex flex-no-wrap justify-space-between">
                       <div style="width:100%">
                         {thumbnail ? <VImg src={thumbnail} class="hidden-sm-and-up" aspectRatio="1.7" /> : null}

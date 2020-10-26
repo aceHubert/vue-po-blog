@@ -33,7 +33,7 @@ import { Route } from 'vue-router';
   },
   asyncData({ query, postApi }) {
     const { page = 1 } = query;
-    return postApi.getList({ page, from: 'home' }).then((posts: any) => ({ posts }));
+    return postApi.getList({ page: parseInt(page as string), from: 'home' }).then((posts: any) => ({ posts }));
   },
 })
 export default class ThemeHome extends Vue {
@@ -41,7 +41,7 @@ export default class ThemeHome extends Vue {
     const { page = 1 } = to.query;
     this.loading = true;
     this.postApi
-      .getList({ page, from: 'home' })
+      .getList({ page: parseInt(page as string), from: 'home' })
       .then((posts: any) => {
         this.posts = posts;
       })

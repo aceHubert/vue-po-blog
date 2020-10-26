@@ -10,12 +10,18 @@
     "dist/beautify-theme/index.css"
   ],
   "admin:main": {
-    "moduleName": "index",
-    "entry": "dist/admin/index.umd.js"
+    "moduleName": "beautify-theme-admin",
+    "entry": "dist/admin/index.umd.js",
+    "styles": []
   },
-  "widgets": [
-    {}
-  ],
+  "widgets": {
+    "category": {
+      "entry": "dist/wedgets/category/index.umd.js",
+      "admin": "dist/wedgets/category/admin.umd.js"
+    },
+    "tag": "dist/wedgets/tag/tag.umd.js",
+    "my-info": "dist/wedgets/my-info/my-info.umd.js"
+  },
   "license": "MIT",
   "sideEffects": false,
   "files": [
@@ -23,17 +29,16 @@
     "src"
   ],
   "scripts": {
-    "serve": "po dev --name beautifyTheme --filename index --dest dist/beautify-theme src/beautify-theme.ts",
-    "build:front": "po build --name beautifyTheme --filename index --dest dist/beautify-theme src/beautify-theme.ts",
+    "dev": "po dev --name beautifyTheme --filename index --dest dist/beautify-theme src/main.ts",
+    "build:front": "po build --name beautifyTheme --filename index --dest dist/beautify-theme src/main.ts",
     "build:widgets": "po build --dest dist/widgets src/widgets",
-    "build:admin": "po build --name beautifyThemeAdmin --filename index --dest dist/admin  src/admin/index.ts",
+    "build:admin": "po build --name beautifyThemeAdmin --filename index --dest dist/admin  src/admin/main.ts",
     "build": "yarn build:front && yarn build:widgets && yarn build:admin",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@nuxt/types": "^2.14.6",
-    "@vue-async/utils": "^1.0.3",
+    "@vue-async/utils": "^1.0.6",
     "core-js": "^3.6.4",
     "marked": "^1.1.1",
     "moment": "^2.28.0",
@@ -45,7 +50,6 @@
   "devDependencies": {
     "@plumemo/devtools": "^0.0.5-alpha",
     "@types/marked": "^1.1.0",
-    "@vue-async/module-loader-typing": "^0.0.2",
     "@vue/cli-plugin-babel": "^4.2.0",
     "@vue/cli-plugin-eslint": "^4.2.0",
     "@vue/cli-plugin-typescript": "^4.5.6",

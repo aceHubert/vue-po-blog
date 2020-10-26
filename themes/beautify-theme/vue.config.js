@@ -3,12 +3,6 @@ module.exports = {
   productionSourceMap: false,
   lintOnSave: false,
   transpileDependencies: ['vuetify', '@vue-async/utils'],
-  pages: {
-    index: {
-      entry: 'src/beautify-theme.js',
-      template: 'public/index.html',
-    },
-  },
   css: {
     // 是否使用css分离插件 ExtractTextPlugin
     extract: true,
