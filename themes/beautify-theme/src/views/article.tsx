@@ -62,20 +62,20 @@ export default class ThemeArticle extends Vue {
         <VRow>
           <VCol cols={this.hasSidebar ? 8 : 12}>
             {this.pageBeforePlugins && this.pageBeforePlugins.length
-              ? this.pageBeforePlugins.map((plugin) => h(plugin))
+              ? this.pageBeforePlugins.map((plugin) => h(plugin, { props: { article: this.$data } }))
               : null}
 
             <h2 class="text-center">{this.title}</h2>
             <p class="caption grey--text text-center">{moment(this.createTime).format('YYYY-MM-DD')}</p>
             <div domPropsInnerHTML={this.markedContent} class={['body-2', classes.content]}></div>
             {this.pageAfterPlugins && this.pageAfterPlugins.length
-              ? this.pageAfterPlugins.map((plugin) => h(plugin))
+              ? this.pageAfterPlugins.map((plugin) => h(plugin, { props: { article: this.$data } }))
               : null}
           </VCol>
           {this.hasSidebar ? (
             <VCol cols="4">
               {this.pageSidebarPlugins && this.pageSidebarPlugins.length
-                ? this.pageSidebarPlugins.map((plugin) => h(plugin))
+                ? this.pageSidebarPlugins.map((plugin) => h(plugin, { props: { article: this.$data } }))
                 : null}
             </VCol>
           ) : null}

@@ -150,7 +150,7 @@ export default class ThemeSearchResult extends Vue {
                           {summary}
                           <div>
                             {tags.map((tag: any) => (
-                              <nuxt-link to={{ name: 'theme-tag', params: { id: tag.id } }} class="mr-2">
+                              <nuxt-link to={{ name: 'theme-search-tag', params: { id: tag.id } }} class="mr-2">
                                 {`#${tag.name}`}
                               </nuxt-link>
                             ))}

@@ -11,9 +11,9 @@ export default class MainWarp extends Vue {
   pageBeforePlugins: Array<VueComponent | AsyncComponent> = [];
   pageAfterPlugins: Array<VueComponent | AsyncComponent> = [];
 
-  get userInfo() {
-    return this.getUserInfo();
-  }
+  // get userInfo() {
+  //   return this.getUserInfo();
+  // }
 
   created() {
     this.hook('page-before')

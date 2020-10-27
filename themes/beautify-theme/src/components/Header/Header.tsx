@@ -1,5 +1,5 @@
 import { Vue, Component } from 'vue-property-decorator';
-import { VAppBar, VContainer, VAppBarNavIcon, VToolbarTitle, VSpacer, VImg, VIcon, VBtn } from '../vuetify-tsx';
+import { VAppBar, VContainer, VAppBarNavIcon, VToolbarTitle, VSpacer, VIcon, VBtn } from '../vuetify-tsx';
 import { RootParams } from '../RootWarp';
 
 @Component({
@@ -21,20 +21,7 @@ export default class Header extends Vue {
 
   render() {
     return (
-      <VAppBar
-        color="primary"
-        app
-        dark
-        // shrink-on-scroll={this.$vuetify.breakpoint.mdAndUp}
-        // src="https://picsum.photos/1920/1080?random"
-        {...{
-          scopedSlots: {
-            img: ({ props }) => (
-              <VImg gradient="to top right, rgba(19,84,122,.5), rgba(128,208,199,.8)" {...{ props }} />
-            ),
-          },
-        }}
-      >
+      <VAppBar app>
         <VContainer style="padding:0;display:flex;align-items: center;">
           <VAppBarNavIcon
             class="hidden-md-and-up"

@@ -61,12 +61,19 @@ export default class ThemeHome extends Vue {
     },
   };
 
+  // widget 参数
   get supportParams() {
     return {
       from: 'home',
     };
   }
 
+  // 左侧菜单（只在 lg 及以上显示）
+  get liftbarWidgets() {
+    return this.getWidgets('liftbar').sort((a, b) => (a.order === b.order ? 0 : a.order > b.order ? 1 : -1));
+  }
+
+  // 侧边栏 (中在 md 及以上显示)
   get sidebarWidgets() {
     return this.getWidgets('sidebar').sort((a, b) => (a.order === b.order ? 0 : a.order > b.order ? 1 : -1));
   }
@@ -89,7 +96,33 @@ export default class ThemeHome extends Vue {
     return (
       <VContainer class="home">
         <VRow>
-          <VCol cols="12" md="8">
+          {this.$vuetify.breakpoint.lgAndUp ? (
+            <VCol cols="3">
+              {this.liftbarWidgets && this.liftbarWidgets.length
+                ? this.liftbarWidgets.map((widget) => (
+                    <VCard class="mb-3">
+                      {widget.title ? [<p class="caption pa-3 mb-0">{widget.title}</p>, <VDivider />] : null}
+                      <div class="pa-3">
+                        <plugin-holder
+                          support-params={this.supportParams}
+                          component-configs={widget.config}
+                        ></plugin-holder>
+                      </div>
+                      ))
+                    </VCard>
+                  ))
+                : [
+                    <VCard class="mb-3">
+                      <p class="caption pa-3 mb-0">分类</p>
+                      <VDivider />
+                      <div class="pa-3">
+                        <WidgetCategory />
+                      </div>
+                    </VCard>,
+                  ]}
+            </VCol>
+          ) : null}
+          <VCol cols="12" md="8" lg="6">
             {this.posts.rows && this.posts.rows.length ? (
               [
                 this.posts.rows.map(({ id, title, summary, thumbnail, tags = [], views, createTime }) => (
@@ -149,7 +182,7 @@ export default class ThemeHome extends Vue {
             )}
           </VCol>
           {this.$vuetify.breakpoint.mdAndUp ? (
-            <VCol cols="4">
+            <VCol cols="4" lg="3">
               {this.sidebarWidgets && this.sidebarWidgets.length
                 ? this.sidebarWidgets.map((widget) => (
                     <VCard class="mb-3">
@@ -169,13 +202,15 @@ export default class ThemeHome extends Vue {
                         <WidgetMyInfo />
                       </div>
                     </VCard>,
-                    <VCard class="mb-3">
-                      <p class="caption pa-3 mb-0">分类</p>
-                      <VDivider />
-                      <div class="pa-3">
-                        <WidgetCategory />
-                      </div>
-                    </VCard>,
+                    !this.$vuetify.breakpoint.lgAndUp ? (
+                      <VCard class="mb-3">
+                        <p class="caption pa-3 mb-0">分类</p>
+                        <VDivider />
+                        <div class="pa-3">
+                          <WidgetCategory />
+                        </div>
+                      </VCard>
+                    ) : null,
                     <VCard class="mb-3">
                       <p class="caption pa-3 mb-0">标签</p>
                       <VDivider />
