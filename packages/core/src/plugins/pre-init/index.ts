@@ -76,6 +76,7 @@ const plugin: Plugin = async (cxt) => {
   try {
     const configs = await siteApi.getTheme();
     themeFn.setThemes(configs.dark, configs.themes);
+    themeFn.setDarkTheme(configs.dark);
   } catch (err) {
     globalError(process.env.NODE_ENV === 'production', `[core] Theme配置加载失败, 错误：${err.message}`);
     // error({ statusCode: 500, message: 'Theme配置加载失败' });

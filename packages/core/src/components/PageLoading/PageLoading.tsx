@@ -18,8 +18,10 @@ export default class PageLoading extends Vue {
   render() {
     return this.loading ? (
       <div class={classes.container}>
-        <figure class={classes.logo}></figure>
-        <p classes={classes.text}>Loading...</p>
+        <div class={classes.content}>
+          <figure class={classes.logo}></figure>
+          <p classes={classes.text}>Loading...</p>
+        </div>
       </div>
     ) : null;
   }

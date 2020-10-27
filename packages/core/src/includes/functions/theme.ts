@@ -46,7 +46,7 @@ const themeFunctions: ThemeFunctions = {
   /**
    * @author Hubert
    * @since 2020-09-04
-   * 设置主题
+   * 设置深色/浅色主题
    * @param dark 深色主题
    */
   setDarkTheme: function (dark = true) {
@@ -74,18 +74,19 @@ const themeFunctions: ThemeFunctions = {
   /**
    * @author Hubert
    * @since 2020-09-04
-   * 设置主题
+   * 设置主题色值(不修改主题颜色)
    */
-  setThemes: function (dark: boolean | Partial<Themes>, themes?: Partial<Theme>) {
-    if (typeof dark === 'boolean') {
+  setThemes: function (darkOrThemes: boolean | Partial<Themes>, themes?: Partial<Theme>) {
+    if (typeof darkOrThemes === 'boolean') {
+      const dark = darkOrThemes;
       globalThemes.themes[dark ? 'dark' : 'light'] = merge(
         {},
         globalThemes.themes[dark ? 'dark' : 'light'],
         themes,
       ) as Theme;
     } else {
-      const themes = dark;
-      globalThemes.themes = merge({}, globalThemes, themes) as Themes;
+      const themes = darkOrThemes;
+      globalThemes.themes = merge({}, globalThemes.themes, themes) as Themes;
     }
   },
 

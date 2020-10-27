@@ -12,10 +12,10 @@
   ],
   "scripts": {
     "serve": "nuxt",
-    "build": "nuxt build",
-    "build:devtools": "cross-env BASE_URL=http://localhost:5005 nuxt build && node ./scripts/copyToDevtools.js",
+    "build": "cross-env BASE_URL=https://preview.plumemo.com nuxt build",
+    "build:devtools": "cross-env BASE_URL=/ nuxt build && node ./scripts/copyToDevtools.js",
     "start": "nuxt start",
-    "generate": "nuxt generate"
+    "generate": "cross-env BASE_URL=https://preview.plumemo.com nuxt generate"
   },
   "license": "MIT",
   "repository": {

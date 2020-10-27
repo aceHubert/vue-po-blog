@@ -67,24 +67,24 @@ module.exports = (configContext) => {
       // 在 devtools 时调试模块代理
       ...(configContext.proxyThemeTarget
         ? {
-            '/api/blog/module/theme/v1/get': {
+            '/api/blog/v1/plumemo/module/theme': {
               target: configContext.proxyThemeTarget,
               changeOrigin: false,
               ws: false,
               pathRewrite: {
-                '^/api/blog/module/theme/v1/get': '',
+                '^/api/blog/v1/plumemo/module/theme': '',
               },
             },
           }
         : null),
       ...(configContext.proxyPluginTarget
         ? {
-            '/api/blog/module/plugin/v1/list': {
+            '/api/blog/v1/plumemo/module/plugins': {
               target: configContext.proxyPluginTarget,
               changeOrigin: false,
               ws: false,
               pathRewrite: {
-                '^/api/blog/module/plugin/v1/list': '',
+                '^/api/blog/v1/plumemo/module/plugins': '',
               },
             },
           }

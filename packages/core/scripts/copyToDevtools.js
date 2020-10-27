@@ -28,9 +28,13 @@ try {
 
   // 复制文件
   const buildDir = nuxtConfig.buildDir || '.nuxt';
+  const staticDir =
+    (nuxtConfig.srcDir || '') + (nuxtConfig.dir && nuxtConfig.dir.static ? nuxtConfig.dir.static : 'static');
+
   child_process.spawnSync('cp', [
     '-r',
     path.resolve('./', buildDir),
+    path.resolve('./', staticDir),
     path.resolve('./', typesDir),
     nuxtCofnigPath,
     destDir,
