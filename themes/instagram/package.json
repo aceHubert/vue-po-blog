@@ -1,0 +1,60 @@
+{
+  "name": "instagram",
+  "version": "0.0.1-alpha",
+  "description": "",
+  "private": true,
+  "main": "dist/instagram/index.umd.js",
+  "main:styles": [
+    "//at.alicdn.com/t/font_2126729_jgej2jp7cbd.css",
+    "dist/instagram/index.css"
+  ],
+  "admin:main": {
+    "moduleName": "index",
+    "entry": "dist/admin/index.umd.js"
+  },
+  "widgets": [
+    {}
+  ],
+  "license": "MIT",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "dev": "po dev --name instagram --filename index --dest dist/instagram src/main.ts",
+    "build:front": "po build --name instagram --filename index --dest dist/instagram src/main.ts",
+    "build:widgets": "po build --dest dist/widgets src/widgets",
+    "build:admin": "po build --name instagramAdmin --filename index --dest dist/admin  src/admin/main.ts",
+    "build": "yarn build:front && yarn build:widgets && yarn build:admin",
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@vue-async/utils": "^1.0.6",
+    "core-js": "^3.6.4",
+    "marked": "^1.1.1",
+    "moment": "^2.28.0",
+    "vue": "^2.6.9",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^8.4.1",
+    "vuetify": "^2.3.10"
+  },
+  "devDependencies": {
+    "@plumemo/devtools": "^0.0.5-alpha",
+    "@types/marked": "^1.1.0",
+    "@vue/cli-plugin-babel": "^4.2.0",
+    "@vue/cli-plugin-eslint": "^4.2.0",
+    "@vue/cli-plugin-typescript": "^4.5.6",
+    "@vue/cli-service": "^4.2.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^5.0.2",
+    "eslint-plugin-vue": "^5.0.0",
+    "sass": "^1.26.10",
+    "sass-loader": "^7.3.0",
+    "typescript": "^3.7.2",
+    "vue-router": "^3.4.3",
+    "vue-template-compiler": "^2.6.9",
+    "vue-tsx-support": "^2.3.3"
+  }
+}
