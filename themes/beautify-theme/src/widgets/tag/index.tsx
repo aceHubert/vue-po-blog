@@ -20,7 +20,7 @@ export default class WidgetTag extends Vue {
     return (
       <div class="category">
         {this.tags.map((tag) => (
-          <VChip small class="ma-2" color="accent" textColor="white" to={`/tag/${tag.id}`} nuxt>
+          <VChip small class="ma-2" color="primary" textColor="white" to={`/tag/${tag.id}`} nuxt>
             {tag.name}
             <VAvatar right class="accent darken-4">
               {tag.postsTotal}

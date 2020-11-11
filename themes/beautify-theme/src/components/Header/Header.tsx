@@ -37,7 +37,7 @@ export default class Header extends Vue {
                 <nuxt-link
                   to={menu.to}
                   exact
-                  active-class="accent--text"
+                  active-class="primary--text"
                   class="ml-3 text-decoration-none text-no-wrap"
                   style="color:inherit;"
                 >

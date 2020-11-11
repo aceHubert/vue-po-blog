@@ -69,8 +69,8 @@ export default class ThemeHome extends Vue {
   }
 
   // 左侧菜单（只在 lg 及以上显示）
-  get liftbarWidgets() {
-    return this.getWidgets('liftbar').sort((a, b) => (a.order === b.order ? 0 : a.order > b.order ? 1 : -1));
+  get leftbarWidgets() {
+    return this.getWidgets('leftbar').sort((a, b) => (a.order === b.order ? 0 : a.order > b.order ? 1 : -1));
   }
 
   // 侧边栏 (中在 md 及以上显示)
@@ -98,8 +98,8 @@ export default class ThemeHome extends Vue {
         <VRow>
           {this.$vuetify.breakpoint.lgAndUp ? (
             <VCol cols="3">
-              {this.liftbarWidgets && this.liftbarWidgets.length
-                ? this.liftbarWidgets.map((widget) => (
+              {this.leftbarWidgets && this.leftbarWidgets.length
+                ? this.leftbarWidgets.map((widget) => (
                     <VCard class="mb-3">
                       {widget.title ? [<p class="caption pa-3 mb-0">{widget.title}</p>, <VDivider />] : null}
                       <div class="pa-3">
@@ -137,7 +137,7 @@ export default class ThemeHome extends Vue {
                             {tags.map((tag: any) => (
                               <nuxt-link
                                 to={{ name: 'theme-search-tag', params: { id: tag.id } }}
-                                class="mr-2 accent--text"
+                                class="mr-2 primary--text"
                               >
                                 {`#${tag.name}`}
                               </nuxt-link>
