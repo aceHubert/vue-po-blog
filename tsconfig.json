@@ -52,12 +52,8 @@
     "baseUrl": "." /* Base directory to resolve non-absolute module names. */,
     "paths": {
       /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
-      "@vue-async/module-loader": ["packages/module-loader/src"],
-      "@vue-async/module-loader/*": ["packages/module-loader/src/*"],
-      "@vue-async/resource-manager": ["packages/resource-manager/src"],
-      "@vue-async/resource-manager/*": ["packages/resource-manager/src/*"],
-      "@vue-async/utils": ["packages/utils/src"],
-      "@vue-async/utils/*": ["packages/utils/src/*"]
+      "@plumemo/devtools": ["packages/devtools/src"],
+      "@plumemo/devtools/*": ["packages/devtools/src/*"],
     },
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [],                       /* List of folders to include type definitions from. */
