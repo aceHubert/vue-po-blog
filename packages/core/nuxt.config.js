@@ -23,7 +23,7 @@ const assetsCDN = {
   ],
 };
 
-const port = process.env.PORT || 5006;
+const port = process.env.PORT || 5008;
 const host = process.env.HOST || 'localhost';
 
 module.exports = (configContext) => {
@@ -100,10 +100,9 @@ module.exports = (configContext) => {
     },
     plugins: [
       { src: 'plugins/pre-init' }, // pre-init
+      { src: 'plugins/module-loader', ssr: false }, // modules load
       { src: 'plugins/i18n' }, // locale
       { src: 'plugins/router' }, // router
-      // 自定义扩展应该加在此之前
-      { src: 'plugins/module-loader', ssr: false },
     ],
     router: {
       extendRoutes(routes, _resolve) {

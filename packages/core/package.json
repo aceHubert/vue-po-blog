@@ -15,7 +15,9 @@
     "build": "cross-env BASE_URL=https://preview.plumemo.com nuxt build",
     "build:devtools": "cross-env BASE_URL=/ nuxt build && node ./scripts/copyToDevtools.js",
     "start": "nuxt start",
-    "generate": "cross-env BASE_URL=https://preview.plumemo.com nuxt generate"
+    "generate": "cross-env BASE_URL=https://preview.plumemo.com nuxt generate",
+    "lint": "eslint . --cache --report-unused-disable-directives --ext .ts,.tsx --ignore-path=../../.eslintignore",
+    "lint:fix": "eslint . --cache --fix --ext .ts,.tsx --ignore-path=../../.eslintignore"
   },
   "license": "MIT",
   "repository": {

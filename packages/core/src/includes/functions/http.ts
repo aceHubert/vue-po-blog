@@ -3,7 +3,8 @@ import settingsFuncs from './settings';
 import hook from './hooks';
 
 // Types
-import { Response } from 'types/datas/response';
+import { HttpInstance } from 'types/functions/http';
+import { Response, PagerResponse } from 'types/datas/response';
 
 /**
  * @author Hubert
@@ -16,7 +17,12 @@ import { Response } from 'types/datas/response';
 const instance = axios.create({
   baseURL: settingsFuncs.getApiPath(),
   timeout: 10000,
-});
+}) as HttpInstance;
+
+/**
+ * 用于区分返回类型
+ */
+instance.getList = instance.get;
 
 /**
  * default interceptor
@@ -25,7 +31,13 @@ const instance = axios.create({
 // request interceptor
 instance.interceptors.request.use(
   (config: AxiosRequestConfig) => {
-    return hook('pre_request').filter(config);
+    return hook('pre_request')
+      .exec(config)
+      .then(() => {
+        // set Authorization header
+
+        return config;
+      });
   },
   (err: AxiosError) => {
     return hook('request_error')
@@ -40,13 +52,13 @@ instance.interceptors.request.use(
 );
 
 // response interceptor
-instance.interceptors.response.use(
+instance.interceptors.response.use<Response<any> | PagerResponse<any>>(
   (resp: AxiosResponse<Response<any>>) => {
     return hook('pre_response')
-      .filter(resp)
-      .then((resp) => {
+      .exec(resp)
+      .then(() => {
         if (!resp.data.success) return Promise.reject(new Error(resp.data.message));
-        return resp;
+        return resp.data;
       });
   },
   (err: AxiosError) => {
@@ -56,11 +68,11 @@ instance.interceptors.response.use(
         if (err.response) {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
-          // if (err.response.status === 401) {
-          // }
-          // else if (err.response.status === 403) {
-          //   err.message = '您没有执行该操作的权限'
-          // }
+          if (err.response.status === 401) {
+            // todo: 401
+          } else if (err.response.status === 403) {
+            err.message = '您没有执行该操作的权限';
+          }
         } else if (err.request) {
           // The request was made but no response was received
           // `error.request` is an instance of XMLHttpRequest in the browser and an instance of

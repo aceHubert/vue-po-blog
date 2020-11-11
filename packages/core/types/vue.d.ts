@@ -1,6 +1,13 @@
-import { AxiosStatic, AxiosInstance } from 'axios';
+import { AxiosStatic } from 'axios';
 import { CategoryApi, TagApi, PostApi } from './datas';
-import { HookFunction, ThemeFunctions, LayoutFunctions, LocaleFunctions, SettingsFunctions } from './functions';
+import {
+  HookFunction,
+  HttpInstance,
+  ThemeFunctions,
+  LayoutFunctions,
+  LocaleFunctions,
+  SettingsFunctions,
+} from './functions';
 
 export interface VueExtraPrototypes
   extends Pick<ThemeFunctions, 'getCurrentTheme' | 'getThemes' | 'isDarkTheme'>,
@@ -22,11 +29,11 @@ export interface VueExtraPrototypes
 declare module 'vue/types/vue' {
   interface Vue extends VueExtraPrototypes {
     axios: AxiosStatic;
-    $http: AxiosInstance;
+    $http: HttpInstance;
   }
 
   interface VueConstructor {
     axios: AxiosStatic;
-    $http: AxiosInstance;
+    $http: HttpInstance;
   }
 }

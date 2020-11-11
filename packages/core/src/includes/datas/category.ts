@@ -8,14 +8,14 @@ export const categoryApi: CategoryApi = {
    * 获取分类列表
    */
   getList() {
-    return http.get('category/category/v1/list').then(({ data: { models } = {} }) => models);
+    return http.getList('category/category/v1/list').then(({ models = [] }) => models);
   },
 
   /**
    * 获取分类数量
    */
   getCount() {
-    return http.get('category/category/v1/count').then(({ data: { model = 0 } }) => model);
+    return http.get('category/category/v1/count').then(({ model = 0 }) => model);
   },
 
   /**
@@ -23,6 +23,6 @@ export const categoryApi: CategoryApi = {
    * @param id 标签 ID
    */
   get(id) {
-    return http.get(`category/category/v1/${id}`).then(({ data: { model } }) => model);
+    return http.get(`category/category/v1/${id}`).then(({ model }) => model);
   },
 };

@@ -11,7 +11,7 @@ export interface Response<T> {
   model: T;
 }
 
-export interface PagerResponse<T> extends Response<T> {
+export interface PagerResponse<T> extends Omit<Response<T>, 'model'> {
   models: Array<T>;
-  pager: PagerInfo;
+  pageInfo: PagerInfo;
 }

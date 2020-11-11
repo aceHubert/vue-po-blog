@@ -51,28 +51,26 @@ export const postApi: PostApi = {
    * @param param
    */
   getList({ page = 1, size = 10, ...rest } = {}) {
-    return http
-      .get('posts/posts/v1/list', { params: { page, size, ...rest } })
-      .then(({ data: { models, pageInfo } = {} }) => {
-        return {
-          rows: models.map(formatPost),
-          pager: pageInfo,
-        };
-      });
+    return http.getList('posts/posts/v1/list', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
+      return {
+        rows: models.map((post) => formatPost(post)),
+        pager: pageInfo,
+      };
+    });
   },
 
   /**
    * 获取文章数量
    */
   getCount() {
-    return http.get('posts/posts/v1/count').then(({ data: { model = 0 } }) => model);
+    return http.get('posts/posts/v1/count').then(({ model = 0 }) => model);
   },
 
   /**
    * 获取文章归档
    */
   getArchive() {
-    return http.get('posts/archive/v1/list').then(({ data: { models = [] } }) =>
+    return http.getList('posts/archive/v1/list').then(({ models = [] }) =>
       models.map((item: any) => ({
         date: item.archiveDate,
         posts: item.archivePosts.map(formatPost),
@@ -86,6 +84,6 @@ export const postApi: PostApi = {
    * @param id
    */
   get(id) {
-    return http.get(`posts/posts/v1/${id}`).then(({ data: { model } }) => formatPost(model, true));
+    return http.get(`posts/posts/v1/${id}`).then(({ model }) => formatPost(model, true));
   },
 };

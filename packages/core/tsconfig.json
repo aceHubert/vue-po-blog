@@ -6,8 +6,8 @@
     "jsx": "preserve",
     "types": ["@types/node", "@nuxt/types"],
     "paths": {
-      "~/*": ["./src/*"],
-      "@/*": ["./src/*"]
+      "~/*": ["src/*"],
+      "@/*": ["src/*"]
     }
   },
   "include": ["src", "types"],
