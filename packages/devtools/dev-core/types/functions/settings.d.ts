@@ -4,7 +4,6 @@ export type SiteSettings = {
   icp: string | null;
   copyright: string | null;
   staticDir: string;
-  apiPath: string;
 };
 
 export type UserInfo = {

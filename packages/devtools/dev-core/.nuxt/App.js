@@ -1,8 +1,10 @@
 import Vue from 'vue'
 
 import { getMatchedComponentsInstances, getChildrenComponentInstancesUsingFetch, promisify, globalHandleError, urlJoin, sanitizeComponent } from './utils'
-import NuxtError from './components/nuxt-error.vue'
-import NuxtLoading from './components/nuxt-loading.vue'
+import NuxtError from '../src/layouts/error.tsx'
+import NuxtLoading from '~/components/PageLoading'
+
+import '../src/assets/styles/index.scss'
 
 import _6f6c098b from '../src/layouts/default.tsx'
 import _2b880c31 from '../src/layouts/fullscreen.tsx'

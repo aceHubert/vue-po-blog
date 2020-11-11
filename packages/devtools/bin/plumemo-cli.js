@@ -35,12 +35,12 @@ require('yargs')
         .option('port', {
           type: 'number',
           describe: ' specify port',
-          default: 5005,
+          default: 5007,
         })
         .option('host', {
           type: 'string',
           describe: ' specify host',
-          default: '0.0.0.0',
+          default: 'localhost',
         });
     },
     (argv) => {

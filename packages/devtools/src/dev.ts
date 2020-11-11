@@ -20,8 +20,8 @@ export async function run(
   const filename = args.filename;
   const dest = args.dest || 'dist';
   const isPlugin = !!args.plugin;
-  const port = args.port || 5005;
-  const host = args.host || '0.0.0.0';
+  const port = args.port || 5007;
+  const host = args.host || 'localhost';
 
   const apiPath = `dev-${isPlugin ? 'plugins' : 'theme'}`;
   const staticPath = path.resolve(process.cwd(), dest);
@@ -54,34 +54,48 @@ export async function run(
   // 创建代理到静态文件服务器上
   app.use(`/${apiPath}`, (req, resp) => {
     // plugin 返回数组, theme 返回对象
+    const data = {
+      moduleName,
+      entry: moduleEntry,
+      styles: moduleStyles,
+    };
     resp.send({
       success: 1,
-      [isPlugin ? 'models' : 'model']: {
-        moduleName,
-        entry: moduleEntry,
-        styles: moduleStyles,
-      },
       message: 'devtools',
+      ...(isPlugin ? { models: [data] } : { model: data }),
     });
   });
 
-  return await startCore();
+  return await startCore(host, port, apiPath);
 
   // 执行 nuxt stsrt
-  async function startCore() {
-    const proxyPath = `http://localhost:${port}/${apiPath}`;
+  async function startCore(host: string, port: number, apiPath: string) {
+    const nuxtConfigFile = 'nuxt.config';
+    const proxyPath = `http://${host}:${port}/${apiPath}`;
+    const rootDir = path.resolve(__dirname, '../dev-core');
+    const nuxtConfig = require(path.resolve(rootDir, nuxtConfigFile));
+    const staticDir = nuxtConfig.dir && nuxtConfig.dir.static ? nuxtConfig.dir.static : 'static';
+
     const nuxt = await loadNuxt({
       for: 'start',
-      rootDir: path.resolve(__dirname, '../dev-core'),
-      // configFile: 'nuxt.config',
+      rootDir,
+      // configFile: nuxtConfigFile,
       configContext: {
         devtools: true,
         ...(isPlugin ? { proxyPluginTarget: proxyPath } : { proxyThemeTarget: proxyPath }),
       },
     });
 
-    // start server
+    app.use(express.static(path.resolve(rootDir, staticDir)));
     app.use(nuxt.render);
-    app.listen(port, host, () => console.log('\x1b[36m', `server is listening on: ${host}:${port}`, '\x1b[0m'));
+
+    // start server
+    app.listen(port, host, () =>
+      console.log(
+        '\x1b[36m',
+        `server is listening on: http://${host}:${port} \n wait for module build completely \n`,
+        '\x1b[0m',
+      ),
+    );
   }
 }
