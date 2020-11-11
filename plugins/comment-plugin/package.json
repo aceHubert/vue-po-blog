@@ -3,15 +3,15 @@
   "version": "0.0.1-alpha",
   "description": "",
   "private": true,
-  "main": "dist/comment-plugin/comment-plugin.common.js",
+  "main": "dist/comment-plugin/index.umd.js",
   "license": "MIT",
   "sideEffects": false,
   "scripts": {
-    "serve": "concurrently --raw \"nodemon scripts/buildModule.js src/comment-plugin.ts\" \"node service/index.js\"",
-    "build:front": "node scripts/buildModule.js src/comment-plugin.ts",
-    "build:widgets": "node scripts/buildModule.js src/widgets/widgetA src/widgets/widgetB",
-    "build:admin": "node scripts/buildModule.js src/admin",
-    "build": "yarn build:front && yarn build:components && yarn build:admin",
+    "dev": "po dev --name commentPlugin --filename index --plugin --dest dist/comment-plugin src/index.ts",
+    "build:front": "po build --name commentPlugin --filename index --dest dist/comment-plugin src/index.ts",
+    "build:widgets": "po build --dest dist/widgets src/widgets",
+    "build:admin": "po build --name commentPluginAdmin --filename index --dest dist/admin  src/admin/index.ts",
+    "build": "yarn build:front && yarn build:widgets && yarn build:admin",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
@@ -23,6 +23,7 @@
     "vue-property-decorator": "^8.4.1"
   },
   "devDependencies": {
+    "@plumemo/devtools": "^0.0.5-alpha",
     "@vue-async/module-loader-typing": "^0.0.2",
     "@vue/cli-plugin-babel": "^4.2.0",
     "@vue/cli-plugin-eslint": "^4.2.0",
