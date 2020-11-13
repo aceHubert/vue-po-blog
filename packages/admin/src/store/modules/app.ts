@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import {
   SIDEBAR_TYPE,
-  TOGGLE_DEVICE,
   TOGGLE_NAV_THEME,
   TOGGLE_LAYOUT,
   TOGGLE_FIXED_HEADER,
@@ -11,16 +10,13 @@ import {
   TOGGLE_COLOR,
   TOGGLE_WEAK,
   TOGGLE_MULTI_TAB,
-} from '@/store/mutation-types';
-import { DEVICE_TYPE } from '@/utils/device';
-
+} from '@/config/mutationTypes';
 // Types
 import { Module } from 'vuex';
 import { RootState } from '../';
 
 export type AppState = {
   sideCollapsed: boolean;
-  device: ValueOf<typeof DEVICE_TYPE>;
   theme: string;
   layout: string;
   contentWidth: string;
@@ -36,7 +32,6 @@ const app: Module<AppState, RootState> = {
   namespaced: true,
   state: {
     sideCollapsed: false,
-    device: 'desktop',
     theme: 'dark',
     layout: '',
     contentWidth: '',
@@ -51,9 +46,6 @@ const app: Module<AppState, RootState> = {
     [SIDEBAR_TYPE]: (state, type) => {
       state.sideCollapsed = type;
       Vue.ls.set(SIDEBAR_TYPE, type);
-    },
-    [TOGGLE_DEVICE]: (state, device) => {
-      state.device = device;
     },
     [TOGGLE_NAV_THEME]: (state, theme) => {
       state.theme = theme;

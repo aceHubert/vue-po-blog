@@ -1,4 +1,4 @@
-export type Locale = {
+export type LocaleConfig = {
   default: string;
   supportLanguages: SupportLanguage[];
 };
@@ -23,5 +23,5 @@ export interface LocaleFunctions {
   getSupportLanguages(): SupportLanguage[];
   setDefaultLocale(locale: string): void;
   addSupportLanguages(languages: SupportLanguage | SupportLanguage[]): void;
-  setLocale(locale: Partial<Locale>): void;
+  setLocale(locale: Partial<LocaleConfig>): void;
 }

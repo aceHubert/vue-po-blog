@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import { store } from '@/store';
 import {
-  ACCESS_TOKEN,
   TOGGLE_CONTENT_WIDTH,
   TOGGLE_FIXED_HEADER,
   TOGGLE_FIXED_SIDEBAR,
@@ -11,7 +10,7 @@ import {
   TOGGLE_WEAK,
   TOGGLE_COLOR,
   TOGGLE_MULTI_TAB,
-} from '@/store/mutation-types';
+} from '@/config/mutationTypes';
 import config from '@/config/layoutSettings';
 
 export default function Initializer() {
@@ -24,7 +23,6 @@ export default function Initializer() {
   store.commit(`app/${TOGGLE_WEAK}`, Vue.ls.get(TOGGLE_WEAK, config.colorWeak));
   store.commit(`app/${TOGGLE_COLOR}`, Vue.ls.get(TOGGLE_COLOR, config.primaryColor));
   store.commit(`app/${TOGGLE_MULTI_TAB}`, Vue.ls.get(TOGGLE_MULTI_TAB, config.multiTab));
-  store.commit('user/SET_TOKEN', Vue.ls.get(ACCESS_TOKEN));
 
   // store.dispatch('setLang', Vue.ls.get(APP_LANGUAGE, 'en-US'))
   // last step

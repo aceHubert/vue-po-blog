@@ -32,7 +32,6 @@
     "@ant-design-vue/pro-layout": "^1.0.1",
     "@antv/data-set": "^0.10.2",
     "@vue-async/module-loader": "^1.0.9",
-    "@vue-async/utils": "^1.0.6",
     "ant-design-vue": "^1.6.2",
     "axios": "^0.19.0",
     "core-js": "^3.1.2",

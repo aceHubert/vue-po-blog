@@ -1,4 +1,5 @@
 import { AxiosStatic } from 'axios';
+import { CategoryApi, TagApi, ArticleApi } from './datas';
 import { HookFunction, HttpInstance, LocaleFunctions, SettingsFunctions } from './functions';
 
 export interface VueExtraPrototypes
@@ -6,8 +7,11 @@ export interface VueExtraPrototypes
       LocaleFunctions,
       'getDefaultLocale' | 'getSupportLanguages' | 'addSupportLanguages' | 'setDefaultLocale' | 'setLocale'
     >,
-    Pick<SettingsFunctions, 'getDomain' | 'getStaticDir' | 'getApiPath' | 'getUserInfo'> {
+    Pick<SettingsFunctions, 'getDomain' | 'getStaticDir' | 'getSiderMenus' | 'getApiPath'> {
   hook: HookFunction;
+  categoryApi: CategoryApi;
+  tagApi: TagApi;
+  articleApi: ArticleApi;
 }
 
 declare module 'vue/types/vue' {

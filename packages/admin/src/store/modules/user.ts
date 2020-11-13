@@ -1,128 +1,75 @@
 import Vue from 'vue';
-import { ACCESS_TOKEN } from '@/store/mutation-types';
+import { ACCESS_TOKEN } from '@/config/mutationTypes';
 import { welcome } from '@/utils/util';
-import { loginApi, userApi } from '@/includes/datas';
+import { authApi } from '@/includes/datas';
 
 // Types
 import { Module } from 'vuex';
 import { RootState } from '../';
+import { Role } from 'types/datas/auth';
 
 export type UserState = {
-  token: string;
-  name: string;
   welcome: string;
-  avatar: string;
-  roles: string[];
+  name: string;
+  avatar: string | null;
+  role: Role | null;
   info: Dictionary<any>;
 };
 
 const user: Module<UserState, RootState> = {
   namespaced: true,
   state: {
-    token: '',
+    welcome: welcome(),
     name: '',
-    welcome: '',
-    avatar: '',
-    roles: [],
+    avatar: null,
+    role: null,
     info: {},
   },
 
   mutations: {
-    SET_TOKEN: (state, token) => {
-      state.token = token;
-    },
-    SET_NAME: (state, { name, welcome }) => {
+    SET_NAME: (state, name) => {
       state.name = name;
-      state.welcome = welcome;
     },
     SET_AVATAR: (state, avatar) => {
       state.avatar = avatar;
     },
-    SET_ROLES: (state, roles) => {
-      state.roles = roles;
+    SET_ROLE: (state, role) => {
+      state.role = role;
     },
     SET_INFO: (state, info) => {
       state.info = info;
     },
   },
-
   actions: {
     // 登录
-    login({ commit }, userInfo) {
-      return new Promise((resolve, reject) => {
-        loginApi
-          .login(userInfo)
-          .then((response) => {
-            const { model } = response;
-            commit('SET_TOKEN', model.token);
-            Vue.ls.set(ACCESS_TOKEN, model.token, 7 * 24 * 60 * 60 * 1000);
-            resolve(response);
-          })
-          .catch((error) => {
-            reject(error);
-          });
+    login({ dispatch }, loginQuery) {
+      return authApi.login(loginQuery).then((model) => {
+        Vue.ls.set(ACCESS_TOKEN, model.token, 7 * 24 * 60 * 60 * 1000);
+        return dispatch('getUserInfo');
       });
     },
 
-    socialLogin({ commit }, params) {
-      return new Promise((resolve, reject) => {
-        loginApi
-          .socialLogin(params)
-          .then((response) => {
-            const { model } = response;
-            commit('SET_TOKEN', model.token);
-            Vue.ls.set(ACCESS_TOKEN, model.token, 7 * 24 * 60 * 60 * 1000);
-            resolve(response);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
-    },
     // 获取用户信息
-    getInfo({ commit }) {
-      return new Promise((resolve, reject) => {
-        userApi
-          .getInfo()
-          .then((response) => {
-            const { model } = response;
-            const { roles, name, avatar } = model;
+    getUserInfo({ commit }) {
+      return authApi.getLoginUserInfo().then((model) => {
+        const { role, name, avatar, ...rest } = model;
 
-            if (!roles || roles.length <= 0) {
-              reject(new Error('getInfo: roles must be a non-null array!'));
-            }
-
-            commit('SET_INFO', model);
-            commit('SET_ROLES', roles);
-            commit('SET_AVATAR', avatar);
-
-            commit('SET_NAME', { name: name, welcome: welcome() });
-            commit('SET_AVATAR', avatar);
-
-            resolve(response);
-          })
-          .catch((error) => {
-            reject(error);
-          });
+        commit('SET_NAME', name);
+        commit('SET_ROLE', role);
+        commit('SET_AVATAR', avatar);
+        commit('SET_INFO', rest);
       });
     },
 
     // 登出
     logout({ commit }) {
-      return new Promise((resolve) => {
-        loginApi
-          .logout()
-          .then(() => {
-            resolve();
-          })
-          .catch(() => {
-            resolve();
-          })
-          .finally(() => {
-            commit('SET_TOKEN', '');
-            commit('SET_ROLES', []);
-            Vue.ls.remove(ACCESS_TOKEN);
-          });
+      return authApi.logout().then(() => {
+        // 清空 state
+        commit('SET_NAME', '');
+        commit('SET_ROLE', null);
+        commit('SET_AVATAR', null);
+        commit('SET_INFO', {});
+        Vue.ls.remove(ACCESS_TOKEN);
       });
     },
   },

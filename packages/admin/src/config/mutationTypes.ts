@@ -1,7 +1,6 @@
-export const ACCESS_TOKEN = 'Access-Token';
+export const ACCESS_TOKEN = 'ACCESS_TOKEN';
 
 export const SIDEBAR_TYPE = 'SIDEBAR_TYPE';
-export const TOGGLE_DEVICE = 'DEVICE';
 export const TOGGLE_NAV_THEME = 'NAV_THEME';
 export const TOGGLE_LAYOUT = 'LAYOUT';
 export const TOGGLE_FIXED_HEADER = 'FIXED_HEADER';

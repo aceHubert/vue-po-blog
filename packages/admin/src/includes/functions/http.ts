@@ -1,13 +1,12 @@
 import Vue from 'vue';
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { store } from '@/store';
-import { ACCESS_TOKEN } from '@/store/mutation-types';
+import { ACCESS_TOKEN } from '@/config/mutationTypes';
 import settingsFuncs from './settings';
 import hook from './hooks';
 
 // Types
-import { HttpInstance } from 'types/functions/http';
-import { Response } from 'types/datas/response';
+import { HttpInstance, Response } from 'types/functions/http';
 
 /**
  * @author Hubert
@@ -63,7 +62,7 @@ instance.interceptors.request.use(
             //   description: 'Authorization verification failed',
             // });
             if (token) {
-              store.dispatch('Logout').then(() => {
+              store.dispatch('user/logout').then(() => {
                 setTimeout(() => {
                   window.location.reload();
                 }, 1500);
@@ -83,7 +82,7 @@ instance.interceptors.response.use(
       .exec(resp)
       .then(() => {
         const data = resp.data;
-        if (!data.success || data.resultCode !== '00000') {
+        if (!data.success) {
           // notification.error({
           //   message: res.message || 'Error',
           //   duration: 3,

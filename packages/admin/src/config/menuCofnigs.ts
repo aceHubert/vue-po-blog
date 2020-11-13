@@ -3,49 +3,47 @@
  */
 import { bxAnaalyse } from '@/assets/icons';
 
-export default [
-  {
-    name: 'dashboard',
-    title: 'menu.dashboard',
-    icon: bxAnaalyse,
-    permission: [],
-  },
-  {
-    name: 'article',
-    title: 'menu.article',
-    icon: '',
-    permission: [],
-  },
-  {
-    name: 'media',
-    title: 'menu.media',
-    icon: '',
-    permission: [],
-  },
-  {
-    name: 'page',
-    title: 'menu.page',
-    icon: '',
-    permission: [],
-  },
-  {
-    name: 'lib',
-    title: 'menu.lib',
-    icon: '',
-    permission: [],
-  },
-  {
-    name: 'theme',
-    title: 'menu.theme.root',
-    icon: '',
-    permission: [],
-    children: [
-      {
-        name: 'theme-color',
-        title: 'menu.theme.color',
-        icon: '',
-        permission: [],
-      },
-    ],
-  },
-];
+// Types
+import { Menu } from 'types/functions';
+
+export function getDefaultMenus(): Menu[] {
+  return [
+    {
+      name: 'dashboard',
+      title: 'menu.dashboard',
+      icon: bxAnaalyse,
+    },
+    {
+      name: 'article',
+      title: 'menu.article',
+      icon: bxAnaalyse,
+    },
+    {
+      name: 'media',
+      title: 'menu.media',
+      icon: bxAnaalyse,
+    },
+    {
+      name: 'page',
+      title: 'menu.page',
+      icon: bxAnaalyse,
+    },
+    {
+      name: 'lib',
+      title: 'menu.lib',
+      icon: bxAnaalyse,
+    },
+    {
+      name: 'theme',
+      title: 'menu.theme.root',
+      icon: bxAnaalyse,
+      children: [
+        {
+          name: 'theme-color',
+          title: 'menu.theme.color',
+          icon: bxAnaalyse,
+        },
+      ],
+    },
+  ];
+}

@@ -1,15 +1,6 @@
-// import { RouteConfig } from 'vue-router';
-
 declare global {
-  type ModuleConfig = {
-    moduleName: string;
-    entry: string;
-    styles?: string | string[];
-    args?: Record<string, any>;
-  };
-
-  export type Dictionary<T> = Record<string, T>;
-  export type ValueOf<T> = T[keyof T];
+  type Dictionary<T> = Record<string, T>;
+  type ValueOf<T> = T[keyof T];
 }
 
 declare module 'axios/index' {

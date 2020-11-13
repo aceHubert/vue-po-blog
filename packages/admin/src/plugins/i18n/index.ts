@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { Route } from 'vue-router';
-// import en from '@/lang/en';
+import en from '@/lang/en';
 import { localeFuncs } from '@/includes/functions';
 
 // Types
@@ -27,7 +27,14 @@ Object.defineProperties(VueI18n.prototype, {
 
 const plugin: Plugin = (cxt) => {
   const defaultLocale = localeFuncs.getDefaultLocale();
-  const fallbackLocale = defaultLocale;
+  const fallbackLocale = 'en';
+  const messages: Dictionary<any> = {
+    en, // fallback locale
+  };
+  if (defaultLocale !== fallbackLocale) {
+    // todo: require 路径不存在的时候
+    messages[defaultLocale] = require(`@/lang/${defaultLocale}`).default;
+  }
   const globalLanguages: { [locale: string]: any } = {};
   const hasDocument = typeof document !== 'undefined';
   const loadedLanguages: string[] = [defaultLocale]; // 预装默认语言
@@ -43,9 +50,7 @@ const plugin: Plugin = (cxt) => {
   const i18n = new VueI18n({
     locale,
     fallbackLocale,
-    messages: {
-      [defaultLocale]: require(`@/lang/${defaultLocale}`).default,
-    },
+    messages,
     silentFallbackWarn: true,
   });
 

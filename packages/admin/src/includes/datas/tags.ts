@@ -1,41 +1,45 @@
 import { http } from '../functions';
 
-export const tagApi = {
-  fetchTagsList(query: any) {
-    return http({
-      url: '/tags/tags/v1/list',
-      method: 'get',
-      params: query,
-    });
+// Types
+import { TagApi } from 'types/datas/tag';
+
+export const tagApi: TagApi = {
+  /**
+   * 获取标签列表
+   */
+  getList() {
+    return http.getList('/tags/tags/v1/list').then(({ models }) => models);
   },
 
-  fetchTags(id: number) {
-    return http({
-      url: `/tags/tags/v1/${id}`,
-      method: 'get',
-    });
+  /**
+   * 获取标签
+   * @param id
+   */
+  get(id) {
+    return http.get(`/tags/tags/v1/${id}`).then(({ model }) => model);
   },
 
-  createTags(data: any) {
-    return http({
-      url: '/tags/tags/v1/add',
-      method: 'post',
-      data,
-    });
+  /**
+   * 创建标签
+   * @param data
+   */
+  create(data) {
+    return http.post('/tags/tags/v1/add', data).then(({ model }) => model);
   },
 
-  updateTags(data: any) {
-    return http({
-      url: '/tags/tags/v1/update',
-      method: 'put',
-      data,
-    });
+  /**
+   * 修改标签
+   * @param data
+   */
+  update(data) {
+    return http.put('/tags/tags/v1/update', data).then(() => true);
   },
 
-  deleteTags(id: any) {
-    return http({
-      url: `/tags/tags/v1/${id}`,
-      method: 'delete',
-    });
+  /**
+   * 删除标签
+   * @param id
+   */
+  delete(id) {
+    return http.delete(`/tags/tags/v1/${id}`).then(() => true);
   },
 };

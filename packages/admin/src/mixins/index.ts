@@ -1,2 +1,2 @@
-export { default as basicMixin } from './basic';
+export { default as appMixin } from './app';
 export { default as deviceMixin } from './device';

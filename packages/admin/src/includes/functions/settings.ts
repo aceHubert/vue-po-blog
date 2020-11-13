@@ -1,22 +1,15 @@
 import Vue from 'vue';
 import merge from 'lodash.merge';
 import { trailingSlash } from '@/utils/path';
-import menuConfigs from '@/config/menuCofnigs';
+import { getDefaultMenus } from '@/config/menuCofnigs';
 
 // Types
-import { SettingsFunctions, SiteSettings, UserInfo } from 'types/functions/settings';
+import { SettingsFunctions, SiteSettings } from 'types/functions/settings';
 
 export const globalSettings: SiteSettings = Vue.observable({
   domain: '',
   staticDir: 'static/',
-  siderMenus: menuConfigs,
-});
-
-export const globalUserInfo: UserInfo = Vue.observable({
-  name: '',
-  avatar: undefined,
-  email: undefined,
-  introduction: undefined,
+  siderMenus: getDefaultMenus(),
 });
 
 const settingsFunctions: SettingsFunctions = {
@@ -26,7 +19,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * 配置的域名（末尾带有"/")
    */
-  getDomain: function () {
+  getDomain() {
     return trailingSlash(globalSettings.domain);
   },
 
@@ -36,7 +29,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * 相对于配置域名的静态文件目录（末尾带有"/"）
    */
-  getStaticDir: function () {
+  getStaticDir() {
     return trailingSlash(globalSettings.staticDir);
   },
 
@@ -46,22 +39,36 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * API 地址，如果不是http(s) 绝对路径，则会以当前域名为绝对路径
    */
-  getApiPath: function () {
+  getApiPath() {
     return trailingSlash(process.env.baseUrl!) + 'api/blog/';
   },
 
+  /**
+   * @author Hubert
+   * @since 2020-11-12
+   * @version 0.0.1
+   * 侧边栏菜单
+   */
   getSiderMenus() {
     return globalSettings.siderMenus;
   },
 
   /**
    * @author Hubert
-   * @since 2020-09-04
+   * @since 2020-11-12
    * @version 0.0.1
-   * 获取用户信息
+   * 添加侧边栏菜单
    */
-  getUserInfo: function () {
-    return globalUserInfo;
+  addSiderMenus(menus, parentName) {
+    let rootMenus = globalSettings.siderMenus;
+    if (parentName) {
+      const parent = globalSettings.siderMenus.find((menu) => menu.name === parentName);
+      // 只有 children 被定义了才能加
+      if (parent && parent.children) {
+        rootMenus = parent.children!;
+      }
+    }
+    rootMenus.push(...menus);
   },
 
   /**
@@ -70,18 +77,8 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * 设置网站配置
    */
-  setSiteSettings: function (settings) {
+  setSiteSettings(settings) {
     merge(globalSettings, settings);
-  },
-
-  /**
-   * @author Hubert
-   * @since 2020-09-04
-   * @version 0.0.1
-   * 设置用户信息
-   */
-  setUserInfo: function (userInfo) {
-    merge(globalUserInfo, userInfo);
   },
 };
 

@@ -1,5 +1,6 @@
 <template>
   <pro-layout
+    class="layout layout--default"
     :menus="menus"
     :collapsed="collapsed"
     :mediaQuery="query"
@@ -35,13 +36,13 @@
   </pro-layout>
 </template>
 
-<script>
+<script type="ts">
 import Vue from 'vue';
 // import { SettingDrawer, updateTheme } from '@ant-design-vue/pro-layout';
 import { RightContent, GlobalFooter } from '@/components';
 import { localeFuncs, settingsFuncs } from '@/includes/functions';
-import LogoSvg from '../assets/images/logo.svg?inline';
-import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE } from '@/store/mutation-types';
+import LogoSvg from '@/assets/images/logo.svg?inline';
+import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE } from '@/config/mutationTypes';
 import defaultSettings from '@/config/layoutSettings';
 
 export default Vue.extend({
@@ -174,7 +175,7 @@ export default Vue.extend({
         this.$router.push({ name: 'account-settings' });
       } else if (key === 'logout') {
         this.$store.dispatch('user/logout').then(() => {
-          this.$router.push({ name: 'account-login' });
+          this.$router.push({ name: 'login' });
         });
       }
     },
