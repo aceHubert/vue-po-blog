@@ -1,5 +1,5 @@
 /**
- * 传递给主题的方法
+ * 传递到主题入口函数参数 options 上的属性和方法
  */
 
 import hook from './functions/hooks';

@@ -3,27 +3,28 @@ import classes from './styles/index.module.scss';
 
 // Types
 import { Route } from 'vue-router';
+import { ArticlePagerResponse } from '@plumemo/devtools/dev-core';
 
 @Component({
   name: 'home',
   head: {
     title: 'Home',
   },
-  asyncData({ query, postApi }) {
+  asyncData({ query, articleApi }) {
     const { page = 1 } = query;
-    return postApi
+    return articleApi
       .getList({ page: parseInt(page as string), size: 30, from: 'home' })
-      .then((posts: any) => ({ posts }));
+      .then((articles: ArticlePagerResponse) => ({ articles }));
   },
 })
 export default class ThemeHome extends Vue {
   beforeRouteUpdate(to: Route, from: Route, next: Function) {
     const { page = 1 } = to.query;
     this.loading = true;
-    this.postApi
+    this.articleApi
       .getList({ page: parseInt(page as string), size: 30, from: 'home' })
-      .then((posts: any) => {
-        this.posts = posts;
+      .then((articles: ArticlePagerResponse) => {
+        this.articles = articles;
       })
       .finally(() => {
         this.loading = false;
@@ -32,7 +33,7 @@ export default class ThemeHome extends Vue {
   }
 
   loading = false;
-  posts = {
+  articles: ArticlePagerResponse = {
     rows: [],
     pager: {
       page: 1,
@@ -51,7 +52,7 @@ export default class ThemeHome extends Vue {
   }
 
   get pageLength() {
-    const { size, total } = this.posts.pager;
+    const { size, total } = this.articles.pager;
     if (total) {
       return Math.floor(total / size) + (total % size === 0 ? 0 : 1);
     }
@@ -65,7 +66,7 @@ export default class ThemeHome extends Vue {
   }
 
   created() {
-    Promise.all([this.categoryApi.getCount(), this.tagApi.getCount(), this.postApi.getCount()]).then(
+    Promise.all([this.categoryApi.getCount(), this.tagApi.getCount(), this.articleApi.getCount()]).then(
       ([category, tag, post]) => {
         this.counts = {
           category,
@@ -77,7 +78,7 @@ export default class ThemeHome extends Vue {
   }
 
   renderItem(index: number) {
-    const { id, title, thumbnail } = this.posts.rows[index];
+    const { id, title, thumbnail } = this.articles.rows[index];
     return (
       <nuxt-link to={{ name: 'detail', params: { id } }} class={classes.item}>
         <figure
@@ -90,7 +91,7 @@ export default class ThemeHome extends Vue {
   }
 
   render() {
-    const rows = this.posts.rows.length / 3 + (this.posts.rows.length % 3 === 0 ? 0 : 1);
+    const rows = this.articles.rows.length / 3 + (this.articles.rows.length % 3 === 0 ? 0 : 1);
 
     return (
       <div class={classes.container}>
@@ -126,7 +127,7 @@ export default class ThemeHome extends Vue {
         {Array.from({ length: rows }).map((val1, rowIndex) => (
           <div class={['flex', classes.row]}>
             {Array.from({ length: 3 }).map((val, colIndex) =>
-              rowIndex * 3 + colIndex < this.posts.rows.length ? this.renderItem(rowIndex * 3 + colIndex) : null,
+              rowIndex * 3 + colIndex < this.articles.rows.length ? this.renderItem(rowIndex * 3 + colIndex) : null,
             )}
           </div>
         ))}

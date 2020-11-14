@@ -3,8 +3,7 @@ import settingsFuncs from './settings';
 import hook from './hooks';
 
 // Types
-import { HttpInstance } from 'types/functions/http';
-import { Response, PagerResponse } from 'types/datas/response';
+import { HttpInstance, Response } from 'types/functions/http';
 
 /**
  * @author Hubert
@@ -51,13 +50,16 @@ instance.interceptors.request.use(
   },
 );
 
-// response interceptor
-instance.interceptors.response.use<Response<any> | PagerResponse<any>>(
+// response interceptor，then 的参数修改为 response.data
+instance.interceptors.response.use(
   (resp: AxiosResponse<Response<any>>) => {
     return hook('pre_response')
       .exec(resp)
       .then(() => {
-        if (!resp.data.success) return Promise.reject(new Error(resp.data.message));
+        // success !== true 时，丢到 catch 执行
+        if (!resp.data.success) {
+          return Promise.reject(new Error(resp.data.message));
+        }
         return resp.data;
       });
   },

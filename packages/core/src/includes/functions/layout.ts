@@ -22,7 +22,7 @@ const layoutFunctions: LayoutFunctions = {
    * @version 0.0.1
    * 是否在在布局
    */
-  hasLayout: function (name) {
+  hasLayout(name) {
     return hasOwn(globalLayoutArgs.layouts, name);
   },
 
@@ -48,7 +48,7 @@ const layoutFunctions: LayoutFunctions = {
    * 添加布局
    * replace 为 false 时，如而已已在在，则返回 false。否则 undefined
    */
-  addLayout: function (name: string, layout: Component | AsyncComponent, replace = true) {
+  addLayout(name: string, layout: Component | AsyncComponent, replace = true) {
     if (this.hasLayout(name) && !replace) return false;
     return (globalLayoutArgs.layouts[name] = layout);
   },
@@ -59,7 +59,7 @@ const layoutFunctions: LayoutFunctions = {
    * @version 0.0.1
    * 添加多个布局
    */
-  addLayouts: function (layouts: Record<string, Component | AsyncComponent>, replace = true) {
+  addLayouts(layouts: Record<string, Component | AsyncComponent>, replace = true) {
     Object.keys(layouts).forEach((name: string) => this.addLayout(name, layouts[name], replace));
   },
 
@@ -69,7 +69,7 @@ const layoutFunctions: LayoutFunctions = {
    * @version 0.0.1
    * 是否在在小部件
    */
-  hasWidget: function (placement: string) {
+  hasWidget(placement: string) {
     return hasOwn(globalLayoutArgs.widgets, placement) && !!globalLayoutArgs.widgets[placement].length;
   },
 
@@ -93,7 +93,7 @@ const layoutFunctions: LayoutFunctions = {
    * @version 0.0.1
    * 添加小部件
    */
-  addWidgets: function (placement: string, widgets: Widget | Widget[]) {
+  addWidgets(placement: string, widgets: Widget | Widget[]) {
     return (globalLayoutArgs.widgets[placement] = (globalLayoutArgs.widgets[placement] || []).concat(widgets));
   },
 
@@ -103,7 +103,7 @@ const layoutFunctions: LayoutFunctions = {
    * @version 0.0.1
    * 是否在在模版
    */
-  hasTemplate: function (name: string) {
+  hasTemplate(name: string) {
     return hasOwn(globalLayoutArgs.templates, name);
   },
 
@@ -129,7 +129,7 @@ const layoutFunctions: LayoutFunctions = {
    * 添加模版
    * replace 为 false 时，如而已已在在，则返回 false。否则 undefined
    */
-  addTemplate: function (name: string, template: Component | AsyncComponent, replace = true) {
+  addTemplate(name: string, template: Component | AsyncComponent, replace = true) {
     if (this.hasLayout(name) && !replace) return false;
     return (globalLayoutArgs.templates[name] = template);
   },
@@ -140,7 +140,7 @@ const layoutFunctions: LayoutFunctions = {
    * @version 0.0.1
    * 添加多个模版
    */
-  addTemplates: function (templates: Record<string, Component | AsyncComponent>, replace = true) {
+  addTemplates(templates: Record<string, Component | AsyncComponent>, replace = true) {
     Object.keys(templates).forEach((name: string) => this.addTemplate(name, templates[name], replace));
   },
 
@@ -150,7 +150,7 @@ const layoutFunctions: LayoutFunctions = {
    * @version 0.0.1
    * 移除模版
    */
-  removeTemplates: function (names: string | string[]) {
+  removeTemplates(names: string | string[]) {
     if (typeof names === 'string') {
       names = [names];
     }

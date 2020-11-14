@@ -16,8 +16,8 @@ import { Component as VueComponent, AsyncComponent, CreateElement } from 'vue';
       title: this.title,
     };
   },
-  asyncData({ params, postApi }) {
-    return postApi.get(parseInt(params.id));
+  asyncData({ params, articleApi }) {
+    return articleApi.get(parseInt(params.id));
   },
 })
 export default class ThemeArticle extends Vue {
@@ -60,7 +60,7 @@ export default class ThemeArticle extends Vue {
     return (
       <VContainer class={classes.article}>
         <VRow>
-          <VCol cols={this.hasSidebar ? 8 : 12}>
+          <VCol cols="12" md={this.hasSidebar ? 8 : 12}>
             {this.pageBeforePlugins && this.pageBeforePlugins.length
               ? this.pageBeforePlugins.map((plugin) => h(plugin, { props: { article: this.$data } }))
               : null}
@@ -72,7 +72,7 @@ export default class ThemeArticle extends Vue {
               ? this.pageAfterPlugins.map((plugin) => h(plugin, { props: { article: this.$data } }))
               : null}
           </VCol>
-          {this.hasSidebar ? (
+          {this.$vuetify.breakpoint.mdAndUp && this.hasSidebar ? (
             <VCol cols="4">
               {this.pageSidebarPlugins && this.pageSidebarPlugins.length
                 ? this.pageSidebarPlugins.map((plugin) => h(plugin, { props: { article: this.$data } }))

@@ -1,5 +1,5 @@
 /**
- * 传递给插件的方法
+ * 传递到插件入口函数参数 options 上的属性和方法
  */
 
 import hook from './functions/hooks';

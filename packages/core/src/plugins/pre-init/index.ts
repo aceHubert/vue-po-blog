@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Axios from 'axios';
 import { error as globalError, hasOwn } from '@vue-async/utils';
 import { http, globalSettings, settingsFuncs } from '@/includes/functions';
-import { tagApi, postApi, siteApi, categoryApi } from '@/includes/datas';
+import { tagApi, articleApi, siteApi, categoryApi } from '@/includes/datas';
 import themeFn from '@/includes/theme';
 
 // components
@@ -130,7 +130,7 @@ const plugin: Plugin = async (cxt) => {
    */
   cxt.categoryApi = categoryApi;
   cxt.tagApi = tagApi;
-  cxt.postApi = postApi;
+  cxt.articleApi = articleApi;
   // cxt.siteApi = siteApi; // 暂时不导出，仅内部使用
 };
 

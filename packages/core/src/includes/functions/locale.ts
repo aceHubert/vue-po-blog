@@ -2,9 +2,9 @@ import Vue from 'vue';
 import merge from 'lodash.merge';
 
 // Types
-import { LocaleFunctions, Locale } from 'types/functions/locale';
+import { LocaleFunctions, LocaleConfig } from 'types/functions/locale';
 
-export const globalLocale: Locale = Vue.observable({
+export const globalLocale: LocaleConfig = Vue.observable({
   default: 'en',
   supportLanguages: [
     {
@@ -29,7 +29,7 @@ const localeFunctions: LocaleFunctions = {
    * @version 0.0.1
    * 获取默认语言 locale
    */
-  getDefaultLocale: function () {
+  getDefaultLocale() {
     return globalLocale.default;
   },
 
@@ -39,7 +39,7 @@ const localeFunctions: LocaleFunctions = {
    * @version 0.0.1
    * 获取支持语言列表
    */
-  getSupportLanguages: function () {
+  getSupportLanguages() {
     return globalLocale.supportLanguages;
   },
 
@@ -49,7 +49,7 @@ const localeFunctions: LocaleFunctions = {
    * @version 0.0.1
    * 设置默认语言 locale
    */
-  setDefaultLocale: function (locale) {
+  setDefaultLocale(locale) {
     globalLocale.default = locale;
   },
 
@@ -59,7 +59,7 @@ const localeFunctions: LocaleFunctions = {
    * @version 0.0.1
    * 添加支持语言列表
    */
-  addSupportLanguages: function (languages) {
+  addSupportLanguages(languages) {
     globalLocale.supportLanguages = globalLocale.supportLanguages.concat(languages);
   },
 
@@ -69,7 +69,7 @@ const localeFunctions: LocaleFunctions = {
    * @version 0.0.1
    * 设置语言配置
    */
-  setLocale: function (locale: Partial<Locale>) {
+  setLocale(locale) {
     merge(globalLocale, locale);
   },
 };

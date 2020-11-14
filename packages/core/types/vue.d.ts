@@ -1,5 +1,6 @@
 import { AxiosStatic } from 'axios';
-import { CategoryApi, TagApi, PostApi } from './datas';
+// import VueI18n from 'vue-i18n';
+import { CategoryApi, TagApi, ArticleApi } from './datas';
 import {
   HookFunction,
   HttpInstance,
@@ -23,13 +24,14 @@ export interface VueExtraPrototypes
   hook: HookFunction;
   categoryApi: CategoryApi;
   tagApi: TagApi;
-  postApi: PostApi;
+  articleApi: ArticleApi;
 }
 
 declare module 'vue/types/vue' {
   interface Vue extends VueExtraPrototypes {
     axios: AxiosStatic;
     $http: HttpInstance;
+    // $tv: typeof VueI18n.prototype.tv;
   }
 
   interface VueConstructor {

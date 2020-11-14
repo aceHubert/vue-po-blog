@@ -25,25 +25,28 @@ import WidgetTag from '@/widgets/tag';
 
 // Types
 import { Route } from 'vue-router';
+import { ArticlePagerResponse } from '@plumemo/devtools/dev-core';
 
 @Component({
   name: 'home',
   head: {
     title: '首页',
   },
-  asyncData({ query, postApi }) {
+  asyncData({ query, articleApi }) {
     const { page = 1 } = query;
-    return postApi.getList({ page: parseInt(page as string), from: 'home' }).then((posts: any) => ({ posts }));
+    return articleApi
+      .getList({ page: parseInt(page as string), from: 'home' })
+      .then((articles: ArticlePagerResponse) => ({ articles }));
   },
 })
 export default class ThemeHome extends Vue {
   beforeRouteUpdate(to: Route, from: Route, next: Function) {
     const { page = 1 } = to.query;
     this.loading = true;
-    this.postApi
+    this.articleApi
       .getList({ page: parseInt(page as string), from: 'home' })
-      .then((posts: any) => {
-        this.posts = posts;
+      .then((articles: ArticlePagerResponse) => {
+        this.articles = articles;
       })
       .finally(() => {
         this.loading = false;
@@ -52,7 +55,7 @@ export default class ThemeHome extends Vue {
   }
 
   loading = false;
-  posts = {
+  articles: ArticlePagerResponse = {
     rows: [],
     pager: {
       page: 1,
@@ -79,7 +82,7 @@ export default class ThemeHome extends Vue {
   }
 
   get pageLength() {
-    const { size, total } = this.posts.pager;
+    const { size, total } = this.articles.pager;
     if (total) {
       return Math.floor(total / size) + (total % size === 0 ? 0 : 1);
     }
@@ -123,10 +126,16 @@ export default class ThemeHome extends Vue {
             </VCol>
           ) : null}
           <VCol cols="12" md="8" lg="6">
-            {this.posts.rows && this.posts.rows.length ? (
+            {this.articles.rows && this.articles.rows.length ? (
               [
-                this.posts.rows.map(({ id, title, summary, thumbnail, tags = [], views, createTime }) => (
-                  <VCard min-height="100" class="mb-3" hover nuxt to={{ name: 'theme-article', params: { id } }}>
+                this.articles.rows.map(({ id, title, summary, thumbnail, tags = [], views, createTime }) => (
+                  <VCard
+                    min-height="100"
+                    class="mb-3"
+                    hover
+                    nuxt
+                    to={{ name: 'theme-article', params: { id: String(id) } }}
+                  >
                     <div class="d-flex flex-no-wrap justify-space-between">
                       <div style="width:100%">
                         {thumbnail ? <VImg src={thumbnail} class="hidden-sm-and-up" aspectRatio="1.7" /> : null}
@@ -168,7 +177,7 @@ export default class ThemeHome extends Vue {
                 )),
                 this.pageLength ? (
                   <VPagination
-                    v-model={this.posts.pager.page}
+                    v-model={this.articles.pager.page}
                     length={this.pageLength}
                     totalVisible="7"
                     onInput={(val: number) => this.handlePageChange(val)}

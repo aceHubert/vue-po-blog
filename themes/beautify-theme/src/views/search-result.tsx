@@ -22,7 +22,7 @@ import WidgetTag from '@/widgets/tag';
 
 // Types
 import { Route } from 'vue-router';
-import { Category, Tag, PostPagerResponse } from '@plumemo/devtools/dev-core';
+import { Category, Tag, ArticlePagerResponse } from '@plumemo/devtools/dev-core';
 
 @Component({
   name: 'theme-search-result',
@@ -36,7 +36,7 @@ import { Category, Tag, PostPagerResponse } from '@plumemo/devtools/dev-core';
           : `搜索关键字 ${this.keywords} 结果`,
     };
   },
-  asyncData({ route, params, query, postApi }) {
+  asyncData({ route, params, query, articleApi }) {
     const { page = 1 } = query;
     const { keywords = '', id } = params;
     const extendParams: Dictionary<any> = {};
@@ -48,9 +48,9 @@ import { Category, Tag, PostPagerResponse } from '@plumemo/devtools/dev-core';
       extendParams.keywords = keywords;
     }
 
-    return postApi
+    return articleApi
       .getList({ page: page as number, from: 'search', ...extendParams })
-      .then((posts: PostPagerResponse) => ({ posts }));
+      .then((articles: ArticlePagerResponse) => ({ articles }));
   },
 })
 export default class ThemeSearchResult extends Vue {
@@ -65,10 +65,10 @@ export default class ThemeSearchResult extends Vue {
       extendParams.keywords = this.keywords;
     }
     this.loading = true;
-    this.postApi
+    this.articleApi
       .getList({ page: page as number, from: 'search', ...extendParams })
-      .then((posts: any) => {
-        this.posts = posts;
+      .then((articles: ArticlePagerResponse) => {
+        this.articles = articles;
       })
       .finally(() => {
         this.loading = false;
@@ -82,7 +82,7 @@ export default class ThemeSearchResult extends Vue {
 
   loading = false;
   resultTip = '';
-  posts: PostPagerResponse = {
+  articles: ArticlePagerResponse = {
     rows: [],
     pager: {
       page: 1,
@@ -92,7 +92,7 @@ export default class ThemeSearchResult extends Vue {
   };
 
   get pageLength() {
-    const { size, total } = this.posts.pager;
+    const { size, total } = this.articles.pager;
     if (total) {
       return Math.floor(total / size) + (total % size === 0 ? 0 : 1);
     }
@@ -114,17 +114,17 @@ export default class ThemeSearchResult extends Vue {
     if (this.type === 'category') {
       this.categoryApi.get(this.id! as number).then((category: Category | null) => {
         this.resultTip = category
-          ? `分类 "${category.name}"， 搜索到 ${this.posts.pager.total} 条记录`
-          : `搜索到 ${this.posts.pager.total} 条记录`;
+          ? `分类 "${category.name}"， 搜索到 ${this.articles.pager.total} 条记录`
+          : `搜索到 ${this.articles.pager.total} 条记录`;
       });
     } else if (this.type === 'tag') {
       this.tagApi.get(this.id! as number).then((tag: Tag | null) => {
         this.resultTip = tag
-          ? `标签 "${tag.name}"， 搜索到 ${this.posts.pager.total} 条记录`
-          : `搜索到 ${this.posts.pager.total} 条记录`;
+          ? `标签 "${tag.name}"， 搜索到 ${this.articles.pager.total} 条记录`
+          : `搜索到 ${this.articles.pager.total} 条记录`;
       });
     } else {
-      this.resultTip = `关键字 "${this.keywords}"，搜索到 ${this.posts.pager.total} 条记录`;
+      this.resultTip = `关键字 "${this.keywords}"，搜索到 ${this.articles.pager.total} 条记录`;
     }
   }
 
@@ -138,9 +138,9 @@ export default class ThemeSearchResult extends Vue {
                 <p class="mb-0 pa-2"> {this.resultTip}</p>
               </VSheet>
             ) : null}
-            {this.posts.rows && this.posts.rows.length ? (
+            {this.articles.rows && this.articles.rows.length ? (
               [
-                this.posts.rows.map(({ id, title, summary, thumbnail, tags = [], views, createTime }) => (
+                this.articles.rows.map(({ id, title, summary, thumbnail, tags = [], views, createTime }) => (
                   <VCard min-height="100" class="mb-3" to={{ name: 'theme-article', params: { id: String(id) } }} nuxt>
                     <div class="d-flex flex-no-wrap justify-space-between">
                       <div style="width:100%">
@@ -180,7 +180,7 @@ export default class ThemeSearchResult extends Vue {
                 )),
                 this.pageLength ? (
                   <VPagination
-                    v-model={this.posts.pager.page}
+                    v-model={this.articles.pager.page}
                     length={this.pageLength}
                     totalVisible="7"
                     onInput={(val: number) => this.handlePageChange(val)}

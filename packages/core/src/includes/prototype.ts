@@ -1,5 +1,5 @@
 /**
- * 挂载到 Vue.prototype 上的方法
+ * 挂载到 Vue.prototype 上，所有的组件（包括子模块主题和插件）都可以能过 this 去调用
  */
 
 // functions
@@ -10,7 +10,7 @@ import layoutFunctions from './functions/layout';
 import settingsFunctions from './functions/settings';
 
 // apis
-import { categoryApi, tagApi, postApi } from './datas';
+import { categoryApi, tagApi, articleApi } from './datas';
 
 // Types
 import { VueExtraPrototypes } from 'types/vue';
@@ -41,7 +41,7 @@ const prototypes: VueExtraPrototypes = {
   getUserInfo,
   categoryApi,
   tagApi,
-  postApi,
+  articleApi,
 };
 
 export default prototypes;

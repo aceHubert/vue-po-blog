@@ -1,7 +1,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Component as VueComponent } from 'vue';
 import { AsyncComponentFactory } from 'vue/types/options';
-import classes from './index.scss?module';
+import classes from './PluginHolder.scss?module';
 
 // Types
 import { ComponentConfig } from 'types/functions/widget';

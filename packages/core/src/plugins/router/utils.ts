@@ -7,7 +7,7 @@ import kebabCase from 'lodash.kebabcase';
 import { trailingSlash } from '@/utils/path';
 
 // Types
-import { Locale, LangConfig } from 'types/functions/locale';
+import { LocaleConfig, LangConfig } from 'types/functions/locale';
 
 /**
  * layouts
@@ -56,28 +56,33 @@ export function root(routes: RouteConfig[]) {
  * 子模块路由处理方式一
  * 添加多语言到 params
  */
-export function genLocaleConfig(locale: Locale) {
+export function genLocaleConfig(locale: LocaleConfig) {
   // Matches allowed languages
-  const languagePattern = locale.supportLanguages.map((lang: LangConfig) => lang.alternate || lang.locale).join('|');
-  const languageRegexp = new RegExp('^(' + languagePattern + ')$');
+  const localePattern = locale.supportLanguages.map((lang: LangConfig) => lang.alternate || lang.locale).join('|');
+  const localeRegexp = new RegExp('^(' + localePattern + ')$');
   // Matches any language identifier
-  const genericLanguageRegexp = /[a-z]{2,3}|[a-z]{2,3}-[a-zA-Z]{4}|[a-z]{2,3}-[A-Z]{2,3}/;
+  const genericLocaleRegexp = /[a-z]{2,3}|[a-z]{2,3}-[a-zA-Z]{4}|[a-z]{2,3}-[A-Z]{2,3}/;
 
-  const preferredLanguage =
+  const preferredLocale =
     typeof document === 'undefined'
       ? locale.default
-      : navigator.languages.find((l: string) => l.match(languageRegexp)) || locale.default;
+      : navigator.languages.find((l: string) => l.match(localeRegexp)) || locale.default;
 
   return {
-    languagePattern,
-    languageRegexp,
-    genericLanguageRegexp,
-    preferredLanguage,
+    localePattern,
+    localeRegexp,
+    genericLocaleRegexp,
+    preferredLocale,
   };
 }
 
-export function localeRoot(children: RouteConfig[], locale: Locale) {
-  const { languagePattern, genericLanguageRegexp, preferredLanguage } = genLocaleConfig(locale);
+/**
+ * 多语言路由配置
+ * @param children
+ * @param locale
+ */
+export function localeRoot(children: RouteConfig[], locale: LocaleConfig) {
+  const { localePattern, genericLocaleRegexp, preferredLocale } = genLocaleConfig(locale);
 
   // Reomve start slash
   (function removeStartSlash(items: RouteConfig[]) {
@@ -87,17 +92,17 @@ export function localeRoot(children: RouteConfig[], locale: Locale) {
   })(children);
 
   return [
-    layout(`/:lang(${languagePattern})`, 'Root', children),
+    layout(`/:lang(${localePattern})`, 'Root', children),
     {
-      path: `/:lang(${genericLanguageRegexp.source})/*`,
-      redirect: (to: Route) => trailingSlash(`/${preferredLanguage}/${to.params.pathMatch || ''}`),
+      path: `/:lang(${genericLocaleRegexp.source})/*`,
+      redirect: (to: Route) => trailingSlash(`/${preferredLocale}/${to.params.pathMatch || ''}`),
     },
     {
       // The previous one doesn't match if there's no slash after the language code
-      path: `/:lang(${genericLanguageRegexp.source})`,
-      redirect: () => `/${preferredLanguage}/`,
+      path: `/:lang(${genericLocaleRegexp.source})`,
+      redirect: () => `/${preferredLocale}/`,
     },
-    redirect((to: Route) => trailingSlash(`/${preferredLanguage}${to.path}`)),
+    redirect((to: Route) => trailingSlash(`/${preferredLocale}${to.path}`)),
   ];
 }
 

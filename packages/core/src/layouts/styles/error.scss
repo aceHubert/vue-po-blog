@@ -1,16 +1,20 @@
 .container {
   padding: 0;
-  margin: 100px 0 0;
+  margin: 100px auto 50px;
   text-align: center;
   position: relative;
   z-index: 5000;
+}
+
+.error-text{
+  margin-bottom: 15px;
 }
 
 .btn-go-home {
   padding: 0 16px;
   height: 36px;
   min-width: 64px;
-  color: #fff;
+  color: inherit !important;
   font-size: 0.875rem;
   align-items: center;
   border-radius: 4px;

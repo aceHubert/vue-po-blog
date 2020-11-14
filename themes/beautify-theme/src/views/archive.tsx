@@ -13,23 +13,26 @@ import {
   VDivider,
 } from '@/components/vuetify-tsx';
 
+// Types
+import { ArticleArchive } from '@plumemo/devtools/dev-core';
+
 @Component({
   name: 'theme-archive',
   head: {
     title: '归档',
   },
-  asyncData({ postApi }) {
-    return postApi.getArchive().then((archives: any) => ({ archives }));
+  asyncData({ articleApi }) {
+    return articleApi.getArchive().then((archives: ArticleArchive[]) => ({ archives }));
   },
 })
 export default class ThemeArchive extends Vue {
-  archives = [];
+  archives: ArticleArchive[] = [];
 
   render() {
     return (
       <VContainer class="archive">
         <VList twoLine subheader>
-          {this.archives.map((item: any, index: number) => [
+          {this.archives.map((item: ArticleArchive, index: number) => [
             index > 0 ? <VDivider /> : null,
             <VSubheader>
               <VIcon small class="mr-1">
@@ -37,8 +40,8 @@ export default class ThemeArchive extends Vue {
               </VIcon>
               {moment(item.date).format('YYYY-MM')}
             </VSubheader>,
-            ...item.posts.map(({ id, title, summary, createTime }: any) => (
-              <VListItem nuxt to={{ name: 'theme-article', params: { id } }}>
+            ...item.articles.map(({ id, title, summary, createTime }) => (
+              <VListItem nuxt to={{ name: 'theme-article', params: { id: String(id) } }}>
                 <VListItemContent>
                   <VListItemTitle>{title}</VListItemTitle>
                   {summary ? <VListItemSubtitle>{summary}</VListItemSubtitle> : null}

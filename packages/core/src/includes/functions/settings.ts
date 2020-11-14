@@ -3,7 +3,8 @@ import merge from 'lodash.merge';
 import { trailingSlash } from '@/utils/path';
 
 // Types
-import { SettingsFunctions, SiteSettings, UserInfo } from 'types/functions/settings';
+import { UserInfo } from 'types/datas/site';
+import { SettingsFunctions, SiteSettings } from 'types/functions/settings';
 
 export const globalSettings: SiteSettings = Vue.observable({
   name: '',
@@ -27,7 +28,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * 配置的域名（末尾带有"/")
    */
-  getDomain: function () {
+  getDomain() {
     return trailingSlash(globalSettings.domain);
   },
 
@@ -37,7 +38,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * 相对于配置域名的静态文件目录（末尾带有"/"）
    */
-  getStaticDir: function () {
+  getStaticDir() {
     return trailingSlash(globalSettings.staticDir);
   },
 
@@ -47,7 +48,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * API 地址，如果不是http(s) 绝对路径，则会以当前域名为绝对路径
    */
-  getApiPath: function () {
+  getApiPath() {
     return trailingSlash(process.env.baseUrl!) + 'api/blog/';
   },
 
@@ -57,7 +58,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * Copyright
    */
-  getCopyright: function () {
+  getCopyright() {
     return globalSettings.copyright;
   },
 
@@ -67,7 +68,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * ICP
    */
-  getICP: function () {
+  getICP() {
     return globalSettings.icp;
   },
 
@@ -77,7 +78,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * 配置的 Logo, todo:扩展支持图片
    */
-  getLogo: function () {
+  getLogo() {
     return {
       type: 'text',
       content: globalSettings.name,
@@ -90,7 +91,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * 获取用户信息
    */
-  getUserInfo: function () {
+  getUserInfo() {
     return globalUserInfo;
   },
 
@@ -100,7 +101,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * 设置网站配置
    */
-  setSiteSettings: function (settings) {
+  setSiteSettings(settings) {
     merge(globalSettings, settings);
   },
 
@@ -110,7 +111,7 @@ const settingsFunctions: SettingsFunctions = {
    * @version 0.0.1
    * 设置用户信息
    */
-  setUserInfo: function (userInfo) {
+  setUserInfo(userInfo) {
     merge(globalUserInfo, userInfo);
   },
 };

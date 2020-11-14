@@ -1,5 +1,4 @@
 import { Vue, Component, Prop } from 'vue-property-decorator';
-// @ts-ignore
 import classes from './styles/error.scss?module';
 
 // Types
@@ -26,9 +25,9 @@ export default class PageError extends Vue {
   render() {
     return (
       <div class={['error-page', classes.container]}>
-        <h1 clsss="error-text">{this.message}</h1>
+        <h1 clsss={classes.errorText}>{this.message}</h1>
         <nuxt-link to="/" class={['primary', classes.btnGoHome]}>
-          Home Page
+          {this.$t('home')}
         </nuxt-link>
       </div>
     );

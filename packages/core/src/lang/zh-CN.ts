@@ -3,5 +3,7 @@
  */
 
 export default {
-  name: '中文',
+  name: '简体中文',
+
+  home: '首页',
 };

@@ -9,12 +9,12 @@ import { genLocaleConfig } from './utils';
 
 const plugin: Plugin = (cxt) => {
   const router = cxt.app.router!;
-  const { languageRegexp, preferredLanguage } = genLocaleConfig(globalLocale);
+  const { localeRegexp, preferredLocale } = genLocaleConfig(globalLocale);
 
   router.beforeEach((to: Route, from: Route, next: any) => {
     // 修正 query 语言
-    if (to.query.lang && !languageRegexp.test(to.query.lang as string)) {
-      to.query.lang = preferredLanguage;
+    if (to.query.lang && !localeRegexp.test(to.query.lang as string)) {
+      to.query.lang = preferredLocale;
       next(to);
     } else {
       next();

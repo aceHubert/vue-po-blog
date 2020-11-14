@@ -23,7 +23,7 @@ export default class WidgetTag extends Vue {
           <VChip small class="ma-2" color="primary" textColor="white" to={`/tag/${tag.id}`} nuxt>
             {tag.name}
             <VAvatar right class="accent darken-4">
-              {tag.postsTotal}
+              {tag.articleTotal}
             </VAvatar>
           </VChip>
         ))}

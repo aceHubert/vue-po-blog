@@ -16,7 +16,7 @@ export default class WidgetMyInfo extends Vue {
   }
 
   created() {
-    Promise.all([this.categoryApi.getCount(), this.tagApi.getCount(), this.postApi.getCount()]).then(
+    Promise.all([this.categoryApi.getCount(), this.tagApi.getCount(), this.articleApi.getCount()]).then(
       ([category, tag, post]) => {
         this.counts = {
           category,

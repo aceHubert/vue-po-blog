@@ -24,7 +24,7 @@ const plugin: Plugin = async (cxt) => {
   const { app, store } = cxt;
   /**
    * 添加路由
-   * 放在模块入口文件 options 中，而不入在 Context 中，因为 Context 会传递到组件中
+   * 放在模块入口文件 options 中，而不入在 Context 中，因为 Context 会传递到子模块中
    * todo: 是否初始化多语言
    */
   const addRoutes: ThemeOptions['addRoutes'] = (routes, megreFn = megreRoutes) => {
@@ -42,6 +42,7 @@ const plugin: Plugin = async (cxt) => {
 
   const themeModule = await siteApi.getThemeModule();
   if (!themeModule) {
+    // todo: 跳转到错误页面
     globalError(process.env.NODE_ENV === 'production', `[core] 未配置主题模块`);
   } else {
     themeModule.args = _themeArgs;
@@ -75,11 +76,13 @@ const plugin: Plugin = async (cxt) => {
     },
   });
 
-  cxt.app.moduleLoader = moduleLoader;
+  // 暂不把对象传出去
+  // cxt.app.moduleLoader = moduleLoader;
   // cxt.$moduleLoader = moduleLoader
 
   //
   // -- theme 与 plugins 加载完成，入口文件中的方法全部执行完成 --
+  // 以下可以执行到入口文件中注入的 hook 了~~~
   //
 
   /**
@@ -110,7 +113,7 @@ const plugin: Plugin = async (cxt) => {
   }
 
   /**
-   * 初始化（网站，用户，SEO 等配置加载完成）
+   * 执行子模块中注入的初始化init代码
    */
   await hook('init').exec(cxt);
 };

@@ -1,5 +1,5 @@
 import { Vue, Component } from 'vue-property-decorator';
-import classes from './index.scss?module';
+import classes from './PageLoading.scss?module';
 
 @Component({
   name: 'page-loading',

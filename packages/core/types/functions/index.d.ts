@@ -1,5 +1,5 @@
 export * from './hook';
-export * from './http';
+export { HttpInstance, HttpInterceptorManager } from './http';
 export * from './theme';
 export * from './layout';
 export * from './locale';

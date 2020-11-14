@@ -2,7 +2,8 @@ import Vue from 'vue';
 import merge from 'lodash.merge';
 
 // Types
-import { ThemeFunctions, Theme, Themes } from 'types/functions/theme';
+import { Theme } from 'types/datas/site';
+import { ThemeFunctions, Themes } from 'types/functions/theme';
 
 export const globalThemes: {
   dark: boolean;
@@ -39,7 +40,7 @@ const themeFunctions: ThemeFunctions = {
    * @since 2020-09-04
    * 是否深色主题
    */
-  isDarkTheme: function () {
+  isDarkTheme() {
     return globalThemes.dark;
   },
 
@@ -49,7 +50,7 @@ const themeFunctions: ThemeFunctions = {
    * 设置深色/浅色主题
    * @param dark 深色主题
    */
-  setDarkTheme: function (dark = true) {
+  setDarkTheme(dark = true) {
     globalThemes.dark = dark;
   },
 
@@ -58,7 +59,7 @@ const themeFunctions: ThemeFunctions = {
    * @since 2020-09-04
    * 获取当前主题配置
    */
-  getCurrentTheme: function () {
+  getCurrentTheme() {
     return globalThemes.themes[globalThemes.dark ? 'dark' : 'light'];
   },
 
@@ -67,7 +68,7 @@ const themeFunctions: ThemeFunctions = {
    * @since 2020-09-04
    * 获取主题配置
    */
-  getThemes: function () {
+  getThemes() {
     return globalThemes.themes;
   },
 
@@ -76,7 +77,7 @@ const themeFunctions: ThemeFunctions = {
    * @since 2020-09-04
    * 设置主题色值(不修改主题颜色)
    */
-  setThemes: function (darkOrThemes: boolean | Partial<Themes>, themes?: Partial<Theme>) {
+  setThemes(darkOrThemes: boolean | Partial<Themes>, themes?: Partial<Theme>) {
     if (typeof darkOrThemes === 'boolean') {
       const dark = darkOrThemes;
       globalThemes.themes[dark ? 'dark' : 'light'] = merge(
@@ -96,7 +97,7 @@ const themeFunctions: ThemeFunctions = {
    * 生成 css styles
    * 注意模块字符串换行格式
    */
-  genCssStyles: function () {
+  genCssStyles() {
     const current = this.getCurrentTheme();
     const variables = `
     :root{${Object.keys(current)

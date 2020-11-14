@@ -1,14 +1,23 @@
 import { http } from '../functions';
 
 // Types
-import { TagApi } from 'types/datas/tag';
+import { Tag, TagApi } from 'types/datas/tag';
+
+function formatTag(tag: any): Tag {
+  const { id, name, postsTotal } = tag;
+  return {
+    id,
+    name,
+    articleTotal: postsTotal,
+  };
+}
 
 export const tagApi: TagApi = {
   /**
    * 获取标签列表
    */
   getList() {
-    return http.getList('tags/tags-article-quantity/v1/list').then(({ models = [] }) => models);
+    return http.getList('tags/tags-article-quantity/v1/list').then(({ models = [] }) => models.map(formatTag));
   },
 
   /**
@@ -23,6 +32,6 @@ export const tagApi: TagApi = {
    * @param id 标签 ID
    */
   get(id: number) {
-    return http.get(`tags/tags/v1/${id}`).then(({ model }) => model);
+    return http.get(`tags/tags/v1/${id}`).then(({ model }) => formatTag(model));
   },
 };

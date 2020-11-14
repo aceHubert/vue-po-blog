@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@vue-async/module-loader": "^1.0.9",
-    "@vue-async/utils": "^1.0.6",
     "axios": "^0.20.0",
     "core-js": "^3.6.5",
     "lodash.kebabcase": "^4.1.1",

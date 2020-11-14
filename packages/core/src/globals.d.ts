@@ -1,13 +1,6 @@
 // import { RouteConfig } from 'vue-router';
 
 declare global {
-  type ModuleConfig = {
-    moduleName: string;
-    entry: string;
-    styles?: string | string[];
-    args?: Record<string, any>;
-  };
-
   export type Dictionary<T> = Record<string, T>;
 }
 

@@ -16,7 +16,7 @@ Vue.use(VueI18n);
  */
 Object.defineProperties(VueI18n.prototype, {
   tv: {
-    value: function (key: string, fallbackStr: string, locale?: string) {
+    value: function (key: VueI18n.Path, fallbackStr: string, locale?: VueI18n.Locale) {
       return (this.t && this.te ? (this.te(key, locale) ? this.t(key, locale) : fallbackStr) : fallbackStr) || key;
     },
     writable: false,
@@ -25,9 +25,28 @@ Object.defineProperties(VueI18n.prototype, {
   },
 });
 
+/**
+ * 扩展方法添加到 Vue 实例中
+ */
+Vue.prototype.$tv = function (
+  key: VueI18n.Path,
+  fallbackStr: string,
+  locale?: VueI18n.Locale,
+): VueI18n.TranslateResult {
+  const i18n = this.$i18n;
+  return i18n.tv(key, fallbackStr, locale);
+};
+
 const plugin: Plugin = (cxt) => {
   const defaultLocale = localeFuncs.getDefaultLocale();
-  const fallbackLocale = defaultLocale;
+  const fallbackLocale = 'en';
+  const messages: Dictionary<any> = {
+    en, // fallback locale
+  };
+  if (defaultLocale !== fallbackLocale) {
+    // todo: require 路径不存在的时候
+    messages[defaultLocale] = require(`@/lang/${defaultLocale}`).default;
+  }
   const globalLanguages: { [locale: string]: any } = {};
   const hasDocument = typeof document !== 'undefined';
   const loadedLanguages: string[] = [defaultLocale]; // 预装默认语言
@@ -43,9 +62,7 @@ const plugin: Plugin = (cxt) => {
   const i18n = new VueI18n({
     locale,
     fallbackLocale,
-    messages: {
-      [defaultLocale]: en, //require(`@/lang/${defaultLocale}`).default,
-    },
+    messages,
     silentFallbackWarn: true,
   });
 
