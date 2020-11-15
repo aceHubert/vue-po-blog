@@ -48,7 +48,7 @@ export const authApi: AuthApi = {
    * 获取登录用户信息
    */
   getLoginUserInfo() {
-    return http.get('/user/info').then(({ model }) => model);
+    return http.get('/auth/user/v1/get').then(({ model }) => model);
   },
 
   // getCurrentUserNav(_token: string) {
