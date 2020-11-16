@@ -1,26 +1,19 @@
-export type SiteSettings = {
-  name: string;
-  domain: string;
-  icp: string | null;
-  copyright: string | null;
-  staticDir: string;
-};
+import { UserInfo } from '../datas/site';
 
-export type UserInfo = {
-  name: string;
-  avatar?: string;
-  email?: string;
-  introduction?: string;
+export type SiteSettings = {
+  staticDir: string;
+  [key: string]: any;
 };
 
 export interface SettingsFunctions {
+  getSettingByKey<T = string | undefined>(key: string, defaultValue?: NonNullable<T>): T;
   getDomain(): string;
   getStaticDir(): string;
   getApiPath(): string;
-  getCopyright(): string | null;
-  getICP(): string | null;
+  getCopyright(): string;
+  getICP(): string;
   getLogo(): { type: 'text' | 'image'; content: string };
   getUserInfo(): UserInfo;
-  setSiteSettings(settings: Partial<SiteSettings>): void;
+  setSiteSettings(settings: Record<string, any>): void;
   setUserInfo(userInfo: Partial<UserInfo>): void;
 }

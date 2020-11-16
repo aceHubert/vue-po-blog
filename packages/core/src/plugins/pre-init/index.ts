@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Axios from 'axios';
 import { error as globalError, hasOwn } from '@vue-async/utils';
-import { http, globalSettings, settingsFuncs } from '@/includes/functions';
+import { http, settingsFuncs } from '@/includes/functions';
 import { tagApi, articleApi, siteApi, categoryApi } from '@/includes/datas';
 import themeFn from '@/includes/theme';
 
@@ -13,7 +13,6 @@ import prototypeArgs from '@/includes/prototype';
 
 // Types
 import { Plugin } from '@nuxt/types';
-import { SiteSettings } from 'types/functions/settings';
 
 // 注入 http 到 Vue
 Vue.axios = Axios;
@@ -28,16 +27,17 @@ const plugin: Plugin = async (cxt) => {
   const metas: Array<{ name: string; content: any }> = []; // 提升给后面SEO使用
   try {
     const configs = await siteApi.getConfigs();
-    const settings: Partial<SiteSettings> = {};
+    const settings: Dictionary<any> = {};
 
     Object.keys(configs).forEach((key) => {
-      if (hasOwn(globalSettings, key)) {
-        settings[key as keyof SiteSettings] = configs[key];
-      } else if (metaKeys.some((metaKey) => metaKey === key)) {
+      // todo: 待 seo 配置接口分离
+      if (metaKeys.some((metaKey) => metaKey === key)) {
         metas.push({
           name: key,
           content: configs[key],
         });
+      } else {
+        settings[key] = configs[key];
       }
     });
 

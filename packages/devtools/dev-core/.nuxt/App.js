@@ -6,11 +6,11 @@ import NuxtLoading from '~/components/PageLoading'
 
 import '../src/assets/styles/index.scss'
 
+import _77180f1e from '../src/layouts/blank.tsx'
 import _6f6c098b from '../src/layouts/default.tsx'
-import _2b880c31 from '../src/layouts/fullscreen.tsx'
 import _df05644a from '../src/layouts/root/index.tsx'
 
-const layouts = { "_default": sanitizeComponent(_6f6c098b),"_fullscreen": sanitizeComponent(_2b880c31),"_root/index": sanitizeComponent(_df05644a) }
+const layouts = { "_blank": sanitizeComponent(_77180f1e),"_default": sanitizeComponent(_6f6c098b),"_root/index": sanitizeComponent(_df05644a) }
 
 export default {
   render (h, props) {

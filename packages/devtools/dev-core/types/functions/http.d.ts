@@ -4,6 +4,7 @@
 import { AxiosInterceptorManager, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { PagerInfo } from '../datas/request';
 
+// response from server
 export interface Response<T> {
   success: boolean;
   message: string;
@@ -11,6 +12,7 @@ export interface Response<T> {
   model: T;
 }
 
+// response from server
 export interface PagerResponse<T> extends Omit<Response<T>, 'model'> {
   models: Array<T>;
   pageInfo?: PagerInfo;

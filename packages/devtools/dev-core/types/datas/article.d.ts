@@ -4,15 +4,14 @@ import { Category } from './category';
 
 export type Article = {
   id: number;
-  status: number;
-  author: string;
   title: string;
   summary: string;
+  author: string;
   content: string;
   thumbnail: string;
   category: Category;
-  comments: number;
   syncStatus: number;
+  status: number;
   tags: Tag[];
   views: number;
   weight: number;

@@ -1,4 +1,4 @@
-import Vue, { Component, AsyncComponent } from 'vue';
+import { Component, AsyncComponent } from 'vue';
 import { hasOwn } from '@vue-async/utils';
 
 // Types
@@ -9,11 +9,11 @@ export const globalLayoutArgs: {
   layouts: Dictionary<Component | AsyncComponent>;
   widgets: Dictionary<Widget[]>;
   templates: Dictionary<Component | AsyncComponent>;
-} = Vue.observable({
+} = {
   layouts: {},
   widgets: {},
   templates: {},
-});
+};
 
 const layoutFunctions: LayoutFunctions = {
   /**

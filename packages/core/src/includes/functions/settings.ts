@@ -1,27 +1,35 @@
-import Vue from 'vue';
 import merge from 'lodash.merge';
+import { hasOwn } from '@vue-async/utils';
 import { trailingSlash } from '@/utils/path';
 
 // Types
 import { UserInfo } from 'types/datas/site';
 import { SettingsFunctions, SiteSettings } from 'types/functions/settings';
 
-export const globalSettings: SiteSettings = Vue.observable({
-  name: '',
-  domain: '',
-  icp: null,
-  copyright: null,
+export const globalSettings: SiteSettings = {
   staticDir: 'static/',
-});
+  // 以上字段可以被服务端覆盖
+  // 其它字段来自服务端
+};
 
-export const globalUserInfo: UserInfo = Vue.observable({
+export const globalUserInfo: UserInfo = {
   name: '',
   avatar: undefined,
   email: undefined,
   introduction: undefined,
-});
+};
 
 const settingsFunctions: SettingsFunctions = {
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * 根据 key 查找配置
+   */
+  getSettingByKey(key, defaultVal) {
+    return hasOwn(globalSettings, key) ? globalSettings[key] : defaultVal;
+  },
+
   /**
    * @author Hubert
    * @since 2020-09-04
@@ -29,7 +37,7 @@ const settingsFunctions: SettingsFunctions = {
    * 配置的域名（末尾带有"/")
    */
   getDomain() {
-    return trailingSlash(globalSettings.domain);
+    return trailingSlash(settingsFunctions.getSettingByKey('domain', '/'));
   },
 
   /**
@@ -56,10 +64,23 @@ const settingsFunctions: SettingsFunctions = {
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
+   * 配置的 Logo, todo:扩展支持图片
+   */
+  getLogo() {
+    return {
+      type: 'text',
+      content: settingsFunctions.getSettingByKey('name', ''),
+    };
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    * Copyright
    */
   getCopyright() {
-    return globalSettings.copyright;
+    return settingsFunctions.getSettingByKey('copyright', '');
   },
 
   /**
@@ -69,20 +90,7 @@ const settingsFunctions: SettingsFunctions = {
    * ICP
    */
   getICP() {
-    return globalSettings.icp;
-  },
-
-  /**
-   * @author Hubert
-   * @since 2020-09-04
-   * @version 0.0.1
-   * 配置的 Logo, todo:扩展支持图片
-   */
-  getLogo() {
-    return {
-      type: 'text',
-      content: globalSettings.name,
-    };
+    return settingsFunctions.getSettingByKey('icp', '');
   },
 
   /**

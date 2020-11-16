@@ -1,10 +1,9 @@
-import Vue from 'vue';
 import merge from 'lodash.merge';
 
 // Types
 import { LocaleFunctions, LocaleConfig } from 'types/functions/locale';
 
-export const globalLocale: LocaleConfig = Vue.observable({
+export const globalLocale: LocaleConfig = {
   default: 'en',
   supportLanguages: [
     {
@@ -20,7 +19,7 @@ export const globalLocale: LocaleConfig = Vue.observable({
       alternate: 'en',
     },
   ],
-});
+};
 
 const localeFunctions: LocaleFunctions = {
   /**
