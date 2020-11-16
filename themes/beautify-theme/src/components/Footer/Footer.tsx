@@ -30,7 +30,7 @@ export default class Footer extends Vue {
   render(h: CreateElement) {
     return (
       <VFooter>
-        <VContainer class="text-center">
+        <VContainer class="text-center pb-6">
           {this.footerWidgets && this.footerWidgets.length
             ? this.footerWidgets.map((widget) => (
                 <VCard class="mb-3">
