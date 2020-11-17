@@ -143,10 +143,13 @@ module.exports = (configContext) => {
       // eslint-disable-next-line no-unused-vars
       extend(config, ctx) {},
     },
+    // 启动加载 loading 配置
     loadingIndicator: {
       name: 'three-bounce',
       color: '#f67280',
       background: 'white',
     },
+    // 忽略文件的 auto build
+    ignore: ['layouts/root'],
   };
 };
