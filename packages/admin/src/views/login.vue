@@ -46,11 +46,10 @@
 </template>
 
 <script type="ts">
-import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { timeFix } from '@/utils/util';
 
-export default Vue.extend({
+export default {
   layout: 'user',
   data() {
     return {
@@ -101,7 +100,7 @@ export default Vue.extend({
       });
     },
   },
-});
+};
 </script>
 
 <style lang="less" scoped>

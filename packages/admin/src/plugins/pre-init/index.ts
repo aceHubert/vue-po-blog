@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Axios from 'axios';
 import { hasOwn } from '@vue-async/utils';
 import { http } from '@/includes/functions';
-// import { siteApi } from '@/includes/datas';
+import { tagApi, articleApi, categoryApi } from '@/includes/datas';
 import * as directives from '@/directives';
 import * as filters from '@/filters';
 import bootstrap from './bootstrap';
@@ -118,6 +118,9 @@ const plugin: Plugin = async (cxt) => {
   /**
    * for asyncData
    */
+  cxt.articleApi = articleApi;
+  cxt.categoryApi = categoryApi;
+  cxt.tagApi = tagApi;
   // cxt.siteApi = siteApi; // 暂时不导出，仅内部使用
 };
 

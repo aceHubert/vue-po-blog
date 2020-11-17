@@ -14,18 +14,6 @@ const components = {
 
 const locale = {
   message: '-',
-  menu: {
-    home: 'Home',
-    dashboard: 'Dashboard',
-    article: 'Article',
-    media: 'Media',
-    page: 'Page',
-    lib: 'Lib',
-    theme: {
-      root: 'Theme',
-      color: 'Color',
-    },
-  },
 
   'layouts.userment.user.center': 'User',
   'layouts.userment.user.settings': 'Settings',
@@ -52,6 +40,28 @@ const locale = {
   'app.setting.loading': 'Loading theme',
   'app.setting.copyinfo': 'copy success，please replace defaultSettings in src/models/setting.js',
   'app.setting.production.hint': 'Setting panel shows in development environment only, please manually modify',
+
+  // 菜单
+  menu: {
+    home: 'Home',
+    dashboard: 'Dashboard',
+    article: 'Article',
+    media: 'Media',
+    page: 'Page',
+    lib: 'Lib',
+    theme: {
+      root: 'Theme',
+      color: 'Color',
+    },
+  },
+
+  // 文章
+  article: {
+    status: {
+      draft: ' Draft',
+      published: 'Published',
+    },
+  },
 };
 
 export default {

@@ -14,6 +14,15 @@ const components = {
 
 const locale = {
   message: '-',
+
+  // layouts
+  'layouts.userment.user.center': '用户中心',
+  'layouts.userment.user.settings': '用户设置',
+  'layouts.userment.user.logout': '退出登录',
+  'layouts.usermenu.dialog.title': '提示',
+  'layouts.usermenu.dialog.content': '确认退出吗？',
+
+  // 菜单
   menu: {
     home: '主页',
     dashboard: '仪表盘',
@@ -27,11 +36,13 @@ const locale = {
     },
   },
 
-  'layouts.userment.user.center': '用户中心',
-  'layouts.userment.user.settings': '用户设置',
-  'layouts.userment.user.logout': '退出登录',
-  'layouts.usermenu.dialog.title': '提示',
-  'layouts.usermenu.dialog.content': '确认退出吗？',
+  // 文章
+  article: {
+    status: {
+      draft: '草稿',
+      published: '已发布',
+    },
+  },
 };
 
 export default {

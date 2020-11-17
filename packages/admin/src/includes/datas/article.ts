@@ -91,13 +91,13 @@ export const articleApi: ArticleApi = {
     return http.put('/posts/posts/v1/update', data).then(() => true);
   },
 
-  // updateArticleStatus(data: any) {
-  //   return http({
-  //     url: '/posts/status/v1/update',
-  //     method: 'put',
-  //     data,
-  //   });
-  // },
+  /**
+   *
+   * @param data
+   */
+  updateStatus(id, status) {
+    return http.put('/posts/status/v1/update', { id, status }).then(() => true);
+  },
 
   /**
    * 删除文章

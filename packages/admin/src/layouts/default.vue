@@ -32,12 +32,11 @@
       <global-footer></global-footer>
     </template>
     <!-- <setting-drawer :settings="settings" @change="handleSettingChange" /> -->
-    <router-view />
+    <router-view class="content" />
   </pro-layout>
 </template>
 
 <script type="ts">
-import Vue from 'vue';
 // import { SettingDrawer, updateTheme } from '@ant-design-vue/pro-layout';
 import { RightContent, GlobalFooter } from '@/components';
 import { localeFuncs, settingsFuncs } from '@/includes/functions';
@@ -45,7 +44,7 @@ import LogoSvg from '@/assets/images/logo.svg?inline';
 import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE } from '@/config/mutationTypes';
 import defaultSettings from '@/config/layoutSettings';
 
-export default Vue.extend({
+export default {
   name: 'DefaultLayout',
   components: {
     // SettingDrawer,
@@ -180,7 +179,7 @@ export default Vue.extend({
       }
     },
   },
-});
+};
 </script>
 
 <style lang="less">

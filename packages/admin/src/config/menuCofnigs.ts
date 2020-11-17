@@ -14,27 +14,27 @@ export function getDefaultMenus(): Menu[] {
       icon: bxAnaalyse,
     },
     {
-      name: 'article',
+      name: 'articles',
       title: 'menu.article',
       icon: bxAnaalyse,
     },
     {
-      name: 'media',
+      name: 'medias',
       title: 'menu.media',
       icon: bxAnaalyse,
     },
     {
-      name: 'page',
+      name: 'pages',
       title: 'menu.page',
       icon: bxAnaalyse,
     },
     {
-      name: 'lib',
+      name: 'libs',
       title: 'menu.lib',
       icon: bxAnaalyse,
     },
     {
-      name: 'theme',
+      name: 'theme-color',
       title: 'menu.theme.root',
       icon: bxAnaalyse,
       children: [

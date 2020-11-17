@@ -10,5 +10,5 @@ export const numberFormat = function (value: number) {
 };
 
 export const dateFormat = function (value: moment.MomentInput, pattern = 'YYYY-MM-DD HH:mm:ss') {
-  return moment(value).format(pattern);
+  return value ? moment(value).format(pattern) : '';
 };

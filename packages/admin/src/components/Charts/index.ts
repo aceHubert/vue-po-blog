@@ -1,11 +1,41 @@
-export { default as Bar } from './Bar.vue';
-export { default as ChartCard } from './ChartCard.vue';
-export { default as Liquid } from './Liquid.vue';
-export { default as MiniArea } from './MiniArea.vue';
-export { default as MiniSmoothArea } from './MiniSmoothArea.vue';
-export { default as MiniBar } from './MiniBar.vue';
-export { default as MiniProgress } from './MiniProgress.vue';
-export { default as Radar } from './Radar.vue';
-export { default as RankList } from './RankList.vue';
-export { default as TransferBar } from './TransferBar.vue';
-export { default as TagCloud } from './TagCloud.vue';
+import Bar from './Bar.vue';
+import ChartCard from './ChartCard.vue';
+import Liquid from './Liquid.vue';
+import MiniArea from './MiniArea.vue';
+import MiniSmoothArea from './MiniSmoothArea.vue';
+import MiniBar from './MiniBar.vue';
+import MiniProgress from './MiniProgress.vue';
+import Radar from './Radar.vue';
+import RankList from './RankList.vue';
+import TransferBar from './TransferBar.vue';
+import TagCloud from './TagCloud.vue';
+
+export {
+  Bar,
+  ChartCard,
+  Liquid,
+  MiniArea,
+  MiniSmoothArea,
+  MiniBar,
+  MiniProgress,
+  Radar,
+  RankList,
+  TransferBar,
+  TagCloud,
+};
+export default {
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  $_subcomponents: {
+    Bar,
+    ChartCard,
+    Liquid,
+    MiniArea,
+    MiniSmoothArea,
+    MiniBar,
+    MiniProgress,
+    Radar,
+    RankList,
+    TransferBar,
+    TagCloud,
+  },
+};

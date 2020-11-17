@@ -1,6 +1,7 @@
 import { PagerQuery, PagerResponse } from './request';
 import { Tag } from './tag';
 import { Category } from './category';
+import { ArticleStatus } from 'src/includes/datas/enums';
 
 export type Article = {
   id: number;
@@ -52,5 +53,6 @@ export interface ArticleApi {
   get(id: number): Promise<Article>;
   create(data: CreateArticleModel): Promise<Article>;
   update(data: UpdateArticleModel): Promise<true>;
+  updateStatus(id: number, status: ArticleStatus): Promise<true>;
   delete(id: number): Promise<true>;
 }

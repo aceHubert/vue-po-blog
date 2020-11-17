@@ -15,16 +15,15 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { deviceMixin } from '@/mixins';
 
-export default Vue.extend({
+export default {
   name: 'UserLayout',
   mixins: [deviceMixin],
   data() {
     return {};
   },
-});
+};
 </script>
 
 <style lang="less" scoped>
