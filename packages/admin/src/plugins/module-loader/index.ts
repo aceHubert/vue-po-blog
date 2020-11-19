@@ -65,7 +65,7 @@ const plugin: Plugin = async (cxt) => {
   // cxt.$moduleLoader = moduleLoader
 
   //
-  // -- theme 与 plugins 加载完成，入口文件中的方法全部执行完成 --
+  // -- theme 与 plugin 加载完成，入口文件中的方法全部执行完成 --
   // 以下可以执行到入口文件中注入的 hook 了~~~
   //
 

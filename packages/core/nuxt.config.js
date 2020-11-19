@@ -99,10 +99,10 @@ module.exports = (configContext) => {
         : null),
     },
     plugins: [
-      { src: 'plugins/pre-init' }, // pre-init
-      { src: 'plugins/module-loader', ssr: false }, // modules load
-      { src: 'plugins/i18n' }, // locale
-      { src: 'plugins/router' }, // router
+      { src: 'plugin/pre-init' }, // pre-init
+      { src: 'plugin/module-loader', ssr: false }, // modules load
+      { src: 'plugin/i18n' }, // locale
+      { src: 'plugin/router' }, // router
     ],
     router: {
       extendRoutes(routes, _resolve) {

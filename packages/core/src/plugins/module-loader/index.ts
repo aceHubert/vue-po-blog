@@ -66,7 +66,7 @@ const plugin: Plugin = async (cxt) => {
   }).registerDynamicComponent(store);
 
   /**
-   * 加载 theme 和 plugins, 按顺序执行
+   * 加载 theme 和 plugin, 按顺序执行
    */
   await moduleLoader.load([themeModule, ...pluginModules], {
     sync: true, // 同步执行，theme 优先加载，然后加载插件
@@ -81,7 +81,7 @@ const plugin: Plugin = async (cxt) => {
   // cxt.$moduleLoader = moduleLoader
 
   //
-  // -- theme 与 plugins 加载完成，入口文件中的方法全部执行完成 --
+  // -- theme 与 plugin 加载完成，入口文件中的方法全部执行完成 --
   // 以下可以执行到入口文件中注入的 hook 了~~~
   //
 

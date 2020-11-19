@@ -34,6 +34,11 @@ const locale = {
       root: '主题',
       color: '主题色配置',
     },
+    plugin: {
+      root: '插件',
+      install: '已安装插件',
+      plugins: '插件广场',
+    },
   },
 
   // 文章

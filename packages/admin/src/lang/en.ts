@@ -53,6 +53,11 @@ const locale = {
       root: 'Theme',
       color: 'Color',
     },
+    plugin: {
+      root: 'Plugin',
+      install: 'Installed',
+      plugins: 'Plugins',
+    },
   },
 
   // 文章

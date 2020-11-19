@@ -1,7 +1,7 @@
 import Vue from 'vue'
 
 // window.{{globals.loadedCallback}} hook
-// Useful for jsdom testing or plugins (https://github.com/tmpvar/jsdom#dealing-with-asynchronous-script-loading)
+// Useful for jsdom testing or plugin (https://github.com/tmpvar/jsdom#dealing-with-asynchronous-script-loading)
 if (process.client) {
   window.onNuxtReadyCbs = []
   window.onNuxtReady = (cb) => {

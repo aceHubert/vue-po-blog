@@ -45,5 +45,22 @@ export function getDefaultMenus(): Menu[] {
         },
       ],
     },
+    {
+      name: 'plugins',
+      title: 'menu.plugin.root',
+      icon: bxAnaalyse,
+      children: [
+        {
+          name: 'plugins-installed',
+          title: 'menu.plugin.install',
+          icon: bxAnaalyse,
+        },
+        {
+          name: 'plugins',
+          title: 'menu.plugin.plugins',
+          icon: bxAnaalyse,
+        },
+      ],
+    },
   ];
 }

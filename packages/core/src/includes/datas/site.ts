@@ -41,6 +41,6 @@ export const siteApi: SiteApi = {
 
   /** 获取插件模块 */
   getPluginModules() {
-    return http.getList('v1/plumemo/module/plugins').then(({ models = [] }) => models);
+    return http.getList('v1/plumemo/module/plugin').then(({ models = [] }) => models);
   },
 };

@@ -13,10 +13,10 @@ import { createStore } from './store.js'
 
 /* Plugins */
 
-import nuxt_plugin_preinit_00bd4102 from 'nuxt_plugin_preinit_00bd4102' // Source: ../src/plugins/pre-init (mode: 'all')
-import nuxt_plugin_moduleloader_77ce702f from 'nuxt_plugin_moduleloader_77ce702f' // Source: ../src/plugins/module-loader (mode: 'client')
-import nuxt_plugin_i18n_61b06223 from 'nuxt_plugin_i18n_61b06223' // Source: ../src/plugins/i18n (mode: 'all')
-import nuxt_plugin_router_6bfcdbe4 from 'nuxt_plugin_router_6bfcdbe4' // Source: ../src/plugins/router (mode: 'all')
+import nuxt_plugin_preinit_00bd4102 from 'nuxt_plugin_preinit_00bd4102' // Source: ../src/plugin/pre-init (mode: 'all')
+import nuxt_plugin_moduleloader_77ce702f from 'nuxt_plugin_moduleloader_77ce702f' // Source: ../src/plugin/module-loader (mode: 'client')
+import nuxt_plugin_i18n_61b06223 from 'nuxt_plugin_i18n_61b06223' // Source: ../src/plugin/i18n (mode: 'all')
+import nuxt_plugin_router_6bfcdbe4 from 'nuxt_plugin_router_6bfcdbe4' // Source: ../src/plugin/router (mode: 'all')
 
 // Component: <ClientOnly>
 Vue.component(ClientOnly.name, ClientOnly)
@@ -180,13 +180,13 @@ async function createApp(ssrContext, config = {}) {
   inject('config', config)
 
   if (process.client) {
-    // Replace store state before plugins execution
+    // Replace store state before plugin execution
     if (window.__NUXT__ && window.__NUXT__.state) {
       store.replaceState(window.__NUXT__.state)
     }
   }
 
-  // Add enablePreview(previewData = {}) in context for plugins
+  // Add enablePreview(previewData = {}) in context for plugin
   if (process.static && process.client) {
     app.context.enablePreview = function (previewData = {}) {
       app.previewData = Object.assign({}, previewData)
