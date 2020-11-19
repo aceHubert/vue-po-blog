@@ -111,6 +111,7 @@ module.exports = (configContext) => {
       { src: 'plugins/router' }, // router
     ],
     router: {
+      middleware: 'auth',
       extendRoutes(routes, _resolve) {
         routes.push(
           {

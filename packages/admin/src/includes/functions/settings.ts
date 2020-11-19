@@ -60,15 +60,15 @@ const settingsFunctions: SettingsFunctions = {
    * 添加侧边栏菜单
    */
   addSiderMenus(menus, parentName) {
-    let rootMenus = globalSettings.siderMenus;
     if (parentName) {
       const parent = globalSettings.siderMenus.find((menu) => menu.name === parentName);
       // 只有 children 被定义了才能加
       if (parent && parent.children) {
-        rootMenus = parent.children!;
+        parent.children.push(...menus);
       }
+    } else {
+      globalSettings.siderMenus.push(...menus);
     }
-    rootMenus.push(...menus);
   },
 
   /**

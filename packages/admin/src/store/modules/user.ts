@@ -1,11 +1,11 @@
 import Vue from 'vue';
-import { ACCESS_TOKEN } from '@/config/mutationTypes';
+import { ACCESS_TOKEN } from '@/config/proLayoutConfigs';
 import { welcome } from '@/utils/util';
 import { authApi } from '@/includes/datas';
 
 // Types
 import { Module } from 'vuex';
-import { RootState } from '../';
+import { RootState } from '../state';
 import { Role } from 'types/datas/auth';
 
 export type UserState = {

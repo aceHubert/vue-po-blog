@@ -1,16 +1,11 @@
 <template>
   <div :class="wrpCls">
-    <avatar-dropdown
-      :show-menu="showMenu"
-      :current-user="currentUser"
-      :class="prefixCls"
-      @action="(key) => $emit('action', key)"
-    />
+    <avatar-dropdown :user="user" :class="prefixCls" :i18nRender="i18nRender" @action="(key) => $emit('action', key)" />
     <select-lang-dropdown
       :locale="locale"
       :supportLanguages="supportLanguages"
       :class="prefixCls"
-      @change="(locale) => $emit('changeLang', locale)"
+      @change="(locale) => $emit('changeLocale', locale)"
       v-if="supportLanguages.length"
     />
   </div>
@@ -39,6 +34,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    user: {
+      type: Object,
+      default: () => null,
+    },
     theme: {
       type: String,
       required: true,
@@ -49,14 +48,12 @@ export default {
     },
     supportLanguages: {
       type: Array,
-      required: true,
+      default: () => [],
     },
-  },
-  data() {
-    return {
-      showMenu: true,
-      currentUser: {},
-    };
+    i18nRender: {
+      type: Function,
+      default: () => null,
+    },
   },
   computed: {
     wrpCls() {
@@ -65,13 +62,6 @@ export default {
         [`ant-pro-global-header-index-${this.isMobile || !this.topMenu ? 'light' : this.theme}`]: true,
       };
     },
-  },
-  mounted() {
-    setTimeout(() => {
-      this.currentUser = {
-        name: 'Serati Ma',
-      };
-    }, 1500);
   },
 };
 </script>

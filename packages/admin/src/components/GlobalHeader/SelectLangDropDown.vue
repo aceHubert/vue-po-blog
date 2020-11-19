@@ -1,8 +1,7 @@
 <template>
   <a-dropdown placement="bottomRight">
     <span class="ant-pro-drop-down">
-      <template v-if="locale">{{ currentLanguage.shortName }}</template>
-      <a-icon type="global" :title="$t('navBar.lang')" v-else />
+      <a-icon type="global" :title="currentLanguage.name" />
     </span>
     <template v-slot:overlay>
       <a-menu class="ant-pro-drop-down menu" :selectedKeys="[currentLanguage.locale]" @click="handleChangeLang">
@@ -18,13 +17,20 @@
 export default {
   name: 'SelectLangDropdown',
   props: {
-    locale: { type: String, default: () => null },
-    supportLanguages: { type: Array, required: true, validate: (val) => !!val.length },
+    locale: {
+      type: String,
+      default: () => null,
+    },
+    supportLanguages: {
+      type: Array,
+      required: true,
+      validate: (val) => !!val.length,
+    },
   },
   computed: {
     currentLanguage() {
       const locale = this.locale || (this.$i18n && this.$i18n.locale);
-      const lang = this.supportLanguages.find((lang) => lang.locale === locale);
+      const lang = this.supportLanguages.find((lang) => lang.locale === locale || lang.alternate === locale);
       if (lang) {
         return lang;
       } else {

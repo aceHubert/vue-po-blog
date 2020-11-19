@@ -1,88 +1,59 @@
 import { ArticleStatus } from '@/includes/datas/enums';
-import VueI18n from 'vue-i18n';
 
 // 表格列信息
 const table = {
   columns: [
+    // {
+    //   title: 'ID',
+    //   align: 'center',
+    //   dataIndex: 'id',
+    // },
     {
-      title: 'ID',
-      align: 'center',
-      dataIndex: 'id',
-    },
-    {
-      title: '文章名称',
-      align: 'center',
+      title: 'article.column.title',
+      align: 'left',
       dataIndex: 'title',
       scopedSlots: { customRender: 'titles' },
     },
     {
-      title: '摘要',
+      title: 'article.column.summary',
       dataIndex: 'summary',
-      align: 'center',
+      align: 'left',
       scopedSlots: { customRender: 'summary' },
     },
     {
-      title: '文章状态',
+      title: 'article.column.status',
       dataIndex: 'status',
-      align: 'center',
+      align: 'left',
       scopedSlots: { customRender: 'status' },
     },
-    // {
-    //   title: '同步状态',
-    //   dataIndex: 'syncStatus',
-    //   align: 'center',
-    //   scopedSlots: { customRender: 'syncStatus' },
-    // },
     {
-      title: '浏览数',
-      align: 'center',
+      title: 'article.column.views',
+      align: 'left',
       dataIndex: 'views',
+      needTotal: true,
     },
-    // {
-    //   title: '评论数',
-    //   align: 'center',
-    //   dataIndex: 'comments',
-    // },
-    // {
-    //   title: '权重',
-    //   align: 'center',
-    //   dataIndex: 'weight',
-    // },
     {
-      title: '创建时间',
-      align: 'center',
+      title: 'article.column.createTime',
+      align: 'left',
       dataIndex: 'createTime',
+      width: '250px',
       scopedSlots: { customRender: 'createTime' },
     },
     {
-      title: '操作',
-      dataIndex: 'action',
-      align: 'center',
+      title: 'article.column.actions',
+      dataIndex: 'actions',
+      align: 'left',
       fixed: 'right',
       width: '250px',
-      scopedSlots: { customRender: 'action' },
+      scopedSlots: { customRender: 'actions' },
     },
   ],
 };
 
 // 表格里面的列key value
 const filters = {
-  // syncStatusFilter(status: number) {
-  //   enum statusMap {
-  //     '未同步',
-  //     '已同步',
-  //   }
-  //   return statusMap[status];
-  // },
-  // syncStatusTypeFilter(status: number) {
-  //   enum statusMap {
-  //     'error',
-  //     'success',
-  //   }
-  //   return statusMap[status];
-  // },
-  statusFilter(status: ArticleStatus, i18n: VueI18n) {
-    return i18n.t(`article.status.${ArticleStatus[status]}`);
+  statusFilter(status: ArticleStatus, i18nRender: (key: string) => string) {
+    return i18nRender(`article.status.${ArticleStatus[status]}`);
   },
   statusTypeFilter(status: number) {
     enum StatusType {

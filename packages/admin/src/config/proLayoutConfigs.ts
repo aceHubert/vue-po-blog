@@ -1,5 +1,69 @@
+/**
+ * @ant-design-vue/pro-layout 配置文件
+ */
+
+export const ACCESS_TOKEN = 'ACCESS_TOKEN';
+export const APP_LANGUAGE = 'APP_LANGUAGE';
+
+export const SET_LAYOUT = 'LAYOUT';
+export const SET_THEME = 'THEME';
+export const SET_PRIMARY_COLOR = 'PRIMARY_COLOR';
+export const SET_CONTENT_WIDTH = 'CONTENT_WIDTH';
+export const TOGGLE_FIXED_HEADER = 'FIXED_HEADER';
+export const TOGGLE_FIXED_SIDEBAR = 'FIXED_SIDEBAR';
+export const TOGGLE_SIDE_COLLAPSED = 'SIDE_COLLAPSED';
+export const TOGGLE_COLOR_WEAK = 'COLOR_WEAK';
+export const TOGGLE_AUTO_HIDE_HEADER = 'AUTO_HIDE_HEADER';
+export const TOGGLE_MULTI_TAB = 'MULTI_TAB';
+
+export enum ContentWidth {
+  Fluid = 'Fluid',
+  Fixed = 'Fixed',
+}
+
+export enum Theme {
+  Light = 'light',
+  Dark = 'dark',
+}
+
+export enum Layout {
+  sideMenu = 'sidemenu',
+  topMenu = 'topmenu',
+}
+
 export default {
-  theme: [
+  title: 'Plumemo Admin',
+  pwa: false,
+  // iconfontUrl: '',
+
+  /**
+   *  默认配置
+   * layout - 整体布局方式 'sidemenu' | 'topmenu'
+   * primaryColor - 默认主题色, 如果修改颜色不生效，请清理 localStorage
+   * theme - 主题 'dark' | 'light'
+   * contentWidth - 内容区布局： Fluid |  Fixed
+   * fixedHeader - 固定 Header : boolean
+   * fixSiderbar - 固定左侧菜单栏 ： boolean
+   * sideCollapsed - siderbar 展开状态 在 layout 为 'sidemenu' 时有效： boolean
+   * colorWeak - 色盲模式： boolean
+   * autoHideHeader - 向下滚动时，隐藏 Header ： boolean
+   * multiTab - 多 tab 页模式： boolean
+   */
+  settings: {
+    layout: Layout.sideMenu,
+    theme: Theme.Dark,
+    primaryColor: '#13C2C2',
+    contentWidth: ContentWidth.Fluid,
+    fixedHeader: true,
+    fixSiderbar: true,
+    colorWeak: false,
+    sideCollapsed: false,
+    autoHideHeader: false,
+    multiTab: false,
+  },
+
+  // umi_plugin_ant_themeVar
+  themeVar: [
     {
       key: 'dark',
       fileName: 'dark.css',

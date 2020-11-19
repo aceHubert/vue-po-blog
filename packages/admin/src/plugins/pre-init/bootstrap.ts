@@ -1,28 +1,29 @@
 import Vue from 'vue';
 import { store } from '@/store';
-import {
-  TOGGLE_CONTENT_WIDTH,
+import config, {
+  SET_LAYOUT,
+  SET_THEME,
+  SET_PRIMARY_COLOR,
+  SET_CONTENT_WIDTH,
   TOGGLE_FIXED_HEADER,
   TOGGLE_FIXED_SIDEBAR,
-  TOGGLE_HIDE_HEADER,
-  TOGGLE_LAYOUT,
-  TOGGLE_NAV_THEME,
-  TOGGLE_WEAK,
-  TOGGLE_COLOR,
+  TOGGLE_SIDE_COLLAPSED,
+  TOGGLE_COLOR_WEAK,
+  TOGGLE_AUTO_HIDE_HEADER,
   TOGGLE_MULTI_TAB,
-} from '@/config/mutationTypes';
-import config from '@/config/layoutSettings';
+} from '@/config/proLayoutConfigs';
 
 export default function Initializer() {
-  store.commit(`app/${TOGGLE_LAYOUT}`, Vue.ls.get(TOGGLE_LAYOUT, config.layout));
-  store.commit(`app/${TOGGLE_FIXED_HEADER}`, Vue.ls.get(TOGGLE_FIXED_HEADER, config.fixedHeader));
-  store.commit(`app/${TOGGLE_FIXED_SIDEBAR}`, Vue.ls.get(TOGGLE_FIXED_SIDEBAR, config.fixSiderbar));
-  store.commit(`app/${TOGGLE_CONTENT_WIDTH}`, Vue.ls.get(TOGGLE_CONTENT_WIDTH, config.contentWidth));
-  store.commit(`app/${TOGGLE_HIDE_HEADER}`, Vue.ls.get(TOGGLE_HIDE_HEADER, config.autoHideHeader));
-  store.commit(`app/${TOGGLE_NAV_THEME}`, Vue.ls.get(TOGGLE_NAV_THEME, config.navTheme));
-  store.commit(`app/${TOGGLE_WEAK}`, Vue.ls.get(TOGGLE_WEAK, config.colorWeak));
-  store.commit(`app/${TOGGLE_COLOR}`, Vue.ls.get(TOGGLE_COLOR, config.primaryColor));
-  store.commit(`app/${TOGGLE_MULTI_TAB}`, Vue.ls.get(TOGGLE_MULTI_TAB, config.multiTab));
+  store.commit(`app/${SET_LAYOUT}`, Vue.ls.get(SET_LAYOUT, config.settings.layout));
+  store.commit(`app/${SET_THEME}`, Vue.ls.get(SET_THEME, config.settings.theme));
+  store.commit(`app/${SET_PRIMARY_COLOR}`, Vue.ls.get(SET_PRIMARY_COLOR, config.settings.primaryColor));
+  store.commit(`app/${SET_CONTENT_WIDTH}`, Vue.ls.get(SET_CONTENT_WIDTH, config.settings.contentWidth));
+  store.commit(`app/${TOGGLE_FIXED_HEADER}`, Vue.ls.get(TOGGLE_FIXED_HEADER, config.settings.fixedHeader));
+  store.commit(`app/${TOGGLE_FIXED_SIDEBAR}`, Vue.ls.get(TOGGLE_FIXED_SIDEBAR, config.settings.fixSiderbar));
+  store.commit(`app/${TOGGLE_SIDE_COLLAPSED}`, Vue.ls.get(TOGGLE_SIDE_COLLAPSED, config.settings.sideCollapsed));
+  store.commit(`app/${TOGGLE_COLOR_WEAK}`, Vue.ls.get(TOGGLE_COLOR_WEAK, config.settings.colorWeak));
+  store.commit(`app/${TOGGLE_AUTO_HIDE_HEADER}`, Vue.ls.get(TOGGLE_AUTO_HIDE_HEADER, config.settings.autoHideHeader));
+  store.commit(`app/${TOGGLE_MULTI_TAB}`, Vue.ls.get(TOGGLE_MULTI_TAB, config.settings.multiTab));
 
   // store.dispatch('setLang', Vue.ls.get(APP_LANGUAGE, 'en-US'))
   // last step

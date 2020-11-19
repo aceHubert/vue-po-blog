@@ -1,9 +1,9 @@
 <template>
-  <h1>库</h1>
+  <h1>新建新建</h1>
 </template>
 
 <script>
 export default {
-  name: 'LibIndex',
+  name: 'CategoryCreate',
 };
 </script>

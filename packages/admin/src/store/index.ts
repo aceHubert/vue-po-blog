@@ -9,12 +9,10 @@ import user from './modules/user';
 
 // dynamic router permission control (Experimental)
 // import permission from './modules/async-router'
+import state, { RootState } from './state';
 import getters from './getters';
 
 Vue.use(Vuex);
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface RootState {}
 
 export const store = new Vuex.Store<RootState>({
   strict: process.env.NODE_ENV !== 'production',
@@ -22,10 +20,10 @@ export const store = new Vuex.Store<RootState>({
     app,
     user,
   },
-  state: {},
+  state,
+  getters,
   mutations: {},
   actions: {},
-  getters,
 });
 
 const createStore = (): Store<RootState> => {

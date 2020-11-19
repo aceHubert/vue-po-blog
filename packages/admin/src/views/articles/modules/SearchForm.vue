@@ -3,16 +3,16 @@
     <a-form layout="inline">
       <a-row :gutter="48">
         <a-col :md="8" :sm="24">
-          <a-form-item label="标题">
-            <a-input v-model="queryParam.title" placeholder="请输入标题" />
+          <a-form-item :label="$t('article.search.title')">
+            <a-input v-model="queryParam.title" :placeholder="$t('article.search.titlePlaceholder')" />
           </a-form-item>
         </a-col>
         <a-col :md="8" :sm="24">
-          <a-form-item label="文章状态">
-            <a-select v-model="queryParam.status" placeholder="请选择" default-value="0">
-              <a-select-option value="0">全部</a-select-option>
-              <a-select-option value="1">草稿箱</a-select-option>
-              <a-select-option value="2">已发布</a-select-option>
+          <a-form-item :label="$t('article.search.status')">
+            <a-select v-model="queryParam.status" :placeholder="$t('article.search.statusPlaceholder')">
+              <a-select-option v-for="option in statusOptions" :key="option.value" :value="option.value">{{
+                option.label
+              }}</a-select-option>
             </a-select>
           </a-form-item>
         </a-col>
@@ -37,10 +37,10 @@
             class="table-page-search-submitButtons"
             :style="(advanced && { float: 'right', overflow: 'hidden' }) || {}"
           >
-            <a-button type="primary" @click="handlerSearch">查询</a-button>
-            <a-button style="margin-left: 8px" @click="handleReset">重置</a-button>
+            <a-button type="primary" @click="handlerSearch">{{ $t('common.btn.search') }}</a-button>
+            <a-button style="margin-left: 8px" @click="handleReset">{{ $t('common.btn.reset') }}</a-button>
             <a @click="toggleAdvanced" style="margin-left: 8px">
-              {{ advanced ? '收起' : '展开' }}
+              {{ $t(`common.btn.${advanced ? 'collapse' : 'expand'}`) }}
               <a-icon :type="advanced ? 'up' : 'down'" />
             </a>
           </span>
@@ -51,12 +51,23 @@
 </template>
 
 <script>
+import { ArticleStatus } from '@/includes/datas/enums';
+
 export default {
   name: 'ArticleSearch',
   props: {
-    title: { type: String, default: '' },
-    status: { type: Number, default: null },
-    createTime: { type: Number, default: null },
+    title: {
+      type: String,
+      default: '',
+    },
+    status: {
+      type: Number,
+      default: null,
+    },
+    createTime: {
+      type: Number,
+      default: null,
+    },
   },
   data() {
     return {
@@ -65,10 +76,28 @@ export default {
       // 查询参数
       queryParam: {
         title: this.title,
-        statue: this.status,
+        status: this.status,
         createTime: this.createTime,
       },
     };
+  },
+  computed: {
+    statusOptions() {
+      return [
+        {
+          value: null,
+          label: this.$t('article.status.all'),
+        },
+        {
+          value: ArticleStatus.published,
+          label: this.$t('article.status.published'),
+        },
+        {
+          value: ArticleStatus.draft,
+          label: this.$t('article.status.draft'),
+        },
+      ];
+    },
   },
   methods: {
     toggleAdvanced() {
@@ -84,7 +113,7 @@ export default {
     handleReset() {
       this.queryParam = {
         title: this.title,
-        statue: this.status,
+        status: this.status,
         createTime: this.createTime,
       };
     },

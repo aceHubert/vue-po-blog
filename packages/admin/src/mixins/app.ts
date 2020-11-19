@@ -1,5 +1,18 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
+import {
+  SET_LAYOUT,
+  SET_THEME,
+  SET_PRIMARY_COLOR,
+  SET_CONTENT_WIDTH,
+  TOGGLE_FIXED_HEADER,
+  TOGGLE_FIXED_SIDEBAR,
+  TOGGLE_COLOR_WEAK,
+  TOGGLE_SIDE_COLLAPSED,
+  Layout,
+  Theme,
+  ContentWidth,
+} from '@/config/proLayoutConfigs';
 
 // Types
 import { AppState } from '@/store/modules/app';
@@ -7,15 +20,15 @@ import { AppState } from '@/store/modules/app';
 export default Vue.extend({
   computed: {
     ...mapState<AppState, Dictionary<(state: AppState) => any>>('app', {
-      layoutMode: (state) => state.layout,
-      navTheme: (state) => state.theme,
-      primaryColor: (state) => state.color,
-      colorWeak: (state) => state.weak,
+      layout: (state) => state.layout,
+      theme: (state) => state.theme,
+      primaryColor: (state) => state.primaryColor,
       fixedHeader: (state) => state.fixedHeader,
       fixedSiderbar: (state) => state.fixedSidebar,
       contentWidth: (state) => state.contentWidth,
+      sideCollapsed: (state) => state.sideCollapsed,
+      colorWeak: (state) => state.colorWeak,
       autoHideHeader: (state) => state.autoHideHeader,
-      sidebarOpened: (state) => !state.sideCollapsed,
       multiTab: (state) => state.multiTab,
     }),
   },
@@ -25,6 +38,30 @@ export default Vue.extend({
     },
     isSideMenu() {
       return !this.isTopMenu();
+    },
+    setLayout(val: Layout) {
+      this.$store.commit(`app/${SET_LAYOUT}`, val);
+    },
+    setTheme(val: Theme) {
+      this.$store.commit(`app/${SET_THEME}`, val);
+    },
+    setPrimaryColor(val: string) {
+      this.$store.commit(`app/${SET_PRIMARY_COLOR}`, val);
+    },
+    setContentWidth(val: ContentWidth) {
+      this.$store.commit(`app/${SET_CONTENT_WIDTH}`, val);
+    },
+    setFixedHeader(val: boolean) {
+      this.$store.commit(`app/${TOGGLE_FIXED_HEADER}`, val);
+    },
+    setFixedSidebar(val: boolean) {
+      this.$store.commit(`app/${TOGGLE_FIXED_SIDEBAR}`, val);
+    },
+    setSideCollapsed(val: boolean) {
+      this.$store.commit(`app/${TOGGLE_SIDE_COLLAPSED}`, val);
+    },
+    setColorWeak(val: boolean) {
+      this.$store.commit(`app/${TOGGLE_COLOR_WEAK}`, val);
     },
   },
 });
