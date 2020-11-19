@@ -1,34 +1,23 @@
-import Vue from 'vue';
-import { Route } from 'vue-router';
-import { globalLocale } from '@/includes/functions';
-import { ACCESS_TOKEN } from '@/config/mutationTypes';
-
 // Types
 import { Plugin } from '@nuxt/types';
-
-// Utilities
-import { genLocaleConfig } from './utils';
-
-// 匿名允许路由名
-const anonymousRouteNames = ['login'];
+import VueRouter, { RouteConfig } from 'vue-router';
 
 const plugin: Plugin = (cxt) => {
-  const router = cxt.app.router!;
-  const { localeRegexp, preferredLocale } = genLocaleConfig(globalLocale);
+  const { app } = cxt;
 
-  router.beforeEach((to: Route, from: Route, next: any) => {
-    const hasLogin = !!Vue.ls.get(ACCESS_TOKEN);
-    // 没有授权，需要登录
-    if (!anonymousRouteNames.includes(to.name!) && !hasLogin) {
-      next({ name: 'login' });
-    } else if (to.query.lang && !localeRegexp.test(to.query.lang as string)) {
-      // 修正 query 上的语言
-      to.query.lang = preferredLocale;
-      next(to);
-    } else {
-      next();
-    }
-  });
+  const options = app.router!.options;
+  (function setMeta(routes: RouteConfig[]) {
+    routes.forEach((route) => {
+      if (route.name && (route.name === 'articles' || route.name === 'medias')) {
+        route.meta = { keepAlive: true };
+      }
+      if (route.children && route.children.length) {
+        setMeta(route.children);
+      }
+    });
+  })(options.routes!);
+  const newRouter = new VueRouter(options);
+  (app.router as any).matcher = (newRouter as any).matcher;
 };
 
 export default plugin;

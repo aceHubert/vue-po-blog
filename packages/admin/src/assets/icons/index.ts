@@ -6,7 +6,15 @@
  * 自定义图标加载表
  * 所有图标均从这里加载，方便管理
  */
-import bxAnaalyse from './bx-analyse.svg?inline'; // path to your '*.svg?inline' file.
 import github from './github.svg'; // path to your '*.svg?inline' file.
+import bxAnaalyse from './bx-analyse.svg?inline'; // path to your '*.svg?inline' file.
+import dashboard from './dashboard.svg?inline';
+import article from './article.svg?inline';
+import media from './media.svg?inline';
+import page from './page.svg?inline';
+import theme from './theme.svg?inline';
+import plugin from './plugin.svg?inline';
+import tool from './tool.svg?inline';
+import setting from './setting.svg?inline';
 
-export { bxAnaalyse, github };
+export { dashboard, article, media, theme, plugin, page, tool, setting, bxAnaalyse, github };

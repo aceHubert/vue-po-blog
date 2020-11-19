@@ -134,7 +134,7 @@
 import { mavonEditor as MavonEditor } from 'mavon-editor';
 import { articleApi, categoryApi, tagApi } from '@/includes/datas';
 import { markdownOption } from './constants';
-import 'mavon-editor/dist/css/index.css'
+import 'mavon-editor/dist/css/index.css';
 
 export default {
   name: 'ArticleCreate',
@@ -265,18 +265,18 @@ export default {
             .catch((err) => {
               console.log(err);
             });
-            // createParams['id'] = this.id;
-            // articleApi
-            //   .update(createParams)
-            //   .then((response) => {
-            //     this.$notification.success({
-            //       message: response.message,
-            //     });
-            //     this.$emit('refreshTable');
-            //   })
-            //   .catch((err) => {
-            //     console.log(err);
-            //   });
+          // createParams['id'] = this.id;
+          // articleApi
+          //   .update(createParams)
+          //   .then((response) => {
+          //     this.$notification.success({
+          //       message: response.message,
+          //     });
+          //     this.$emit('refreshTable');
+          //   })
+          //   .catch((err) => {
+          //     console.log(err);
+          //   });
 
           this.content = '';
           this.form.resetFields();
@@ -353,7 +353,6 @@ export default {
 };
 </script>
 <style>
-
 .edit-input {
   padding-right: 100px;
 }

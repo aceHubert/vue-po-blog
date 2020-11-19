@@ -1,50 +1,45 @@
 <template>
   <a-card :bordered="false">
     <SearchForm ref="searchForm" @search="handleSearch" />
-    <div class="table-operator">
-      <a-button type="primary" icon="plus" @click="handleCreate">新建</a-button>
-      <!-- <a-button type="primary" icon="import" @click="importHandler">导入</a-button> -->
-    </div>
     <STable
       ref="table"
-      size="default"
+      size="small"
       rowKey="id"
       :scroll="{ x: 1300 }"
       :columns="columns"
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
-      showPagination="true"
+      :i18nRender="i18nRender"
+      showPagination="auto"
     >
-      <span slot="status" slot-scope="text">
-        <a-badge :status="text | statusTypeFilter" :text="text | statusFilter($i18n)" />
-      </span>
-      <!-- <span slot="syncStatus" slot-scope="text">
-          <a-badge :status="text | syncStatusTypeFilter" :text="text | syncStatusFilter" />
-        </span> -->
-      <span slot="summary" slot-scope="text">
-        <ellipsis :length="10" tooltip>{{ text }}</ellipsis>
-      </span>
-      <span slot="createTime" slot-scope="text">
-        {{ text | dateFormat }}
-      </span>
-      <span slot="titles" slot-scope="text">
+      <template #titles="text">
         <ellipsis :length="15" tooltip>{{ text }}</ellipsis>
-      </span>
-      <span slot="action" slot-scope="text, record">
-        <template>
-          <a @click="handleEdit(record)">编辑</a>
-          <a-divider type="vertical" />
-          <a @click="handleSync(record)">同步</a>
-          <a-divider type="vertical" />
-          <a v-if="record.status === 1" @click="handleModifyStatus(record, 2)">发布</a>
-          <a v-else-if="record.status === 2" @click="handleModifyStatus(record, 1)">草稿箱</a>
-          <a-divider type="vertical" />
-          <a-popconfirm title="确定删除这篇文章？" @confirm="handleDelete(record)" okText="是" cancelText="否">
-            <a href="#">删除</a>
-          </a-popconfirm>
-        </template>
-      </span>
+      </template>
+      <template #summary="text">
+        <ellipsis :length="10" tooltip>{{ text }}</ellipsis>
+      </template>
+      <template #status="text">
+        <a-badge :status="text | statusTypeFilter" :text="text | statusFilter(i18nRender)" />
+      </template>
+      <template #createTime="text">
+        {{ text | dateFormat }}
+      </template>
+      <template slot="actions" slot-scope="text, record">
+        <a @click="handleEdit(record)">{{ $t('article.btn.edit') }}</a>
+        <a-divider type="vertical" />
+        <a v-if="record.status === 1" @click="handleModifyStatus(record, 2)">{{ $t('article.btn.publish') }}</a>
+        <a v-else-if="record.status === 2" @click="handleModifyStatus(record, 1)">{{ $t('article.btn.draft') }}</a>
+        <a-divider type="vertical" />
+        <a-popconfirm
+          :title="$t('article.dialog.delete.content')"
+          :okText="$t('article.dialog.delete.okBtn')"
+          :cancelText="$t('article.dialog.delete.cancelBtn')"
+          @confirm="handleDelete(record)"
+        >
+          <a href="#none">{{ $t('article.btn.delete') }}</a>
+        </a-popconfirm>
+      </template>
     </STable>
   </a-card>
 </template>
@@ -57,6 +52,9 @@ import { filters, table } from './constants';
 
 export default {
   name: 'ArticleIndex',
+  meta: {
+    keepAlive: true,
+  },
   components: {
     STable,
     Ellipsis,
@@ -82,6 +80,9 @@ export default {
     };
   },
   methods: {
+    i18nRender(key) {
+      return this.$i18n.t(`${key}`);
+    },
     loadData(parameter) {
       return articleApi.getList(Object.assign(parameter, this.queryParam));
     },
@@ -113,18 +114,6 @@ export default {
           });
         });
     },
-    // handleSync(record) {
-    //   publishByteBlogs({ id: record.id }).then((res) => {
-    //     const { success } = res;
-    //     if (success === 1) {
-    //       this.$notification.success({
-    //         message: '同步成功',
-    //         description: '已存入ByteBlogs草稿箱,您可以去ByteBlogs进行发布',
-    //       });
-    //       this.$refs.table.refresh();
-    //     }
-    //   });
-    // },
     handleDelete(row) {
       articleApi
         .delete(row.id)
@@ -139,25 +128,6 @@ export default {
             message: '删除失败，请稍后重试',
           });
         });
-    },
-    // goByteBlogsEdit() {
-    //   window.open('https://www.byteblogs.com/editor/posts', '_blank');
-    // },
-    draftForm() {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning',
-        });
-        return;
-      }
-      this.$message({
-        message: '保存成功',
-        type: 'success',
-        showClose: true,
-        duration: 1000,
-      });
-      this.postForm.status = 1;
     },
   },
 };

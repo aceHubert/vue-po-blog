@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Axios from 'axios';
 import { hasOwn } from '@vue-async/utils';
-import { http } from '@/includes/functions';
+import { http, hook } from '@/includes/functions';
 import { tagApi, articleApi, categoryApi } from '@/includes/datas';
 import * as directives from '@/directives';
 import * as filters from '@/filters';
@@ -33,10 +33,15 @@ const plugin: Plugin = async (cxt) => {
 
   // 初始化页面配置
   const _created = app.created;
+  const _mounted = app.mounted;
   app.created = function created() {
     bootstrap();
-
+    hook('created').exec();
     _created && _created.call(this);
+  };
+  app.mounted = function mounted() {
+    hook('mounted').exec();
+    _mounted && _mounted.call(this);
   };
 
   /**

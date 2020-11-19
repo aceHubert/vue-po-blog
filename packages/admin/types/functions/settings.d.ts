@@ -2,7 +2,13 @@ export type Menu = {
   name: string;
   title: string;
   icon: string;
-  children?: Menu[];
+  children?: SubMenu[];
+};
+
+export type SubMenu = {
+  name: string;
+  title: string;
+  icon?: string;
 };
 
 export type SiteSettings = {

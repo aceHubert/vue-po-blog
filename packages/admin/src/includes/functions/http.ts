@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { store } from '@/store';
-import { ACCESS_TOKEN } from '@/config/mutationTypes';
+import { ACCESS_TOKEN } from '@/config/proLayoutConfigs';
 import settingsFuncs from './settings';
 import hook from './hooks';
 

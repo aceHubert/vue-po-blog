@@ -1,5 +1,5 @@
 <template>
-  <h1>媒体</h1>
+  <h1>媒体库</h1>
 </template>
 
 <script>

@@ -2,19 +2,20 @@
 import T from 'ant-design-vue/es/table/Table';
 import get from 'lodash.get';
 
+function i18nRender(key) {
+  switch (key) {
+    case 'sTable.sum':
+      return ' Sum';
+    case 'sTable.selected':
+      return 'Selected';
+    case 'sTable.clear':
+      return 'Clear';
+    default:
+      return key;
+  }
+}
+
 export default {
-  data() {
-    return {
-      needTotalList: [],
-
-      selectedRows: [],
-      selectedRowKeys: [],
-
-      localLoading: false,
-      localDataSource: [],
-      localPagination: Object.assign({}, this.pagination),
-    };
-  },
   props: Object.assign({}, T.props, {
     rowKey: {
       type: [String, Function],
@@ -54,11 +55,6 @@ export default {
       type: Object,
       default: null,
     },
-    /** @Deprecated */
-    showAlertInfo: {
-      type: Boolean,
-      default: false,
-    },
     showPagination: {
       type: String | Boolean,
       default: 'auto',
@@ -70,16 +66,41 @@ export default {
      * /users/1
      * /users/2
      * /users/3?queryParam=test
+     * /users?[pageNoKey]=1
      * ...
      */
     pageURI: {
       type: Boolean,
       default: false,
     },
+    pageNoKey: {
+      type: String,
+      default: 'page',
+    },
+    i18nRender: {
+      type: Function,
+      default: i18nRender,
+    },
   }),
+  data() {
+    return {
+      needTotalList: [],
+      selectedRows: [],
+      selectedRowKeys: [],
+      localLoading: false,
+      localDataSource: [],
+      localPagination: Object.assign({}, this.pagination),
+    };
+  },
+  computed: {
+    hasPagination() {
+      return ['auto', true].includes(this.showPagination);
+    },
+  },
   watch: {
     'localPagination.current'(val) {
-      this.pageURI &&
+      this.$router &&
+        this.pageURI &&
         this.$router.push({
           ...this.$route,
           name: this.$route.name,
@@ -105,36 +126,34 @@ export default {
     },
   },
   created() {
-    const { pageNo } = this.$route.params;
-    const localPageNum = (this.pageURI && pageNo && parseInt(pageNo)) || this.pageNum;
+    // 处理分页显示
+    let localPageNum = this.pageNum;
+    // page num from URI
+    if (this.$router && this.pageURI) {
+      try {
+        if (this.$route.params[this.pageNoKey]) {
+          localPageNum = parseInt(this.$route.params[this.pageNoKey]);
+        } else if (this.$route.query[this.pageNoKey]) {
+          localPageNum = parseInt(this.$route.query[this.pageNoKey]);
+        }
+      } catch (err) {
+        // ate by dog
+      }
+    }
     this.localPagination =
-      (['auto', true].includes(this.showPagination) &&
+      (this.hasPagination &&
         Object.assign({}, this.localPagination, {
           current: localPageNum,
-          pageSize: this.size,
+          pageSize: this.pageSize,
+          hideOnSinglePage: this.showPagination === 'auto',
           showSizeChanger: this.showSizeChanger,
         })) ||
       false;
+
     this.needTotalList = this.initTotalList(this.columns);
     this.loadData();
   },
   methods: {
-    /**
-     * 表格重新加载方法
-     * 如果参数为 true, 则强制刷新到第一页
-     * @param Boolean bool
-     */
-    refresh(bool = false) {
-      bool &&
-        (this.localPagination = Object.assign(
-          {},
-          {
-            current: 1,
-            pageSize: this.size,
-          },
-        ));
-      this.loadData();
-    },
     /**
      * 加载数据方法
      * @param {Object} pagination 分页选项器
@@ -171,14 +190,12 @@ export default {
       if ((typeof result === 'object' || typeof result === 'function') && typeof result.then === 'function') {
         result.then((r) => {
           this.localPagination =
-            (this.showPagination &&
-              Object.assign({}, this.localPagination, {
-                current: r.pager.page, // 返回结果中的当前分页数
-                total: r.pager.total, // 返回结果中的总记录数
-                showSizeChanger: this.showSizeChanger,
-                pageSize: r.pager.size,
-              })) ||
-            false;
+            this.localPagination &&
+            Object.assign({}, this.localPagination, {
+              current: r.pager.page, // 返回结果中的当前分页数
+              total: r.pager.total, // 返回结果中的总记录数
+              pageSize: r.pager.size,
+            });
           // 为防止删除数据后导致页面当前页面数据长度为 0 ,自动翻页到上一页
           if (r.rows.length === 0 && this.showPagination && this.localPagination.current > 1) {
             this.localPagination.current--;
@@ -186,18 +203,6 @@ export default {
             return;
           }
 
-          // 这里用于判断接口是否有返回 r.totalCount 且 this.showPagination = true 且 pageNo 和 pageSize 存在 且 totalCount 小于等于 pageNo * pageSize 的大小
-          // 当情况满足时，表示数据不满足分页大小，关闭 table 分页功能
-          try {
-            if (
-              ['auto', true].includes(this.showPagination) &&
-              r.pager.total <= r.pager.page * this.localPagination.pageSize
-            ) {
-              this.localPagination.hideOnSinglePage = true;
-            }
-          } catch (e) {
-            this.localPagination = false;
-          }
           this.localDataSource = r.rows; // 返回结果中的数组数据
           this.localLoading = false;
         });
@@ -205,8 +210,8 @@ export default {
     },
     initTotalList(columns) {
       const totalList = [];
-      columns &&
-        columns instanceof Array &&
+      Array.isArray(columns) &&
+        columns.length &&
         columns.forEach((column) => {
           if (column.needTotal) {
             totalList.push({
@@ -216,6 +221,22 @@ export default {
           }
         });
       return totalList;
+    },
+    /**
+     * 表格重新加载方法
+     * 如果参数为 true, 则强制刷新到第一页
+     * @param Boolean bool
+     */
+    refresh(force = false) {
+      force &&
+        (this.localPagination = Object.assign(
+          {},
+          {
+            current: 1,
+            pageSize: this.size,
+          },
+        ));
+      this.loadData();
     },
     /**
      * 用于更新已选中的列表数据 total 统计
@@ -260,7 +281,7 @@ export default {
             this.clearSelected();
           }}
         >
-          清空
+          {this.i18nRender('sTable.clear')}
         </a>
       );
     },
@@ -269,7 +290,8 @@ export default {
       const needTotalItems = this.needTotalList.map((item) => {
         return (
           <span style="margin-right: 12px">
-            {item.title}总计{' '}
+            {this.i18nRender(item.title)}
+            {this.i18nRender('sTable.sum')}:&nbsp;
             <a style="font-weight: 600">{!item.customRender ? item.total : item.customRender(item.total)}</a>
           </span>
         );
@@ -288,7 +310,7 @@ export default {
         <a-alert showIcon={true} style="margin-bottom: 16px;">
           <template slot="message">
             <span style="margin-right: 12px">
-              已选择: <a style="font-weight: 600">{this.selectedRows.length}</a>
+              {this.i18nRender('sTable.selected')}:&nbsp;<a style="font-weight: 600">{this.selectedRows.length}</a>
             </span>
             {needTotalItems}
             {clearItem}
@@ -314,7 +336,10 @@ export default {
         props[k] = this[localKey];
         return props[k];
       }
-      if (k === 'rowSelection') {
+      if (k === 'columns') {
+        props[k] = this[k].map(({ title, ...rest }) => ({ title: this.i18nRender(title), ...rest }));
+        return props[k];
+      } else if (k === 'rowSelection') {
         if (showAlert && this.rowSelection) {
           // 如果需要使用alert，则重新绑定 rowSelection 事件
           props[k] = {
@@ -336,13 +361,7 @@ export default {
       this[k] && (props[k] = this[k]);
       return props[k];
     });
-    const table = (
-      <a-table {...{ props, scopedSlots: { ...this.$scopedSlots } }} onChange={this.loadData}>
-        {Object.keys(this.$slots).map((name) => (
-          <template slot={name}>{this.$slots[name]}</template>
-        ))}
-      </a-table>
-    );
+    const table = <a-table {...{ props, scopedSlots: { ...this.$scopedSlots } }} onChange={this.loadData}></a-table>;
 
     return (
       <div class="table-wrapper">

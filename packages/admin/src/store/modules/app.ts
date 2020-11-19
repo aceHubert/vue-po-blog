@@ -1,59 +1,68 @@
 import Vue from 'vue';
-import {
-  SIDEBAR_TYPE,
-  TOGGLE_NAV_THEME,
-  TOGGLE_LAYOUT,
+import config, {
+  SET_LAYOUT,
+  SET_THEME,
+  SET_PRIMARY_COLOR,
+  SET_CONTENT_WIDTH,
+  TOGGLE_SIDE_COLLAPSED,
   TOGGLE_FIXED_HEADER,
   TOGGLE_FIXED_SIDEBAR,
-  TOGGLE_CONTENT_WIDTH,
-  TOGGLE_HIDE_HEADER,
-  TOGGLE_COLOR,
-  TOGGLE_WEAK,
+  TOGGLE_AUTO_HIDE_HEADER,
+  TOGGLE_COLOR_WEAK,
   TOGGLE_MULTI_TAB,
-} from '@/config/mutationTypes';
+  Layout,
+  Theme,
+  ContentWidth,
+} from '@/config/proLayoutConfigs';
+
 // Types
 import { Module } from 'vuex';
-import { RootState } from '../';
+import { RootState } from '../state';
 
 export type AppState = {
-  sideCollapsed: boolean;
-  theme: string;
-  layout: string;
-  contentWidth: string;
+  layout: Layout;
+  theme: Theme;
+  primaryColor: string | null;
+  contentWidth: ContentWidth;
   fixedHeader: boolean;
   fixedSidebar: boolean;
+  sideCollapsed: boolean;
+  colorWeak: boolean;
   autoHideHeader: boolean;
-  color: string | null;
-  weak: boolean;
   multiTab: boolean;
 };
 
 const app: Module<AppState, RootState> = {
   namespaced: true,
   state: {
-    sideCollapsed: false,
-    theme: 'dark',
-    layout: '',
-    contentWidth: '',
-    fixedHeader: false,
-    fixedSidebar: false,
-    autoHideHeader: false,
-    color: '',
-    weak: false,
-    multiTab: true,
+    layout: config.settings.layout,
+    theme: config.settings.theme,
+    primaryColor: config.settings.primaryColor,
+    contentWidth: config.settings.contentWidth,
+    fixedHeader: config.settings.fixedHeader,
+    fixedSidebar: config.settings.fixSiderbar,
+    sideCollapsed: config.settings.sideCollapsed,
+    colorWeak: config.settings.colorWeak,
+    // 下面两个暂时没有用
+    autoHideHeader: config.settings.autoHideHeader,
+    multiTab: config.settings.multiTab,
   },
   mutations: {
-    [SIDEBAR_TYPE]: (state, type) => {
-      state.sideCollapsed = type;
-      Vue.ls.set(SIDEBAR_TYPE, type);
-    },
-    [TOGGLE_NAV_THEME]: (state, theme) => {
-      state.theme = theme;
-      Vue.ls.set(TOGGLE_NAV_THEME, theme);
-    },
-    [TOGGLE_LAYOUT]: (state, mode) => {
+    [SET_LAYOUT]: (state, mode) => {
       state.layout = mode;
-      Vue.ls.set(TOGGLE_LAYOUT, mode);
+      Vue.ls.set(SET_LAYOUT, mode);
+    },
+    [SET_THEME]: (state, theme) => {
+      state.theme = theme;
+      Vue.ls.set(SET_THEME, theme);
+    },
+    [SET_PRIMARY_COLOR]: (state, color) => {
+      state.primaryColor = color;
+      Vue.ls.set(SET_PRIMARY_COLOR, color);
+    },
+    [SET_CONTENT_WIDTH]: (state, type) => {
+      state.contentWidth = type;
+      Vue.ls.set(SET_CONTENT_WIDTH, type);
     },
     [TOGGLE_FIXED_HEADER]: (state, mode) => {
       state.fixedHeader = mode;
@@ -63,25 +72,21 @@ const app: Module<AppState, RootState> = {
       state.fixedSidebar = mode;
       Vue.ls.set(TOGGLE_FIXED_SIDEBAR, mode);
     },
-    [TOGGLE_CONTENT_WIDTH]: (state, type) => {
-      state.contentWidth = type;
-      Vue.ls.set(TOGGLE_CONTENT_WIDTH, type);
+    [TOGGLE_SIDE_COLLAPSED]: (state, mode) => {
+      state.sideCollapsed = mode;
+      Vue.ls.set(TOGGLE_SIDE_COLLAPSED, mode);
     },
-    [TOGGLE_HIDE_HEADER]: (state, type) => {
-      state.autoHideHeader = type;
-      Vue.ls.set(TOGGLE_HIDE_HEADER, type);
+    [TOGGLE_COLOR_WEAK]: (state, mode) => {
+      state.colorWeak = mode;
+      Vue.ls.set(TOGGLE_COLOR_WEAK, mode);
     },
-    [TOGGLE_COLOR]: (state, color) => {
-      state.color = color;
-      Vue.ls.set(TOGGLE_COLOR, color);
+    [TOGGLE_AUTO_HIDE_HEADER]: (state, mode) => {
+      state.autoHideHeader = mode;
+      Vue.ls.set(TOGGLE_AUTO_HIDE_HEADER, mode);
     },
-    [TOGGLE_WEAK]: (state, mode) => {
-      state.weak = mode;
-      Vue.ls.set(TOGGLE_WEAK, mode);
-    },
-    [TOGGLE_MULTI_TAB]: (state, bool) => {
-      Vue.ls.set(TOGGLE_MULTI_TAB, bool);
-      state.multiTab = bool;
+    [TOGGLE_MULTI_TAB]: (state, mode) => {
+      state.multiTab = mode;
+      Vue.ls.set(TOGGLE_MULTI_TAB, mode);
     },
   },
 };

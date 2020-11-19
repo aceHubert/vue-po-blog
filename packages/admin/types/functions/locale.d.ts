@@ -15,7 +15,6 @@ export type SupportLanguage = {
   shortName: string;
   locale: string;
   alternate?: string;
-  fallback?: boolean;
 };
 
 export interface LocaleFunctions {
@@ -23,5 +22,5 @@ export interface LocaleFunctions {
   getSupportLanguages(): SupportLanguage[];
   setDefaultLocale(locale: string): void;
   addSupportLanguages(languages: SupportLanguage | SupportLanguage[]): void;
-  setLocale(locale: Partial<LocaleConfig>): void;
+  setLocale(localeConfig: Partial<LocaleConfig>): void;
 }

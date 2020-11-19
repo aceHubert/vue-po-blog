@@ -25,8 +25,8 @@ const plugin: Plugin = async (cxt) => {
    * todo: 是否初始化多语言
    */
   const addRoutes: ModuleOptions['addRoutes'] = (routes, megreFn = megreRoutes) => {
-    const options = (app.router as any).options;
-    megreFn(options.routes, root(routes));
+    const options = app.router!.options;
+    megreFn(options.routes!, root(routes));
     const newRouter = new VueRouter(options);
     (app.router as any).matcher = (newRouter as any).matcher;
   };

@@ -2,7 +2,7 @@
   <pro-layout
     class="layout layout--default"
     :menus="menus"
-    :collapsed="collapsed"
+    :collapsed="sideCollapsed"
     :mediaQuery="query"
     :isMobile="isMobile"
     :handleMediaQuery="handleMediaQuery"
@@ -21,10 +21,12 @@
       <right-content
         :top-menu="settings.layout === 'topmenu'"
         :is-mobile="isMobile"
+        :user="currentUser"
         :theme="settings.theme"
         :locale="$i18n.locale"
         :support-languages="supportLanguages"
-        @changeLang="handleChangeLang"
+        :i18nRender="i18nRender"
+        @changeLocale="handleChangeLocale"
         @action="handleAction"
       />
     </template>
@@ -32,21 +34,23 @@
       <global-footer></global-footer>
     </template>
     <!-- <setting-drawer :settings="settings" @change="handleSettingChange" /> -->
-    <router-view class="content" />
+    <nuxt class="content" />
   </pro-layout>
 </template>
 
 <script type="ts">
-// import { SettingDrawer, updateTheme } from '@ant-design-vue/pro-layout';
+import ProLayout from '@ant-design-vue/pro-layout';
+import { appMixin } from '@/mixins';
 import { RightContent, GlobalFooter } from '@/components';
 import { localeFuncs, settingsFuncs } from '@/includes/functions';
 import LogoSvg from '@/assets/images/logo.svg?inline';
-import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE } from '@/config/mutationTypes';
-import defaultSettings from '@/config/layoutSettings';
+import config, { ContentWidth } from '@/config/proLayoutConfigs';
 
 export default {
   name: 'DefaultLayout',
+  mixins: [appMixin],
   components: {
+    ProLayout,
     // SettingDrawer,
     RightContent,
     GlobalFooter,
@@ -54,46 +58,28 @@ export default {
   },
   data() {
     return {
-      menus: [],
-      // 侧栏收起状态
-      collapsed: false,
-      title: defaultSettings.title,
-      settings: {
-        // 布局类型
-        layout: defaultSettings.layout, // 'sidemenu', 'topmenu'
-        // CONTENT_WIDTH_TYPE
-        contentWidth: defaultSettings.layout === 'sidemenu' ? CONTENT_WIDTH_TYPE.Fluid : defaultSettings.contentWidth,
-        // 主题 'dark' | 'light'
-        theme: defaultSettings.navTheme,
-        // 主色调
-        primaryColor: defaultSettings.primaryColor,
-        fixedHeader: defaultSettings.fixedHeader,
-        fixSiderbar: defaultSettings.fixSiderbar,
-        colorWeak: defaultSettings.colorWeak,
-        hideHintAlert: false,
-        hideCopyButton: false,
-      },
-      supportLanguages: localeFuncs.getSupportLanguages(),
-      // 媒体查询
-      query: {},
-      // 是否手机模式
-      isMobile: false,
+      menus: [], //菜单
+      title: config.title, // 标题
+      currentUser: null, // 当前用户信息
+      supportLanguages: localeFuncs.getSupportLanguages(), // 语言支持列表
+      query: {}, // 媒体查询
+      isMobile: false, // 是否手机模式
     };
   },
   computed: {
-    contentPaddingLeft() {
-      if (!this.fixSidebar || this.isMobile()) {
-        return '0';
-      }
-      if (this.sidebarOpened) {
-        return '256px';
-      }
-      return '80px';
-    },
-  },
-  watch: {
-    sidebarOpened(val) {
-      this.collapsed = !val;
+    //pro-layout 配置
+    settings() {
+      return {
+        layout: this.layout,
+        theme: this.theme,
+        primaryColor: this.primaryColor,
+        contentWidth: this.layout === 'sidemenu' ? ContentWidth.Fluid : this.contentWidth,
+        fixedHeader: this.fixedHeader,
+        fixSiderbar: this.fixSiderbar,
+        colorWeak: this.colorWeak,
+        hideHintAlert: true,
+        hideCopyButton: true,
+      };
     },
   },
   created() {
@@ -106,18 +92,14 @@ export default {
         children: children && children.length ? formatMenus(children) : null,
       }));
     })(settingsFuncs.getSiderMenus());
-    // 处理侧栏收起状态
-    this.$watch('collapsed', () => {
-      this.$store.commit(`app/${SIDEBAR_TYPE}`, this.collapsed);
-    });
   },
   mounted() {
     const userAgent = navigator.userAgent;
     if (userAgent.indexOf('Edge') > -1) {
       this.$nextTick(() => {
-        this.collapsed = !this.collapsed;
+        this.setSideCollapsed(!this.sideCollapsed);
         setTimeout(() => {
-          this.collapsed = !this.collapsed;
+          this.setSideCollapsed(!this.sideCollapsed);
         }, 16);
       });
     }
@@ -127,6 +109,18 @@ export default {
     if (process.env.NODE_ENV !== 'production' || process.env.VUE_APP_PREVIEW === 'true') {
       // updateTheme(this.settings.primaryColor);
     }
+
+    //setting-drawer theme options
+    if (!window.umi_plugin_ant_themeVar) {
+      // @ts-ignore
+      window.umi_plugin_ant_themeVar = config.themeVar;
+    }
+
+    setTimeout(() => {
+      this.currentUser = {
+        name: 'Serati Ma',
+      };
+    }, 1500);
   },
   methods: {
     i18nRender(key) {
@@ -140,33 +134,34 @@ export default {
       }
       if (!this.isMobile && val['screen-xs']) {
         this.isMobile = true;
-        this.collapsed = false;
-        this.settings.contentWidth = CONTENT_WIDTH_TYPE.Fluid;
+        this.setSideCollapsed(false);
+        this.setContentWidth(ContentWidth.Fluid);
         // this.settings.fixSiderbar = false
       }
     },
     handleCollapse(val) {
-      this.collapsed = val;
+      this.setSideCollapsed(val);
     },
-    handleSettingChange({ type, value }) {
-      type && (this.settings[type] = value);
-      switch (type) {
-        case 'contentWidth':
-          this.settings[type] = value;
-          break;
-        case 'layout':
-          if (value === 'sidemenu') {
-            this.settings.contentWidth = CONTENT_WIDTH_TYPE.Fluid;
-          } else {
-            this.settings.fixSiderbar = false;
-            this.settings.contentWidth = CONTENT_WIDTH_TYPE.Fixed;
-          }
-          break;
-      }
+    handleChangeLocale(locale) {
+      this.$i18n.locale = locale;
     },
-    handleChangeLang(locale) {
-      this.$i18n.loadLanguageAsync(locale);
-    },
+    // handleSettingChange({ type, value }) {
+    //   type && (this.settings[type] = value);
+    //   switch (type) {
+    //     case 'contentWidth':
+    //       this.settings[type] = value;
+    //       break;
+    //     case 'layout':
+    //       if (value === 'sidemenu') {
+    //         this.settings.contentWidth = CONTENT_WIDTH.Fluid;
+    //       } else {
+    //         this.settings.fixSiderbar = false;
+    //         this.settings.contentWidth = CONTENT_WIDTH.Fixed;
+    //       }
+    //       break;
+    //   }
+    // },
+
     handleAction(key) {
       if (key === 'center') {
         this.$router.push({ name: 'account-user' });
