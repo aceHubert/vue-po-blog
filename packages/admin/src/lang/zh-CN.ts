@@ -53,7 +53,7 @@ const locale = {
     settings: {
       root: '设置',
       general: '常规',
-    }
+    },
   },
 
   // 文章

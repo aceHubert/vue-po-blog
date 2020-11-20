@@ -70,7 +70,8 @@ const plugin: Plugin = async (cxt) => {
   //
 
   /**
-   * 执行子模块中注入的初始化init代码
+   * init 勾子
+   * 所有子模块初始化完成，并且在 new Vue() 之前
    */
   await hook('init').exec(cxt);
 };

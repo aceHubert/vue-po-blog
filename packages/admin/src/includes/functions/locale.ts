@@ -53,7 +53,6 @@ const localeFunctions: LocaleFunctions = {
   setDefaultLocale(locale) {
     const { locale: newLocale } =
       globalLocale.supportLanguages.find((lang) => lang.locale === locale || lang.alternate === locale) || {};
-    console.log(newLocale);
     if (newLocale && newLocale !== globalLocale.default) {
       globalLocale.default = newLocale;
     }

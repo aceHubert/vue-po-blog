@@ -1,16 +1,17 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
+import { hasOwn } from '@vue-async/utils';
 import { hook, globalLocale, localeFuncs } from '@/includes/functions';
 
 // Locales
 import enUS from '@/lang/en-US';
-import zhCN from '@/lang/zh-CN';
 import { APP_LANGUAGE } from '@/config/proLayoutConfigs';
 import { genLocaleConfig } from '../router/utils';
 
 // Types
 import { Route } from 'vue-router';
 import { Plugin } from '@nuxt/types';
+import { LangConfig } from 'types/functions';
 
 Vue.use(VueI18n);
 
@@ -29,19 +30,40 @@ Object.defineProperties(VueI18n.prototype, {
   },
 });
 
-const plugin: Plugin = (cxt) => {
+/**
+ * 扩展方法添加到 Vue 实例中
+ */
+Object.defineProperties(Vue.prototype, {
+  $tv: {
+    value: function (key: VueI18n.Path, fallbackStr: string, locale?: VueI18n.Locale): VueI18n.TranslateResult {
+      const i18n = this.$i18n;
+      return i18n.tv(key, fallbackStr, locale);
+    },
+    writable: false,
+    enumerable: true,
+    configurable: true,
+  },
+});
+
+const plugin: Plugin = async (cxt) => {
   const { app } = cxt;
 
-  const defaultLocale = Vue.ls.get(APP_LANGUAGE, localeFuncs.getDefaultLocale());
+  let defaultLocale = Vue.ls.get(APP_LANGUAGE, localeFuncs.getDefaultLocale());
   const fallbackLocale = 'en-US';
   const messages: Dictionary<any> = {
     'en-US': enUS, // fallback locale
-    'zh-CN': zhCN,
   };
   const hasDocument = typeof document !== 'undefined';
+  const { hasLocale, preferredLocale } = genLocaleConfig(globalLocale);
 
-  // 自定义多语言消息
-  hook('i18n-messages').exec(messages);
+  if (!defaultLocale || !hasLocale(defaultLocale)) {
+    defaultLocale = preferredLocale;
+  }
+
+  //对内置语言文件修改（fallbackLocale）
+  await hook('i18n_message_update').exec(messages[fallbackLocale], fallbackLocale);
+  // 自定义多语言消息(同步)
+  await hook('i18n-messages').exec(messages);
 
   const i18n = new VueI18n({
     locale: defaultLocale,
@@ -54,34 +76,92 @@ const plugin: Plugin = (cxt) => {
     created() {
       this.$watch(
         () => i18n.locale,
-        (val: string) => {
-          Vue.ls.set(APP_LANGUAGE, val);
+        (locale: string) => {
+          if (!i18n.availableLocales.includes(locale)) {
+            loadLanguageAsync(locale).catch(() => {
+              // ate by dog
+            });
+          } else {
+            setLocale(locale);
+          }
         },
+        { immediate: true },
       );
     },
   });
 
-  function setI18nLanguage(lang: string) {
-    i18n.locale = lang;
+  function setLocale(locale: string) {
+    i18n.locale = locale;
+    Vue.ls.set(APP_LANGUAGE, locale);
     if (hasDocument) {
-      document.querySelector('html')!.setAttribute('lang', lang);
+      document.querySelector('html')!.setAttribute('lang', locale);
     }
-    return lang;
+    return locale;
+  }
+
+  /**
+   * 动态加载语言包，默认打包语言包含zh-CN, en-US
+   * @param {string} locale language code
+   * @returns {Promise<string>} language code
+   */
+  function loadLanguageAsync(locale: string): Promise<string> {
+    if (!hasOwn(i18n.messages, locale)) {
+      const { locale: newLocale } =
+        localeFuncs.getSupportLanguages().find((l: LangConfig) => locale === l.alternate || locale === l.locale) || {};
+
+      if (newLocale) {
+        return import(/* webpackChunkName: "locale-[request]" */ `@/lang/${newLocale}`)
+          .then((msgs) => {
+            const { default: message, dateTimeFormat, numberFormat } = msgs;
+
+            //对内置语言文件修改（fallback其它的）
+            return hook('i18n_message_update')
+              .exec(message, newLocale)
+              .then(() => {
+                i18n.setLocaleMessage(newLocale, message);
+                // setting datetime & number format
+                dateTimeFormat && i18n.setDateTimeFormat(newLocale, dateTimeFormat);
+                numberFormat && i18n.setNumberFormat(newLocale, numberFormat);
+
+                return setLocale(newLocale);
+              });
+          })
+          .catch((err) => {
+            // lang目录下没有配置该语言
+            if (err.code === 'MODULE_NOT_FOUND') {
+              // 自定义多语言消息(异步)
+              return hook('i18n-messages-async')
+                .filter(newLocale, i18n)
+                .then((locale) => {
+                  return setLocale(locale);
+                });
+            }
+            // 否则直接忽略并切换到新语言，让 i18n 处理 fallback 。
+            return setLocale(newLocale);
+          });
+      } else {
+        return Promise.reject(new Error(`Language "${locale}" is not support!`)); // 不在 SupportLanguages 列表中
+      }
+    }
+    return Promise.resolve(i18n.locale !== locale ? locale : setLocale(locale)); // 当前配置已在在，直接切换
   }
 
   // 路由变化后的语言变化
-  const { localeRegexp, preferredLocale } = genLocaleConfig(globalLocale);
   app.router!.beforeEach((to: Route, from: Route, next: any) => {
     let locale: string;
-    if ((locale = to.query.lang as string)) {
-      if (!localeRegexp.test(locale)) {
-        // 修正 query 上的语言
-        to.query.lang = preferredLocale;
-        setI18nLanguage(preferredLocale);
-        next(to);
+    if ((locale = to.params.lang || (to.query.lang as string))) {
+      // 修正 params/query 语言
+      if (!hasLocale(locale)) {
+        if (to.params.lang) {
+          to.params.lang = preferredLocale;
+        } else {
+          to.query.lang = preferredLocale;
+        }
+        next(to); // 重新进入路由到 else 中
       } else {
-        setI18nLanguage(locale);
-        next();
+        loadLanguageAsync(locale)
+          .catch(() => {}) // 忽略错误
+          .finally(() => next());
       }
     } else {
       next();

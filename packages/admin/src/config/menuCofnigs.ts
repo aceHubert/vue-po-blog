@@ -129,6 +129,6 @@ export function getDefaultMenus(): Menu[] {
           title: 'menu.settings.general',
         },
       ],
-    }
+    },
   ];
 }

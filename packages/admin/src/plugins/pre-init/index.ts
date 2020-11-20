@@ -31,19 +31,6 @@ Vue.$http = http;
 const plugin: Plugin = async (cxt) => {
   const { app } = cxt;
 
-  // 初始化页面配置
-  const _created = app.created;
-  const _mounted = app.mounted;
-  app.created = function created() {
-    bootstrap();
-    hook('created').exec();
-    _created && _created.call(this);
-  };
-  app.mounted = function mounted() {
-    hook('mounted').exec();
-    _mounted && _mounted.call(this);
-  };
-
   /**
    * 加载网站配置文件
    */
@@ -113,6 +100,23 @@ const plugin: Plugin = async (cxt) => {
       }, {} as PropertyDescriptorMap),
     );
   })({ ...prototypeArgs, axios: Axios, $http: http });
+
+  /**
+   * root vue created/mounted 勾子
+   */
+  const _created = app.created;
+  const _mounted = app.mounted;
+  app.created = function created() {
+    // 管理后台启动里的一些配置参数
+    bootstrap();
+
+    hook('app_created').exec();
+    _created && _created.call(this);
+  };
+  app.mounted = function mounted() {
+    hook('app_mounted').exec();
+    _mounted && _mounted.call(this);
+  };
 
   /**
    * 添加 http and apis 到 Context

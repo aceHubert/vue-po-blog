@@ -126,6 +126,9 @@ export default {
     i18nRender(key) {
       return this.$i18n.t(`${key}`);
     },
+    handleChangeLocale(locale) {
+      this.$i18n.locale = locale;
+    },
     handleMediaQuery(val) {
       this.query = val;
       if (this.isMobile && !val['screen-xs']) {
@@ -141,9 +144,6 @@ export default {
     },
     handleCollapse(val) {
       this.setSideCollapsed(val);
-    },
-    handleChangeLocale(locale) {
-      this.$i18n.locale = locale;
     },
     // handleSettingChange({ type, value }) {
     //   type && (this.settings[type] = value);

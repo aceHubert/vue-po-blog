@@ -56,23 +56,35 @@ export function root(routes: RouteConfig[]) {
  * 子模块路由处理方式一
  * 添加多语言到 params
  */
-export function genLocaleConfig(locale: LocaleConfig) {
+export function genLocaleConfig(localeConfig: LocaleConfig) {
   // Matches allowed languages
-  const localePattern = locale.supportLanguages.map((lang: LangConfig) => lang.alternate || lang.locale).join('|');
+  const localePattern = localeConfig.supportLanguages
+    .map((lang: LangConfig) => lang.alternate || lang.locale)
+    .join('|');
   const localeRegexp = new RegExp('^(' + localePattern + ')$');
+  // 判断是否在支持的语言中在在
+  const hasLocale = function (locale: string) {
+    return localeConfig.supportLanguages.some(
+      (lang: LangConfig) => lang.alternate === locale || lang.locale === locale,
+    );
+  };
+
   // Matches any language identifier
   const genericLocaleRegexp = /[a-z]{2,3}|[a-z]{2,3}-[a-zA-Z]{4}|[a-z]{2,3}-[A-Z]{2,3}/;
 
   const preferredLocale =
     typeof document === 'undefined'
-      ? locale.default
-      : navigator.languages.find((l: string) => l.match(localeRegexp)) || locale.default;
+      ? localeConfig.default
+      : navigator.languages.find((l: string) => l.match(localeRegexp)) || localeConfig.default;
+
+  localeConfig.supportLanguages.find((lang: LangConfig) => lang.alternate || lang.locale) || {};
 
   return {
     localePattern,
     localeRegexp,
     genericLocaleRegexp,
     preferredLocale,
+    hasLocale,
   };
 }
 
