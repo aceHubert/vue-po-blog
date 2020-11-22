@@ -92,7 +92,7 @@ module.exports = (configContext) => {
       ...(configContext.dev || configContext.devtools
         ? {
             '/api/blog': {
-              target: 'https://preview.plumemo.com',
+              target: 'http://preview2.plumemo.com',
             },
           }
         : null),

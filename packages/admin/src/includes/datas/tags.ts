@@ -8,7 +8,7 @@ export const tagApi: TagApi = {
    * 获取标签列表
    */
   getList() {
-    return http.getList('/tags/tags/v1/list').then(({ models }) => models);
+    return http.getList('/v1/admin/tags').then(({ models }) => models);
   },
 
   /**
@@ -16,7 +16,7 @@ export const tagApi: TagApi = {
    * @param id
    */
   get(id) {
-    return http.get(`/tags/tags/v1/${id}`).then(({ model }) => model);
+    return http.get(`/v1/admin/tags/${id}`).then(({ model }) => model);
   },
 
   /**
@@ -24,7 +24,7 @@ export const tagApi: TagApi = {
    * @param data
    */
   create(data) {
-    return http.post('/tags/tags/v1/add', data).then(({ model }) => model);
+    return http.post('/v1/admin/tags', data).then(({ model }) => model);
   },
 
   /**
@@ -32,7 +32,7 @@ export const tagApi: TagApi = {
    * @param data
    */
   update(data) {
-    return http.put('/tags/tags/v1/update', data).then(() => true);
+    return http.put('/v1/admin/tags', data).then(() => true);
   },
 
   /**
@@ -40,6 +40,6 @@ export const tagApi: TagApi = {
    * @param id
    */
   delete(id) {
-    return http.delete(`/tags/tags/v1/${id}`).then(() => true);
+    return http.delete(`/v1/admin/tags/${id}`).then(() => true);
   },
 };

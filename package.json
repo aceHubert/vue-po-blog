@@ -25,7 +25,9 @@
       "path": "./node_modules/cz-lerna-changelog"
     }
   },
-  "dependencies": {},
+  "dependencies": {
+    "eslint-plugin-vue": "^7.1.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.7.4",

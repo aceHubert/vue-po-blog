@@ -8,7 +8,7 @@ export const categoryApi: CategoryApi = {
    * 获取分类列表
    */
   getList() {
-    return http.getList('/category/category/v1/list').then(({ models = [] }) => models);
+    return http.getList('/v1/admin/category/tags').then(({ models = [] }) => models);
   },
 
   // fetchCategoryList(query: any) {
@@ -24,7 +24,7 @@ export const categoryApi: CategoryApi = {
    * @param id
    */
   get(id) {
-    return http.get(`/category/category-tags/v1/${id}`).then(({ model }) => model);
+    return http.get(`/v1/admin/category/tags/${id}`).then(({ model }) => model);
   },
 
   /**
@@ -32,7 +32,7 @@ export const categoryApi: CategoryApi = {
    * @param data
    */
   create(data) {
-    return http.post('/category/category/v1/add', data).then(({ model }) => model);
+    return http.post('/v1/admin/category', data).then(({ model }) => model);
   },
 
   /**
@@ -40,7 +40,7 @@ export const categoryApi: CategoryApi = {
    * @param data
    */
   update(data) {
-    return http.put('/category/category/v1/update', data).then(() => true);
+    return http.put('/v1/admin/category', data).then(() => true);
   },
 
   /**
@@ -48,6 +48,6 @@ export const categoryApi: CategoryApi = {
    * @param id
    */
   delete(id) {
-    return http.delete(`/category/category/v1/${id}`).then(() => true);
+    return http.delete(`/v1/admin/category/${id}`).then(() => true);
   },
 };

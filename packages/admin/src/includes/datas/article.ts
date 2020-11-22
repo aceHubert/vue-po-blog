@@ -53,7 +53,7 @@ export const articleApi: ArticleApi = {
    * @param param
    */
   getList({ page = 1, size = 10, ...rest } = {}) {
-    return http.getList('posts/posts/v1/list', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
+    return http.getList('/v1/admin/posts', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
       return {
         rows: models.map((article) => formatArticle(article)),
         pager: pageInfo!,
@@ -66,7 +66,7 @@ export const articleApi: ArticleApi = {
    * @param id
    */
   get(id) {
-    return http.get(`posts/posts/v1/${id}`).then(({ model }) => formatArticle(model, true));
+    return http.get(`/v1/admin/posts/${id}`).then(({ model }) => formatArticle(model, true));
   },
 
   /**
@@ -74,7 +74,7 @@ export const articleApi: ArticleApi = {
    * @param article
    */
   create(data) {
-    return http.post('/posts/posts/v1/add', data).then(({ model }) => formatArticle(model, true));
+    return http.post('/v1/admin/posts', data).then(({ model }) => formatArticle(model, true));
   },
 
   // crawler(article: any) {
@@ -88,7 +88,7 @@ export const articleApi: ArticleApi = {
    * @param data
    */
   update(data) {
-    return http.put('/posts/posts/v1/update', data).then(() => true);
+    return http.put('/v1/admin/posts', data).then(() => true);
   },
 
   /**
@@ -96,7 +96,7 @@ export const articleApi: ArticleApi = {
    * @param data
    */
   updateStatus(id, status) {
-    return http.put('/posts/status/v1/update', { id, status }).then(() => true);
+    return http.put('/v1/admin/posts/status', { id, status }).then(() => true);
   },
 
   /**
@@ -104,7 +104,7 @@ export const articleApi: ArticleApi = {
    * @param id
    */
   delete(id) {
-    return http.delete(`/posts/posts/v1/${id}`).then(() => true);
+    return http.delete(`/v1/admin/posts/${id}`).then(() => true);
   },
 
   // publishByteBlogs(data: any) {

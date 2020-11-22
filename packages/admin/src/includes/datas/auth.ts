@@ -5,7 +5,7 @@ import { AuthApi } from 'types/datas/auth';
 
 export const authApi: AuthApi = {
   login(query) {
-    return http.post('/auth/admin/v1/login', query).then(({ model }) => model);
+    return http.post('/v1/admin/user/login', query).then(({ model }) => model);
   },
 
   // socialLogin(data: any) {
@@ -17,7 +17,7 @@ export const authApi: AuthApi = {
   // },
 
   logout() {
-    return http.post('/auth/auth/v1/logout').then(() => true);
+    return http.post('/v1/admin/user/logout').then(() => true);
   },
 
   // register(parameter: any) {
@@ -48,7 +48,7 @@ export const authApi: AuthApi = {
    * 获取登录用户信息
    */
   getLoginUserInfo() {
-    return http.get('/auth/user/v1/get').then(({ model }) => model);
+    return http.get('/v1/admin/user/login').then(({ model }) => model);
   },
 
   // getCurrentUserNav(_token: string) {

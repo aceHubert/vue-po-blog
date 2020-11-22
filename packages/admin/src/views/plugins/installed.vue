@@ -1,6 +1,6 @@
 <template>
   <a-card :bordered="false">
-    <!-- <a-table :columns="columns" :data-source="data">
+    <a-table :columns="columns" :data-source="data">
       <a slot="name" slot-scope="text">tgest</a>
       <span slot="action" slot-scope="text, record">
         <a>启用</a>
@@ -11,7 +11,7 @@
         <a-divider type="vertical" />
         <a>更新</a>
       </span>
-    </a-table> -->
+    </a-table>
   </a-card>
 </template>
 
