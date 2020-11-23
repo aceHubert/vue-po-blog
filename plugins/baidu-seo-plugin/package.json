@@ -4,7 +4,7 @@
   "description": "可以主动推送数据同步到百度",
   "private": true,
   "admin:main": {
-    "moduleName": "baidu-seo-plugin",
+    "moduleName": "baiduSEO",
     "entry": "dist/admin/index.umd.js",
     "styles": []
   },
@@ -15,27 +15,20 @@
     "src"
   ],
   "scripts": {
-    "dev": "po dev --name beautifyTheme --filename index --dest dist/beautify-theme src/main.ts",
-    "build:front": "po build --name beautifyTheme --filename index --dest dist/beautify-theme src/main.ts",
-    "build:widgets": "po build --dest dist/widgets src/widgets",
-    "build:admin": "po build --name baiduSeoAdmin --filename index --dest dist/admin  src/admin/main.ts",
-    "build": "yarn build:front && yarn build:widgets && yarn build:admin",
+    "dev": "po dev --name baiduSEO --admin --filename index --dest dist/admin src/admin/main.ts",
+    "build": "po build --name baiduSEO --filename index --dest dist/admin  src/admin/main.ts",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@vue-async/utils": "^1.0.6",
     "core-js": "^3.6.4",
-    "marked": "^1.1.1",
-    "moment": "^2.28.0",
     "vue": "^2.6.9",
     "vue-class-component": "^7.2.3",
-    "vue-property-decorator": "^8.4.1",
-    "vuetify": "^2.3.10"
+    "vue-property-decorator": "^8.4.1"
   },
   "devDependencies": {
     "@plumemo/devtools": "^0.0.5-alpha",
-    "@types/marked": "^1.1.0",
     "@vue/cli-plugin-babel": "^4.2.0",
     "@vue/cli-plugin-eslint": "^4.2.0",
     "@vue/cli-plugin-typescript": "^4.5.6",

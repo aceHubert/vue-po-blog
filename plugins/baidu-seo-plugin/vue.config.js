@@ -2,7 +2,6 @@ module.exports = {
   publicPath: './',
   productionSourceMap: false,
   lintOnSave: false,
-  transpileDependencies: ['vuetify', '@vue-async/utils'],
   css: {
     // 是否使用css分离插件 ExtractTextPlugin
     extract: true,
@@ -10,13 +9,13 @@ module.exports = {
     sourceMap: false,
     // css预设器配置项
     loaderOptions: {
-      scss: {
-        //  implementation: require('sass'),
-        //  fiber: require('fibers'),
-        data: `
-         @import "~vuetify/src/styles/styles.sass";
-         `,
-      },
+      // scss: {
+      //   //  implementation: require('sass'),
+      //   //  fiber: require('fibers'),
+      //   data: `
+      //    @import "~vuetify/src/styles/styles.sass";
+      //    `,
+      // },
       css: {
         // 模块定义设置
         modules: {

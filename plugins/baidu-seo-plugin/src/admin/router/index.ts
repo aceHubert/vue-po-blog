@@ -1,13 +1,17 @@
 /**
  * routes
  */
-// import { RouteConfig } from 'vue-router';
+import { RouteConfig } from 'vue-router';
 
-const routes: any = [
+export function interopDefault(promise: Promise<any>) {
+  return promise.then((m) => m.default || m);
+}
+
+const routes: RouteConfig[] = [
   {
     path: 'baidu-seo-config',
     name: 'baidu-seo-config',
-    component: () => import(/* webpackChunkName: "router-theme" */ '@/admin/views/baidu-seo-config'),
+    component: () => interopDefault(import(/* webpackChunkName: "views" */ '../views/config')),
   },
 ];
 

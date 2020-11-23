@@ -7,11 +7,9 @@ import { Vue, Component } from 'vue-property-decorator';
   },
 })
 export default class BaiduSeoConfig extends Vue {
+  value = 1;
+
   render() {
-    return (
-      <div class="setting">
-        <h1>setting</h1>
-      </div>
-    );
+    return <h1>setting</h1>;
   }
 }
