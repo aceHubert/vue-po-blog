@@ -1,16 +1,16 @@
-import Vue from 'vue';
 import merge from 'lodash.merge';
 import { trailingSlash } from '@/utils/path';
 import { getDefaultMenus } from '@/config/menuCofnigs';
+import { bxAnaalyse } from '@/assets/icons';
 
 // Types
 import { SettingsFunctions, SiteSettings } from 'types/functions/settings';
 
-export const globalSettings: SiteSettings = Vue.observable({
+export const globalSettings: SiteSettings = {
   domain: '',
   staticDir: 'static/',
   siderMenus: getDefaultMenus(),
-});
+};
 
 const settingsFunctions: SettingsFunctions = {
   /**
@@ -67,6 +67,12 @@ const settingsFunctions: SettingsFunctions = {
         parent.children.push(...menus);
       }
     } else {
+      menus.forEach((menu) => {
+        if (!menu.icon) {
+          // todo: 替换一个公用 icon
+          menu.icon = bxAnaalyse;
+        }
+      });
       globalSettings.siderMenus.push(...menus);
     }
   },

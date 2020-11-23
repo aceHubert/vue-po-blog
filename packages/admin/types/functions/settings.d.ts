@@ -1,7 +1,7 @@
 export type Menu = {
   name: string;
   title: string;
-  icon: string;
+  icon?: string;
   children?: SubMenu[];
 };
 

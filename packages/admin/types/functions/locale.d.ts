@@ -1,26 +1,20 @@
 export type LocaleConfig = {
   default: string;
-  supportLanguages: SupportLanguage[];
+  supportLanguages: LangConfig[];
 };
 
 export type LangConfig = {
   name: string;
   shortName: string;
-  locale: string;
-  alternate?: string;
-};
-
-export type SupportLanguage = {
-  name: string;
-  shortName: string;
+  icon?: string;
   locale: string;
   alternate?: string;
 };
 
 export interface LocaleFunctions {
   getDefaultLocale(): string;
-  getSupportLanguages(): SupportLanguage[];
+  getSupportLanguages(): LangConfig[];
   setDefaultLocale(locale: string): void;
-  addSupportLanguages(languages: SupportLanguage | SupportLanguage[]): void;
+  addSupportLanguages(languages: LangConfig | LangConfig[]): void;
   setLocale(localeConfig: Partial<LocaleConfig>): void;
 }
