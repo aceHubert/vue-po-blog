@@ -1,11 +1,15 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
-import { Route } from 'vue-router';
-import en from '@/lang/en';
-import { localeFuncs } from '@/includes/functions';
+import { hasOwn } from '@vue-async/utils';
+import { hook, globalLocale, localeFuncs } from '@/includes/functions';
+
+// Langs
+import enUS from '@/lang/en-US';
+import { genLocaleConfig } from '../router/utils';
 
 // Types
 import { Plugin } from '@nuxt/types';
+import { Route } from 'vue-router';
 import { LangConfig } from 'types/functions/locale';
 
 Vue.use(VueI18n);
@@ -16,7 +20,7 @@ Vue.use(VueI18n);
  */
 Object.defineProperties(VueI18n.prototype, {
   tv: {
-    value: function (key: VueI18n.Path, fallbackStr: string, locale?: VueI18n.Locale) {
+    value: function (key: VueI18n.Path, fallbackStr: string, locale?: VueI18n.Locale): VueI18n.TranslateResult {
       return (this.t && this.te ? (this.te(key, locale) ? this.t(key, locale) : fallbackStr) : fallbackStr) || key;
     },
     writable: false,
@@ -28,113 +32,151 @@ Object.defineProperties(VueI18n.prototype, {
 /**
  * 扩展方法添加到 Vue 实例中
  */
-Vue.prototype.$tv = function (
-  key: VueI18n.Path,
-  fallbackStr: string,
-  locale?: VueI18n.Locale,
-): VueI18n.TranslateResult {
-  const i18n = this.$i18n;
-  return i18n.tv(key, fallbackStr, locale);
-};
+Object.defineProperties(Vue.prototype, {
+  $tv: {
+    value: function (key: VueI18n.Path, fallbackStr: string, locale?: VueI18n.Locale): VueI18n.TranslateResult {
+      const i18n = this.$i18n;
+      return i18n.tv(key, fallbackStr, locale);
+    },
+    writable: false,
+    enumerable: true,
+    configurable: true,
+  },
+});
 
-const plugin: Plugin = (cxt) => {
-  const defaultLocale = localeFuncs.getDefaultLocale();
-  const fallbackLocale = 'en';
+const plugin: Plugin = async (cxt) => {
+  const { app } = cxt;
+
+  let defaultLocale = localeFuncs.getDefaultLocale();
+  const fallbackLocale = 'en-US';
   const messages: Dictionary<any> = {
-    en, // fallback locale
+    'en-US': enUS, // fallback locale
   };
-  if (defaultLocale !== fallbackLocale) {
-    // todo: require 路径不存在的时候
-    messages[defaultLocale] = require(`@/lang/${defaultLocale}`).default;
-  }
-  const globalLanguages: { [locale: string]: any } = {};
   const hasDocument = typeof document !== 'undefined';
-  const loadedLanguages: string[] = [defaultLocale]; // 预装默认语言
+  const { localeRegexp, preferredLocale } = genLocaleConfig(globalLocale);
 
-  let locale = defaultLocale;
+  if (!defaultLocale || !localeRegexp.test(defaultLocale)) {
+    defaultLocale = preferredLocale;
+  }
 
-  if (process.server && (cxt as any).ssrContext && (cxt as any).ssrContext.lang) {
-    locale = (cxt as any).ssrContext.lang;
-  } else if (hasDocument) {
-    locale = document.documentElement.lang;
+  //对内置语言文件修改（fallbackLocale）
+  await hook('i18n_message_update').exec(messages[fallbackLocale], fallbackLocale);
+  // 自定义多语言消息(同步)
+  await hook('i18n_messages').exec(messages);
+
+  //当初始化默认语言没有被加载
+  if (defaultLocale !== fallbackLocale && !hasOwn(messages, defaultLocale)) {
+    try {
+      await loadLanguageAsync(defaultLocale);
+    } catch (err) {
+      // ate by dog
+    }
   }
 
   const i18n = new VueI18n({
-    locale,
+    locale: defaultLocale,
     fallbackLocale,
     messages,
     silentFallbackWarn: true,
   });
 
-  function setI18nLanguage(lang: string) {
-    i18n.locale = lang;
+  new Vue({
+    created() {
+      this.$watch(
+        () => i18n.locale,
+        (locale: string) => {
+          if (!i18n.availableLocales.includes(locale)) {
+            loadLanguageAsync(locale).catch(() => {
+              // ate by dog
+            });
+          } else {
+            setLocale(locale);
+          }
+        },
+        { immediate: true },
+      );
+    },
+  });
+
+  function setLocale(locale: string) {
+    i18n.locale = locale;
     if (hasDocument) {
-      document.querySelector('html')!.setAttribute('lang', lang);
+      document.querySelector('html')!.setAttribute('lang', locale);
     }
-    return lang;
+    return locale;
   }
 
   /**
-   * 动态加载语言名，默认打包语言包含zh-CN, en-US
-   * 其它扩展可将语言包json 文件放在 static/langs/ 目录下
-   * @param {string} lang language code
+   * 动态加载语言包，默认打包语言包含zh-CN, en-US
+   * @param {string} locale language code
    * @returns {Promise<string>} language code
    */
-  function loadLanguageAsync(lang: string): Promise<string> {
-    if (i18n.locale !== lang) {
-      if (!loadedLanguages.includes(lang)) {
-        const { locale } =
-          localeFuncs.getSupportLanguages().find((l: LangConfig) => lang === l.alternate || lang === l.locale) || {};
+  function loadLanguageAsync(locale: string): Promise<string> {
+    if (!hasOwn(i18n.messages, locale)) {
+      const { locale: newLocale } =
+        localeFuncs.getSupportLanguages().find((l: LangConfig) => locale === l.alternate || locale === l.locale) || {};
 
-        if (locale) {
-          return import(/* webpackChunkName: "locale-[request]" */ `@/lang/${locale}`).then((msgs) => {
-            const { default: translates, dateTimeFormat, numberFormat } = msgs;
-            loadedLanguages.push(lang);
-            globalLanguages[lang] = translates;
-            i18n.setLocaleMessage(lang, globalLanguages[lang]);
-            // setting datetime & number format
-            dateTimeFormat && i18n.setDateTimeFormat(lang, dateTimeFormat);
-            numberFormat && i18n.setNumberFormat(lang, numberFormat);
+      if (newLocale) {
+        return import(/* webpackChunkName: "locale-[request]" */ `@/lang/${newLocale}`)
+          .then((msgs) => {
+            const { default: message, dateTimeFormat, numberFormat } = msgs;
 
-            return setI18nLanguage(lang);
+            //对内置语言文件修改（fallback其它的）
+            return hook('i18n_message_update')
+              .exec(message, newLocale)
+              .then(() => {
+                i18n.setLocaleMessage(newLocale, message);
+                // setting datetime & number format
+                dateTimeFormat && i18n.setDateTimeFormat(newLocale, dateTimeFormat);
+                numberFormat && i18n.setNumberFormat(newLocale, numberFormat);
+
+                return setLocale(newLocale);
+              });
+          })
+          .catch((err) => {
+            // lang目录下没有配置该语言
+            if (err.code === 'MODULE_NOT_FOUND') {
+              // 自定义多语言消息(异步)
+              return hook('i18n_messages_async')
+                .filter(newLocale, i18n)
+                .then((locale) => {
+                  return setLocale(locale);
+                });
+            }
+            // 否则直接忽略并切换到新语言，让 i18n 处理 fallback 。
+            return setLocale(newLocale);
           });
-        } else {
-          return Promise.reject(new Error('Language not found'));
-          // 扩展语言包加载
-          // TODO: 远程加载语言
-          // return createHttp()
-          //   .get(`${process.env.BASE_URL || '/'}static/langs/${lang}.json`)
-          //   .then(({ data = {} }) => {
-          //     const { dateTimeFormat, numberFormat, ...translates } = data;
-          //     i18n.setLocaleMessage(lang, translates);
-          //     dateTimeFormat && i18n.setDateTimeFormat(lang, dateTimeFormat);
-          //     numberFormat && i18n.setNumberFormat(lang, numberFormat);
-          //     loadedLanguages.push(lang);
-          //     return setI18nLanguage(lang);
-          //   })
-          //   .catch(() => {
-          //     return new Error('unsupport language');
-          //   });
-        }
+      } else {
+        return Promise.reject(new Error(`Language "${locale}" is not support!`)); // 不在 SupportLanguages 列表中
       }
-      return Promise.resolve(setI18nLanguage(lang));
     }
-    return Promise.resolve(lang);
+    return Promise.resolve(i18n.locale !== locale ? locale : setLocale(locale)); // 当前配置已在在，直接切换
   }
 
   // 路由变化后的语言变化
-  cxt.app.router!.beforeEach((to: Route, from: Route, next: () => void) => {
-    to.query.lang
-      ? loadLanguageAsync(to.query.lang as string)
-          .then(() => next())
-          .catch(() => {})
-      : next();
+  app.router!.beforeEach((to: Route, from: Route, next: any) => {
+    let locale: string;
+    if ((locale = to.params.lang || (to.query.lang as string))) {
+      // 修正 params/query 语言
+      if (!localeRegexp.test(locale)) {
+        if (to.params.lang) {
+          to.params.lang = preferredLocale;
+        } else {
+          to.query.lang = preferredLocale;
+        }
+        next(to); // 重新进入路由到 else 中
+      } else {
+        loadLanguageAsync(locale)
+          .catch(() => {}) // 忽略错误
+          .finally(() => next());
+      }
+    } else {
+      next();
+    }
   });
 
   cxt.app.i18n = i18n;
-
-  // 添加 i18n 到 Context
-  cxt.$i18n = i18n;
+  cxt.$i18n = i18n; // 添加 i18n 到 Context
 };
 
 export default plugin;

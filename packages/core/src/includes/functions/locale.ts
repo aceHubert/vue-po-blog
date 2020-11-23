@@ -4,7 +4,7 @@ import merge from 'lodash.merge';
 import { LocaleFunctions, LocaleConfig } from 'types/functions/locale';
 
 export const globalLocale: LocaleConfig = {
-  default: 'en',
+  default: 'en-US',
   supportLanguages: [
     {
       name: '简体中文',

@@ -3,7 +3,7 @@ import { MetaInfo } from 'vue-meta';
 import VueRouter from 'vue-router';
 import ModuleLoader from '@vue-async/module-loader';
 import { error as globalError, warn as globalWarn } from '@vue-async/utils';
-import { hook, themeFuncs } from '@/includes/functions';
+import { hook } from '@/includes/functions';
 import { siteApi } from '@/includes/datas';
 
 // megre routes
@@ -28,8 +28,8 @@ const plugin: Plugin = async (cxt) => {
    * todo: 是否初始化多语言
    */
   const addRoutes: ThemeOptions['addRoutes'] = (routes, megreFn = megreRoutes) => {
-    const options = (app.router as any).options;
-    megreFn(options.routes, root(routes));
+    const options = app.router!.options;
+    megreFn(options.routes!, root(routes));
     const newRouter = new VueRouter(options);
     (app.router as any).matcher = (newRouter as any).matcher;
   };
@@ -86,22 +86,7 @@ const plugin: Plugin = async (cxt) => {
   //
 
   /**
-   * 生成 theme css 变量
-   * todo: ssr
-   */
-  const _mounted = app.mounted;
-  app.mounted = function () {
-    const style = document.createElement('style');
-    style.type = 'text/css';
-    style.id = 'plumemo-theme-stylesheet';
-    style.setAttribute('data-n-head', 'plumemo');
-    style.innerHTML = themeFuncs.genCssStyles();
-    document.getElementsByTagName('head')[0].appendChild(style);
-    _mounted && _mounted.call(this);
-  };
-
-  /**
-   * 自定义 head title template
+   * 自定义 head title template 勾子
    */
   const _head = app.head! as MetaInfo;
   if (hook('head_title_template').has()) {
@@ -113,7 +98,8 @@ const plugin: Plugin = async (cxt) => {
   }
 
   /**
-   * 执行子模块中注入的初始化init代码
+   * init 勾子
+   * 所有子模块初始化完成，并且在 new Vue() 之前
    */
   await hook('init').exec(cxt);
 };

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Axios from 'axios';
 import { error as globalError, hasOwn } from '@vue-async/utils';
-import { http, settingsFuncs } from '@/includes/functions';
+import { hook, http, themeFuncs, settingsFuncs } from '@/includes/functions';
 import { tagApi, articleApi, siteApi, categoryApi } from '@/includes/datas';
 import themeFn from '@/includes/theme';
 
@@ -118,6 +118,28 @@ const plugin: Plugin = async (cxt) => {
       }, {} as PropertyDescriptorMap),
     );
   })({ ...prototypeArgs, axios: Axios, $http: http });
+
+  /**
+   * root vue created/mounted 勾子
+   */
+  const _created = app.created;
+  const _mounted = app.mounted;
+  app.created = function created() {
+    hook('app_created').exec();
+    _created && _created.call(this);
+  };
+  app.mounted = function mounted() {
+    // 生成 theme css 变量, todo: ssr
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.id = 'plumemo-theme-stylesheet';
+    style.setAttribute('data-n-head', 'plumemo');
+    style.innerHTML = themeFuncs.genCssStyles();
+    document.getElementsByTagName('head')[0].appendChild(style);
+
+    hook('app_mounted').exec();
+    _mounted && _mounted.call(this);
+  };
 
   /**
    * 添加 http and apis 到 Context
