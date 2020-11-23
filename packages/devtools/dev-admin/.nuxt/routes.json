@@ -1,0 +1,208 @@
+[
+  {
+    "name": "404",
+    "path": "/404",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/404.vue",
+    "chunkName": "views/404"
+  },
+  {
+    "path": "/articles",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/articles.vue",
+    "chunkName": "views/articles",
+    "children": [
+      {
+        "name": "articles",
+        "path": "",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/articles/index.vue",
+        "chunkName": "views/articles/index"
+      },
+      {
+        "name": "articles-create",
+        "path": "create",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/articles/create.vue",
+        "chunkName": "views/articles/create"
+      },
+      {
+        "name": "articles-id",
+        "path": ":id",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/articles/_id.vue",
+        "chunkName": "views/articles/_id"
+      }
+    ]
+  },
+  {
+    "name": "categories",
+    "path": "/categories",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/categories/index.vue",
+    "chunkName": "views/categories/index"
+  },
+  {
+    "name": "dashboard",
+    "path": "/dashboard",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/dashboard/index.vue",
+    "chunkName": "views/dashboard/index"
+  },
+  {
+    "name": "login",
+    "path": "/login",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/login.vue",
+    "chunkName": "views/login"
+  },
+  {
+    "path": "/medias",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/medias.vue",
+    "chunkName": "views/medias",
+    "children": [
+      {
+        "name": "medias",
+        "path": "",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/medias/index.vue",
+        "chunkName": "views/medias/index"
+      },
+      {
+        "name": "medias-create",
+        "path": "create",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/medias/create.vue",
+        "chunkName": "views/medias/create"
+      }
+    ]
+  },
+  {
+    "path": "/pages",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/pages.vue",
+    "chunkName": "views/pages",
+    "children": [
+      {
+        "name": "pages",
+        "path": "",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/pages/index.vue",
+        "chunkName": "views/pages/index"
+      },
+      {
+        "name": "pages-create",
+        "path": "create",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/pages/create.vue",
+        "chunkName": "views/pages/create"
+      }
+    ]
+  },
+  {
+    "name": "plugins",
+    "path": "/plugins",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/plugins/index.vue",
+    "chunkName": "views/plugins/index"
+  },
+  {
+    "name": "settings",
+    "path": "/settings",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/settings.vue",
+    "chunkName": "views/settings",
+    "children": [
+      {
+        "name": "settings-general",
+        "path": "general",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/settings/general.vue",
+        "chunkName": "views/settings/general"
+      }
+    ]
+  },
+  {
+    "name": "tags",
+    "path": "/tags",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/tags/index.vue",
+    "chunkName": "views/tags/index"
+  },
+  {
+    "path": "/themes",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/themes.vue",
+    "chunkName": "views/themes",
+    "children": [
+      {
+        "name": "themes",
+        "path": "",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/themes/index.vue",
+        "chunkName": "views/themes/index"
+      },
+      {
+        "name": "themes-color",
+        "path": "color",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/themes/color.vue",
+        "chunkName": "views/themes/color"
+      },
+      {
+        "name": "themes-customize",
+        "path": "customize",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/themes/customize.vue",
+        "chunkName": "views/themes/customize"
+      },
+      {
+        "name": "themes-widgets",
+        "path": "widgets",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/themes/widgets.vue",
+        "chunkName": "views/themes/widgets"
+      }
+    ]
+  },
+  {
+    "name": "tools",
+    "path": "/tools",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/tools.vue",
+    "chunkName": "views/tools",
+    "children": [
+      {
+        "name": "tools-export",
+        "path": "export",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/tools/export.vue",
+        "chunkName": "views/tools/export"
+      },
+      {
+        "name": "tools-import",
+        "path": "import",
+        "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/tools/import.vue",
+        "chunkName": "views/tools/import"
+      }
+    ]
+  },
+  {
+    "name": "account-settings",
+    "path": "/account/settings",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/account/settings.vue",
+    "chunkName": "views/account/settings"
+  },
+  {
+    "name": "account-user",
+    "path": "/account/user",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/account/user.vue",
+    "chunkName": "views/account/user"
+  },
+  {
+    "name": "categories-create",
+    "path": "/categories/create",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/categories/create.vue",
+    "chunkName": "views/categories/create"
+  },
+  {
+    "name": "plugins-installed",
+    "path": "/plugins/installed",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/plugins/installed.vue",
+    "chunkName": "views/plugins/installed"
+  },
+  {
+    "name": "tags-create",
+    "path": "/tags/create",
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/tags/create.vue",
+    "chunkName": "views/tags/create"
+  },
+  {
+    "path": "/",
+    "redirect": {
+      "name": "dashboard"
+    }
+  },
+  {
+    "path": "*",
+    "redirect": {
+      "name": "404"
+    }
+  }
+]

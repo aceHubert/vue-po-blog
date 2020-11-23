@@ -1,15 +1,16 @@
 import Vue from 'vue'
 
 import { getMatchedComponentsInstances, getChildrenComponentInstancesUsingFetch, promisify, globalHandleError, urlJoin, sanitizeComponent } from './utils'
-import NuxtError from '../src/layouts/error.tsx'
-import NuxtLoading from '~/components/PageLoading'
+import NuxtError from './components/nuxt-error.vue'
+import NuxtLoading from './components/nuxt-loading.vue'
 
-import '../src/assets/styles/index.scss'
+import '../src/assets/styles/index.less'
 
-import _77180f1e from '../src/layouts/blank.tsx'
-import _6f6c098b from '../src/layouts/default.tsx'
+import _77180f1e from '../src/layouts/blank.vue'
+import _6f6c098b from '../src/layouts/default.vue'
+import _2d2a8cc1 from '../src/layouts/user.vue'
 
-const layouts = { "_blank": sanitizeComponent(_77180f1e),"_default": sanitizeComponent(_6f6c098b) }
+const layouts = { "_blank": sanitizeComponent(_77180f1e),"_default": sanitizeComponent(_6f6c098b),"_user": sanitizeComponent(_2d2a8cc1) }
 
 export default {
   render (h, props) {
@@ -63,7 +64,8 @@ export default {
   },
   created () {
     // Add this.$nuxt in child instances
-    Vue.prototype.$nuxt = this
+    this.$root.$options.$nuxt = this
+
     if (process.client) {
       // add to window so we can listen when ready
       window.$nuxt = this

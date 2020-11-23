@@ -23,7 +23,7 @@ const assetsCDN = {
   ],
 };
 
-const port = process.env.PORT || 5008;
+const port = process.env.PORT || 5009;
 const host = process.env.HOST || 'localhost';
 
 module.exports = (configContext) => {
@@ -49,7 +49,7 @@ module.exports = (configContext) => {
       pages: 'views',
     },
     head: {
-      titleTemplate: (title) => (title ? `${title} | Plumemo` : 'Plumemo'),
+      titleTemplate: (title) => (title ? `${title} | Plumemo Admin` : 'Plumemo Admin'),
       meta: [
         { charset: 'utf-8' },
         { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
@@ -60,31 +60,18 @@ module.exports = (configContext) => {
       link: [{ rel: 'icon', type: 'image/x-icon', href: 'favicon.ico' }],
       style: [],
     },
-    css: ['~/assets/styles/index.scss'],
-    loading: '~/components/PageLoading',
+    css: ['~/assets/styles/index.less'],
     modules: ['@nuxtjs/proxy'],
     proxy: {
       // 在 devtools 时调试模块代理
-      ...(configContext.proxyThemeTarget
+      ...(configContext.proxyModuleTarget
         ? {
-            '/api/blog/v1/plumemo/module/theme': {
-              target: configContext.proxyThemeTarget,
+            '/api/blog/v1/plumemo/module/admins': {
+              target: configContext.proxyModuleTarget,
               changeOrigin: false,
               ws: false,
               pathRewrite: {
-                '^/api/blog/v1/plumemo/module/theme': '',
-              },
-            },
-          }
-        : null),
-      ...(configContext.proxyPluginTarget
-        ? {
-            '/api/blog/v1/plumemo/module/plugins': {
-              target: configContext.proxyPluginTarget,
-              changeOrigin: false,
-              ws: false,
-              pathRewrite: {
-                '^/api/blog/v1/plumemo/module/plugins': '',
+                '^/api/blog/v1/plumemo/module/admins': '',
               },
             },
           }
@@ -93,26 +80,40 @@ module.exports = (configContext) => {
       ...(configContext.dev || configContext.devtools
         ? {
             '/api/blog': {
-              target: 'https://preview.plumemo.com',
+              target: 'http://preview2.plumemo.com',
             },
           }
         : null),
     },
     plugins: [
+      // 第三方模块分开引用（部分第三方模块不支持服务端渲染）
+      { src: 'plugins/vue-antd' },
+      { src: 'plugins/vue-ls' },
+      { src: 'plugins/vue-cropper', ssr: false },
+      { src: 'plugins/vue-clipboard' },
+      { src: 'plugins/vue-viser' },
+      // 第三方模块加载完成
       { src: 'plugins/pre-init' }, // pre-init
       { src: 'plugins/module-loader', ssr: false }, // modules load
       { src: 'plugins/i18n' }, // locale
       { src: 'plugins/router' }, // router
     ],
     router: {
+      middleware: 'auth',
       extendRoutes(routes, _resolve) {
-        routes.push({
-          path: '*',
-          redirect: { name: '404' },
-        });
+        routes.push(
+          {
+            path: '/',
+            redirect: { name: 'dashboard' },
+          },
+          {
+            path: '*',
+            redirect: { name: '404' },
+          },
+        );
       },
     },
-    buildModules: ['@nuxt/typescript-build'],
+    buildModules: ['@nuxt/typescript-build', '@nuxtjs/svg'],
     build: {
       babel: {
         // use babel.config.js
@@ -123,12 +124,13 @@ module.exports = (configContext) => {
       transpile: ['@vue-async/utils', '@vue-async/module-loader'],
       extractCSS: true,
       loaders: {
-        scss: {
-          // implementation: require('sass'),
-          // fiber: require('fibers'),
-          data: `
-        @import "./src/assets/styles/fn.scss";
-        `,
+        less: {
+          lessOptions: {
+            javascriptEnabled: true,
+            modifyVars: {
+              hack: 'true;@import "./src/assets/styles/fn.less"',
+            },
+          },
         },
         cssModules: {
           modules: {
@@ -150,6 +152,6 @@ module.exports = (configContext) => {
       background: 'white',
     },
     // 忽略文件的 auto build
-    ignore: ['layouts/root'],
+    ignore: ['views/*/modules/*.vue', 'views/*/constants.ts'],
   };
 };

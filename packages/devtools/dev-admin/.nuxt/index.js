@@ -5,7 +5,7 @@ import ClientOnly from 'vue-client-only'
 import NoSsr from 'vue-no-ssr'
 import { createRouter } from './router.js'
 import NuxtChild from './components/nuxt-child.js'
-import NuxtError from '../src/layouts/error.tsx'
+import NuxtError from './components/nuxt-error.vue'
 import Nuxt from './components/nuxt.js'
 import App from './App.js'
 import { setContext, getLocation, getRouteData, normalizeError } from './utils'
@@ -13,6 +13,11 @@ import { createStore } from './store.js'
 
 /* Plugins */
 
+import nuxt_plugin_vueantd_0d977cc9 from 'nuxt_plugin_vueantd_0d977cc9' // Source: ../src/plugins/vue-antd (mode: 'all')
+import nuxt_plugin_vuels_5dbd9c1a from 'nuxt_plugin_vuels_5dbd9c1a' // Source: ../src/plugins/vue-ls (mode: 'all')
+import nuxt_plugin_vuecropper_2022eba1 from 'nuxt_plugin_vuecropper_2022eba1' // Source: ../src/plugins/vue-cropper (mode: 'client')
+import nuxt_plugin_vueclipboard_14adb0ac from 'nuxt_plugin_vueclipboard_14adb0ac' // Source: ../src/plugins/vue-clipboard (mode: 'all')
+import nuxt_plugin_vueviser_b3047e3e from 'nuxt_plugin_vueviser_b3047e3e' // Source: ../src/plugins/vue-viser (mode: 'all')
 import nuxt_plugin_preinit_00bd4102 from 'nuxt_plugin_preinit_00bd4102' // Source: ../src/plugins/pre-init (mode: 'all')
 import nuxt_plugin_moduleloader_77ce702f from 'nuxt_plugin_moduleloader_77ce702f' // Source: ../src/plugins/module-loader (mode: 'client')
 import nuxt_plugin_i18n_61b06223 from 'nuxt_plugin_i18n_61b06223' // Source: ../src/plugins/i18n (mode: 'all')
@@ -43,6 +48,13 @@ Vue.component('NChild', NuxtChild)
 // Component: <Nuxt>
 Vue.component(Nuxt.name, Nuxt)
 
+Object.defineProperty(Vue.prototype, '$nuxt', {
+  get() {
+    return this.$root.$options.$nuxt
+  },
+  configurable: true
+})
+
 Vue.use(Meta, {"keyName":"head","attribute":"data-n-head","ssrAttribute":"data-n-head-ssr","tagIDKeyName":"hid"})
 
 const defaultTransition = {"name":"page","mode":"out-in","appear":true,"appearClass":"appear","appearActiveClass":"appear-active","appearToClass":"appear-to"}
@@ -66,7 +78,7 @@ async function createApp(ssrContext, config = {}) {
   // here we inject the router and store to all child components,
   // making them available everywhere as `this.$router` and `this.$store`.
   const app = {
-    head: {"titleTemplate":(title) => (title ? `${title} | Plumemo` : 'Plumemo'),"meta":[{"charset":"utf-8"},{"http-equiv":"X-UA-Compatible","content":"IE=edge"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Plumemo Blog"}],"script":[],"link":[{"rel":"icon","type":"image\u002Fx-icon","href":"favicon.ico"}],"style":[]},
+    head: {"titleTemplate":(title) => (title ? `${title} | Plumemo Admin` : 'Plumemo Admin'),"meta":[{"charset":"utf-8"},{"http-equiv":"X-UA-Compatible","content":"IE=edge"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Plumemo Blog"}],"script":[],"link":[{"rel":"icon","type":"image\u002Fx-icon","href":"favicon.ico"}],"style":[]},
 
     store,
     router,
@@ -194,6 +206,26 @@ async function createApp(ssrContext, config = {}) {
     }
   }
   // Plugin execution
+
+  if (typeof nuxt_plugin_vueantd_0d977cc9 === 'function') {
+    await nuxt_plugin_vueantd_0d977cc9(app.context, inject)
+  }
+
+  if (typeof nuxt_plugin_vuels_5dbd9c1a === 'function') {
+    await nuxt_plugin_vuels_5dbd9c1a(app.context, inject)
+  }
+
+  if (process.client && typeof nuxt_plugin_vuecropper_2022eba1 === 'function') {
+    await nuxt_plugin_vuecropper_2022eba1(app.context, inject)
+  }
+
+  if (typeof nuxt_plugin_vueclipboard_14adb0ac === 'function') {
+    await nuxt_plugin_vueclipboard_14adb0ac(app.context, inject)
+  }
+
+  if (typeof nuxt_plugin_vueviser_b3047e3e === 'function') {
+    await nuxt_plugin_vueviser_b3047e3e(app.context, inject)
+  }
 
   if (typeof nuxt_plugin_preinit_00bd4102 === 'function') {
     await nuxt_plugin_preinit_00bd4102(app.context, inject)

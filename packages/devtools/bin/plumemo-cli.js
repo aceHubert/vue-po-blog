@@ -32,6 +32,11 @@ require('yargs')
           describe: 'run as plugin module, otherwise will run as theme module',
           default: false,
         })
+        .option('admin', {
+          type: 'boolean',
+          describe: 'run as admin module',
+          default: false,
+        })
         .option('port', {
           type: 'number',
           describe: ' specify port',

@@ -11,6 +11,7 @@ export async function run(
     filename?: string;
     dest?: string;
     plugin?: boolean;
+    admin?: boolean;
     port?: number;
     host?: string;
   } = {},
@@ -20,22 +21,40 @@ export async function run(
   const filename = args.filename;
   const dest = args.dest || 'dist';
   const isPlugin = !!args.plugin;
+  const isAdmin = !!args.admin;
   const port = args.port || 5007;
   const host = args.host || 'localhost';
 
-  const apiPath = `dev-${isPlugin ? 'plugins' : 'theme'}`;
+  const apiPath = `dev-${isAdmin ? 'admin' : isPlugin ? 'plugins' : 'theme'}`;
   const staticPath = path.resolve(process.cwd(), dest);
   const packageJosn = require(path.resolve(process.cwd(), 'package'));
 
   /**
    * 自定义 name 或 package.json 中的 name 或文件名
    */
-  const moduleName = name || packageJosn.name || path.basename(entry);
-  let moduleEntry = packageJosn['main'] || '';
+  let moduleName: string;
+  let moduleEntry: string;
+  let moduleStyles: string | string[];
+  if (isAdmin) {
+    const conf = packageJosn['admin:main'];
+    if (!conf || !conf.moduleName || !conf.entry) return;
+    moduleName = conf.moduleName;
+    moduleEntry = conf.entry;
+    moduleStyles = conf.styles;
+  } else {
+    moduleName = name || packageJosn.name || path.basename(entry);
+    moduleEntry = packageJosn['main'];
+    moduleStyles = packageJosn['main:styles'];
+  }
+  /**
+   * express 静态文件以 arg.dest 为根目录，文件加载时需要去掉前缀
+   */
+  // 去掉 arg.dest 前缀
   if (moduleEntry.startsWith(dest)) {
     moduleEntry = moduleEntry.substr(dest.length);
   }
-  let moduleStyles = packageJosn['main:styles'];
+
+  // 转成数组并去掉 arg.dest 前缀
   if (typeof moduleStyles === 'string') {
     moduleStyles = [moduleStyles];
   }
@@ -62,17 +81,17 @@ export async function run(
     resp.send({
       success: 1,
       message: 'devtools',
-      ...(isPlugin ? { models: [data] } : { model: data }),
+      ...(isAdmin ? { models: [data] } : isPlugin ? { models: [data] } : { model: data }),
     });
   });
 
-  return await startCore(host, port, apiPath);
+  return await start(host, port, apiPath);
 
   // 执行 nuxt stsrt
-  async function startCore(host: string, port: number, apiPath: string) {
+  async function start(host: string, port: number, apiPath: string) {
     const nuxtConfigFile = 'nuxt.config';
     const proxyPath = `http://${host}:${port}/${apiPath}`;
-    const rootDir = path.resolve(__dirname, '../dev-core');
+    const rootDir = path.resolve(__dirname, `../dev-${isAdmin ? 'admin' : 'core'}`);
     const nuxtConfig = require(path.resolve(rootDir, nuxtConfigFile));
     const staticDir = nuxtConfig.dir && nuxtConfig.dir.static ? nuxtConfig.dir.static : 'static';
 
@@ -82,7 +101,11 @@ export async function run(
       // configFile: nuxtConfigFile,
       configContext: {
         devtools: true,
-        ...(isPlugin ? { proxyPluginTarget: proxyPath } : { proxyThemeTarget: proxyPath }),
+        ...(isAdmin
+          ? { proxyModuleTarget: proxyPath }
+          : isPlugin
+          ? { proxyPluginTarget: proxyPath }
+          : { proxyThemeTarget: proxyPath }),
       },
     });
 

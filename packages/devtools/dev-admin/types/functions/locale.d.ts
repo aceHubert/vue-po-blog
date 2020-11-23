@@ -6,9 +6,9 @@ export type LocaleConfig = {
 export type LangConfig = {
   name: string;
   shortName: string;
+  icon?: string;
   locale: string;
   alternate?: string;
-  fallback?: boolean;
 };
 
 export interface LocaleFunctions {
@@ -16,5 +16,5 @@ export interface LocaleFunctions {
   getSupportLanguages(): LangConfig[];
   setDefaultLocale(locale: string): void;
   addSupportLanguages(languages: LangConfig | LangConfig[]): void;
-  setLocale(locale: Partial<LocaleConfig>): void;
+  setLocale(localeConfig: Partial<LocaleConfig>): void;
 }

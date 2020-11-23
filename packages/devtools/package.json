@@ -21,6 +21,7 @@
     "po": "./bin/plumemo-cli.js"
   },
   "scripts": {
+    "postinstall": "yarn build",
     "tsc": "tsc",
     "dev": "yarn tsc && cd ./dev && node ./server.js",
     "build": "yarn tsc"
