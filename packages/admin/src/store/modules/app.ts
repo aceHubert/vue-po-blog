@@ -17,7 +17,7 @@ import config, {
 
 // Types
 import { Module } from 'vuex';
-import { RootState } from '../state';
+import { RootState } from '../';
 
 export type AppState = {
   layout: Layout;
@@ -34,7 +34,7 @@ export type AppState = {
 
 const app: Module<AppState, RootState> = {
   namespaced: true,
-  state: {
+  state: () => ({
     layout: config.settings.layout,
     theme: config.settings.theme,
     primaryColor: config.settings.primaryColor,
@@ -46,7 +46,7 @@ const app: Module<AppState, RootState> = {
     // 下面两个暂时没有用
     autoHideHeader: config.settings.autoHideHeader,
     multiTab: config.settings.multiTab,
-  },
+  }),
   mutations: {
     [SET_LAYOUT]: (state, mode) => {
       state.layout = mode;

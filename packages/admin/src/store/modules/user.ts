@@ -5,7 +5,7 @@ import { authApi } from '@/includes/datas';
 
 // Types
 import { Module } from 'vuex';
-import { RootState } from '../state';
+import { RootState } from '../';
 import { Role } from 'types/datas/auth';
 
 export type UserState = {
@@ -18,14 +18,13 @@ export type UserState = {
 
 const user: Module<UserState, RootState> = {
   namespaced: true,
-  state: {
+  state: () => ({
     welcome: welcome(),
     name: '',
     avatar: null,
     role: null,
     info: {},
-  },
-
+  }),
   mutations: {
     SET_NAME: (state, name) => {
       state.name = name;
