@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[28],{810:function(e,n,t){"use strict";t.r(n);var l={name:"SettingsGeneral"},r=t(23),component=Object(r.a)(l,(function(){var e=this.$createElement;return(this._self._c||e)("h1",[this._v("常规设置")])}),[],!1,null,null,null);n.default=component.exports}}]);

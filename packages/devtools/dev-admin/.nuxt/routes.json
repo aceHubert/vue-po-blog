@@ -3,7 +3,8 @@
     "name": "404",
     "path": "/404",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/404.vue",
-    "chunkName": "views/404"
+    "chunkName": "views/404",
+    "_name": "_8b5ad462"
   },
   {
     "path": "/articles",
@@ -14,39 +15,46 @@
         "name": "articles",
         "path": "",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/articles/index.vue",
-        "chunkName": "views/articles/index"
+        "chunkName": "views/articles/index",
+        "_name": "_75bff5b9"
       },
       {
         "name": "articles-create",
         "path": "create",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/articles/create.vue",
-        "chunkName": "views/articles/create"
+        "chunkName": "views/articles/create",
+        "_name": "_69f30c25"
       },
       {
         "name": "articles-id",
         "path": ":id",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/articles/_id.vue",
-        "chunkName": "views/articles/_id"
+        "chunkName": "views/articles/_id",
+        "_name": "_fbdbdb3e"
       }
-    ]
+    ],
+    "_name": "_07a6e094"
   },
   {
     "name": "categories",
     "path": "/categories",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/categories/index.vue",
-    "chunkName": "views/categories/index"
+    "chunkName": "views/categories/index",
+    "_name": "_81588ad0"
   },
   {
     "name": "dashboard",
     "path": "/dashboard",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/dashboard/index.vue",
-    "chunkName": "views/dashboard/index"
+    "chunkName": "views/dashboard/index",
+    "_name": "_481d182e"
   },
   {
     "name": "login",
     "path": "/login",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/login.vue",
-    "chunkName": "views/login"
+    "chunkName": "views/login",
+    "_name": "_5d61b7c0"
   },
   {
     "path": "/medias",
@@ -57,15 +65,18 @@
         "name": "medias",
         "path": "",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/medias/index.vue",
-        "chunkName": "views/medias/index"
+        "chunkName": "views/medias/index",
+        "_name": "_aa6af36a"
       },
       {
         "name": "medias-create",
         "path": "create",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/medias/create.vue",
-        "chunkName": "views/medias/create"
+        "chunkName": "views/medias/create",
+        "_name": "_538ae45a"
       }
-    ]
+    ],
+    "_name": "_2e4b75c8"
   },
   {
     "path": "/pages",
@@ -76,21 +87,25 @@
         "name": "pages",
         "path": "",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/pages/index.vue",
-        "chunkName": "views/pages/index"
+        "chunkName": "views/pages/index",
+        "_name": "_3c72f8de"
       },
       {
         "name": "pages-create",
         "path": "create",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/pages/create.vue",
-        "chunkName": "views/pages/create"
+        "chunkName": "views/pages/create",
+        "_name": "_79a06da0"
       }
-    ]
+    ],
+    "_name": "_0cd3daca"
   },
   {
     "name": "plugins",
     "path": "/plugins",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/plugins/index.vue",
-    "chunkName": "views/plugins/index"
+    "chunkName": "views/plugins/index",
+    "_name": "_592899fa"
   },
   {
     "name": "settings",
@@ -102,15 +117,18 @@
         "name": "settings-general",
         "path": "general",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/settings/general.vue",
-        "chunkName": "views/settings/general"
+        "chunkName": "views/settings/general",
+        "_name": "_38c083f5"
       }
-    ]
+    ],
+    "_name": "_327b169c"
   },
   {
     "name": "tags",
     "path": "/tags",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/tags/index.vue",
-    "chunkName": "views/tags/index"
+    "chunkName": "views/tags/index",
+    "_name": "_e701a5d6"
   },
   {
     "path": "/themes",
@@ -121,27 +139,32 @@
         "name": "themes",
         "path": "",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/themes/index.vue",
-        "chunkName": "views/themes/index"
+        "chunkName": "views/themes/index",
+        "_name": "_c3eb6174"
       },
       {
         "name": "themes-color",
         "path": "color",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/themes/color.vue",
-        "chunkName": "views/themes/color"
+        "chunkName": "views/themes/color",
+        "_name": "_443ea557"
       },
       {
         "name": "themes-customize",
         "path": "customize",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/themes/customize.vue",
-        "chunkName": "views/themes/customize"
+        "chunkName": "views/themes/customize",
+        "_name": "_4192c437"
       },
       {
         "name": "themes-widgets",
         "path": "widgets",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/themes/widgets.vue",
-        "chunkName": "views/themes/widgets"
+        "chunkName": "views/themes/widgets",
+        "_name": "_04c9d0ba"
       }
-    ]
+    ],
+    "_name": "_492f51fa"
   },
   {
     "name": "tools",
@@ -153,56 +176,66 @@
         "name": "tools-export",
         "path": "export",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/tools/export.vue",
-        "chunkName": "views/tools/export"
+        "chunkName": "views/tools/export",
+        "_name": "_394685e1"
       },
       {
         "name": "tools-import",
         "path": "import",
         "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/tools/import.vue",
-        "chunkName": "views/tools/import"
+        "chunkName": "views/tools/import",
+        "_name": "_a908f55c"
       }
-    ]
+    ],
+    "_name": "_a7c7ed9c"
   },
   {
     "name": "account-settings",
     "path": "/account/settings",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/account/settings.vue",
-    "chunkName": "views/account/settings"
+    "chunkName": "views/account/settings",
+    "_name": "_35a10384"
   },
   {
     "name": "account-user",
     "path": "/account/user",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/account/user.vue",
-    "chunkName": "views/account/user"
+    "chunkName": "views/account/user",
+    "_name": "_0912d934"
   },
   {
     "name": "categories-create",
     "path": "/categories/create",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/categories/create.vue",
-    "chunkName": "views/categories/create"
+    "chunkName": "views/categories/create",
+    "_name": "_52d7e326"
   },
   {
     "name": "plugins-installed",
     "path": "/plugins/installed",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/plugins/installed.vue",
-    "chunkName": "views/plugins/installed"
+    "chunkName": "views/plugins/installed",
+    "_name": "_9a6a66bc"
   },
   {
     "name": "tags-create",
     "path": "/tags/create",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/admin/src/views/tags/create.vue",
-    "chunkName": "views/tags/create"
+    "chunkName": "views/tags/create",
+    "_name": "_2b1ac049"
   },
   {
     "path": "/",
     "redirect": {
       "name": "dashboard"
-    }
+    },
+    "_name": "_29172c1a"
   },
   {
     "path": "*",
     "redirect": {
       "name": "404"
-    }
+    },
+    "_name": "_29172c1a"
   }
 ]

@@ -15,8 +15,6 @@ let store = {};
   // Enforce store modules
   store.modules = store.modules || {}
 
-  resolveStoreModules(require('../src/store/getters.ts'), 'getters.ts')
-  resolveStoreModules(require('../src/store/state.ts'), 'state.ts')
   resolveStoreModules(require('../src/store/modules/app.ts'), 'modules/app.ts')
   resolveStoreModules(require('../src/store/modules/user.ts'), 'modules/user.ts')
 

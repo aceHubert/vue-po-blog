@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[5],{777:function(e,n,t){"use strict";t.r(n);var l={name:"PageIndex"},c=t(23),component=Object(c.a)(l,(function(){var e=this.$createElement;return(this._self._c||e)("h1",[this._v("页面")])}),[],!1,null,null,null);n.default=component.exports}}]);
