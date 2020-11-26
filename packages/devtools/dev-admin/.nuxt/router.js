@@ -3,37 +3,37 @@ import Router from 'vue-router'
 import { interopDefault } from './utils'
 import scrollBehavior from './router.scrollBehavior.js'
 
-const _8b5ad462 = () => interopDefault(import('../src/views/404.vue' /* webpackChunkName: "views/404" */))
-const _07a6e094 = () => interopDefault(import('../src/views/articles.vue' /* webpackChunkName: "views/articles" */))
-const _75bff5b9 = () => interopDefault(import('../src/views/articles/index.vue' /* webpackChunkName: "views/articles/index" */))
-const _69f30c25 = () => interopDefault(import('../src/views/articles/create.vue' /* webpackChunkName: "views/articles/create" */))
-const _fbdbdb3e = () => interopDefault(import('../src/views/articles/_id.vue' /* webpackChunkName: "views/articles/_id" */))
-const _81588ad0 = () => interopDefault(import('../src/views/categories/index.vue' /* webpackChunkName: "views/categories/index" */))
-const _481d182e = () => interopDefault(import('../src/views/dashboard/index.vue' /* webpackChunkName: "views/dashboard/index" */))
-const _5d61b7c0 = () => interopDefault(import('../src/views/login.vue' /* webpackChunkName: "views/login" */))
-const _2e4b75c8 = () => interopDefault(import('../src/views/medias.vue' /* webpackChunkName: "views/medias" */))
-const _aa6af36a = () => interopDefault(import('../src/views/medias/index.vue' /* webpackChunkName: "views/medias/index" */))
-const _538ae45a = () => interopDefault(import('../src/views/medias/create.vue' /* webpackChunkName: "views/medias/create" */))
-const _0cd3daca = () => interopDefault(import('../src/views/pages.vue' /* webpackChunkName: "views/pages" */))
-const _3c72f8de = () => interopDefault(import('../src/views/pages/index.vue' /* webpackChunkName: "views/pages/index" */))
-const _79a06da0 = () => interopDefault(import('../src/views/pages/create.vue' /* webpackChunkName: "views/pages/create" */))
-const _592899fa = () => interopDefault(import('../src/views/plugins/index.vue' /* webpackChunkName: "views/plugins/index" */))
-const _327b169c = () => interopDefault(import('../src/views/settings.vue' /* webpackChunkName: "views/settings" */))
-const _38c083f5 = () => interopDefault(import('../src/views/settings/general.vue' /* webpackChunkName: "views/settings/general" */))
-const _e701a5d6 = () => interopDefault(import('../src/views/tags/index.vue' /* webpackChunkName: "views/tags/index" */))
-const _492f51fa = () => interopDefault(import('../src/views/themes.vue' /* webpackChunkName: "views/themes" */))
-const _c3eb6174 = () => interopDefault(import('../src/views/themes/index.vue' /* webpackChunkName: "views/themes/index" */))
-const _443ea557 = () => interopDefault(import('../src/views/themes/color.vue' /* webpackChunkName: "views/themes/color" */))
-const _4192c437 = () => interopDefault(import('../src/views/themes/customize.vue' /* webpackChunkName: "views/themes/customize" */))
-const _04c9d0ba = () => interopDefault(import('../src/views/themes/widgets.vue' /* webpackChunkName: "views/themes/widgets" */))
-const _a7c7ed9c = () => interopDefault(import('../src/views/tools.vue' /* webpackChunkName: "views/tools" */))
-const _394685e1 = () => interopDefault(import('../src/views/tools/export.vue' /* webpackChunkName: "views/tools/export" */))
-const _a908f55c = () => interopDefault(import('../src/views/tools/import.vue' /* webpackChunkName: "views/tools/import" */))
-const _35a10384 = () => interopDefault(import('../src/views/account/settings.vue' /* webpackChunkName: "views/account/settings" */))
-const _0912d934 = () => interopDefault(import('../src/views/account/user.vue' /* webpackChunkName: "views/account/user" */))
-const _52d7e326 = () => interopDefault(import('../src/views/categories/create.vue' /* webpackChunkName: "views/categories/create" */))
-const _9a6a66bc = () => interopDefault(import('../src/views/plugins/installed.vue' /* webpackChunkName: "views/plugins/installed" */))
-const _2b1ac049 = () => interopDefault(import('../src/views/tags/create.vue' /* webpackChunkName: "views/tags/create" */))
+const _809e7a42 = () => interopDefault(import('../src/views/404.vue' /* webpackChunkName: "views/404" */))
+const _f21fe6b4 = () => interopDefault(import('../src/views/articles.vue' /* webpackChunkName: "views/articles" */))
+const _826402ae = () => interopDefault(import('../src/views/articles/index.vue' /* webpackChunkName: "views/articles/index" */))
+const _42a62135 = () => interopDefault(import('../src/views/articles/create.vue' /* webpackChunkName: "views/articles/create" */))
+const _5824d15e = () => interopDefault(import('../src/views/articles/_id.vue' /* webpackChunkName: "views/articles/_id" */))
+const _05f970f0 = () => interopDefault(import('../src/views/categories/index.vue' /* webpackChunkName: "views/categories/index" */))
+const _20d02d3e = () => interopDefault(import('../src/views/dashboard/index.vue' /* webpackChunkName: "views/dashboard/index" */))
+const _f82e3e60 = () => interopDefault(import('../src/views/login.vue' /* webpackChunkName: "views/login" */))
+const _4ead2290 = () => interopDefault(import('../src/views/medias.vue' /* webpackChunkName: "views/medias" */))
+const _06b3e98a = () => interopDefault(import('../src/views/medias/index.vue' /* webpackChunkName: "views/medias/index" */))
+const _8060b23a = () => interopDefault(import('../src/views/medias/create.vue' /* webpackChunkName: "views/medias/create" */))
+const _201d3bab = () => interopDefault(import('../src/views/pages.vue' /* webpackChunkName: "views/pages" */))
+const _4f9b15ee = () => interopDefault(import('../src/views/pages/index.vue' /* webpackChunkName: "views/pages/index" */))
+const _69081ae0 = () => interopDefault(import('../src/views/pages/create.vue' /* webpackChunkName: "views/pages/create" */))
+const _42bdb30a = () => interopDefault(import('../src/views/plugins/index.vue' /* webpackChunkName: "views/plugins/index" */))
+const _8582d8e8 = () => interopDefault(import('../src/views/settings.vue' /* webpackChunkName: "views/settings" */))
+const _767010e5 = () => interopDefault(import('../src/views/settings/general.vue' /* webpackChunkName: "views/settings/general" */))
+const _74572e05 = () => interopDefault(import('../src/views/tags/index.vue' /* webpackChunkName: "views/tags/index" */))
+const _f473601a = () => interopDefault(import('../src/views/themes.vue' /* webpackChunkName: "views/themes" */))
+const _20345794 = () => interopDefault(import('../src/views/themes/index.vue' /* webpackChunkName: "views/themes/index" */))
+const _d3cbab72 = () => interopDefault(import('../src/views/themes/color.vue' /* webpackChunkName: "views/themes/color" */))
+const _7f425127 = () => interopDefault(import('../src/views/themes/customize.vue' /* webpackChunkName: "views/themes/customize" */))
+const _46a92093 = () => interopDefault(import('../src/views/themes/widgets.vue' /* webpackChunkName: "views/themes/widgets" */))
+const _5ab99b7c = () => interopDefault(import('../src/views/tools.vue' /* webpackChunkName: "views/tools" */))
+const _e9bbea5e = () => interopDefault(import('../src/views/tools/export.vue' /* webpackChunkName: "views/tools/export" */))
+const _0551eb7c = () => interopDefault(import('../src/views/tools/import.vue' /* webpackChunkName: "views/tools/import" */))
+const _22df0b2e = () => interopDefault(import('../src/views/account/settings.vue' /* webpackChunkName: "views/account/settings" */))
+const _4d521856 = () => interopDefault(import('../src/views/account/user.vue' /* webpackChunkName: "views/account/user" */))
+const _69cc1794 = () => interopDefault(import('../src/views/categories/create.vue' /* webpackChunkName: "views/categories/create" */))
+const _2b0cddb2 = () => interopDefault(import('../src/views/plugins/installed.vue' /* webpackChunkName: "views/plugins/installed" */))
+const _3e42dd59 = () => interopDefault(import('../src/views/tags/create.vue' /* webpackChunkName: "views/tags/create" */))
 
 // TODO: remove in Nuxt 3
 const emptyFn = () => {}
@@ -53,129 +53,132 @@ export const routerOptions = {
 
   routes: [{
     path: "/404",
-    component: _8b5ad462,
+    component: _809e7a42,
     name: "404"
   }, {
     path: "/articles",
-    component: _07a6e094,
+    component: _f21fe6b4,
     children: [{
       path: "",
-      component: _75bff5b9,
+      component: _826402ae,
+      meta: {"title":"Articles","keepAlive":true},
       name: "articles"
     }, {
       path: "create",
-      component: _69f30c25,
+      component: _42a62135,
+      meta: {"title":"Create"},
       name: "articles-create"
     }, {
       path: ":id",
-      component: _fbdbdb3e,
-      name: "articles-id"
+      component: _5824d15e,
+      meta: {"title":"Edit"},
+      name: "articles-edit"
     }]
   }, {
     path: "/categories",
-    component: _81588ad0,
+    component: _05f970f0,
     name: "categories"
   }, {
     path: "/dashboard",
-    component: _481d182e,
+    component: _20d02d3e,
     name: "dashboard"
   }, {
     path: "/login",
-    component: _5d61b7c0,
+    component: _f82e3e60,
     name: "login"
   }, {
     path: "/medias",
-    component: _2e4b75c8,
+    component: _4ead2290,
     children: [{
       path: "",
-      component: _aa6af36a,
+      component: _06b3e98a,
       name: "medias"
     }, {
       path: "create",
-      component: _538ae45a,
+      component: _8060b23a,
       name: "medias-create"
     }]
   }, {
     path: "/pages",
-    component: _0cd3daca,
+    component: _201d3bab,
     children: [{
       path: "",
-      component: _3c72f8de,
+      component: _4f9b15ee,
       name: "pages"
     }, {
       path: "create",
-      component: _79a06da0,
+      component: _69081ae0,
       name: "pages-create"
     }]
   }, {
     path: "/plugins",
-    component: _592899fa,
+    component: _42bdb30a,
     name: "plugins"
   }, {
     path: "/settings",
-    component: _327b169c,
+    component: _8582d8e8,
     name: "settings",
     children: [{
       path: "general",
-      component: _38c083f5,
+      component: _767010e5,
       name: "settings-general"
     }]
   }, {
     path: "/tags",
-    component: _e701a5d6,
+    component: _74572e05,
     name: "tags"
   }, {
     path: "/themes",
-    component: _492f51fa,
+    component: _f473601a,
     children: [{
       path: "",
-      component: _c3eb6174,
+      component: _20345794,
       name: "themes"
     }, {
       path: "color",
-      component: _443ea557,
+      component: _d3cbab72,
       name: "themes-color"
     }, {
       path: "customize",
-      component: _4192c437,
+      component: _7f425127,
       name: "themes-customize"
     }, {
       path: "widgets",
-      component: _04c9d0ba,
+      component: _46a92093,
       name: "themes-widgets"
     }]
   }, {
     path: "/tools",
-    component: _a7c7ed9c,
+    component: _5ab99b7c,
     name: "tools",
     children: [{
       path: "export",
-      component: _394685e1,
+      component: _e9bbea5e,
       name: "tools-export"
     }, {
       path: "import",
-      component: _a908f55c,
+      component: _0551eb7c,
       name: "tools-import"
     }]
   }, {
     path: "/account/settings",
-    component: _35a10384,
+    component: _22df0b2e,
     name: "account-settings"
   }, {
     path: "/account/user",
-    component: _0912d934,
+    component: _4d521856,
     name: "account-user"
   }, {
     path: "/categories/create",
-    component: _52d7e326,
+    component: _69cc1794,
     name: "categories-create"
   }, {
     path: "/plugins/installed",
-    component: _9a6a66bc,
+    component: _2b0cddb2,
     name: "plugins-installed"
   }, {
     path: "/tags/create",
-    component: _2b1ac049,
+    component: _3e42dd59,
     name: "tags-create"
   }, {
     path: "/",

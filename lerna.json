@@ -14,7 +14,7 @@
   },
   "version": "independent",
   "changelog": {
-    "repo": "aceHubert/vue-plumemo-blog",
+    "repo": "aceHubert/vue-po-blog",
     "labels": {
       "feat": ":rocket: New Feature",
       "bug": ":bug: Bug Fix",

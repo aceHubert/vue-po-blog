@@ -1,0 +1,40 @@
+{
+  "name": "@po-plugins/easy-comment",
+  "version": "0.0.1-alpha",
+  "description": "",
+  "private": true,
+  "main": "dist/comment-plugin/index.umd.js",
+  "license": "MIT",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "po dev --name commentPlugin --filename index --plugin --dest dist/comment-plugin src/index.ts",
+    "build:front": "po build --name commentPlugin --filename index --dest dist/comment-plugin src/index.ts",
+    "build:widgets": "po build --dest dist/widgets src/widgets",
+    "build:admin": "po build --name commentPluginAdmin --filename index --dest dist/admin  src/admin/index.ts",
+    "build": "yarn build:front && yarn build:widgets && yarn build:admin",
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@vue-async/utils": "^1.0.3",
+    "core-js": "^3.6.4",
+    "vue": "^2.6.9",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^8.4.1"
+  },
+  "devDependencies": {
+    "@plumemo/devtools": "^0.0.5-alpha",
+    "@vue-async/module-loader-typing": "^0.0.2",
+    "@vue/cli-plugin-babel": "^4.2.0",
+    "@vue/cli-plugin-eslint": "^4.2.0",
+    "@vue/cli-plugin-typescript": "^4.5.6",
+    "@vue/cli-service": "^4.2.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^5.0.2",
+    "eslint-plugin-vue": "^5.0.0",
+    "sass": "^1.26.10",
+    "sass-loader": "^7.3.0",
+    "typescript": "^3.7.2",
+    "vue-template-compiler": "^2.6.9"
+  }
+}

@@ -1,15 +1,15 @@
 {
-  "name": "vue-plumemo-blog",
+  "name": "vue-po-blog",
   "version": "0.0.1-alpha",
-  "description": "frontend app for plumemo blog",
+  "description": "前后端分离的轻量级Blog系统",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git@github.com:aceHubert/vue-plumemo-blog.git"
+    "url": "git@github.com:aceHubert/po-blog.git"
   },
   "scripts": {
     "build:es": "lerna run build:es --sort --parallel",
-    "build": "lerna run build --sort --stream --scope=@plumemo/*",
+    "build": "lerna run build --sort --stream --scope=@po/*",
     "clean": "lerna clean --yes",
     "lint": "lerna run lint --parallel --stream",
     "lint:fix": "lerna run lint:fix --parallel",
@@ -19,11 +19,6 @@
     "commit": "git-cz",
     "prepublishOnly": "yarn install && yarn changelog && yarn build",
     "release": "lerna publish"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-lerna-changelog"
-    }
   },
   "dependencies": {
     "eslint-plugin-vue": "^7.1.0"
@@ -63,6 +58,11 @@
     "typescript": "^3.7.2",
     "util": "^0.12.1"
   },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-lerna-changelog"
+    }
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged && yarn lerna run test",
@@ -72,8 +72,8 @@
   "workspaces": {
     "packages": [
       "packages/devtools",
-      "themes/*",
-      "plugins/*"
+      "packages/themes/*",
+      "packages/plugins/*"
     ]
   }
 }

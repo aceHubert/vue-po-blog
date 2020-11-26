@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[14],{800:function(e,t,n){"use strict";n.r(t);var c={components:{ExceptionPage:n(244).b}},o=n(23),component=Object(o.a)(c,(function(){var e=this.$createElement;return(this._self._c||e)("exception-page",{attrs:{type:"404"}})}),[],!1,null,null,null);t.default=component.exports}}]);

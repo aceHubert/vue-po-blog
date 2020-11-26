@@ -2,11 +2,11 @@
   "name": "@plumemo/devtools",
   "version": "0.0.5-alpha",
   "author": "Hubert<yi.xiang@live.cn>",
-  "description": "plumemo devtools",
+  "description": "Po blog 开发工具",
   "main": "dist/cli.js",
   "typings": "types/index.d.ts",
   "keywords": [
-    "plumemo",
+    "po blog",
     "blog",
     "async modules",
     "devtools"
@@ -18,7 +18,7 @@
     "types"
   ],
   "bin": {
-    "po": "./bin/plumemo-cli.js"
+    "po": "./bin/po-cli.js"
   },
   "scripts": {
     "postinstall": "yarn build",
@@ -29,11 +29,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:aceHubert/vue-plumemo-blog.git",
-    "directory": "packages/core"
+    "url": "git@github.com:aceHubert/vue-po-blog.git",
+    "directory": "packages/devtools"
   },
   "bugs": {
-    "url": "https://github.com/aceHubert/vue-plumemo-blog/issues"
+    "url": "https://github.com/aceHubert/vue-po-blog/issues"
   },
   "dependencies": {
     "@nuxt/types": "^2.14.6",

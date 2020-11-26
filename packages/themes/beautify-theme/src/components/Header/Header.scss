@@ -1,0 +1,17 @@
+.b-theme {
+  &-container {
+    padding: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  &-logo {
+    height: 56px;
+    width: auto;
+  }
+
+  &-menu-icon {
+    vertical-align: text-bottom;
+    color: inherit;
+  }
+}

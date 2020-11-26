@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[7],{779:function(n,e,t){"use strict";t.r(e);var l={name:"TagIndex"},c=t(23),component=Object(c.a)(l,(function(){var n=this.$createElement;return(this._self._c||n)("h1",[this._v("标签")])}),[],!1,null,null,null);e.default=component.exports}}]);

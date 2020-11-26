@@ -1,21 +1,30 @@
-# @plumemo/devtools
-包含 `类型定义` 和 `模块调试工具`  
-<br>
+# Po blog 开发工具
+> 包含 `Typescript类型定义` 和 `模块调试工具`    
 
+<br/>
+
+## 安装：
 ``` bash
-// run dev module
-po dev [options] <entry>
-
-// build modules
-po build [options] <entry>
+yarn add -D @plumemo/devtools
+或者
+npm i -D @plumemo/devtools
 ```
 
-## \<entry\>  
+## 使用：
+``` bash
+// 调试模块
+po dev [options] <entry>
+
+// 编译模块
+po build [options] <entry>
+```
+## 参数说明：
+### \<entry\>  
 入口文件或文件夹，详情查看 `vue-cli-service` [entry] 说明
 <br>
 <br>
 
-## dev [options]
+### dev [options]
   `--name`  
   类型：string  
   lib 名，（默认值：pakcage.json name 字段 或 entry 文件名）  
@@ -43,7 +52,7 @@ po build [options] <entry>
 
 
 
-## build [options]
+### build [options]
   `--name`  
   类型：string  
   lib 名，（默认值：pakcage.json name 字段 或 entry 文件名）  

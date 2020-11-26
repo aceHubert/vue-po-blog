@@ -5,7 +5,7 @@ export default function (Vue, opts) {
       name: 'index',
       component: {
         render(h) {
-          return h('div', [h('h1', 'plumemo devtools'), this.$slots.default]);
+          return h('div', [h('h1', 'po devtools'), this.$slots.default]);
         },
       },
     },

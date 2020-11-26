@@ -78,7 +78,7 @@ async function createApp(ssrContext, config = {}) {
   // here we inject the router and store to all child components,
   // making them available everywhere as `this.$router` and `this.$store`.
   const app = {
-    head: {"titleTemplate":(title) => (title ? `${title} | Plumemo Admin` : 'Plumemo Admin'),"meta":[{"charset":"utf-8"},{"http-equiv":"X-UA-Compatible","content":"IE=edge"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Plumemo Blog"}],"script":[],"link":[{"rel":"icon","type":"image\u002Fx-icon","href":"favicon.ico"}],"style":[]},
+    head: {"titleTemplate":(title) => (title ? `${title} | Po Admin` : 'Po Admin'),"meta":[{"charset":"utf-8"},{"http-equiv":"X-UA-Compatible","content":"IE=edge"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Po Blog"}],"script":[],"link":[{"rel":"icon","type":"image\u002Fx-icon","href":"\u002Ffavicon.ico"}],"style":[]},
 
     store,
     router,

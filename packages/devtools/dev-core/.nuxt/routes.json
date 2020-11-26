@@ -2,22 +2,19 @@
   {
     "name": "404",
     "path": "/404",
-    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/core/src/views/404.tsx",
-    "chunkName": "views/404",
-    "_name": "_5e75607c"
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-po-blog/core/src/views/404.tsx",
+    "chunkName": "views/404"
   },
   {
     "name": "index",
     "path": "/",
-    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-plumemo-blog/packages/core/src/views/index.tsx",
-    "chunkName": "views/index",
-    "_name": "_8b1c9e54"
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-po-blog/core/src/views/index.tsx",
+    "chunkName": "views/index"
   },
   {
     "path": "*",
     "redirect": {
       "name": "404"
-    },
-    "_name": "_29172c1a"
+    }
   }
 ]
