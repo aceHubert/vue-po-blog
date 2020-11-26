@@ -1,6 +1,6 @@
 {
   "name": "vue-po-blog",
-  "version": "0.0.1-alpha",
+  "version": "0.0.2-alpha",
   "description": "前后端分离的轻量级Blog系统",
   "private": true,
   "repository": {

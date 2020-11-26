@@ -23,7 +23,7 @@
     "vue-property-decorator": "^8.4.1"
   },
   "devDependencies": {
-    "@plumemo/devtools": "^0.0.5-alpha",
+    "@plumemo/devtools": "^0.0.8-alpha",
     "@vue-async/module-loader-typing": "^0.0.2",
     "@vue/cli-plugin-babel": "^4.2.0",
     "@vue/cli-plugin-eslint": "^4.2.0",
