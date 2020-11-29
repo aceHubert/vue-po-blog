@@ -1,21 +1,21 @@
 <template>
   <a-card :bordered="false">
     <a-table :columns="columns" :data-source="data">
-      <a slot="name" slot-scope="text">tgest</a>
+      <span slot="name" slot-scope="text">{{ text }}</span>
+      <span slot="desc" slot-scope="text">{{ text }} <a-divider type="vertical" /> <a>查看详情</a></span>
       <span slot="action" slot-scope="text, record">
         <a>启用</a>
         <a-divider type="vertical" />
-        <a>删除</a>
-        <a-divider type="vertical" />
-        <a>删除</a>
-        <a-divider type="vertical" />
         <a>更新</a>
+        <a-divider type="vertical" />
+        <a>卸载</a>
       </span>
     </a-table>
   </a-card>
 </template>
 
 <script>
+import { pluginApi } from '@/includes/datas';
 const columns = [
   {
     dataIndex: 'name',
@@ -29,9 +29,20 @@ const columns = [
     key: 'status',
   },
   {
+    title: '作者',
+    dataIndex: 'provider',
+    key: 'provider',
+  },
+  {
     title: '描述',
     dataIndex: 'desc',
     key: 'desc',
+    scopedSlots: { customRender: 'desc' },
+  },
+  {
+    title: '版本号',
+    dataIndex: 'version',
+    key: 'version',
   },
   {
     title: '操作',
@@ -40,26 +51,6 @@ const columns = [
   },
 ];
 
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    status: '停用',
-    desc: 'New York No. 1 Lake Park',
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    status: '启用',
-    desc: 'London No. 1 Lake Park',
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    status: '启用',
-    desc: 'Sidney No. 1 Lake Park',
-  },
-];
 export default {
   name: 'PluginsInstalled',
   data() {
@@ -67,6 +58,16 @@ export default {
       data,
       columns,
     };
+  },
+  created() {
+    this.getInstalledPluginList();
+  },
+  methods: {
+    getInstalledPluginList() {
+      pluginApi.getInstalledPluginList().then((res) => {
+        this.data = res.rows;
+      });
+    },
   },
 };
 </script>

@@ -20,4 +20,8 @@ export interface PluginsApi {
   getList(query?: PluginsPagerQuery): Promise<PluginsPagerResponse>;
   downloadPlugin(pluginId?: string): Promise<true>;
   getPluginIdList(): Promise<string[]>;
+  getInstalledPluginList(query?: PluginsPagerQuery): Promise<PluginsPagerResponse>;
+  startPlugin(pluginId?: string): Promise<true>;
+  stopPlugin(pluginId?: string): Promise<true>;
+  unload(pluginId?: string): Promise<true>;
 }

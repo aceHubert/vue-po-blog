@@ -29,6 +29,6 @@ export const siteApi: SiteApi = {
 
   /** 获取主题模块 */
   getModules(): Promise<ModuleConfig[]> {
-    return http.getList('v1/plumemo/module/admins').then(({ models = [] }) => models);
+    return http.getList('v1/admin/modules/admins').then(({ models = [] }) => models);
   },
 };
