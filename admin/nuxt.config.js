@@ -99,6 +99,7 @@ module.exports = (configContext) => {
       { src: 'plugins/router' }, // router
     ],
     router: {
+      base: '/admin/',
       middleware: 'auth',
       extendRoutes(routes, _resolve) {
         routes.push(
