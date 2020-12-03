@@ -12,11 +12,11 @@ const components = {
   momentLocale: momentEU,
 
   // 内部组件
-  // sTable: {
-  //   sum: ' Sum',
-  //   selected: 'Selected',
-  //   clear: 'Clear',
-  // },
+  sTable: {
+    sum: ' Sum',
+    selected: 'Selected',
+    clear: 'Clear',
+  },
   avatarDropdown: {
     user: {
       center: 'User Center',
@@ -170,6 +170,15 @@ const locale = {
       expand: 'Expand',
       collapse: 'Collapse',
     },
+  },
+
+  // 错误消息
+  error: {
+    404: 'Page not found',
+    500: 'System error',
+
+    // plugins error
+    modulesLoadError: 'Modules load error',
   },
 };
 

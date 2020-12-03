@@ -13,17 +13,17 @@
         <template v-if="showMenu">
           <a-menu-item key="center" @click="handleAction('center')">
             <a-icon type="user" />
-            {{ i18nRender('avatarDropdown.user.center') }}
+            {{ $tv('avatarDropdown.user.center', 'User Center') }}
           </a-menu-item>
           <a-menu-item key="settings" @click="handleAction('settings')">
             <a-icon type="setting" />
-            {{ i18nRender('avatarDropdown.user.settings') }}
+            {{ $tv('avatarDropdown.user.settings', 'Settings') }}
           </a-menu-item>
           <a-menu-divider />
         </template>
         <a-menu-item key="logout" @click="handleLogout">
           <a-icon type="logout" />
-          {{ i18nRender('avatarDropdown.user.logout') }}
+          {{ $tv('avatarDropdown.user.logout', 'Logout') }}
         </a-menu-item>
       </a-menu>
     </template>
@@ -36,23 +36,6 @@
 <script>
 import { Modal } from 'ant-design-vue';
 
-function i18nRender(key) {
-  switch (key) {
-    case 'avatarDropdown.user.center':
-      return 'User Center';
-    case 'avatarDropdown.user.settings':
-      return 'Settings';
-    case 'avatarDropdown.user.logout':
-      return 'Logout';
-    case 'avatarDropdown.dialog.logout.title':
-      return 'Message';
-    case 'avatarDropdown.dialog.logout.content':
-      return 'Do you really log-out?';
-    default:
-      return key;
-  }
-}
-
 export default {
   name: 'AvatarDropdown',
   props: {
@@ -64,10 +47,6 @@ export default {
       type: Boolean,
       default: true,
     },
-    i18nRender: {
-      type: Function,
-      default: i18nRender,
-    },
   },
   methods: {
     handleAction(key) {
@@ -75,8 +54,8 @@ export default {
     },
     handleLogout() {
       Modal.confirm({
-        title: this.i18nRender('avatarDropdown.dialog.logout.title'),
-        content: this.i18nRender('avatarDropdown.dialog.logout.content'),
+        title: this.$tv('avatarDropdown.dialog.logout.title', 'Message'),
+        content: this.$tv('avatarDropdown.dialog.logout.content', 'Do you really log-out?'),
         onOk: () => {
           this.handleAction('logout');
         },

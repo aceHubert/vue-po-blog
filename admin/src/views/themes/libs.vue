@@ -1,17 +1,17 @@
 <template>
-  <h1>导出</h1>
+  <h1>主题库</h1>
 </template>
 
 <router>
 {
   meta:{
-    title: 'Export',
+    title: 'Theme Libs',
   }
 }
 </router>
 
 <script>
 export default {
-  name: 'ToolsExport',
+  name: 'ThemeLibs',
 };
 </script>

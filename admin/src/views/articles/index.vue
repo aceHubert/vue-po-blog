@@ -46,8 +46,13 @@
 
 <router>
 {
+  prop:(route)=>{
+    return {
+      refresh: route.meta.refresh || route.name ==='articles-edit', // 从编辑页面返回时强制刷新
+    }
+  },
   meta:{
-    title: 'Articles',
+    title: 'All Articles',
     keepAlive: true,
   }
 }
@@ -67,6 +72,12 @@ export default {
     SearchForm,
   },
   filters: filters,
+  props: {
+    refresh: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       queryParam: {},
@@ -94,6 +105,9 @@ export default {
     },
     refreshTable() {
       this.$refs.table.refresh();
+    },
+    onSelectChange() {
+      console.log(arguments);
     },
     handleCreate() {
       this.$router.push({ name: 'articles-create' });

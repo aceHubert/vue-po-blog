@@ -1,17 +1,18 @@
 <template>
-  <h1>导出</h1>
+  <h1>新建页面</h1>
 </template>
 
 <router>
 {
+  name:'pages-edit',
   meta:{
-    title: 'Export',
+    title: 'Edit',
   }
 }
 </router>
 
 <script>
 export default {
-  name: 'ToolsExport',
+  name: 'PageCreate',
 };
 </script>

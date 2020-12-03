@@ -63,11 +63,11 @@ module.exports = (configContext) => {
     css: ['~/assets/styles/index.less'],
     modules: ['@nuxtjs/proxy'],
     proxy: {
-      // 在 devtools 时调试模块代理
-      ...(configContext.proxyModuleTarget
+      // 在 devtools 时调试后台模块代理
+      ...(configContext.devProxyModuleTarget
         ? {
-            '/api/blog/v1/plumemo/module/admins': {
-              target: configContext.proxyModuleTarget,
+            '/api/plumemo-service/v1/plumemo/module/admins': {
+              target: configContext.devProxyModuleTarget,
               changeOrigin: false,
               ws: false,
               pathRewrite: {
@@ -76,11 +76,16 @@ module.exports = (configContext) => {
             },
           }
         : null),
-      // 在 dev 或 devtools 模式下接口代理
-      ...(configContext.dev || configContext.devtools
+      // 在 dev 或 devtools 模式下接口代理(此代理在 BASE_URL 被设置成跨域后无效, 请在 dev 模式下不要设置此环境变量)
+      ...((configContext.dev && process.env.PROXYAPI_URL) || configContext.devProxyApiTarget
         ? {
-            '/api/blog': {
-              target: 'http://preview2.plumemo.com',
+            '/api/plumemo-service/v1': {
+              /**
+               * devProxyApiTarget: 在 devtools 自定义接口地址
+               * PROXYAPI_URL: 在 scripts serve 自定义环境变量接口地址
+               * fallback 到当前 domain
+               */
+              target: configContext.devProxyApiTarget || process.env.PROXYAPI_URL || '/',
             },
           }
         : null),
@@ -92,10 +97,10 @@ module.exports = (configContext) => {
       { src: 'plugins/vue-cropper', ssr: false },
       { src: 'plugins/vue-clipboard' },
       { src: 'plugins/vue-viser' },
+      { src: 'plugins/i18n' }, // locale
       // 第三方模块加载完成
       { src: 'plugins/pre-init' }, // pre-init
       { src: 'plugins/module-loader', ssr: false }, // modules load
-      { src: 'plugins/i18n' }, // locale
       { src: 'plugins/router' }, // router
     ],
     router: {

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Axios from 'axios';
-import { hasOwn } from '@vue-async/utils';
+import { hasOwn, error as globalError } from '@vue-async/utils';
 import { http, hook } from '@/includes/functions';
 import { tagApi, articleApi, categoryApi } from '@/includes/datas';
 import * as directives from '@/directives';
@@ -28,8 +28,84 @@ Object.keys(filters).map((key) => {
 Vue.axios = Axios;
 Vue.$http = http;
 
+// 异常处理
+Vue.config.errorHandler = function (err: Error, vm: Vue, info: string) {
+  if (process.env.NODE_ENV === 'production') {
+    // todo: 总的 error 处理, 推送到服务端
+  } else {
+    globalError(false, `[core] Error(${info})：${err.message || err}`, vm);
+  }
+
+  if (vm && vm.$root) {
+    // do something if vue instance is exists
+  }
+};
+
 const plugin: Plugin = async (cxt) => {
   const { app } = cxt;
+
+  /**
+   * root vue created/mounted 勾子
+   */
+  const _created = app.created;
+  const _mounted = app.mounted;
+  app.created = function created() {
+    // 管理后台启动里的一些配置参数
+    bootstrap();
+
+    hook('app_created').exec();
+    _created && _created.call(this);
+  };
+  app.mounted = function mounted() {
+    hook('app_mounted').exec();
+    _mounted && _mounted.call(this);
+
+    // plugin 中无法使用 error 方法，通过 hook 去显示错误
+    this.$route.name !== 'error' && // route error 优先
+      hook('__PLUGIN_ERROR__')
+        .filter(null)
+        .then((error) => {
+          if (error) {
+            this.error(error);
+          }
+        });
+  };
+
+  /**
+   *  注册全局方法
+   * (global mixin 必须在 created 之后才可以被调用, 这里使用 defineProperties)
+   * prototypeAres 已包含 api 部分
+   */
+  ((methods: Dictionary<any> = {}) => {
+    Object.defineProperties(
+      Vue.prototype,
+      Object.keys(methods).reduce((prev, name) => {
+        !hasOwn(prev, name) &&
+          (prev[name] = {
+            get() {
+              return methods[name];
+            },
+            enumerable: true,
+            configurable: true,
+          });
+        return prev;
+      }, {} as PropertyDescriptorMap),
+    );
+  })({ ...prototypeArgs, axios: Axios, $http: http });
+
+  /**
+   * 添加 http and apis 到 Context
+   */
+  cxt.axios = Axios;
+  cxt.$http = http;
+
+  /**
+   * for asyncData
+   */
+  cxt.articleApi = articleApi;
+  cxt.categoryApi = categoryApi;
+  cxt.tagApi = tagApi;
+  // cxt.siteApi = siteApi; // 暂时不导出，仅内部使用
 
   /**
    * 加载网站配置文件
@@ -78,59 +154,6 @@ const plugin: Plugin = async (cxt) => {
   //   globalError(process.env.NODE_ENV === 'production', `[core] Theme配置加载失败, 错误：${err.message}`);
   //   // error({ statusCode: 500, message: 'Theme配置加载失败' });
   // }
-
-  /**
-   *  注册全局方法
-   * (global mixin 必须在 created 之后才可以被调用, 这里使用 defineProperties)
-   * prototypeAres 已包含 api 部分
-   */
-  ((methods: Dictionary<any> = {}) => {
-    Object.defineProperties(
-      Vue.prototype,
-      Object.keys(methods).reduce((prev, name) => {
-        !hasOwn(prev, name) &&
-          (prev[name] = {
-            get() {
-              return methods[name];
-            },
-            enumerable: true,
-            configurable: true,
-          });
-        return prev;
-      }, {} as PropertyDescriptorMap),
-    );
-  })({ ...prototypeArgs, axios: Axios, $http: http });
-
-  /**
-   * root vue created/mounted 勾子
-   */
-  const _created = app.created;
-  const _mounted = app.mounted;
-  app.created = function created() {
-    // 管理后台启动里的一些配置参数
-    bootstrap();
-
-    hook('app_created').exec();
-    _created && _created.call(this);
-  };
-  app.mounted = function mounted() {
-    hook('app_mounted').exec();
-    _mounted && _mounted.call(this);
-  };
-
-  /**
-   * 添加 http and apis 到 Context
-   */
-  cxt.axios = Axios;
-  cxt.$http = http;
-
-  /**
-   * for asyncData
-   */
-  cxt.articleApi = articleApi;
-  cxt.categoryApi = categoryApi;
-  cxt.tagApi = tagApi;
-  // cxt.siteApi = siteApi; // 暂时不导出，仅内部使用
 };
 
 export default plugin;

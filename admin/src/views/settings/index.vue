@@ -1,13 +1,13 @@
 <router>
 {
-  redirect:{name:'themes-libs'}
+  redirect:{name:'settings-general'}
 }
 </router>
 
 <script>
 // 占位页面
 export default {
-  name: 'Themes',
+  name: 'Settings',
   render() {
     return null;
   },

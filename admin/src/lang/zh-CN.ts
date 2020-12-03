@@ -12,11 +12,11 @@ const components = {
   momentLocale: momentCN,
 
   // 内部组件
-  // sTable: {
-  //   sum: '总计',
-  //   selected: '已选择',
-  //   clear: '清除',
-  // },
+  sTable: {
+    sum: '总计',
+    selected: '已选择',
+    clear: '清除',
+  },
   avatarDropdown: {
     user: {
       center: '个人中心',
@@ -55,7 +55,7 @@ const locale = {
     },
     theme: {
       root: '主题',
-      themes: '主题库',
+      libs: '主题库',
       customize: '自定义',
       color: '主题色配置',
       widgets: '小组件',
@@ -74,6 +74,32 @@ const locale = {
       root: '设置',
       general: '常规',
     },
+  },
+
+  // 面包屑导航
+  breadcrumb: {
+    dashboard: '@:menu.dashboard',
+    articles: '@:menu.article.root',
+    allArticles: '@:menu.article.articles',
+    tags: '标签',
+    categories: '分类',
+    pages: '@:menu.page.root',
+    allPages: '@:menu.page.pages',
+    medias: '@:menu.media.root',
+    allMedias: '@:menu.media.medias',
+    themes: '@:menu.theme.root',
+    themeLibs: '@:menu.theme.libs',
+    themeCustomize: '@:menu.theme.libs',
+    themeColor: '@:menu.theme.color',
+    widgets: '@:menu.theme.widgets',
+    tools: '@:menu.tools.root',
+    import: '@:menu.tools.import',
+    export: '@:menu.tools.export',
+    generalSettings: '@:menu.settings.general设置',
+
+    new: '新建',
+    create: '@:breadcrumb.new',
+    edit: '编辑',
   },
 
   // 文章
@@ -143,6 +169,15 @@ const locale = {
       expand: '展开',
       collapse: '收起',
     },
+  },
+
+  // 错误消息
+  error: {
+    404: '页面未找到',
+    500: '系统错误，请稍后重试',
+
+    // plugins error
+    modulesLoadError: '模块加载失败',
   },
 };
 

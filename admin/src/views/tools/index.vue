@@ -1,13 +1,13 @@
 <router>
 {
-  redirect:{name:'themes-libs'}
+  redirect:{name:'tools-import'}
 }
 </router>
 
 <script>
 // 占位页面
 export default {
-  name: 'Themes',
+  name: 'Tools',
   render() {
     return null;
   },

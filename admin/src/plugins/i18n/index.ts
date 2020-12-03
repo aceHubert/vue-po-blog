@@ -169,7 +169,7 @@ const plugin: Plugin = async (cxt) => {
   });
 
   cxt.app.i18n = i18n;
-  cxt.$i18n = i18n; // 添加 i18n 到 Context
+  cxt.$i18n = i18n as any; // 添加 i18n 到 Context, todo: type error
 };
 
 export default plugin;

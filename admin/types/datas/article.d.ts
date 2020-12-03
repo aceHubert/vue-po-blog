@@ -28,9 +28,7 @@ export type CreateArticleModel = {
   tags: Tag['name'][];
 };
 
-export type UpdateArticleModel = Partial<CreateArticleModel> & {
-  id: number;
-};
+export type UpdateArticleModel = Partial<CreateArticleModel>;
 
 export type ArticlePagerQuery = PagerQuery<{
   keywords?: string;
@@ -50,7 +48,7 @@ export interface ArticleApi {
   getList(query?: ArticlePagerQuery): Promise<ArticlePagerResponse>;
   get(id: number): Promise<Article>;
   create(data: CreateArticleModel): Promise<Article>;
-  update(data: UpdateArticleModel): Promise<true>;
+  update(id: number, data: UpdateArticleModel): Promise<true>;
   updateStatus(id: number, status: ArticleStatus): Promise<true>;
   delete(id: number): Promise<true>;
 }

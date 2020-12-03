@@ -1,8 +1,8 @@
 <template>
-  <router-view />
+  <nuxt />
 </template>
 
-<script lang="ts">
+<script>
 export default {
   name: 'BlankLayout',
 };
