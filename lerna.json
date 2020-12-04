@@ -4,7 +4,7 @@
   "useWorkspaces": true,
   "command": {
     "publish": {
-      "conventionalCommits": false,
+      "conventionalCommits": true,
       "gitTagVersion": false,
       "gitReset": false,
       "allowBranch": ["master"],
