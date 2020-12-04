@@ -46,13 +46,19 @@ export const articleApi: ArticleApi = {
    * 获取文章列表
    * @param param
    */
-  getList({ page = 1, size = 10, ...rest } = {}) {
-    return http.getList('/v1/admin/posts', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
-      return {
-        rows: models.map((article) => formatArticle(article)),
-        pager: pageInfo!,
-      };
-    });
+  getList({ page = 1, size = 10, createTime, ...rest } = {}) {
+    let _createTime = null;
+    if (createTime && (createTime[0] || createTime[1])) {
+      _createTime = `${createTime[0] || ''}-${createTime[1] || ''}`;
+    }
+    return http
+      .getList('admin/posts', { params: { page, size, createTime: _createTime, ...rest } })
+      .then(({ models, pageInfo }) => {
+        return {
+          rows: models.map((article) => formatArticle(article)),
+          pager: pageInfo!,
+        };
+      });
   },
 
   /**
@@ -60,7 +66,7 @@ export const articleApi: ArticleApi = {
    * @param id
    */
   get(id) {
-    return http.get(`/v1/admin/posts/${id}`).then(({ model }) => formatArticle(model, true));
+    return http.get(`admin/posts/${id}`).then(({ model }) => formatArticle(model, true));
   },
 
   /**
@@ -68,11 +74,11 @@ export const articleApi: ArticleApi = {
    * @param article
    */
   create(data) {
-    return http.post('/v1/admin/posts', data).then(({ model }) => formatArticle(model, true));
+    return http.post('admin/posts', data).then(({ model }) => formatArticle(model, true));
   },
 
   // crawler(article: any) {
-  //   return http.post('/posts/posts/v1/crawler', article, {
+  //   return http.post('/posts/postscrawler', article, {
   //     timeout: 500000,
   //   });
   // },
@@ -81,8 +87,8 @@ export const articleApi: ArticleApi = {
    * 修改文章
    * @param data
    */
-  update(data) {
-    return http.put('/v1/admin/posts', data).then(() => true);
+  update(id, data) {
+    return http.put(`admin/posts/${id}`, { id, ...data }).then(() => true);
   },
 
   /**
@@ -90,7 +96,7 @@ export const articleApi: ArticleApi = {
    * @param data
    */
   updateStatus(id, status) {
-    return http.put('/v1/admin/posts/status', { id, status }).then(() => true);
+    return http.put('admin/posts/status', { id, status }).then(() => true);
   },
 
   /**
@@ -98,22 +104,6 @@ export const articleApi: ArticleApi = {
    * @param id
    */
   delete(id) {
-    return http.delete(`/v1/admin/posts/${id}`).then(() => true);
+    return http.delete(`admin/posts/${id}`).then(() => true);
   },
-
-  // publishByteBlogs(data: any) {
-  //   return http({
-  //     url: '/posts/byte-blogs/v1/publish',
-  //     method: 'post',
-  //     data,
-  //   });
-  // },
-  // importDataByDB(data: any) {
-  //   return http({
-  //     url: '/blog-move/v1/mysql',
-  //     method: 'post',
-  //     timeout: 5000000,
-  //     data,
-  //   });
-  // },
 };

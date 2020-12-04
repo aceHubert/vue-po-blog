@@ -3,13 +3,27 @@
     <a-form layout="inline">
       <a-row :gutter="48">
         <a-col :md="8" :sm="24">
-          <a-form-item :label="$t('article.search.title')">
-            <a-input v-model="queryParam.title" :placeholder="$t('article.search.titlePlaceholder')" />
+          <a-form-item :label="$tv('article.search.title', 'Title')">
+            <a-input
+              v-model="queryParam.title"
+              :placeholder="$tv('article.search.titlePlaceholder', 'Please input search title')"
+            />
           </a-form-item>
         </a-col>
         <a-col :md="8" :sm="24">
-          <a-form-item :label="$t('article.search.status')">
-            <a-select v-model="queryParam.status" :placeholder="$t('article.search.statusPlaceholder')">
+          <a-form-item :label="$tv('article.search.author', 'Author')">
+            <a-input
+              v-model="queryParam.author"
+              :placeholder="$tv('article.search.authorPlaceholder', 'Please input search author')"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :md="8" :sm="24">
+          <a-form-item :label="$tv('article.search.status')">
+            <a-select
+              v-model="queryParam.status"
+              :placeholder="$tv('article.search.statusPlaceholder', 'Please choose search status')"
+            >
               <a-select-option v-for="option in statusOptions" :key="option.value" :value="option.value">{{
                 option.label
               }}</a-select-option>
@@ -22,25 +36,16 @@
               <a-date-picker @change="dateChange" style="width: 100%" placeholder="请选择日期" />
             </a-form-item> -->
           </a-col>
-          <!-- <a-col :md="8" :sm="24">
-            <a-form-item label="同步状态">
-              <a-select v-model="queryParam.isPublishByteBlogs" placeholder="请选择" default-value="">
-                <a-select-option value="">全部</a-select-option>
-                <a-select-option value="0">未同步</a-select-option>
-                <a-select-option value="1">已同步</a-select-option>
-              </a-select>
-            </a-form-item>
-          </a-col> -->
         </template>
         <a-col :md="(!advanced && 8) || 24" :sm="24">
           <span
             class="table-page-search-submitButtons"
             :style="(advanced && { float: 'right', overflow: 'hidden' }) || {}"
           >
-            <a-button type="primary" @click="handlerSearch">{{ $t('common.btn.search') }}</a-button>
-            <a-button style="margin-left: 8px" @click="handleReset">{{ $t('common.btn.reset') }}</a-button>
+            <a-button type="primary" @click="handlerSearch">{{ $tv('common.btn.search', 'Search') }}</a-button>
+            <a-button style="margin-left: 8px" @click="handleReset">{{ $tv('common.btn.reset', 'Reset') }}</a-button>
             <a @click="toggleAdvanced" style="margin-left: 8px">
-              {{ $t(`common.btn.${advanced ? 'collapse' : 'expand'}`) }}
+              {{ $tv(`common.btn.${advanced ? 'collapse' : 'expand'}`, advanced ? 'Collapse' : 'Expand') }}
               <a-icon :type="advanced ? 'up' : 'down'" />
             </a>
           </span>
@@ -60,12 +65,16 @@ export default {
       type: String,
       default: '',
     },
+    author: {
+      type: String,
+      default: '',
+    },
     status: {
       type: Number,
       default: null,
     },
     createTime: {
-      type: Number,
+      type: Array,
       default: null,
     },
   },
@@ -77,6 +86,7 @@ export default {
       queryParam: {
         title: this.title,
         status: this.status,
+        author: this.author,
         createTime: this.createTime,
       },
     };
@@ -86,15 +96,15 @@ export default {
       return [
         {
           value: null,
-          label: this.$t('article.status.all'),
+          label: this.$tv('article.status.all', 'All'),
         },
         {
           value: ArticleStatus.published,
-          label: this.$t('article.status.published'),
+          label: this.$tv('article.status.published', 'Published'),
         },
         {
           value: ArticleStatus.draft,
-          label: this.$t('article.status.draft'),
+          label: this.$tv('article.status.draft', 'Draft'),
         },
       ];
     },

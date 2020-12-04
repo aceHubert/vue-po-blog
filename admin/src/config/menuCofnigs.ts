@@ -72,8 +72,8 @@ export function getDefaultMenus(): Menu[] {
       icon: theme,
       children: [
         {
-          name: 'themes',
-          title: 'menu.theme.themes',
+          name: 'themes-libs',
+          title: 'menu.theme.libs',
         },
         {
           name: 'themes-customize',

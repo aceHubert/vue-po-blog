@@ -17,7 +17,7 @@ export type Theme = {
 //   introduction?: string;
 // };
 
-type ModuleConfig = {
+export type ModuleConfig = {
   moduleName: string;
   entry: string;
   styles?: string | string[];

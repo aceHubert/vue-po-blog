@@ -1,9 +1,15 @@
-<template>
-  <h1>主题库</h1>
-</template>
+<router>
+{
+  redirect:{name:'themes-libs'}
+}
+</router>
 
 <script>
+// 占位页面
 export default {
-  name: 'ThemeIndex',
+  name: 'Themes',
+  render() {
+    return null;
+  },
 };
 </script>

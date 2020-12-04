@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[29],{829:function(e,n,t){"use strict";t.r(n);var l={name:"TagCreate"},r=t(23),component=Object(r.a)(l,(function(){var e=this.$createElement;return(this._self._c||e)("h1",[this._v("新建标签")])}),[],!1,null,null,null);n.default=component.exports}}]);

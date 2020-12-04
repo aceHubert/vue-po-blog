@@ -18,6 +18,10 @@
       </div>
     </template> -->
 
+    <template #headerContentRender>
+      <breadcrumb style="padding: 0 12px; line-height: 64px" v-if="settings.layout !== 'topmenu' && !isMobile" />
+    </template>
+
     <template #rightContentRender>
       <right-content
         :top-menu="settings.layout === 'topmenu'"
@@ -35,16 +39,15 @@
       <global-footer></global-footer>
     </template>
     <!-- <setting-drawer :settings="settings" @change="handleSettingChange" /> -->
-    <router-view class="content" />
+    <nuxt class="content" />
   </pro-layout>
 </template>
 
-<script type="ts">
+<script>
 import ProLayout from '@ant-design-vue/pro-layout';
 import { appMixin } from '@/mixins';
-import { RightContent, GlobalFooter } from '@/components';
+import { RightContent, Breadcrumb, GlobalFooter } from '@/components';
 import { localeFuncs, settingsFuncs } from '@/includes/functions';
-
 import config, { ContentWidth } from '@/config/proLayoutConfigs';
 
 export default {
@@ -54,6 +57,7 @@ export default {
     ProLayout,
     // SettingDrawer,
     RightContent,
+    Breadcrumb,
     GlobalFooter,
   },
   data() {
@@ -125,7 +129,7 @@ export default {
   },
   methods: {
     i18nRender(key) {
-      return this.$i18n.t(`${key}`);
+      return this.$i18n.tv(key, key);
     },
     handleChangeLocale(locale) {
       this.$i18n.locale = locale;
@@ -174,7 +178,7 @@ export default {
         });
       }
     },
-  }
+  },
 };
 </script>
 

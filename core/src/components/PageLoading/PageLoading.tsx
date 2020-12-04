@@ -20,7 +20,7 @@ export default class PageLoading extends Vue {
       <div class={classes.container}>
         <div class={classes.content}>
           <figure class={classes.logo}></figure>
-          <p classes={classes.text}>Loading...</p>
+          <p classes={classes.text}>{this.$tv('pageLoading.text', 'Loading...')}</p>
         </div>
       </div>
     ) : null;

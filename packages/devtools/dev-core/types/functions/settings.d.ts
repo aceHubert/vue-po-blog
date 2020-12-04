@@ -12,7 +12,7 @@ export interface SettingsFunctions {
   getApiPath(): string;
   getCopyright(): string;
   getICP(): string;
-  getLogo(): { type: 'text' | 'image'; content: string };
+  getLogo(): { imgUrl?: string; text?: string };
   getUserInfo(): UserInfo;
   setSiteSettings(settings: Record<string, any>): void;
   setUserInfo(userInfo: Partial<UserInfo>): void;

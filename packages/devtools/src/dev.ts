@@ -14,6 +14,7 @@ export async function run(
     admin?: boolean;
     port?: number;
     host?: string;
+    'proxy-api-target'?: string;
   } = {},
 ) {
   const entry = path.join(process.cwd(), file);
@@ -24,6 +25,7 @@ export async function run(
   const isAdmin = !!args.admin;
   const port = args.port || 5007;
   const host = args.host || 'localhost';
+  const proxyApiTarget = args['proxy-api-target'];
 
   const apiPath = `dev-${isAdmin ? 'admin' : isPlugin ? 'plugins' : 'theme'}`;
   const staticPath = path.resolve(process.cwd(), dest);
@@ -94,19 +96,27 @@ export async function run(
     const rootDir = path.resolve(__dirname, `../dev-${isAdmin ? 'admin' : 'core'}`);
     const nuxtConfig = require(path.resolve(rootDir, nuxtConfigFile));
     const staticDir = nuxtConfig.dir && nuxtConfig.dir.static ? nuxtConfig.dir.static : 'static';
+    const configContext: Record<string, any> = {
+      devtools: true,
+    };
+
+    if (proxyApiTarget) {
+      configContext.devProxyApiTarget = proxyApiTarget;
+    }
+
+    if (isAdmin) {
+      configContext.devProxyModuleTarget = proxyPath;
+    } else if (isPlugin) {
+      configContext.devProxyPluginTarget = proxyPath;
+    } else {
+      configContext.devProxyThemeTarget = proxyPath;
+    }
 
     const nuxt = await loadNuxt({
       for: 'start',
       rootDir,
       // configFile: nuxtConfigFile,
-      configContext: {
-        devtools: true,
-        ...(isAdmin
-          ? { proxyModuleTarget: proxyPath }
-          : isPlugin
-          ? { proxyPluginTarget: proxyPath }
-          : { proxyThemeTarget: proxyPath }),
-      },
+      configContext,
     });
 
     app.use(express.static(path.resolve(rootDir, staticDir)));
@@ -116,7 +126,9 @@ export async function run(
     app.listen(port, host, () =>
       console.log(
         '\x1b[36m',
-        `server is listening on: http://${host}:${port} \n wait for module build completely \n`,
+        `Listening on: http://${host}:${port}${
+          proxyApiTarget ? `\n API Proxy to: ${proxyApiTarget}` : ''
+        } \n wait for module build completely \n`,
         '\x1b[0m',
       ),
     );

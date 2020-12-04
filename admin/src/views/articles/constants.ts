@@ -1,7 +1,12 @@
+/**
+ * scopedSlots 中设置 title 是关键字
+ */
+
+import upperFirst from 'lodash.upperfirst';
 import { ArticleStatus } from '@/includes/datas/enums';
 
 // 表格列信息
-const table = {
+const table = () => ({
   columns: [
     // {
     //   title: 'ID',
@@ -9,38 +14,45 @@ const table = {
     //   dataIndex: 'id',
     // },
     {
-      title: 'article.column.title',
+      title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.title', 'Title'),
       align: 'left',
       dataIndex: 'title',
       scopedSlots: { customRender: 'titles' },
     },
     {
-      title: 'article.column.summary',
+      title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.author', 'Author'),
+      align: 'left',
+      dataIndex: 'author',
+      scopedSlots: { customRender: 'author' },
+    },
+    {
+      title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.summary', 'Summary'),
       dataIndex: 'summary',
       align: 'left',
       scopedSlots: { customRender: 'summary' },
     },
     {
-      title: 'article.column.status',
+      title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.status', 'Status'),
       dataIndex: 'status',
       align: 'left',
       scopedSlots: { customRender: 'status' },
     },
     {
-      title: 'article.column.views',
+      title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.views', 'Views'),
       align: 'left',
       dataIndex: 'views',
       needTotal: true,
     },
     {
-      title: 'article.column.createTime',
+      title: (i18nRender: (key: string, fallback: string) => string) =>
+        i18nRender('article.column.createTime', 'CreateTime'),
       align: 'left',
       dataIndex: 'createTime',
       width: '250px',
       scopedSlots: { customRender: 'createTime' },
     },
     {
-      title: 'article.column.actions',
+      title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.actions', 'Actions'),
       dataIndex: 'actions',
       align: 'left',
       fixed: 'right',
@@ -48,12 +60,12 @@ const table = {
       scopedSlots: { customRender: 'actions' },
     },
   ],
-};
+});
 
 // 表格里面的列key value
 const filters = {
-  statusFilter(status: ArticleStatus, i18nRender: (key: string) => string) {
-    return i18nRender(`article.status.${ArticleStatus[status]}`);
+  statusFilter(status: ArticleStatus, i18nRender: (key: string, fallback: string) => string) {
+    return i18nRender(`article.status.${ArticleStatus[status]}`, upperFirst(ArticleStatus[status]));
   },
   statusTypeFilter(status: number) {
     enum StatusType {
@@ -65,7 +77,7 @@ const filters = {
 };
 
 // md配置
-const markdownOption = {
+const markdownOption = () => ({
   bold: true, // 粗体
   italic: true, // 斜体
   header: true, // 标题
@@ -92,6 +104,6 @@ const markdownOption = {
   subfield: true, // 单双栏模式
   preview: true, // 预览
   htmlcode: true, // 展示html源码
-};
+});
 
 export { table, filters, markdownOption };

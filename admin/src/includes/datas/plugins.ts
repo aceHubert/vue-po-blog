@@ -15,10 +15,9 @@ function formatPlugin(plugin: any): PluginsModel {
 }
 
 export const pluginApi: PluginsApi = {
-
   /**
    * 获取插件列表 @todo 待优化
-   * 
+   *
    * @param param
    */
   getList({ page = 1, size = 10, ...rest } = {}) {
@@ -33,17 +32,17 @@ export const pluginApi: PluginsApi = {
   },
   /**
    * 下载插件
-   * 
-   * @param pluginId 
+   *
+   * @param pluginId
    */
   downloadPlugin(pluginId) {
-    return http.post(`/v1/admin/modules/download/plugin/${pluginId}`).then(() => true);
+    return http.post(`admin/module/download/plugin/${pluginId}`).then(() => true);
   },
   /**
    * 获取安装的插件id列表
    */
   getPluginIdList() {
-    return http.getList(`/v1/admin/modules/plugin-ids`).then(({ models }) => {
+    return http.getList(`admin/module/plugin-ids`).then(({ models }) => {
       return models;
     });
   },

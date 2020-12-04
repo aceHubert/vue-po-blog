@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[20],{827:function(e,t,n){"use strict";n.r(t);var r={name:"CategoryCreate"},l=n(23),component=Object(l.a)(r,(function(){var e=this.$createElement;return(this._self._c||e)("h1",[this._v("新建新建")])}),[],!1,null,null,null);t.default=component.exports}}]);

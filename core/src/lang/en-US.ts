@@ -3,10 +3,10 @@
  */
 
 const locale = {
-  home: 'Home',
-  usage: 'How to use',
-  backToHome: 'Back to @:home',
-  pageNotFound: 'Page not found!',
+  error: {
+    404: 'Page not found',
+    500: 'System error',
+  },
 };
 
 export default {

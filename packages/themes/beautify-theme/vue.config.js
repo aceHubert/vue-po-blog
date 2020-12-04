@@ -1,3 +1,5 @@
+const isProd = process.env.NODE_ENV === 'production';
+
 module.exports = {
   publicPath: './',
   productionSourceMap: false,
@@ -7,7 +9,7 @@ module.exports = {
     // 是否使用css分离插件 ExtractTextPlugin
     extract: true,
     // 开启 CSS source maps?
-    sourceMap: false,
+    sourceMap: isProd,
     // css预设器配置项
     loaderOptions: {
       scss: {
@@ -20,8 +22,7 @@ module.exports = {
       css: {
         // 模块定义设置
         modules: {
-          localIdentName:
-            process.env.NODE_ENV === 'production' ? '[hash:base64]' : '[path]_[name]_[local]_[hash:base64:5]',
+          localIdentName: isProd ? '[hash:base64]' : '[path]_[name]_[local]_[hash:base64:5]',
         },
         localsConvention: 'camelCaseOnly',
       },

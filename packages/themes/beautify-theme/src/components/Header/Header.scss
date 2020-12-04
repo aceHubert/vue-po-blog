@@ -1,4 +1,4 @@
-.b-theme {
+.b-theme-header {
   &-container {
     padding: 0;
     display: flex;
@@ -8,10 +8,23 @@
   &-logo {
     height: 56px;
     width: auto;
+
+    &__img {
+      height: 100%;
+    }
+
+    &__text {
+      margin-left: 5px;
+      display: inline-block;
+      line-height: 56px;
+      vertical-align: top;
+    }
   }
 
-  &-menu-icon {
-    vertical-align: text-bottom;
-    color: inherit;
+  &-menu {
+    &__icon {
+      vertical-align: text-bottom !important;
+      color: inherit !important;
+    }
   }
 }

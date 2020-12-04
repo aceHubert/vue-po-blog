@@ -1,6 +1,6 @@
 {
   "name": "@po-themes/beautiful-theme",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1",
   "description": "",
   "private": true,
   "main": "dist/beautify-theme/index.umd.js",
@@ -23,14 +23,18 @@
     "my-info": "dist/wedgets/my-info/my-info.umd.js"
   },
   "license": "MIT",
-  "sideEffects": false,
   "files": [
     "dist",
     "src"
   ],
+  "sideEffects": [
+    "./src/**/*.scss",
+    "./src/components/**/*.tsx",
+    "./src/*.ts"
+  ],
   "scripts": {
-    "dev": "po dev --name beautifyTheme --filename index --dest dist/beautify-theme src/main.ts",
-    "dev:admin": "po dev --name beautifyThemeAdmin --filename index --dest dist/admin --port 5006 --admin src/admin/main.ts",
+    "dev": "po dev --name beautifyTheme --filename index --dest dist/beautify-theme --proxy-api-target http://preview2.plumemo.com src/main.ts",
+    "dev:admin": "po dev --name beautifyThemeAdmin --filename index --dest dist/admin --port 5006 --admin --proxy-api-target http://preview2.plumemo.com src/admin/main.ts",
     "build:front": "po build --name beautifyTheme --filename index --dest dist/beautify-theme src/main.ts",
     "build:widgets": "po build --dest dist/widgets src/widgets",
     "build:admin": "po build --name beautifyThemeAdmin --filename index --dest dist/admin  src/admin/main.ts",
@@ -49,7 +53,7 @@
     "vuetify": "^2.3.10"
   },
   "devDependencies": {
-    "@plumemo/devtools": "^0.0.8-alpha",
+    "@plumemo/devtools": "^0.0.8",
     "@types/marked": "^1.1.0",
     "@vue/cli-plugin-babel": "^4.2.0",
     "@vue/cli-plugin-eslint": "^4.2.0",

@@ -46,6 +46,11 @@ require('yargs')
           type: 'string',
           describe: ' specify host',
           default: 'localhost',
+        })
+        .option('proxy-api-target', {
+          type: 'string',
+          describe: 'proxy to a specify api address(ex: http://localhost:5007)',
+          default: '',
         });
     },
     (argv) => {

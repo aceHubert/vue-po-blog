@@ -49,7 +49,7 @@ module.exports = (configContext) => {
       pages: 'views',
     },
     head: {
-      titleTemplate: (title) => (title ? `${title} | Po blog` : 'Po blog'),
+      titleTemplate: (title) => (title ? `${title} | Po Blog` : 'Po Blog'),
       meta: [
         { charset: 'utf-8' },
         { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
@@ -64,52 +64,69 @@ module.exports = (configContext) => {
     loading: '~/components/PageLoading',
     modules: ['@nuxtjs/proxy'],
     proxy: {
-      // 在 devtools 时调试模块代理
-      ...(configContext.proxyThemeTarget
+      // 在 devtools 时调试主题模块代理
+      ...(configContext.devProxyThemeTarget
         ? {
-            '/api/blog/v1/plumemo/module/theme': {
-              target: configContext.proxyThemeTarget,
+            '/api/plumemo-service/v1/modules/theme': {
+              target: configContext.devProxyThemeTarget,
               changeOrigin: false,
               ws: false,
               pathRewrite: {
-                '^/api/blog/v1/plumemo/module/theme': '',
+                '^/api/plumemo-service/v1/modules/theme': '',
               },
             },
           }
         : null),
-      ...(configContext.proxyPluginTarget
+      // 在 devtools 时调试插件模块代理
+      ...(configContext.devProxyPluginTarget
         ? {
-            '/api/blog/v1/plumemo/module/plugins': {
-              target: configContext.proxyPluginTarget,
+            '/api/plumemo-service/v1/modules/plugins': {
+              target: configContext.devProxyPluginTarget,
               changeOrigin: false,
               ws: false,
               pathRewrite: {
-                '^/api/blog/v1/plumemo/module/plugins': '',
+                '^/api/plumemo-service/v1/modules/plugins': '',
               },
             },
           }
         : null),
-      // 在 dev 或 devtools 模式下接口代理
-      ...(configContext.dev || configContext.devtools
+      // 在 dev 或 devtools 模式下接口代理(此代理在 BASE_URL 被设置成跨域后无效, 请在 dev 模式下不要设置此环境变量)
+      ...((configContext.dev && process.env.PROXYAPI_URL) || configContext.devProxyApiTarget
         ? {
-            '/api/blog': {
-              target: 'https://preview.plumemo.com',
+            '/api/plumemo-service': {
+              /**
+               * devProxyApiTarget: 在 devtools 自定义接口地址
+               * PROXYAPI_URL: 在 scripts serve 自定义环境变量接口地址
+               * fallback 到当前 domain
+               */
+              target: configContext.devProxyApiTarget || process.env.PROXYAPI_URL || '/',
             },
           }
         : null),
     },
     plugins: [
+      { src: 'plugins/i18n' }, // locale
       { src: 'plugins/pre-init' }, // pre-init
       { src: 'plugins/module-loader', ssr: false }, // modules load
-      { src: 'plugins/i18n' }, // locale
       { src: 'plugins/router' }, // router
     ],
     router: {
-      extendRoutes(routes, _resolve) {
-        routes.push({
-          path: '*',
-          redirect: { name: '404' },
-        });
+      extendRoutes(routes, resolve) {
+        routes.push(
+          ...[
+            {
+              path: '/error',
+              name: 'error',
+              props: true,
+              component: resolve(__dirname, './src/layouts/error.tsx'),
+            },
+            {
+              path: '*',
+              props: { error: { statusCode: 404 } },
+              component: resolve(__dirname, './src/layouts/error.tsx'),
+            },
+          ],
+        );
       },
     },
     buildModules: ['@nuxt/typescript-build'],
@@ -119,6 +136,18 @@ module.exports = (configContext) => {
         babelrc: true,
         configFile: true,
         cacheDirectory: undefined,
+      },
+      optimization: {
+        splitChunks: {
+          chunks: 'async',
+        },
+      },
+      splitChunks: {
+        vendor: true,
+        commons: true,
+        runtime: true,
+        pages: false,
+        layouts: false,
       },
       transpile: ['@vue-async/module-loader'],
       extractCSS: true,

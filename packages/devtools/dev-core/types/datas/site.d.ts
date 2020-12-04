@@ -1,3 +1,5 @@
+import { MetaInfo } from 'vue-meta';
+
 export type Theme = {
   primary: string;
   secondary: string;
@@ -17,7 +19,7 @@ export type UserInfo = {
   introduction?: string;
 };
 
-type ModuleConfig = {
+export type ModuleConfig = {
   moduleName: string;
   entry: string;
   styles?: string | string[];
@@ -26,7 +28,8 @@ type ModuleConfig = {
 
 export interface SiteApi {
   getConfigs(): Promise<Record<string, any>>;
-  getTheme(): Promise<{ dark: boolean; themes: Partial<Theme> }>;
+  getSEOConfigs(): Promise<NonNullable<MetaInfo['meta']>>;
+  getThemes(): Promise<{ dark: boolean; themes: Partial<Theme> }>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   getThemeModule(): Promise<ModuleConfig>;
   getPluginModules(): Promise<ModuleConfig[]>;

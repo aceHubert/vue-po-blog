@@ -1,6 +1,6 @@
 {
   "name": "vue-po-blog",
-  "version": "0.0.2-alpha",
+  "version": "0.0.2",
   "description": "前后端分离的轻量级Blog系统",
   "private": true,
   "repository": {
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build:es": "lerna run build:es --sort --parallel",
-    "build": "lerna run build --sort --stream --scope=@po/*",
+    "build": "lerna run build --sort --stream --scope=@plumemo/*",
     "clean": "lerna clean --yes",
     "lint": "lerna run lint --parallel --stream",
     "lint:fix": "lerna run lint:fix --parallel",
@@ -18,10 +18,8 @@
     "changelog": "node ./scripts/genChangelog.js",
     "commit": "git-cz",
     "prepublishOnly": "yarn install && yarn changelog && yarn build",
-    "release": "lerna publish"
-  },
-  "dependencies": {
-    "eslint-plugin-vue": "^7.1.0"
+    "release:alpha": "lerna publish --canary prepatch --preid alpha --dist-tag latest --force-publish",
+    "release": "lerna publish --no-git-reset"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
@@ -45,7 +43,6 @@
     "eslint-plugin-jest": "^24.0.2",
     "eslint-plugin-local": "^1.0.0",
     "eslint-plugin-prettier": "^3.1.2",
-    "express": "^4.17.1",
     "glob-gitignore": "^1.0.14",
     "husky": ">=1",
     "jest": "^24.9.0",

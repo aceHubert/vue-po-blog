@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue, { VueConstructor } from 'vue';
 import VueI18n from 'vue-i18n';
 import { hasOwn } from '@vue-async/utils';
 import { hook, globalLocale, localeFuncs } from '@/includes/functions';
@@ -20,8 +20,22 @@ Vue.use(VueI18n);
  */
 Object.defineProperties(VueI18n.prototype, {
   tv: {
-    value: function (key: VueI18n.Path, fallbackStr: string, locale?: VueI18n.Locale): VueI18n.TranslateResult {
-      return (this.t && this.te ? (this.te(key, locale) ? this.t(key, locale) : fallbackStr) : fallbackStr) || key;
+    value: function (
+      this: typeof VueI18n.prototype,
+      key: VueI18n.Path,
+      fallbackStr: string,
+      locale?: VueI18n.Locale,
+      values?: VueI18n.Values,
+    ): VueI18n.TranslateResult {
+      return (
+        (this.t && this.te
+          ? this.te(key, locale)
+            ? locale
+              ? this.t(key, locale, values)
+              : this.t(key, values)
+            : fallbackStr
+          : fallbackStr) || key
+      );
     },
     writable: false,
     enumerable: true,
@@ -34,9 +48,15 @@ Object.defineProperties(VueI18n.prototype, {
  */
 Object.defineProperties(Vue.prototype, {
   $tv: {
-    value: function (key: VueI18n.Path, fallbackStr: string, locale?: VueI18n.Locale): VueI18n.TranslateResult {
+    value: function (
+      this: InstanceType<VueConstructor>,
+      key: VueI18n.Path,
+      fallbackStr: string,
+      locale?: VueI18n.Locale,
+      values?: VueI18n.Values,
+    ): VueI18n.TranslateResult {
       const i18n = this.$i18n;
-      return i18n.tv(key, fallbackStr, locale);
+      return i18n.tv(key, fallbackStr, locale, values);
     },
     writable: false,
     enumerable: true,
@@ -176,7 +196,7 @@ const plugin: Plugin = async (cxt) => {
   });
 
   cxt.app.i18n = i18n;
-  cxt.$i18n = i18n; // 添加 i18n 到 Context
+  cxt.$i18n = i18n as any; // 添加 i18n 到 Context, todo: type error
 };
 
 export default plugin;

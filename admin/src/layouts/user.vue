@@ -1,7 +1,7 @@
 <template>
   <div id="layout-user" :class="['layout', `theme-${theme}`]">
     <div class="container">
-      <router-view :class="device"></router-view>
+      <nuxt :class="device" />
     </div>
     <div class="footer">
       <div class="links">
@@ -20,7 +20,6 @@ import { appMixin, deviceMixin } from '@/mixins';
 export default {
   name: 'UserLayout',
   mixins: [appMixin, deviceMixin],
-
   data() {
     return {};
   },

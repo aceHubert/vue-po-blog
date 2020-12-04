@@ -4,9 +4,9 @@
   "useWorkspaces": true,
   "command": {
     "publish": {
-      "conventionalCommits": false,
+      "conventionalCommits": true,
       "gitTagVersion": false,
-      "gitReset": false,
+      "gitReset": true,
       "allowBranch": ["master"],
       "ignoreChanges": ["**/CHANGELOG.md", "**/node_modules/**", "**/package.json", "**/*.md", "**/test/**"],
       "message": "chore(release): publish"

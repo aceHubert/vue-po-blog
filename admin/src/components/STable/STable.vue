@@ -1,13 +1,3 @@
-<i18n>
-{
-  "sTable": {
-    "sum": " Sum",
-    "selected": "Selected",
-    "clear": ""
-  }
-}
-</i18n>
-
 <script>
 import T from 'ant-design-vue/es/table/Table';
 import get from 'lodash.get';
@@ -41,8 +31,8 @@ export default {
     /**
      * alert: {
      *   show: true,
-     *   clear: Function
-     * }
+     *   clear: Function | true
+     * } | true
      */
     alert: {
       type: [Object, Boolean],
@@ -86,6 +76,17 @@ export default {
     };
   },
   computed: {
+    showAlert() {
+      if (this.alert === null) return false;
+
+      return (
+        (typeof this.alert === 'object' &&
+          this.alert.show &&
+          this.rowSelection &&
+          typeof this.rowSelection.selectedRowKeys !== 'undefined') ||
+        this.alert
+      );
+    },
     hasPagination() {
       return ['auto', true].includes(this.showPagination);
     },
@@ -164,19 +165,9 @@ export default {
             (this.showPagination && this.localPagination.pageSize) ||
             this.pageSize,
         },
-        (sorter &&
-          sorter.field && {
-            sortField: sorter.field,
-          }) ||
-          {},
-        (sorter &&
-          sorter.order && {
-            sortOrder: sorter.order,
-          }) ||
-          {},
-        {
-          ...filters,
-        },
+        (sorter && sorter.field && { sortField: sorter.field }) || {},
+        (sorter && sorter.order && { sortOrder: sorter.order }) || {},
+        { ...filters },
       );
       const result = this.data(parameter);
       // 对接自己的通用数据接口需要修改下方代码中的 r.pageNo, r.totalCount, r.data
@@ -207,10 +198,7 @@ export default {
         columns.length &&
         columns.forEach((column) => {
           if (column.needTotal) {
-            totalList.push({
-              ...column,
-              total: 0,
-            });
+            totalList.push({ ...column, total: 0 });
           }
         });
       return totalList;
@@ -221,14 +209,7 @@ export default {
      * @param Boolean bool
      */
     refresh(force = false) {
-      force &&
-        (this.localPagination = Object.assign(
-          {},
-          {
-            current: 1,
-            pageSize: this.size,
-          },
-        ));
+      force && (this.localPagination = Object.assign({}, { current: 1, pageSize: this.size }));
       this.loadData();
     },
     /**
@@ -255,73 +236,64 @@ export default {
      */
     clearSelected() {
       if (this.rowSelection) {
-        this.rowSelection.onChange([], []);
+        this.rowSelection.onChange && this.rowSelection.onChange([], []);
         this.updateSelect([], []);
       }
     },
-    /**
-     * 处理交给 table 使用者去处理 clear 事件时，内部选中统计同时调用
-     * @param callback
-     * @returns {*}
-     */
-    renderClear(callback) {
-      if (this.selectedRowKeys.length <= 0) return null;
-      return (
-        <a
-          style="margin-left: 24px"
-          onClick={() => {
-            callback();
-            this.clearSelected();
-          }}
-        >
-          {this.$t('sTable.clear')}
-        </a>
-      );
-    },
+
     renderAlert() {
       // 绘制统计列数据
       const needTotalItems = this.needTotalList.map((item) => {
         return (
           <span style="margin-right: 12px">
-            {this.$t(item.title)}
-            {this.$t('sTable.sum')}:&nbsp;
+            {typeof item.title === 'function' ? item.title(this.$tv.bind(this)) : item.title}
+            {this.$tv('sTable.sum', ' Sum')}:&nbsp;
             <a style="font-weight: 600">{!item.customRender ? item.total : item.customRender(item.total)}</a>
           </span>
         );
       });
 
       // 绘制 清空 按钮
-      const clearItem =
-        typeof this.alert.clear === 'boolean' && this.alert.clear
-          ? this.renderClear(this.clearSelected)
-          : this.alert !== null && typeof this.alert.clear === 'function'
-          ? this.renderClear(this.alert.clear)
-          : null;
+      let clearItem = null;
+      if (this.alert && this.alert.clear) {
+        const callback = typeof this.alert.clear === 'function' ? this.alert.clear : () => {};
+        clearItem = renderClear.call(this, callback);
+      }
 
       // 绘制 alert 组件
       return (
         <a-alert showIcon={true} style="margin-bottom: 16px;">
           <template slot="message">
             <span style="margin-right: 12px">
-              {this.$t('sTable.selected')}:&nbsp;<a style="font-weight: 600">{this.selectedRows.length}</a>
+              {this.$tv('sTable.selected', 'Selected')}:&nbsp;<a style="font-weight: 600">{this.selectedRows.length}</a>
             </span>
             {needTotalItems}
             {clearItem}
           </template>
         </a-alert>
       );
+
+      // 处理交给 table 使用者去处理 clear 事件时，内部选中统计同时调用
+      function renderClear(callback) {
+        if (this.selectedRowKeys.length <= 0) return null;
+        return (
+          <a
+            style="margin-left: 24px"
+            onClick={() => {
+              callback();
+              this.clearSelected();
+            }}
+          >
+            {this.$tv('sTable.clear', 'Clear')}
+          </a>
+        );
+      }
     },
   },
 
   render() {
     const props = {};
     const localKeys = Object.keys(this.$data);
-    const showAlert =
-      (typeof this.alert === 'object' &&
-        this.alert !== null &&
-        this.alert.show &&
-        typeof this.rowSelection.selectedRowKeys !== 'undefined') ||
-      this.alert;
 
     Object.keys(T.props).forEach((k) => {
       const localKey = `local${k.substring(0, 1).toUpperCase()}${k.substring(1)}`;
@@ -330,10 +302,13 @@ export default {
         return props[k];
       }
       if (k === 'columns') {
-        props[k] = this[k].map(({ title, ...rest }) => ({ title: this.$t(title), ...rest }));
+        props[k] = this[k].map(({ title, ...rest }) => ({
+          title: typeof title === 'function' ? title(this.$tv.bind(this)) : title,
+          ...rest,
+        }));
         return props[k];
       } else if (k === 'rowSelection') {
-        if (showAlert && this.rowSelection) {
+        if (this.showAlert && this.rowSelection) {
           // 如果需要使用alert，则重新绑定 rowSelection 事件
           props[k] = {
             ...this.rowSelection,
@@ -358,7 +333,7 @@ export default {
 
     return (
       <div class="table-wrapper">
-        {showAlert ? this.renderAlert() : null}
+        {this.showAlert ? this.renderAlert() : null}
         {table}
       </div>
     );

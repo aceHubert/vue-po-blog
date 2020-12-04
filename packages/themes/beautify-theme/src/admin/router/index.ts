@@ -10,8 +10,11 @@ function interopDefault(promise: Promise<any>) {
 const routes: RouteConfig[] = [
   {
     path: 'themes/settings',
-    name: 'beautify-theme-settings',
+    name: 'b-theme-settings',
     component: () => interopDefault(import(/* webpackChunkName: "router-theme" */ '@/admin/views/settings')),
+    meta: {
+      title: 'Theme Settings Demo',
+    },
   },
 ];
 

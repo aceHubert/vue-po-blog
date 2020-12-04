@@ -2,14 +2,22 @@
   <div id="dashboard">
     <div class="banner">
       <img alt="logo" style="width: 64px; height: 64px" src="/images/logo.png" />
-      <h3 style="margin-top: 1rem">Welcome to Po Blog</h3>
+      <h3 style="margin-top: 1rem">Welcome to Plumemo Blog</h3>
     </div>
   </div>
 </template>
 
+<router>
+{
+  meta:{
+    title: 'Dashboard'
+  }
+}
+</router>
+
 <script>
 export default {
-  name: 'Home',
+  name: 'Dashboard',
 };
 </script>
 
