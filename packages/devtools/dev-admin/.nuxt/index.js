@@ -18,9 +18,9 @@ import nuxt_plugin_vuels_5dbd9c1a from 'nuxt_plugin_vuels_5dbd9c1a' // Source: .
 import nuxt_plugin_vuecropper_2022eba1 from 'nuxt_plugin_vuecropper_2022eba1' // Source: ../src/plugins/vue-cropper (mode: 'client')
 import nuxt_plugin_vueclipboard_14adb0ac from 'nuxt_plugin_vueclipboard_14adb0ac' // Source: ../src/plugins/vue-clipboard (mode: 'all')
 import nuxt_plugin_vueviser_b3047e3e from 'nuxt_plugin_vueviser_b3047e3e' // Source: ../src/plugins/vue-viser (mode: 'all')
+import nuxt_plugin_i18n_61b06223 from 'nuxt_plugin_i18n_61b06223' // Source: ../src/plugins/i18n (mode: 'all')
 import nuxt_plugin_preinit_00bd4102 from 'nuxt_plugin_preinit_00bd4102' // Source: ../src/plugins/pre-init (mode: 'all')
 import nuxt_plugin_moduleloader_77ce702f from 'nuxt_plugin_moduleloader_77ce702f' // Source: ../src/plugins/module-loader (mode: 'client')
-import nuxt_plugin_i18n_61b06223 from 'nuxt_plugin_i18n_61b06223' // Source: ../src/plugins/i18n (mode: 'all')
 import nuxt_plugin_router_6bfcdbe4 from 'nuxt_plugin_router_6bfcdbe4' // Source: ../src/plugins/router (mode: 'all')
 
 // Component: <ClientOnly>
@@ -227,16 +227,16 @@ async function createApp(ssrContext, config = {}) {
     await nuxt_plugin_vueviser_b3047e3e(app.context, inject)
   }
 
+  if (typeof nuxt_plugin_i18n_61b06223 === 'function') {
+    await nuxt_plugin_i18n_61b06223(app.context, inject)
+  }
+
   if (typeof nuxt_plugin_preinit_00bd4102 === 'function') {
     await nuxt_plugin_preinit_00bd4102(app.context, inject)
   }
 
   if (process.client && typeof nuxt_plugin_moduleloader_77ce702f === 'function') {
     await nuxt_plugin_moduleloader_77ce702f(app.context, inject)
-  }
-
-  if (typeof nuxt_plugin_i18n_61b06223 === 'function') {
-    await nuxt_plugin_i18n_61b06223(app.context, inject)
   }
 
   if (typeof nuxt_plugin_router_6bfcdbe4 === 'function') {

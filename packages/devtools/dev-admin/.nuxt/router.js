@@ -3,37 +3,41 @@ import Router from 'vue-router'
 import { interopDefault } from './utils'
 import scrollBehavior from './router.scrollBehavior.js'
 
-const _809e7a42 = () => interopDefault(import('../src/views/404.vue' /* webpackChunkName: "views/404" */))
-const _f21fe6b4 = () => interopDefault(import('../src/views/articles.vue' /* webpackChunkName: "views/articles" */))
-const _826402ae = () => interopDefault(import('../src/views/articles/index.vue' /* webpackChunkName: "views/articles/index" */))
-const _42a62135 = () => interopDefault(import('../src/views/articles/create.vue' /* webpackChunkName: "views/articles/create" */))
-const _5824d15e = () => interopDefault(import('../src/views/articles/_id.vue' /* webpackChunkName: "views/articles/_id" */))
-const _05f970f0 = () => interopDefault(import('../src/views/categories/index.vue' /* webpackChunkName: "views/categories/index" */))
-const _20d02d3e = () => interopDefault(import('../src/views/dashboard/index.vue' /* webpackChunkName: "views/dashboard/index" */))
-const _f82e3e60 = () => interopDefault(import('../src/views/login.vue' /* webpackChunkName: "views/login" */))
-const _4ead2290 = () => interopDefault(import('../src/views/medias.vue' /* webpackChunkName: "views/medias" */))
-const _06b3e98a = () => interopDefault(import('../src/views/medias/index.vue' /* webpackChunkName: "views/medias/index" */))
-const _8060b23a = () => interopDefault(import('../src/views/medias/create.vue' /* webpackChunkName: "views/medias/create" */))
-const _201d3bab = () => interopDefault(import('../src/views/pages.vue' /* webpackChunkName: "views/pages" */))
-const _4f9b15ee = () => interopDefault(import('../src/views/pages/index.vue' /* webpackChunkName: "views/pages/index" */))
-const _69081ae0 = () => interopDefault(import('../src/views/pages/create.vue' /* webpackChunkName: "views/pages/create" */))
-const _42bdb30a = () => interopDefault(import('../src/views/plugins/index.vue' /* webpackChunkName: "views/plugins/index" */))
-const _8582d8e8 = () => interopDefault(import('../src/views/settings.vue' /* webpackChunkName: "views/settings" */))
-const _767010e5 = () => interopDefault(import('../src/views/settings/general.vue' /* webpackChunkName: "views/settings/general" */))
-const _74572e05 = () => interopDefault(import('../src/views/tags/index.vue' /* webpackChunkName: "views/tags/index" */))
-const _f473601a = () => interopDefault(import('../src/views/themes.vue' /* webpackChunkName: "views/themes" */))
-const _20345794 = () => interopDefault(import('../src/views/themes/index.vue' /* webpackChunkName: "views/themes/index" */))
-const _d3cbab72 = () => interopDefault(import('../src/views/themes/color.vue' /* webpackChunkName: "views/themes/color" */))
-const _7f425127 = () => interopDefault(import('../src/views/themes/customize.vue' /* webpackChunkName: "views/themes/customize" */))
-const _46a92093 = () => interopDefault(import('../src/views/themes/widgets.vue' /* webpackChunkName: "views/themes/widgets" */))
-const _5ab99b7c = () => interopDefault(import('../src/views/tools.vue' /* webpackChunkName: "views/tools" */))
-const _e9bbea5e = () => interopDefault(import('../src/views/tools/export.vue' /* webpackChunkName: "views/tools/export" */))
-const _0551eb7c = () => interopDefault(import('../src/views/tools/import.vue' /* webpackChunkName: "views/tools/import" */))
-const _22df0b2e = () => interopDefault(import('../src/views/account/settings.vue' /* webpackChunkName: "views/account/settings" */))
-const _4d521856 = () => interopDefault(import('../src/views/account/user.vue' /* webpackChunkName: "views/account/user" */))
-const _69cc1794 = () => interopDefault(import('../src/views/categories/create.vue' /* webpackChunkName: "views/categories/create" */))
-const _2b0cddb2 = () => interopDefault(import('../src/views/plugins/installed.vue' /* webpackChunkName: "views/plugins/installed" */))
-const _3e42dd59 = () => interopDefault(import('../src/views/tags/create.vue' /* webpackChunkName: "views/tags/create" */))
+import _809e7a42 from '../src/views/404.vue'
+import _f21fe6b4 from '../src/views/articles.vue'
+import _826402ae from '../src/views/articles/index.vue'
+import _42a62135 from '../src/views/articles/create.vue'
+import _5824d15e from '../src/views/articles/_id.vue'
+import _05f970f0 from '../src/views/categories/index.vue'
+import _20d02d3e from '../src/views/dashboard/index.vue'
+import _f82e3e60 from '../src/views/login.vue'
+import _4ead2290 from '../src/views/medias.vue'
+import _06b3e98a from '../src/views/medias/index.vue'
+import _8060b23a from '../src/views/medias/create.vue'
+import _201d3bab from '../src/views/pages.vue'
+import _4f9b15ee from '../src/views/pages/index.vue'
+import _69081ae0 from '../src/views/pages/create.vue'
+import _b59c8854 from '../src/views/pages/_id.vue'
+import _42bdb30a from '../src/views/plugins/index.vue'
+import _8582d8e8 from '../src/views/settings.vue'
+import _e70d7de2 from '../src/views/settings/index.vue'
+import _767010e5 from '../src/views/settings/general.vue'
+import _74572e05 from '../src/views/tags/index.vue'
+import _f473601a from '../src/views/themes.vue'
+import _20345794 from '../src/views/themes/index.vue'
+import _d3cbab72 from '../src/views/themes/color.vue'
+import _7f425127 from '../src/views/themes/customize.vue'
+import _c111624c from '../src/views/themes/libs.vue'
+import _46a92093 from '../src/views/themes/widgets.vue'
+import _5ab99b7c from '../src/views/tools.vue'
+import _89c50176 from '../src/views/tools/index.vue'
+import _e9bbea5e from '../src/views/tools/export.vue'
+import _0551eb7c from '../src/views/tools/import.vue'
+import _22df0b2e from '../src/views/account/settings.vue'
+import _4d521856 from '../src/views/account/user.vue'
+import _69cc1794 from '../src/views/categories/create.vue'
+import _2b0cddb2 from '../src/views/plugins/installed.vue'
+import _3e42dd59 from '../src/views/tags/create.vue'
 
 // TODO: remove in Nuxt 3
 const emptyFn = () => {}
@@ -58,15 +62,16 @@ export const routerOptions = {
   }, {
     path: "/articles",
     component: _f21fe6b4,
+    meta: {"title":"Articles"},
     children: [{
       path: "",
       component: _826402ae,
-      meta: {"title":"Articles","keepAlive":true},
+      meta: {"title":"All Articles","keepAlive":true},
       name: "articles"
     }, {
       path: "create",
       component: _42a62135,
-      meta: {"title":"Create"},
+      meta: {"title":"New"},
       name: "articles-create"
     }, {
       path: ":id",
@@ -77,10 +82,12 @@ export const routerOptions = {
   }, {
     path: "/categories",
     component: _05f970f0,
+    meta: {"title":"Categories"},
     name: "categories"
   }, {
     path: "/dashboard",
     component: _20d02d3e,
+    meta: {"title":"Dashboard"},
     name: "dashboard"
   }, {
     path: "/login",
@@ -89,26 +96,37 @@ export const routerOptions = {
   }, {
     path: "/medias",
     component: _4ead2290,
+    meta: {"title":"Medias"},
     children: [{
       path: "",
       component: _06b3e98a,
+      meta: {"title":"All Medias"},
       name: "medias"
     }, {
       path: "create",
       component: _8060b23a,
+      meta: {"title":"New"},
       name: "medias-create"
     }]
   }, {
     path: "/pages",
     component: _201d3bab,
+    meta: {"title":"Pages"},
     children: [{
       path: "",
       component: _4f9b15ee,
+      meta: {"title":"All Pages","keepAlive":true},
       name: "pages"
     }, {
       path: "create",
       component: _69081ae0,
+      meta: {"title":"New"},
       name: "pages-create"
+    }, {
+      path: ":id",
+      component: _b59c8854,
+      meta: {"title":"Edit"},
+      name: "page-edit"
     }]
   }, {
     path: "/plugins",
@@ -117,56 +135,82 @@ export const routerOptions = {
   }, {
     path: "/settings",
     component: _8582d8e8,
-    name: "settings",
+    meta: {"title":"Settings"},
     children: [{
+      path: "",
+      component: _e70d7de2,
+      redirect: {"name":"settings-general"},
+      name: "settings"
+    }, {
       path: "general",
       component: _767010e5,
+      meta: {"title":"General Settings"},
       name: "settings-general"
     }]
   }, {
     path: "/tags",
     component: _74572e05,
+    meta: {"title":"Tags"},
     name: "tags"
   }, {
     path: "/themes",
     component: _f473601a,
+    meta: {"title":"Themes"},
     children: [{
       path: "",
       component: _20345794,
+      redirect: {"name":"themes-libs"},
       name: "themes"
     }, {
       path: "color",
       component: _d3cbab72,
+      meta: {"title":"Theme Color"},
       name: "themes-color"
     }, {
       path: "customize",
       component: _7f425127,
+      meta: {"title":"Theme Customize"},
       name: "themes-customize"
+    }, {
+      path: "libs",
+      component: _c111624c,
+      meta: {"title":"Theme Libs"},
+      name: "themes-libs"
     }, {
       path: "widgets",
       component: _46a92093,
+      meta: {"title":"Widgets"},
       name: "themes-widgets"
     }]
   }, {
     path: "/tools",
     component: _5ab99b7c,
-    name: "tools",
+    meta: {"title":"Tools"},
     children: [{
+      path: "",
+      component: _89c50176,
+      redirect: {"name":"tools-import"},
+      name: "tools"
+    }, {
       path: "export",
       component: _e9bbea5e,
+      meta: {"title":"Export"},
       name: "tools-export"
     }, {
       path: "import",
       component: _0551eb7c,
+      meta: {"title":"Import"},
       name: "tools-import"
     }]
   }, {
     path: "/account/settings",
     component: _22df0b2e,
+    meta: {"title":"Site Settings"},
     name: "account-settings"
   }, {
     path: "/account/user",
     component: _4d521856,
+    meta: {"title":"User Info"},
     name: "account-user"
   }, {
     path: "/categories/create",

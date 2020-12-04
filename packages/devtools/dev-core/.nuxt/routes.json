@@ -1,20 +1,26 @@
 [
   {
-    "name": "404",
-    "path": "/404",
-    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-po-blog/core/src/views/404.tsx",
-    "chunkName": "views/404"
-  },
-  {
     "name": "index",
     "path": "/",
     "component": "/Users/hubertx/Desktop/Workspace/projects/vue-po-blog/core/src/views/index.tsx",
-    "chunkName": "views/index"
+    "chunkName": "views/index",
+    "_name": "_60d925c6"
+  },
+  {
+    "path": "/error",
+    "name": "error",
+    "props": true,
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-po-blog/core/src/layouts/error.tsx",
+    "_name": "_00ecbbd7"
   },
   {
     "path": "*",
-    "redirect": {
-      "name": "404"
-    }
+    "props": {
+      "error": {
+        "statusCode": 404
+      }
+    },
+    "component": "/Users/hubertx/Desktop/Workspace/projects/vue-po-blog/core/src/layouts/error.tsx",
+    "_name": "_00ecbbd7"
   }
 ]

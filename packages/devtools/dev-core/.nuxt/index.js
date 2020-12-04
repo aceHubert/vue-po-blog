@@ -13,9 +13,9 @@ import { createStore } from './store.js'
 
 /* Plugins */
 
+import nuxt_plugin_i18n_61b06223 from 'nuxt_plugin_i18n_61b06223' // Source: ../src/plugins/i18n (mode: 'all')
 import nuxt_plugin_preinit_00bd4102 from 'nuxt_plugin_preinit_00bd4102' // Source: ../src/plugins/pre-init (mode: 'all')
 import nuxt_plugin_moduleloader_77ce702f from 'nuxt_plugin_moduleloader_77ce702f' // Source: ../src/plugins/module-loader (mode: 'client')
-import nuxt_plugin_i18n_61b06223 from 'nuxt_plugin_i18n_61b06223' // Source: ../src/plugins/i18n (mode: 'all')
 import nuxt_plugin_router_6bfcdbe4 from 'nuxt_plugin_router_6bfcdbe4' // Source: ../src/plugins/router (mode: 'all')
 
 // Component: <ClientOnly>
@@ -66,7 +66,7 @@ async function createApp(ssrContext, config = {}) {
   // here we inject the router and store to all child components,
   // making them available everywhere as `this.$router` and `this.$store`.
   const app = {
-    head: {"titleTemplate":(title) => (title ? `${title} | Po blog` : 'Po blog'),"meta":[{"charset":"utf-8"},{"http-equiv":"X-UA-Compatible","content":"IE=edge"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Po Blog"}],"script":[],"link":[{"rel":"icon","type":"image\u002Fx-icon","href":"\u002Ffavicon.ico"}],"style":[]},
+    head: {"titleTemplate":(title) => (title ? `${title} | Po Blog` : 'Po Blog'),"meta":[{"charset":"utf-8"},{"http-equiv":"X-UA-Compatible","content":"IE=edge"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Po Blog"}],"script":[],"link":[{"rel":"icon","type":"image\u002Fx-icon","href":"\u002Ffavicon.ico"}],"style":[]},
 
     store,
     router,
@@ -195,16 +195,16 @@ async function createApp(ssrContext, config = {}) {
   }
   // Plugin execution
 
+  if (typeof nuxt_plugin_i18n_61b06223 === 'function') {
+    await nuxt_plugin_i18n_61b06223(app.context, inject)
+  }
+
   if (typeof nuxt_plugin_preinit_00bd4102 === 'function') {
     await nuxt_plugin_preinit_00bd4102(app.context, inject)
   }
 
   if (process.client && typeof nuxt_plugin_moduleloader_77ce702f === 'function') {
     await nuxt_plugin_moduleloader_77ce702f(app.context, inject)
-  }
-
-  if (typeof nuxt_plugin_i18n_61b06223 === 'function') {
-    await nuxt_plugin_i18n_61b06223(app.context, inject)
   }
 
   if (typeof nuxt_plugin_router_6bfcdbe4 === 'function') {

@@ -1,4 +1,5 @@
 import { AxiosStatic } from 'axios';
+import { IVueI18n } from 'vue-i18n';
 import { CategoryApi, TagApi, ArticleApi } from './datas';
 import { HookFunction, HttpInstance, LocaleFunctions, SettingsFunctions } from './functions';
 
@@ -18,6 +19,7 @@ declare module 'vue/types/vue' {
   interface Vue extends VueExtraPrototypes {
     axios: AxiosStatic;
     $http: HttpInstance;
+    $tv: IVueI18n['tv'];
   }
 
   interface VueConstructor {

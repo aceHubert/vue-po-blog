@@ -56,17 +56,18 @@ export async function findExecFile(rootDir: string, filename = 'index') {
 /**
  * loading, return: unloading function
  */
-export function startLoading() {
+export function startLoading(msg = 'Building for production...') {
   const P = ['|', '/', '-', '\\'];
   let x = 0;
 
   const interval = setInterval(() => {
-    process.stdout.write('\r' + P[x++]);
+    process.stdout.write(`\r\x1b[36m${P[x++]} ${msg}\x1b[0m`);
     x &= 3;
   }, 300);
 
   return () => {
     clearInterval(interval);
+    process.stdout.clearLine(0);
     process.stdout.write('\r');
   };
 }

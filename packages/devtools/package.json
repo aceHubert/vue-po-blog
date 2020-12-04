@@ -1,6 +1,6 @@
 {
   "name": "@plumemo/devtools",
-  "version": "0.0.8-alpha",
+  "version": "0.0.8",
   "author": "Hubert<yi.xiang@live.cn>",
   "description": "Po blog 开发工具",
   "main": "dist/cli.js",
