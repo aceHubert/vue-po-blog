@@ -127,6 +127,18 @@ module.exports = (configContext) => {
         configFile: true,
         cacheDirectory: undefined,
       },
+      optimization: {
+        splitChunks: {
+          chunks: 'async',
+        },
+      },
+      splitChunks: {
+        vendor: true,
+        commons: true,
+        runtime: true,
+        pages: false,
+        layouts: false,
+      },
       transpile: ['@vue-async/module-loader'],
       extractCSS: true,
       loaders: {
