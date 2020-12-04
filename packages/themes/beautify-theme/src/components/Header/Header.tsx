@@ -9,23 +9,18 @@ import './Header.scss';
 export default class Header extends Vue {
   get logo() {
     const logo = this.getLogo();
-    if (logo) {
-      if (logo.type === 'text') {
-        return <span class="b-theme-logo--text">{logo.content}</span>;
-      } else if (logo.type === 'image') {
-        return <img class="b-theme-logo" src={logo} alt="logo" />;
-      } else {
-        // todo: 混合
-        return null;
-      }
-    }
-    return <img class="b-theme-logo" src="/images/logo.png" alt="logo" />;
+    return (
+      <figure class="b-theme-header-logo">
+        <img class="b-theme-header-logo__img" src={logo.imgUrl || '/images/logo.png'} alt="logo" />
+        {logo.text ? <figcaption class="b-theme-header-logo__text">{logo.text}</figcaption> : null}
+      </figure>
+    );
   }
 
   render() {
     return (
       <VAppBar app>
-        <VContainer class="b-theme-container">
+        <VContainer class="b-theme-header-container">
           <VAppBarNavIcon
             class="hidden-md-and-up"
             onClick={() => {
@@ -41,11 +36,11 @@ export default class Header extends Vue {
                   to={menu.to}
                   exact
                   active-class="primary--text"
-                  class="ml-3 text-decoration-none text-no-wrap"
+                  class="ml-3 text-decoration-none text-no-wrap b-theme-header-menu"
                   style="color:inherit;"
                 >
                   {menu.icon ? (
-                    <VIcon size="1.25em" class="mr-1 b-theme-menu-icon">
+                    <VIcon size="1.25em" class="mr-1 b-theme-header-menu__icon">
                       {menu.icon}
                     </VIcon>
                   ) : null}

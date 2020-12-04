@@ -157,7 +157,7 @@ export default class ThemeHome extends Vue {
                         <VCardTitle>{title}</VCardTitle>
                         <VCardSubtitle>
                           {summary}
-                          <div>
+                          <div style="min-height:18px">
                             {tags.map((tag: any) => (
                               <nuxt-link
                                 to={{ name: 'b-theme-search-tag', params: { id: tag.id } }}

@@ -14,7 +14,7 @@ export default function (this: InstanceType<VueConstructor>, Vue: VueConstructor
   opts.addSiderMenus(
     [
       {
-        name: 'beautify-theme-settings',
+        name: 'b-theme-settings',
         title: 'Settings',
       },
     ],
