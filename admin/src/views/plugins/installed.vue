@@ -1,14 +1,13 @@
 <template>
   <a-card :bordered="false">
     <a-table :columns="columns" :data-source="data">
-      <span slot="name" slot-scope="text">{{ text }}</span>
       <span slot="desc" slot-scope="text">{{ text }} <a-divider type="vertical" /> <a>查看详情</a></span>
       <span slot="action" slot-scope="text, record">
-        <a>启用</a>
+        <a @click="start(record.pluginId)">启用</a>
         <a-divider type="vertical" />
-        <a>更新</a>
+        <a @click="stop(record.pluginId)">停用</a>
         <a-divider type="vertical" />
-        <a>卸载</a>
+        <a @click="unload(record.pluginId)">卸载</a>
       </span>
     </a-table>
   </a-card>
@@ -18,10 +17,9 @@
 import { pluginApi } from '@/includes/datas';
 const columns = [
   {
-    dataIndex: 'name',
-    key: 'name',
+    dataIndex: 'title',
+    key: 'title',
     title: '插件',
-    scopedSlots: { customRender: 'name' },
   },
   {
     title: '状态',
@@ -55,7 +53,7 @@ export default {
   name: 'PluginsInstalled',
   data() {
     return {
-      data,
+      data: [],
       columns,
     };
   },
@@ -67,6 +65,15 @@ export default {
       pluginApi.getInstalledPluginList().then((res) => {
         this.data = res.rows;
       });
+    },
+    start(pluginId) {
+      pluginApi.startPlugin(pluginId).then((res) => {});
+    },
+    unload(pluginId) {
+      pluginApi.unload(pluginId).then((res) => {});
+    },
+    stop(pluginId) {
+      pluginApi.stopPlugin(pluginId).then((res) => {});
     },
   },
 };
