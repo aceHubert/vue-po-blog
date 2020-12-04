@@ -12,24 +12,6 @@ const components = {
   momentLocale: momentEU,
 
   // 内部组件
-  sTable: {
-    sum: ' Sum',
-    selected: 'Selected',
-    clear: 'Clear',
-  },
-  avatarDropdown: {
-    user: {
-      center: 'User Center',
-      settings: 'Settings',
-      logout: 'Logout',
-    },
-    dialog: {
-      logout: {
-        title: '@:common.dialog.title.tip',
-        content: 'Do you really log-out.',
-      },
-    },
-  },
 };
 
 const locale = {
@@ -97,42 +79,6 @@ const locale = {
     },
   },
 
-  // 文章
-  article: {
-    status: {
-      all: 'All', // 仅用于搜索
-      draft: 'Draft',
-      published: 'Published',
-    },
-    search: {
-      title: 'Title',
-      titlePlaceholder: 'Input @.lower:article.search.title',
-      status: 'Status',
-      statusPlaceholder: 'Choose @.lower:article.search.status',
-    },
-    column: {
-      title: 'Title',
-      summary: 'Summary',
-      status: 'Status',
-      views: 'Views',
-      createTime: 'CreateTime',
-      actions: 'Actions',
-    },
-    dialog: {
-      delete: {
-        content: 'Do you really want to delete this article?',
-        okBtn: '@:common.btn.ok',
-        cancelBtn: '@:common.btn.no',
-      },
-    },
-    btn: {
-      edit: '@:common.btn.edit',
-      delete: '@:common.btn.delete',
-      publish: 'Publish',
-      draft: 'Draft',
-    },
-  },
-
   // 常规
   common: {
     dialog: {
@@ -147,17 +93,17 @@ const locale = {
         error: 'Error, please try later!',
       },
       btn: {
-        ok: '@:common.btn.ok',
-        no: '@:common.btn.no',
-        cancel: '@:common.btn.cancel',
-        confirm: '@:common.btn.confirm',
+        ok: '@:common.btnText.ok',
+        no: '@:common.btnText.no',
+        cancel: '@:common.btnText.cancel',
+        confirm: '@:common.btnText.confirm',
       },
     },
     placeholder: {
       input: 'Input {field}',
       choose: 'Choose {field}',
     },
-    btn: {
+    btnText: {
       ok: 'Ok',
       no: 'No',
       cancel: 'Cancel',

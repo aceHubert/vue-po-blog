@@ -246,7 +246,7 @@ export default {
       const needTotalItems = this.needTotalList.map((item) => {
         return (
           <span style="margin-right: 12px">
-            {this.$t(item.title)}
+            {typeof item.title === 'function' ? item.title(this.$tv.bind(this)) : item.title}
             {this.$tv('sTable.sum', ' Sum')}:&nbsp;
             <a style="font-weight: 600">{!item.customRender ? item.total : item.customRender(item.total)}</a>
           </span>
@@ -302,7 +302,10 @@ export default {
         return props[k];
       }
       if (k === 'columns') {
-        props[k] = this[k].map(({ title, ...rest }) => ({ title: this.$t(title), ...rest }));
+        props[k] = this[k].map(({ title, ...rest }) => ({
+          title: typeof title === 'function' ? title(this.$tv.bind(this)) : title,
+          ...rest,
+        }));
         return props[k];
       } else if (k === 'rowSelection') {
         if (this.showAlert && this.rowSelection) {

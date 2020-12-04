@@ -10,34 +10,45 @@
       :data="loadData"
       :alert="options.alert"
       :rowSelection="options.rowSelection"
-      :i18nRender="i18nRender"
       showPagination="auto"
     >
       <template #titles="text">
         <ellipsis :length="15" tooltip>{{ text }}</ellipsis>
       </template>
+      <template #author="text">
+        {{ text || '-' }}
+      </template>
       <template #summary="text">
-        <ellipsis :length="10" tooltip>{{ text }}</ellipsis>
+        <ellipsis :length="30" tooltip>{{ text }}</ellipsis>
       </template>
       <template #status="text">
-        <a-badge :status="text | statusTypeFilter" :text="text | statusFilter(i18nRender)" />
+        <a-badge :status="text | statusTypeFilter" :text="text | statusFilter($i18n.tv.bind($i18n))" />
       </template>
       <template #createTime="text">
         {{ text | dateFormat }}
       </template>
       <template slot="actions" slot-scope="text, record">
-        <a @click="handleEdit(record)">{{ $t('article.btn.edit') }}</a>
+        <a :title="$tv('article.btnTips.edit')" @click="handleEdit(record)">{{
+          $tv('article.btnText.edit', 'Edit')
+        }}</a>
         <a-divider type="vertical" />
-        <a v-if="record.status === 1" @click="handleModifyStatus(record, 2)">{{ $t('article.btn.publish') }}</a>
-        <a v-else-if="record.status === 2" @click="handleModifyStatus(record, 1)">{{ $t('article.btn.draft') }}</a>
+        <a v-if="record.status === 1" :title="$tv('article.btnTips.publish')" @click="handleModifyStatus(record, 2)">{{
+          $tv('article.btnText.publish', 'Publish')
+        }}</a>
+        <a
+          v-else-if="record.status === 2"
+          :title="$tv('article.btnTips.moveToDraft')"
+          @click="handleModifyStatus(record, 1)"
+          >{{ $tv('article.btnText.moveToDraft', 'Move to Draft') }}</a
+        >
         <a-divider type="vertical" />
         <a-popconfirm
-          :title="$t('article.dialog.delete.content')"
-          :okText="$t('article.dialog.delete.okBtn')"
-          :cancelText="$t('article.dialog.delete.cancelBtn')"
+          :title="$tv('article.dialog.delete.content', 'Do you really want to delete this article?')"
+          :okText="$tv('article.dialog.delete.okBtn', 'Ok')"
+          :cancelText="$tv('article.dialog.delete.cancelBtn', 'No')"
           @confirm="handleDelete(record)"
         >
-          <a href="#none">{{ $t('article.btn.delete') }}</a>
+          <a href="#none" :title="$tv('article.btnTips.delete')">{{ $tv('article.btnText.delete', 'Delete') }}</a>
         </a-popconfirm>
       </template>
     </STable>
@@ -46,11 +57,7 @@
 
 <router>
 {
-  prop:(route)=>{
-    return {
-      refresh: route.meta.refresh || route.name ==='articles-edit', // 从编辑页面返回时强制刷新
-    }
-  },
+  prop:true,
   meta:{
     title: 'All Articles',
     keepAlive: true,
@@ -93,13 +100,10 @@ export default {
           onChange: this.onSelectChange,
         },
       },
-      columns: table.columns,
+      columns: table().columns,
     };
   },
   methods: {
-    i18nRender(key) {
-      return this.$i18n.t(`${key}`);
-    },
     loadData(parameter) {
       return articleApi.getList(Object.assign(parameter, this.queryParam));
     },
@@ -152,23 +156,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.edit-input {
-  padding-right: 100px;
-}
-.cancel-btn {
-  position: absolute;
-  right: 15px;
-  top: 10px;
-}
-.ant-upload-select-picture-card i {
-  font-size: 32px;
-  color: #999;
-}
-
-.ant-upload-select-picture-card .ant-upload-text {
-  margin-top: 8px;
-  color: #666;
-}
-</style>

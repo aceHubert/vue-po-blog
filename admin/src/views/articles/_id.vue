@@ -8,8 +8,12 @@
         textAlign: 'right',
       }"
     >
-      <a-button :style="{ marginRight: '8px' }" @click="handleGoBack"> {{ $tv('back', 'Back') }} </a-button>
-      <a-button type="primary" @click.prevent.stop="handleSubmit"> {{ $tv('update', 'Update') }} </a-button>
+      <a-button :title="$tv('article.btnTips.back')" @click="handleGoBack">
+        {{ $tv('article.btnText.back', 'Back') }}
+      </a-button>
+      <a-button type="primary" :title="$tv('article.btnTips.update')" @click.prevent.stop="handleSubmit">
+        {{ $tv('article.btnText.update', 'Update') }}
+      </a-button>
     </a-card>
     <a-card :bordered="false">
       <EditForm :default-values="model" :summary-required="true" ref="form" />
@@ -22,8 +26,12 @@
         textAlign: 'right',
       }"
     >
-      <a-button :style="{ marginRight: '8px' }" @click="handleGoBack"> {{ $tv('back', 'Back') }} </a-button>
-      <a-button type="primary" @click.prevent.stop="handleSubmit"> {{ $tv('update', 'Update') }} </a-button>
+      <a-button :title="$tv('article.btnTips.back')" @click="handleGoBack">
+        {{ $tv('article.btnText.back', 'Back') }}
+      </a-button>
+      <a-button :title="$tv('article.btnTips.update')" type="primary" @click.prevent.stop="handleSubmit">
+        {{ $tv('article.btnText.update', 'Update') }}
+      </a-button>
     </a-card>
   </div>
 </template>

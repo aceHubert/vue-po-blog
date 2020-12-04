@@ -8,11 +8,26 @@
         textAlign: 'right',
       }"
     >
-      <a-button :style="{ marginRight: '8px' }" @click="handleReset"> {{ $tv('reset', 'Reset') }} </a-button>
-      <a-button type="primary" @click.prevent.stop="handleSubmit"> {{ $tv('create', 'Create') }} </a-button>
+      <a-button :title="$tv('article.btnTips.reset', 'Reset all fields')" @click="handleReset">
+        {{ $tv('article.btnText.reset', 'Reset') }}
+      </a-button>
+      <a-button
+        type="primary"
+        :title="$tv('article.btnTips.save', 'Save the article and publish it')"
+        @click.prevent.stop="handleSubmit"
+      >
+        {{ $tv('article.btnText.save', 'Save') }}
+      </a-button>
+      <a-button
+        type="primary"
+        :title="$tv('article.btnTips.saveToDraft', 'Save the article into draft box')"
+        @click.prevent.stop="handleSubmit(true)"
+      >
+        {{ $tv('article.btnText.saveToDraft', 'Save to Draft') }}
+      </a-button>
     </a-card>
     <a-card :bordered="false">
-      <EditForm ref="form" />
+      <EditForm ref="form" :default-values="defaultValues" />
     </a-card>
     <a-card
       size="small"
@@ -22,8 +37,23 @@
         textAlign: 'right',
       }"
     >
-      <a-button :style="{ marginRight: '8px' }" @click="handleReset"> {{ $tv('reset', 'Reset') }} </a-button>
-      <a-button type="primary" @click.prevent.stop="handleSubmit"> {{ $tv('create', 'Create') }} </a-button>
+      <a-button :title="$tv('article.btnTips.reset', 'Reset all fields')" @click="handleReset">
+        {{ $tv('article.btnText.reset', 'Reset') }}
+      </a-button>
+      <a-button
+        type="primary"
+        :title="$tv('article.btnTips.save', 'Save the article and publish it')"
+        @click.prevent.stop="handleSubmit"
+      >
+        {{ $tv('article.btnText.save', 'Save') }}
+      </a-button>
+      <a-button
+        type="primary"
+        :title="$tv('article.btnTips.saveToDraft', 'Save the article into draft box')"
+        @click.prevent.stop="handleSubmit(true)"
+      >
+        {{ $tv('article.btnText.saveToDraft', 'Save to Draft') }}
+      </a-button>
     </a-card>
   </div>
 </template>
@@ -46,19 +76,23 @@ export default {
     EditForm,
   },
   data() {
-    return {};
+    return {
+      defaultValues: {
+        author: '张三', // todo: 带上当前用户
+      },
+    };
   },
   methods: {
     handleReset() {
       this.$refs.form.reset();
     },
-    handleSubmit() {
+    handleSubmit(saveToDarft = false) {
       this.$refs.form.validate((values) => {
         const { tags, categoryIds, ...restValues } = values;
         const createParams = {
           tagsList: tags,
           categoryId: categoryIds.length ? categoryIds[0] : null, // todo: 多分类支持
-          status: 2, // 1 草稿 2 文章
+          status: saveToDarft ? 1 : 2, // 1 草稿 2 文章
           ...restValues,
         };
 
@@ -78,22 +112,3 @@ export default {
   },
 };
 </script>
-<style>
-.edit-input {
-  padding-right: 100px;
-}
-.cancel-btn {
-  position: absolute;
-  right: 15px;
-  top: 10px;
-}
-.ant-upload-select-picture-card i {
-  font-size: 32px;
-  color: #999;
-}
-
-.ant-upload-select-picture-card .ant-upload-text {
-  margin-top: 8px;
-  color: #666;
-}
-</style>

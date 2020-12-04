@@ -1,9 +1,5 @@
-/**
- * scopedSlots 中设置 title 是关键字
- */
-
 import upperFirst from 'lodash.upperfirst';
-import { ArticleStatus } from '@/includes/datas/enums';
+import { PageStatus } from '@/includes/datas/enums';
 
 // 表格列信息
 const table = () => ({
@@ -20,28 +16,10 @@ const table = () => ({
       scopedSlots: { customRender: 'titles' },
     },
     {
-      title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.author', 'Author'),
-      align: 'left',
-      dataIndex: 'author',
-      scopedSlots: { customRender: 'author' },
-    },
-    {
-      title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.summary', 'Summary'),
-      dataIndex: 'summary',
-      align: 'left',
-      scopedSlots: { customRender: 'summary' },
-    },
-    {
       title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.status', 'Status'),
       dataIndex: 'status',
       align: 'left',
       scopedSlots: { customRender: 'status' },
-    },
-    {
-      title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.views', 'Views'),
-      align: 'left',
-      dataIndex: 'views',
-      needTotal: true,
     },
     {
       title: (i18nRender: (key: string, fallback: string) => string) =>
@@ -64,13 +42,13 @@ const table = () => ({
 
 // 表格里面的列key value
 const filters = {
-  statusFilter(status: ArticleStatus, i18nRender: (key: string, fallback: string) => string) {
-    return i18nRender(`article.status.${ArticleStatus[status]}`, upperFirst(ArticleStatus[status]));
+  statusFilter(status: PageStatus, i18nRender: (key: string, fallback: string) => string) {
+    return i18nRender(`page.status.${PageStatus[status]}`, upperFirst(PageStatus[status]));
   },
   statusTypeFilter(status: number) {
     enum StatusType {
-      'error' = ArticleStatus.draft,
-      'success' = ArticleStatus.published,
+      'error' = PageStatus.draft,
+      'success' = PageStatus.published,
     }
     return StatusType[status];
   },

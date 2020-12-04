@@ -3,26 +3,18 @@
     <a-form layout="inline">
       <a-row :gutter="48">
         <a-col :md="8" :sm="24">
-          <a-form-item :label="$tv('article.search.title', 'Title')">
+          <a-form-item :label="$tv('page.search.title', 'Title')">
             <a-input
               v-model="queryParam.title"
-              :placeholder="$tv('article.search.titlePlaceholder', 'Please input search title')"
+              :placeholder="$tv('page.search.titlePlaceholder', 'Please input search title')"
             />
           </a-form-item>
         </a-col>
         <a-col :md="8" :sm="24">
-          <a-form-item :label="$tv('article.search.author', 'Author')">
-            <a-input
-              v-model="queryParam.author"
-              :placeholder="$tv('article.search.authorPlaceholder', 'Please input search author')"
-            />
-          </a-form-item>
-        </a-col>
-        <a-col :md="8" :sm="24">
-          <a-form-item :label="$tv('article.search.status')">
+          <a-form-item :label="$tv('page.search.status')">
             <a-select
               v-model="queryParam.status"
-              :placeholder="$tv('article.search.statusPlaceholder', 'Please choose search status')"
+              :placeholder="$tv('page.search.statusPlaceholder', 'Please choose search status')"
             >
               <a-select-option v-for="option in statusOptions" :key="option.value" :value="option.value">{{
                 option.label
@@ -56,16 +48,12 @@
 </template>
 
 <script>
-import { ArticleStatus } from '@/includes/datas/enums';
+import { PageStatus } from '@/includes/datas/enums';
 
 export default {
-  name: 'ArticleSearch',
+  name: 'PageSearch',
   props: {
     title: {
-      type: String,
-      default: '',
-    },
-    author: {
       type: String,
       default: '',
     },
@@ -74,7 +62,7 @@ export default {
       default: null,
     },
     createTime: {
-      type: Array,
+      type: Number,
       default: null,
     },
   },
@@ -86,7 +74,6 @@ export default {
       queryParam: {
         title: this.title,
         status: this.status,
-        author: this.author,
         createTime: this.createTime,
       },
     };
@@ -96,15 +83,15 @@ export default {
       return [
         {
           value: null,
-          label: this.$tv('article.status.all', 'All'),
+          label: this.$tv('page.status.all', 'All'),
         },
         {
-          value: ArticleStatus.published,
-          label: this.$tv('article.status.published', 'Published'),
+          value: PageStatus.published,
+          label: this.$tv('page.status.published', 'Published'),
         },
         {
-          value: ArticleStatus.draft,
-          label: this.$tv('article.status.draft', 'Draft'),
+          value: PageStatus.draft,
+          label: this.$tv('page.status.draft', 'Draft'),
         },
       ];
     },

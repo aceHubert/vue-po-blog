@@ -46,13 +46,19 @@ export const articleApi: ArticleApi = {
    * 获取文章列表
    * @param param
    */
-  getList({ page = 1, size = 10, ...rest } = {}) {
-    return http.getList('admin/posts', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
-      return {
-        rows: models.map((article) => formatArticle(article)),
-        pager: pageInfo!,
-      };
-    });
+  getList({ page = 1, size = 10, createTime, ...rest } = {}) {
+    let _createTime = null;
+    if (createTime && (createTime[0] || createTime[1])) {
+      _createTime = `${createTime[0] || ''}-${createTime[1] || ''}`;
+    }
+    return http
+      .getList('admin/posts', { params: { page, size, createTime: _createTime, ...rest } })
+      .then(({ models, pageInfo }) => {
+        return {
+          rows: models.map((article) => formatArticle(article)),
+          pager: pageInfo!,
+        };
+      });
   },
 
   /**

@@ -129,7 +129,7 @@ export default {
   },
   methods: {
     i18nRender(key) {
-      return this.$i18n.tv(`${key}`, key);
+      return this.$i18n.tv(key, key);
     },
     handleChangeLocale(locale) {
       this.$i18n.locale = locale;

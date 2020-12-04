@@ -32,8 +32,8 @@ export type UpdateArticleModel = Partial<CreateArticleModel>;
 
 export type ArticlePagerQuery = PagerQuery<{
   keywords?: string;
-  categoryId?: number;
-  tagId?: number;
+  status?: ArticleStatus;
+  createTime?: [string | Date | null, string | Date | null];
 }>;
 
 export type ArticlePagerResponse = PagerResponse<ArticleWithoutContent>;

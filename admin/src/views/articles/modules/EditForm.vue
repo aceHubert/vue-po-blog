@@ -1,42 +1,51 @@
 <template>
   <a-form :form="form" class="article-form">
     <a-row :gutter="16">
-      <a-col :lg="24" :md="12" :sm="24">
-        <a-form-item :label="$tv('articleFormTitle', 'Title')">
+      <a-col :lg="8" :md="12" :sm="24">
+        <a-form-item :label="$tv('article.form.title', 'Title')">
           <a-input
             style="width: 220px; max-width: 100%"
-            :placeholder="$tv('articleFormTitlePlaceholder', 'Please input title')"
+            :placeholder="$tv('article.form.titlePlaceholder', 'Please input title')"
             v-decorator="['title', { rules: rules.title }]"
+          />
+        </a-form-item>
+      </a-col>
+      <a-col :lg="8" :md="12" :sm="24">
+        <a-form-item :label="$tv('article.form.author', 'Author')">
+          <a-input
+            style="width: 220px; max-width: 100%"
+            :placeholder="$tv('article.form.authorPlaceholder', 'Please input author')"
+            v-decorator="['author', { rules: rules.author }]"
           />
         </a-form-item>
       </a-col>
     </a-row>
     <a-row :gutter="16">
-      <a-col :lg="24" :md="12" :sm="24">
-        <a-form-item :label="$tv('articleFormSummary', 'Summary')">
+      <a-col :md="16" :sm="24">
+        <a-form-item :label="$tv('article.form.summary', 'Summary')">
           <a-textarea
             style="width: 500px; max-width: 100%"
-            :placeholder="$tv('articleFormSummaryPlaceholder', 'Please input summary')"
+            :placeholder="$tv('article.form.summaryPlaceholder', 'Please input summary')"
             v-decorator="['summary', { rules: rules.summary }]"
           />
         </a-form-item>
       </a-col>
     </a-row>
     <a-row :gutter="16">
-      <a-col :lg="24" :md="12" :sm="24">
-        <a-form-item :label="$tv('articleFormThumbnail', 'Thumbnail')">
+      <a-col :lg="8" :md="12" :sm="24">
+        <a-form-item :label="$tv('article.form.thumbnail', 'Thumbnail')">
           <a-upload
             action="/api/plumemo-server/v1/file/upload/"
             class="upload-list-inline"
             list-type="picture-card"
-            :default-file-list="defaultThumbnailList"
+            :file-list="thumbnailList"
             :before-upload="beforeThumbnailUpload"
             @change="handleThumbnailChange"
             v-decorator="['thumbnail']"
           >
             <template v-if="!thumbnailList.length">
               <a-icon type="plus" />
-              <div class="ant-upload-text">{{ $tv('upload', 'Upload') }}</div>
+              <div class="ant-upload-text">{{ $tv('article.btnText.upload', 'Upload') }}</div>
             </template>
           </a-upload>
         </a-form-item>
@@ -44,11 +53,11 @@
     </a-row>
     <a-row :gutter="16">
       <a-col :lg="8" :md="12" :sm="24">
-        <a-form-item :label="$tv('articleFormCategory', 'Category')">
+        <a-form-item :label="$tv('article.form.category', 'Category')">
           <a-select
             mode="multiple"
             style="width: 220px"
-            :placeholder="$tv('articleFormCategoryPlaceholder', 'Please choose category')"
+            :placeholder="$tv('article.form.categoryPlaceholder', 'Please choose category')"
             v-decorator="['categoryIds']"
             @change="handleSelectChange"
           >
@@ -59,11 +68,11 @@
         </a-form-item>
       </a-col>
       <a-col :lg="8" :md="12" :sm="24">
-        <a-form-item :label="$tv('articleFormTag', 'Tag')">
+        <a-form-item :label="$tv('article.form.tag', 'Tag')">
           <a-select
             mode="tags"
             style="width: 220px"
-            :placeholder="$tv('articleFormCategoryPlaceholder', 'Please choose tag')"
+            :placeholder="$tv('article.form.tagPlaceholder', 'Please choose tag')"
             v-decorator="['tags']"
             @change="handleSelectChange"
           >
@@ -75,15 +84,15 @@
       </a-col>
     </a-row>
     <a-row :gutter="16">
-      <a-col :lg="24" :md="12" :sm="24">
-        <a-form-item :label="$tv('articleFormContent', 'Content')">
+      <a-col :span="24">
+        <a-form-item :label="$tv('article.form.content', 'Content')">
           <MavonEditor
             ref="md"
             :toolbars="markdownOption"
             :box-shadow="false"
             :subfield="false"
             :ishljs="true"
-            :placeholder="$tv('articleFormContentPlaceholder', 'Please input content')"
+            :placeholder="$tv('article.form.contentPlaceholder', 'Please input content')"
             style="min-height: 335px; z-index: 5"
             class="editor ant-input"
             v-decorator="['content', { initialValue: '', rules: rules.content }]"
@@ -128,53 +137,73 @@ export default {
     return {
       tags: [],
       categories: [],
-      defaultThumbnailList: [],
       thumbnailList: [],
-      markdownOption: markdownOption,
+      markdownOption: markdownOption(),
     };
   },
-  beforeCreate() {
+  created() {
+    const { thumbnail, ...restVals } = this.defaultValues;
+
+    if (thumbnail) {
+      this.thumbnailList = [
+        {
+          uid: '-1',
+          name: 'thumbnail',
+          status: 'done',
+          url: thumbnail,
+        },
+      ];
+    }
+    const model = Object.assign(
+      {
+        title: '',
+        author: '',
+        summary: '',
+        thumbnail: { file: null, fileList: [] },
+        categoryIds: [],
+        tags: [],
+        content: '',
+      },
+      restVals,
+    );
+
     this.form = this.$form.createForm(this, {
       name: 'article_form',
-      props: {
-        title: String,
+      mapPropsToFields: () => {
+        // 默认值
+        return Object.keys(model).reduce((prev, key) => {
+          prev[key] = this.$form.createFormField({
+            value: model[key],
+          });
+          return prev;
+        }, {});
       },
     });
-  },
-  created() {
+
     this.rules = {
       title: [
         {
           required: true,
-          message: this.$tv('articleFormTitleRequired', 'Please input article title'),
+          message: this.$tv('article.form.titleRequired', 'Title is required'),
+          whitespace: true,
+        },
+      ],
+      author: [
+        {
+          required: true,
+          message: this.$tv('article.form.authorRequired', 'Author is required'),
           whitespace: true,
         },
       ],
       summary: [
         {
           required: this.summaryRequired,
-          message: this.$tv('articleFormSummaryRequired', 'Please input article summary'),
+          message: this.$tv('article.form.summaryRequired', 'Summary  is required'),
           whitespace: true,
         },
       ],
-      content: [{ required: true, message: this.$tv('articleFormContentRequired', 'Please input article content') }],
+      content: [{ required: true, message: this.$tv('article.form.contentRequired', 'Content  is required') }],
     };
-  },
-  mounted() {
-    const { thumbnail, ...restVals } = this.defaultValues;
-    if (thumbnail) {
-      this.defaultThumbnailList = Array.isArray(model.thumbnail)
-        ? model.thumbnail
-        : model.thumbnail
-        ? [model.thumbnail]
-        : [];
-    }
-    // 初始值，必须在确保对应的 field 已经用 getFieldDecorator 或 v-decorator 注册过了
-    const model = Object.assign(
-      { title: '', thumbnail: { file: null, fileList: [] }, categoryIds: [], tags: [], content: '' },
-      restVals,
-    );
-    this.form.setFieldsValue(model);
   },
   methods: {
     getTags() {
@@ -201,7 +230,7 @@ export default {
                 ? pureValues.thumbnail.file.response.extra
                 : null;
           } else {
-            pureValues.thumbnail = null;
+            pureValues.thumbnail = this.defaultValues.thumbnail || null;
           }
 
           callback(pureValues);
