@@ -2488,6 +2488,25 @@
   dependencies:
     "@types/node" ">= 8"
 
+"@plumemo/devtools@^0.0.8":
+  version "0.0.8-alpha"
+  resolved "https://registry.yarnpkg.com/@plumemo/devtools/-/devtools-0.0.8-alpha.tgz#c646e1c6db53e0721edfa857e23d233de7569b08"
+  integrity sha512-eR79ebuNEMDWoociZW8U9cAF3zisBLpyqKJO1pLjF9iZ1rdHKI183Pvw9+zwuQpInrxoQXfqWl08MToBPgYjbA==
+  dependencies:
+    "@nuxt/types" "^2.14.6"
+    "@nuxtjs/proxy" "^2.0.1"
+    "@vue-async/module-loader-typing" "^0.0.3"
+    "@vue/cli-service" "^4.5.6"
+    axios "^0.20.0"
+    execa "^4.0.3"
+    express "^4.17.1"
+    lodash.camelcase "^4.3.0"
+    nuxt "^2.14.6"
+    vue-i18n "^8.21.0"
+    vue-property-decorator "^8.4.2"
+    vuex-module-decorators "^0.17.0"
+    yargs "^16.0.3"
+
 "@semantic-release/commit-analyzer@^6.1.0":
   version "6.3.3"
   resolved "https://registry.yarnpkg.com/@semantic-release/commit-analyzer/-/commit-analyzer-6.3.3.tgz#885f7e46e2f0aef23a23be0904dbf18d6ece45ca"

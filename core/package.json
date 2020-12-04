@@ -1,6 +1,6 @@
 {
   "name": "@po/core",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1",
   "description": "Po blog 前端核心系统",
   "author": "Hubert<yi.xiang@live.cn>",
   "private": true,

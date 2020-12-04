@@ -1,6 +1,6 @@
 {
   "name": "@po-themes/beautiful-theme",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1",
   "description": "",
   "private": true,
   "main": "dist/beautify-theme/index.umd.js",

@@ -18,8 +18,8 @@
     "changelog": "node ./scripts/genChangelog.js",
     "commit": "git-cz",
     "prepublishOnly": "yarn install && yarn changelog && yarn build",
-    "release:alpha": "lerna publish --canary",
-    "release": "lerna publish"
+    "release:alpha": "lerna publish --canary prepatch --preid alpha --dist-tag latest --force-publish",
+    "release": "lerna publish --no-git-reset"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
