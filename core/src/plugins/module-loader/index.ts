@@ -14,7 +14,7 @@ import themeArgs from '@/includes/theme';
 import pluginArgs from '@/includes/plugin';
 
 // Types
-import { Plugin } from '@nuxt/types';
+import { NuxtError, Plugin } from '@nuxt/types';
 import { ThemeOptions } from 'types/theme-options';
 import { PluginOptions } from 'types/plugin-options';
 import { ModuleConfig } from 'types';
@@ -22,7 +22,7 @@ import { ModuleConfig } from 'types';
 Vue.use(ModuleLoader);
 
 const plugin: Plugin = async (cxt) => {
-  const { app, store, error } = cxt;
+  const { app, store, $i18n } = cxt;
   /**
    * 添加路由
    * 放在模块入口文件 options 中，而不入在 Context 中，因为 Context 会传递到子模块中
@@ -46,18 +46,16 @@ const plugin: Plugin = async (cxt) => {
     themeModule = await siteApi.getThemeModule();
     if (!themeModule) {
       globalError(process.env.NODE_ENV === 'production', `[core] 未配置主题模块`);
-      error({
-        statusCode: 500,
-        message: 'theme加载失败',
+      return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
+        return error || { statusCode: 500, message: $i18n.t('error.themeModuleUnset', 'Theme module does not set up') };
       });
     } else {
       themeModule.args = _themeArgs;
     }
   } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] ${err.code}:${err.message}`);
-    error({
-      statusCode: 500,
-      message: 'theme加载失败',
+    globalError(process.env.NODE_ENV === 'production', `[core] 主题模块加载失败， 错误:${err.message}`);
+    return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
+      return error || { statusCode: 500, message: $i18n.t('error.themeModuleLoadError', 'Theme module load error') };
     });
   }
 
@@ -73,10 +71,11 @@ const plugin: Plugin = async (cxt) => {
       module.args = _pluginArgs;
     });
   } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] ${err.code}:${err.message}`);
-    error({
-      statusCode: 500,
-      message: 'plugin加载失败',
+    globalError(process.env.NODE_ENV === 'production', `[core] 插件模块加载失败，错误:${err.message}`);
+    return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
+      return (
+        error || { statusCode: 500, message: $i18n.t('error.pluginModulesLoadError', 'Plguin modules load error') }
+      );
     });
   }
 

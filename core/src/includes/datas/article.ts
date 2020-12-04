@@ -53,7 +53,7 @@ export const articleApi: ArticleApi = {
    * @param param
    */
   getList({ page = 1, size = 10, ...rest } = {}) {
-    return http.getList('posts/posts/v1/list', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
+    return http.getList('posts', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
       return {
         rows: models.map((article) => formatArticle(article)),
         pager: pageInfo!,
@@ -65,14 +65,14 @@ export const articleApi: ArticleApi = {
    * 获取文章数量
    */
   getCount() {
-    return http.get('posts/posts/v1/count').then(({ model = 0 }) => model);
+    return http.get('posts/count').then(({ model = 0 }) => model);
   },
 
   /**
    * 获取文章归档
    */
   getArchive() {
-    return http.getList('posts/archive/v1/list').then(({ models = [] }) =>
+    return http.getList('posts/archives').then(({ models = [] }) =>
       models.map((item: any) => ({
         date: item.archiveDate,
         articles: item.archivePosts.map(formatArticle),
@@ -86,6 +86,6 @@ export const articleApi: ArticleApi = {
    * @param id
    */
   get(id) {
-    return http.get(`posts/posts/v1/${id}`).then(({ model }) => formatArticle(model, true));
+    return http.get(`posts/${id}`).then(({ model }) => formatArticle(model, true));
   },
 };

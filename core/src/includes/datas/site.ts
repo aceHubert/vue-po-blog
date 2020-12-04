@@ -12,7 +12,7 @@ export const siteApi: SiteApi = {
    * 获取网站配置
    */
   getConfigs() {
-    return http.getList('config/config-base/v1/list').then(({ models = [] }) => {
+    return http.getList('config/base-info').then(({ models = [] }) => {
       return (models as Array<{ configKey: string; configValue: any }>).reduce((obj, curr) => {
         obj[curr['configKey'] as keyof SiteSettings] = curr['configValue'];
         return obj;
@@ -20,27 +20,38 @@ export const siteApi: SiteApi = {
     });
   },
 
+  // 获取 SEO 配置
+  getSEOConfigs() {
+    return http.getList('config/seo').then(({ models = [] }) => {
+      return models.map(({ configKey, configValue, ...rest }) => ({
+        name: configKey,
+        content: configValue,
+        ...rest,
+      }));
+    });
+  },
+
   /**
    * 获取主题配置
    */
-  getTheme() {
-    return http.get('config/theme/v1/list').then(({ model = {} }) => model);
+  getThemes() {
+    return http.get('config/theme-color').then(({ model = {} }) => model);
   },
 
   /**
    * 获取用户配置
    */
   getUserInfo() {
-    return http.get('auth/master/v1/get').then(({ model = {} }) => model);
+    return http.get('user/master').then(({ model = {} }) => model);
   },
 
   /** 获取主题模块 */
   getThemeModule() {
-    return http.get('v1/plumemo/module/theme').then(({ model }) => model);
+    return http.get('modules/theme').then(({ model }) => model);
   },
 
   /** 获取插件模块 */
   getPluginModules() {
-    return http.getList('v1/plumemo/module/plugin').then(({ models = [] }) => models);
+    return http.getList('modules/plugins').then(({ models = [] }) => models);
   },
 };

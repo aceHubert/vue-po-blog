@@ -1,19 +1,39 @@
 .container {
-  padding: 0;
-  margin: 100px auto 50px;
+  padding: 1rem;
   text-align: center;
-  position: relative;
-  z-index: 5000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-weight: 100 !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  &-inner {
+    max-width: 450px;
+    transform: translateY(-100px);
+  }
 }
 
-.error-text{
-  margin-bottom: 15px;
+.title {
+  font-size: 1.5rem;
+  margin-top: 15px;
+  margin-bottom: 8px;
+}
+
+.description {
+  line-height: 21px;
+  margin-bottom: 10px;
 }
 
 .btn-go-home {
+  margin-top: 15px;
   padding: 0 16px;
   height: 36px;
-  min-width: 64px;
+  min-width: 164px;
   color: inherit !important;
   font-size: 0.875rem;
   align-items: center;
