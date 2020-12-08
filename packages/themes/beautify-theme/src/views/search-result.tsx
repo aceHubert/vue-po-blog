@@ -24,16 +24,18 @@ import WidgetTag from '@/widgets/tag';
 import { Route } from 'vue-router';
 import { Category, Tag, ArticlePagerResponse } from '@plumemo/devtools/dev-core';
 
-@Component({
-  name: 'b-theme-search-result',
-  head(this: ThemeSearchResult) {
+@Component<ThemeSearchResult>({
+  name: 'bThemeSearchResult',
+  head() {
     return {
       title:
         this.type === 'category'
-          ? '分类搜索结果'
+          ? (this.$tv('bTheme.page.title.searchForCategory', 'Category searching result') as string)
           : this.type === 'tag'
-          ? '标签搜索结果'
-          : `搜索关键字 ${this.keywords} 结果`,
+          ? (this.$tv('bTheme.page.title.searchForTag', 'Tag searching result') as string)
+          : (this.$tv('bTheme.page.title.searchForKeyWorkd', `Keyworkd "${this.keywords}" searching result`, {
+              keywords: this.keywords,
+            }) as string),
     };
   },
   asyncData({ route, params, query, articleApi }) {

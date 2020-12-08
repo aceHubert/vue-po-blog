@@ -1,12 +1,14 @@
 import { Vue, Component } from 'vue-property-decorator';
-import { VApp, VContainer, VForm, VTextField, VBtn, VIcon } from '@/components/vuetify-tsx';
+import { VContainer, VForm, VTextField, VBtn, VIcon } from '@/components/vuetify-tsx';
 
 @Component({
-  name: 'b-theme-search',
+  name: 'bThemeSearch',
   layout: 'blank',
   transition: 'dialog-bottom-transition',
-  head: {
-    title: '搜索',
+  head() {
+    return {
+      title: this.$tv('bTheme.page.title.search', 'Search') as string,
+    };
   },
 })
 export default class ThemeSearch extends Vue {
@@ -37,16 +39,16 @@ export default class ThemeSearch extends Vue {
     );
 
     return this.$vuetify.breakpoint.mdAndUp ? (
-      <VApp>
+      <div>
         <div class="mb-10 text-right">
           <VBtn icon large class="mt-5 mr-5" onClick={() => this.$router.back()}>
             <VIcon>mdi-close</VIcon>
           </VBtn>
         </div>
         {container}
-      </VApp>
+      </div>
     ) : (
-      <VApp>{container}</VApp>
+      container
     );
   }
 }

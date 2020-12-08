@@ -5,7 +5,7 @@ import { VContainer, VFooter, VCard, VDivider } from '../vuetify-tsx';
 import { Component as VueComponent, CreateElement } from 'vue';
 
 @Component({
-  name: 'theme-footer',
+  name: 'bThemeFooter',
 })
 export default class Footer extends Vue {
   widgets: VueComponent[] = [];

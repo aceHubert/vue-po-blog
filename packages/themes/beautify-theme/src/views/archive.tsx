@@ -17,9 +17,11 @@ import {
 import { ArticleArchive } from '@plumemo/devtools/dev-core';
 
 @Component({
-  name: 'b-theme-archive',
-  head: {
-    title: '归档',
+  name: 'bThemeArchive',
+  head() {
+    return {
+      title: this.$tv('bTheme.page.title.archive', 'Archive') as string,
+    };
   },
   asyncData({ articleApi }) {
     return articleApi.getArchive().then((archives: ArticleArchive[]) => ({ archives }));

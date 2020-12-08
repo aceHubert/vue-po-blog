@@ -4,7 +4,7 @@ import { Vue, Component } from 'vue-property-decorator';
 import { Category } from '@plumemo/devtools/dev-core';
 
 @Component({
-  name: 'widget-category-admin',
+  name: 'bThemeAdminWidgetCategory',
 })
 export default class WidgetCategory extends Vue {
   categories: Category[] = [];

@@ -28,9 +28,11 @@ import { Route } from 'vue-router';
 import { ArticlePagerResponse } from '@plumemo/devtools/dev-core';
 
 @Component({
-  name: 'home',
-  head: {
-    title: '首页',
+  name: 'bThemeHome',
+  head() {
+    return {
+      title: this.$tv('bTheme.page.title.home', 'Home') as string,
+    };
   },
   asyncData({ query, articleApi }) {
     const { page = 1 } = query;
@@ -130,7 +132,7 @@ export default class ThemeHome extends Vue {
                         <VIcon size="1rem" class="mr-1" style="vertical-align: text-bottom;">
                           mdi-menu
                         </VIcon>
-                        分类
+                        {this.$tv('bTheme.widget.title.category', 'Categories')}
                       </p>
                       <VDivider />
                       <div class="pa-3">
@@ -242,7 +244,7 @@ export default class ThemeHome extends Vue {
                           <VIcon size="1rem" class="mr-1" style="vertical-align: text-bottom;">
                             mdi-menu
                           </VIcon>
-                          分类
+                          {this.$tv('bTheme.widget.title.category', 'Categories')}
                         </p>
                         <VDivider />
                         <div class="pa-3">
@@ -255,7 +257,7 @@ export default class ThemeHome extends Vue {
                         <VIcon size="1rem" class="mr-1" style="vertical-align: text-bottom;">
                           mdi-menu
                         </VIcon>
-                        标签
+                        {this.$tv('bTheme.widget.title.tag', 'Tags')}
                       </p>
                       <VDivider />
                       <div class="pa-3">

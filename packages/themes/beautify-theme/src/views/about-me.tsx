@@ -2,16 +2,25 @@ import { Vue, Component } from 'vue-property-decorator';
 import { VContainer, VRow, VCol, VCard, VDivider } from '@/components/vuetify-tsx';
 import WidgetMyInfo from '@/widgets/my-info';
 
+// Types
+import { UserInfo } from '@plumemo/devtools/dev-core/types';
+
 @Component({
-  name: 'b-theme-about-me',
-  head: {
-    title: '关于我',
+  name: 'bThemeAboutMe',
+  head() {
+    return {
+      title: this.$tv('bTheme.page.title.aboutMe', 'About Me') as string,
+    };
   },
 })
 export default class ThemeAboutMe extends Vue {
-  get userInfo() {
-    return this.getUserInfo();
+  fetch() {
+    return this.$store.dispatch('bTheme/getUserInfo').then((info) => {
+      this.userInfo = info;
+    });
   }
+
+  userInfo: UserInfo | null = null;
 
   get supportParams() {
     return {
@@ -24,11 +33,21 @@ export default class ThemeAboutMe extends Vue {
   }
 
   render() {
+    const { pending, error } = this.$fetchState;
     return (
       <VContainer class="about-me">
         <VRow>
           <VCol cols="12" md="8">
-            <div class="body-1" domPropsInnerHTML={this.userInfo.introduction || '主从很懒，哈也没留下！'}></div>
+            {pending || error ? (
+              <div class="body-1">{this.$tv('bTheme.page.aboutMe.noContent', 'No Content!')}</div>
+            ) : (
+              <div
+                class="body-1"
+                domPropsInnerHTML={
+                  this.userInfo!.introduction || (this.$tv('bTheme.page.aboutMe.noContent', 'No Content!') as string)
+                }
+              ></div>
+            )}
           </VCol>
           {this.$vuetify.breakpoint.mdAndUp ? (
             <VCol cols="4">
