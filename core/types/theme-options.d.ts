@@ -22,10 +22,7 @@ export interface ThemeOptions
       LocaleFunctions,
       'getDefaultLocale' | 'getSupportLanguages' | 'addSupportLanguages' | 'setDefaultLocale' | 'setLocale'
     >,
-    Pick<
-      SettingsFunctions,
-      'getDomain' | 'getLogo' | 'getStaticDir' | 'getApiPath' | 'getCopyright' | 'getICP' | 'getUserInfo'
-    > {
+    Pick<SettingsFunctions, 'getDomain' | 'getLogo' | 'getStaticDir' | 'getApiPath' | 'getCopyright' | 'getICP'> {
   hook: HookFunction;
   addRoutes(routes: RouteConfig[], megreFn?: (oldRoutes: RouteConfig[], newRoutes: RouteConfig[]) => void): void;
 }

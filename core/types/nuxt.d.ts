@@ -1,6 +1,6 @@
 import VueI18n, { IVueI18n } from 'vue-i18n';
 import { AxiosInstance, AxiosStatic } from 'axios';
-import { CategoryApi, TagApi, ArticleApi } from './datas';
+import { CategoryApi, TagApi, ArticleApi, UserApi } from './datas';
 
 declare module '@nuxt/types' {
   interface Context {
@@ -10,5 +10,6 @@ declare module '@nuxt/types' {
     categoryApi: CategoryApi;
     tagApi: TagApi;
     articleApi: ArticleApi;
+    userApi: UserApi;
   }
 }

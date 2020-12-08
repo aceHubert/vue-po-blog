@@ -1,6 +1,6 @@
 import { AxiosStatic } from 'axios';
 import { IVueI18n } from 'vue-i18n';
-import { CategoryApi, TagApi, ArticleApi } from './datas';
+import { CategoryApi, TagApi, ArticleApi, UserApi } from './datas';
 import {
   HookFunction,
   HttpInstance,
@@ -17,14 +17,12 @@ export interface VueExtraPrototypes
       LocaleFunctions,
       'getDefaultLocale' | 'getSupportLanguages' | 'addSupportLanguages' | 'setDefaultLocale' | 'setLocale'
     >,
-    Pick<
-      SettingsFunctions,
-      'getDomain' | 'getLogo' | 'getStaticDir' | 'getApiPath' | 'getCopyright' | 'getICP' | 'getUserInfo'
-    > {
+    Pick<SettingsFunctions, 'getDomain' | 'getLogo' | 'getStaticDir' | 'getApiPath' | 'getCopyright' | 'getICP'> {
   hook: HookFunction;
   categoryApi: CategoryApi;
   tagApi: TagApi;
   articleApi: ArticleApi;
+  userApi: UserApi;
 }
 
 declare module 'vue/types/vue' {

@@ -7,7 +7,7 @@ import classes from './PluginHolder.scss?module';
 import { ComponentConfig } from 'types/functions/widget';
 
 @Component({
-  name: 'plugin-holder',
+  name: 'pluginHolder',
 })
 export default class PluginHolder extends Vue {
   @Prop({ type: Object, required: true, default: () => ({}) }) supportParams!: Record<string, string>; // 插件支持的参数
