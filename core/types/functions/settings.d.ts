@@ -1,5 +1,3 @@
-import { UserInfo } from '../datas/site';
-
 export type SiteSettings = {
   staticDir: string;
   [key: string]: any;
@@ -13,7 +11,5 @@ export interface SettingsFunctions {
   getCopyright(): string;
   getICP(): string;
   getLogo(): { imgUrl?: string; text?: string };
-  getUserInfo(): UserInfo;
   setSiteSettings(settings: Record<string, any>): void;
-  setUserInfo(userInfo: Partial<UserInfo>): void;
 }

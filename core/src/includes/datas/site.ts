@@ -38,13 +38,6 @@ export const siteApi: SiteApi = {
     return http.get('config/theme-color').then(({ model = {} }) => model);
   },
 
-  /**
-   * 获取用户配置
-   */
-  getUserInfo() {
-    return http.get('user/master').then(({ model = {} }) => model);
-  },
-
   /** 获取主题模块 */
   getThemeModule() {
     return http.get('modules/theme').then(({ model }) => model);

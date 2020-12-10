@@ -13,40 +13,28 @@ import {
   VDivider,
 } from '../vuetify-tsx';
 
+// Types
+import { UserInfo } from '@plumemo/devtools/dev-core/types';
+
 export const RootParams: {
   drawerShown: boolean;
   menus: Menu[];
 } = Vue.observable({
   drawerShown: false,
-  menus: [
-    {
-      label: '首页',
-      icon: 'mdi-home',
-      to: { name: 'index' },
-      order: 0,
-    },
-    {
-      label: '归档',
-      icon: 'mdi-archive',
-      to: { name: 'b-theme-archive' },
-      order: 1,
-    },
-    {
-      label: '关于',
-      icon: 'mdi-account',
-      to: { name: 'b-theme-about-me' },
-      order: 2,
-    },
-  ],
+  menus: [],
 });
 
 @Component({
-  name: 'theme-root-warp',
+  name: 'bThemeRootWarp',
 })
 export default class RootWarp extends Vue {
-  get userInfo() {
-    return this.getUserInfo();
+  fetch() {
+    return this.$store.dispatch('bTheme/getUserInfo').then((info) => {
+      this.userInfo = info;
+    });
   }
+
+  userInfo: UserInfo | null = null;
 
   @Watch('$vuetify.breakpoint.mdAndUp')
   watchIsMobile(val: boolean) {
@@ -56,25 +44,55 @@ export default class RootWarp extends Vue {
   }
 
   created() {
+    const menu = [
+      {
+        label: this.$tv('bTheme.menu.home', 'Home') as string,
+        icon: 'mdi-home',
+        to: { name: 'index' },
+        order: 0,
+      },
+      {
+        label: this.$tv('bTheme.menu.archive', 'Archive') as string,
+        icon: 'mdi-archive',
+        to: { name: 'b-theme-archive' },
+        order: 1,
+      },
+      {
+        label: this.$tv('bTheme.menu.about', 'About Me') as string,
+        icon: 'mdi-account',
+        to: { name: 'b-theme-about-me' },
+        order: 2,
+      },
+    ];
     this.hook('header-menus')
-      .filter(RootParams.menus)
+      .filter(menu)
       .then((menus: Menu[]) => {
         RootParams.menus = menus.sort((a, b) => (a.order === b.order ? 0 : a.order > b.order ? 1 : -1));
       });
   }
 
   render() {
+    const { pending = true, error = null } = this.$fetchState;
+
     return (
       <VApp>
         <VNavigationDrawer v-model={RootParams.drawerShown} app disableResizeWatcher disableRouteWatcher>
           <VList dense flat>
             <VListItem class="text-center py-4">
-              <div style="width: 100%">
-                <VAvatar size="46" class="mb-2">
-                  <VImg src={this.userInfo.avatar || 'https://api.adorable.io/avatars/80/abott@adorable.png'} />
-                </VAvatar>
-                <VListItemTitle>{this.userInfo.email}</VListItemTitle>
-              </div>
+              {pending || error ? (
+                <div style="width: 100%">
+                  <VAvatar size="46" class="mb-2">
+                    <VImg src="https://api.adorable.io/avatars/80/abott@adorable.png" />
+                  </VAvatar>
+                </div>
+              ) : (
+                <div style="width: 100%">
+                  <VAvatar size="46" class="mb-2">
+                    <VImg src={this.userInfo!.avatar || 'https://api.adorable.io/avatars/80/abott@adorable.png'} />
+                  </VAvatar>
+                  <VListItemTitle>{this.userInfo!.email}</VListItemTitle>
+                </div>
+              )}
             </VListItem>
             <VDivider />
             {RootParams.menus.map((menu) => [

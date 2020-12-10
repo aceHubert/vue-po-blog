@@ -3,20 +3,12 @@ import { hasOwn } from '@vue-async/utils';
 import { trailingSlash } from '@/utils/path';
 
 // Types
-import { UserInfo } from 'types/datas/site';
 import { SettingsFunctions, SiteSettings } from 'types/functions/settings';
 
 export const globalSettings: SiteSettings = {
   staticDir: 'static/',
   // 以上字段可以被服务端覆盖
   // 其它字段来自服务端
-};
-
-export const globalUserInfo: UserInfo = {
-  name: '',
-  avatar: undefined,
-  email: undefined,
-  introduction: undefined,
 };
 
 const settingsFunctions: SettingsFunctions = {
@@ -97,30 +89,10 @@ const settingsFunctions: SettingsFunctions = {
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 获取用户信息
-   */
-  getUserInfo() {
-    return globalUserInfo;
-  },
-
-  /**
-   * @author Hubert
-   * @since 2020-09-04
-   * @version 0.0.1
    * 设置网站配置
    */
   setSiteSettings(settings) {
     merge(globalSettings, settings);
-  },
-
-  /**
-   * @author Hubert
-   * @since 2020-09-04
-   * @version 0.0.1
-   * 设置用户信息
-   */
-  setUserInfo(userInfo) {
-    merge(globalUserInfo, userInfo);
   },
 };
 

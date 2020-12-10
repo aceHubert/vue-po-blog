@@ -35,4 +35,4 @@ export type DefaultLayouts = {
   footer: string | Component;
 };
 
-export type FullScreenLayouts = Pick<DefaultLayouts, 'rootWarp' | 'mainWarp'>;
+export type BlankLayouts = Pick<DefaultLayouts, 'rootWarp' | 'mainWarp'>;

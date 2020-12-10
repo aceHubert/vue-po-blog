@@ -27,7 +27,7 @@ const {
   removeTemplates,
 } = layoutFunctions;
 const { getDefaultLocale, getSupportLanguages, addSupportLanguages, setDefaultLocale, setLocale } = localeFunctions;
-const { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } = settingsFunctions;
+const { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP } = settingsFunctions;
 
 // addRoutes 在外部添加
 const themeOptions: Omit<ThemeOptions, 'addRoutes'> = {
@@ -60,7 +60,6 @@ const themeOptions: Omit<ThemeOptions, 'addRoutes'> = {
   getApiPath,
   getCopyright,
   getICP,
-  getUserInfo,
 };
 
 export default themeOptions;

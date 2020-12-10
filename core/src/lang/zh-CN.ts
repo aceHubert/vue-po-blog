@@ -18,7 +18,8 @@ const locale = {
   error: {
     404: '页面未找到',
     500: '系统错误',
-    backToHomeBtnText: '返回@:home',
+    description: '在页面渲染时发生错误，请在控制台中查看详情。',
+    backToHomeBtnText: '返回@:home.title',
 
     // plugins error
     siteSettingsLoadError: '站点配置加载失败',

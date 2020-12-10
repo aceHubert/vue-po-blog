@@ -10,7 +10,7 @@ import layoutFunctions from './functions/layout';
 import settingsFunctions from './functions/settings';
 
 // apis
-import { categoryApi, tagApi, articleApi } from './datas';
+import { categoryApi, tagApi, articleApi, userApi } from './datas';
 
 // Types
 import { VueExtraPrototypes } from 'types/vue';
@@ -18,7 +18,7 @@ import { VueExtraPrototypes } from 'types/vue';
 const { getCurrentTheme, getThemes, isDarkTheme } = themeFunctions;
 const { hasWidget, getWidgets } = layoutFunctions;
 const { getDefaultLocale, getSupportLanguages, addSupportLanguages, setDefaultLocale, setLocale } = localeFunctions;
-const { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } = settingsFunctions;
+const { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP } = settingsFunctions;
 
 const prototypes: VueExtraPrototypes = {
   hook,
@@ -38,7 +38,7 @@ const prototypes: VueExtraPrototypes = {
   getApiPath,
   getCopyright,
   getICP,
-  getUserInfo,
+  userApi,
   categoryApi,
   tagApi,
   articleApi,

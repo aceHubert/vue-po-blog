@@ -12,13 +12,6 @@ export type Theme = {
   [key: string]: string;
 };
 
-export type UserInfo = {
-  name: string;
-  avatar?: string;
-  email?: string;
-  introduction?: string;
-};
-
 export type ModuleConfig = {
   moduleName: string;
   entry: string;
@@ -30,7 +23,6 @@ export interface SiteApi {
   getConfigs(): Promise<Record<string, any>>;
   getSEOConfigs(): Promise<NonNullable<MetaInfo['meta']>>;
   getThemes(): Promise<{ dark: boolean; themes: Partial<Theme> }>;
-  getUserInfo(): Promise<Partial<UserInfo>>;
   getThemeModule(): Promise<ModuleConfig>;
   getPluginModules(): Promise<ModuleConfig[]>;
 }

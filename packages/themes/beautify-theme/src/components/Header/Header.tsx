@@ -4,7 +4,7 @@ import { RootParams } from '../RootWarp';
 import './Header.scss';
 
 @Component({
-  name: 'theme-header',
+  name: 'bThemeHeader',
 })
 export default class Header extends Vue {
   get logo() {

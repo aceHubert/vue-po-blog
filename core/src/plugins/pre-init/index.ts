@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Axios from 'axios';
 import { error as globalError, warn as globalWarn, hasOwn } from '@vue-async/utils';
 import { hook, http, themeFuncs, settingsFuncs } from '@/includes/functions';
-import { tagApi, articleApi, siteApi, categoryApi } from '@/includes/datas';
+import { tagApi, articleApi, categoryApi, userApi, siteApi } from '@/includes/datas';
 import themeFn from '@/includes/theme';
 
 // components
@@ -108,6 +108,7 @@ const plugin: Plugin = async (cxt) => {
   cxt.categoryApi = categoryApi;
   cxt.tagApi = tagApi;
   cxt.articleApi = articleApi;
+  cxt.userApi = userApi;
   // cxt.siteApi = siteApi; // 暂时不导出，仅内部使用
 
   /**
@@ -136,19 +137,6 @@ const plugin: Plugin = async (cxt) => {
     globalError(process.env.NODE_ENV === 'production', `[core] 站点配置加载失败, 错误：${err.message}`);
     return hook('__PLUGIN_ERROR__', (error: NuxtError | null) => {
       return error || { statusCode: 500, message: $i18n.tv('error.siteSettingsLoadError', 'Site settings load error') };
-    });
-  }
-
-  /**
-   * 加载用户配置
-   */
-  try {
-    const configs = await siteApi.getUserInfo();
-    settingsFuncs.setUserInfo(configs);
-  } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] 用户配置加载失败, 错误：${err.message}`);
-    return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
-      return error || { statusCode: 500, message: $i18n.t('error.userInfoLoadError', 'User settings load error') };
     });
   }
 

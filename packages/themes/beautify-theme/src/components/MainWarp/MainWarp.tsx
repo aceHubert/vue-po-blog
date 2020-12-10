@@ -5,7 +5,7 @@ import { VMain } from '../vuetify-tsx';
 import { Component as VueComponent, AsyncComponent, CreateElement } from 'vue';
 
 @Component({
-  name: 'theme-main-warp',
+  name: 'bThemeMainWarp',
 })
 export default class MainWarp extends Vue {
   pageBeforePlugins: Array<VueComponent | AsyncComponent> = [];

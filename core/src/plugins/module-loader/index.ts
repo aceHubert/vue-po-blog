@@ -47,7 +47,9 @@ const plugin: Plugin = async (cxt) => {
     if (!themeModule) {
       globalError(process.env.NODE_ENV === 'production', `[core] 未配置主题模块`);
       return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
-        return error || { statusCode: 500, message: $i18n.t('error.themeModuleUnset', 'Theme module does not set up') };
+        return (
+          error || { statusCode: 500, message: $i18n.tv('error.themeModuleUnset', 'Theme module does not set up') }
+        );
       });
     } else {
       themeModule.args = _themeArgs;
@@ -55,7 +57,7 @@ const plugin: Plugin = async (cxt) => {
   } catch (err) {
     globalError(process.env.NODE_ENV === 'production', `[core] 主题模块加载失败， 错误:${err.message}`);
     return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
-      return error || { statusCode: 500, message: $i18n.t('error.themeModuleLoadError', 'Theme module load error') };
+      return error || { statusCode: 500, message: $i18n.tv('error.themeModuleLoadError', 'Theme module load error') };
     });
   }
 
@@ -74,7 +76,7 @@ const plugin: Plugin = async (cxt) => {
     globalError(process.env.NODE_ENV === 'production', `[core] 插件模块加载失败，错误:${err.message}`);
     return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
       return (
-        error || { statusCode: 500, message: $i18n.t('error.pluginModulesLoadError', 'Plguin modules load error') }
+        error || { statusCode: 500, message: $i18n.tv('error.pluginModulesLoadError', 'Plguin modules load error') }
       );
     });
   }

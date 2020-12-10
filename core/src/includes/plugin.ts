@@ -14,7 +14,7 @@ import { PluginOptions } from 'types/plugin-options';
 const { getCurrentTheme, getThemes, isDarkTheme } = themeFunctions;
 const { hasWidget, getWidgets, hasTemplate, getTemplates } = layoutFunctions;
 const { getDefaultLocale, getSupportLanguages, addSupportLanguages, setDefaultLocale, setLocale } = localeFunctions;
-const { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP, getUserInfo } = settingsFunctions;
+const { getDomain, getLogo, getStaticDir, getApiPath, getCopyright, getICP } = settingsFunctions;
 
 const pluginOptions: PluginOptions = {
   hook,
@@ -36,7 +36,6 @@ const pluginOptions: PluginOptions = {
   getApiPath,
   getCopyright,
   getICP,
-  getUserInfo,
 };
 
 export default pluginOptions;

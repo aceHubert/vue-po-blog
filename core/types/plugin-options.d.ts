@@ -7,9 +7,6 @@ export interface PluginOptions
       LocaleFunctions,
       'getDefaultLocale' | 'getSupportLanguages' | 'addSupportLanguages' | 'setDefaultLocale' | 'setLocale'
     >,
-    Pick<
-      SettingsFunctions,
-      'getDomain' | 'getLogo' | 'getStaticDir' | 'getApiPath' | 'getCopyright' | 'getICP' | 'getUserInfo'
-    > {
+    Pick<SettingsFunctions, 'getDomain' | 'getLogo' | 'getStaticDir' | 'getApiPath' | 'getCopyright' | 'getICP'> {
   hook: HookFunction;
 }

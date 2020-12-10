@@ -2,6 +2,7 @@ import { Vue, Component } from 'vue-property-decorator';
 
 @Component({
   name: 'home',
+  layout: 'root/index',
   head() {
     return {
       title: this.$tv('home.title', 'Home') as string,

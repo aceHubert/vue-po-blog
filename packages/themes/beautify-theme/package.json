@@ -67,6 +67,7 @@
     "typescript": "^3.7.2",
     "vue-router": "^3.4.3",
     "vue-template-compiler": "^2.6.9",
-    "vue-tsx-support": "^2.3.3"
+    "vue-tsx-support": "^2.3.3",
+    "vuex": "^3.6.0"
   }
 }

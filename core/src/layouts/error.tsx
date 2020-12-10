@@ -1,6 +1,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import { themeFuncs } from '@/includes/functions';
 import classes from './styles/error.scss?module';
+
+import { themeFuncs } from '@/includes/functions';
 
 // Types
 type Error = {
@@ -10,7 +11,7 @@ type Error = {
 
 @Component<LayoutPageError>({
   name: 'LayoutPageError',
-  layout: 'blank',
+  layout: 'root/index',
   head() {
     return {
       title: this.message,
@@ -54,7 +55,10 @@ export default class LayoutPageError extends Vue {
             </p>
           ) : (
             <p class={classes.description}>
-              An error occurred while rendering the page. Check developer tools console for details.
+              {this.$tv(
+                'error.description',
+                'An error occurred while rendering the page. Check developer tools console for details.',
+              )}
             </p>
           )}
         </div>

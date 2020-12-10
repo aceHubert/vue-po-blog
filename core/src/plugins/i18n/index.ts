@@ -24,18 +24,10 @@ Object.defineProperties(VueI18n.prototype, {
       this: typeof VueI18n.prototype,
       key: VueI18n.Path,
       fallbackStr: string,
-      locale?: VueI18n.Locale,
-      values?: VueI18n.Values,
+      ...values: any
     ): VueI18n.TranslateResult {
-      return (
-        (this.t && this.te
-          ? this.te(key, locale)
-            ? locale
-              ? this.t(key, locale, values)
-              : this.t(key, values)
-            : fallbackStr
-          : fallbackStr) || key
-      );
+      const locale = typeof values[0] === 'string' ? values[0] : undefined;
+      return (this.t && this.te ? (this.te(key, locale) ? this.t(key, ...values) : fallbackStr) : fallbackStr) || key;
     },
     writable: false,
     enumerable: true,
@@ -52,11 +44,10 @@ Object.defineProperties(Vue.prototype, {
       this: InstanceType<VueConstructor>,
       key: VueI18n.Path,
       fallbackStr: string,
-      locale?: VueI18n.Locale,
-      values?: VueI18n.Values,
+      ...values: any
     ): VueI18n.TranslateResult {
       const i18n = this.$i18n;
-      return i18n.tv(key, fallbackStr, locale, values);
+      return i18n.tv(key, fallbackStr, ...values);
     },
     writable: false,
     enumerable: true,

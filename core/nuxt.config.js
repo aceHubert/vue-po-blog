@@ -179,6 +179,8 @@ module.exports = (configContext) => {
       background: 'white',
     },
     // 忽略文件的 auto build
-    ignore: ['layouts/root'],
+    ignore: [
+      // 'layouts/root'
+    ],
   };
 };

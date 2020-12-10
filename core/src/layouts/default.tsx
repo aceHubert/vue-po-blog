@@ -6,7 +6,7 @@ import { CreateElement } from 'vue';
 import { DefaultLayouts } from 'types/functions/hook';
 
 @Component({
-  name: 'layout-default',
+  name: 'layoutDefault',
 })
 export default class LayoutDefault extends Vue {
   layout: Partial<DefaultLayouts> = {
@@ -29,9 +29,9 @@ export default class LayoutDefault extends Vue {
     return h(
       rootWarp,
       {
-        staticClass: 'layout layout--default',
+        attrs: { id: 'default-layout', 'data-app': 'true' },
+        staticClass: 'layout',
         class: `theme--${this.isDark ? 'dark' : 'light'}`,
-        domProps: { id: 'default-layout', 'data-app': 'true' },
       },
       [header ? h(header) : null, mainWarp ? h(mainWarp, [h('nuxt')]) : h('nuxt'), footer ? h(footer) : null],
     );

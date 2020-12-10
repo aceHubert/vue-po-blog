@@ -9,9 +9,9 @@ import classes from './styles/article.module.scss';
 // Types
 import { Component as VueComponent, AsyncComponent, CreateElement } from 'vue';
 
-@Component({
-  name: 'b-theme-article',
-  head(this: ThemeArticle) {
+@Component<ThemeArticle>({
+  name: 'bThemeArticle',
+  head() {
     return {
       title: this.title,
     };

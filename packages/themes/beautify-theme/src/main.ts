@@ -4,6 +4,9 @@ import { print } from '@vue-async/utils';
 // Routes
 import routes from './router';
 
+// Store
+import bThemeModule from './store';
+
 // Layout components
 import { RootWarp, MainWarp, Header, Footer } from './components';
 
@@ -33,13 +36,15 @@ export default function (this: ModuleContext, Vue: VueConstructor, opts: ThemeOp
   opts.addRoutes(routes);
 
   // 注册 init 勾子
-  opts.hook('init', ({ app }: InitContext) => {
+  opts.hook('init', ({ app, store, userApi, articleApi, categoryApi, tagApi }: InitContext) => {
     app.vuetify = new Vuetify({
       theme: {
         dark: opts.isDarkTheme(),
         themes: opts.getThemes(),
       },
     });
+
+    store.registerModule('bTheme', bThemeModule({ userApi, articleApi, categoryApi, tagApi }));
   });
 
   // 设置布局
