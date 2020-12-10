@@ -7,8 +7,13 @@ export const tagApi: TagApi = {
   /**
    * 获取标签列表
    */
-  getList() {
-    return http.getList('admin/tags').then(({ models }) => models);
+  getList({ page = 1, size = 10, ...rest } = {}) {
+    return http.getList('admin/tags', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
+      return {
+        rows: models,
+        pager: pageInfo!,
+      };
+    });
   },
 
   /**
