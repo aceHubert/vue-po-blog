@@ -40,7 +40,7 @@ const settingsFunctions: SettingsFunctions = {
    * API 地址(v1)，如果不是http(s) 绝对路径，则会以当前域名为绝对路径
    */
   getApiPath() {
-    return trailingSlash(process.env.baseUrl!) + 'api/plumemo-service/v1/';
+    return trailingSlash(process.env.baseUrl!) + 'api/plumemo-service/';
   },
 
   /**
