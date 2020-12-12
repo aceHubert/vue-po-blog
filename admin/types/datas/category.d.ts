@@ -1,3 +1,5 @@
+import { PagerResponse } from './request';
+
 export type Category = {
   id: number;
   name: string;
@@ -9,8 +11,15 @@ export type CreateCategoryModel = {
 
 export type UpdateCategoryModel = CreateCategoryModel;
 
+export type CategoryPagerResponse = PagerResponse<Category>;
+
+export type CategoryPagerQuery = {
+  page?: number;
+  size?: number;
+};
+
 export interface CategoryApi {
-  getList(): Promise<Category[]>;
+  getList(query?: CategoryPagerQuery): Promise<CategoryPagerResponse>;
   get(id: number): Promise<Category | null>;
   create(data: CreateCategoryModel): Promise<Category>;
   update(id: number, data: UpdateCategoryModel): Promise<true>;

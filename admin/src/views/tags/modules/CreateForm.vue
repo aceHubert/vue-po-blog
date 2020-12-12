@@ -89,7 +89,7 @@ export default {
           } else {
             createParams['id'] = this.id;
             tagApi
-              .update(createParams)
+              .update(this.id, createParams)
               .then((res) => {
                 this.$notification.success({
                   message: '编辑标签成功',
@@ -114,7 +114,7 @@ export default {
       tagApi.get(record.id)
         .then((response) => {
           console.log(response)
-          const postForm = response.model;
+          const postForm = response;
           this.tagsForm = this.$form.createForm(this, {
             onFieldsChange: (_, changedFields) => {},
             mapPropsToFields: () => {

@@ -7,8 +7,13 @@ export const categoryApi: CategoryApi = {
   /**
    * 获取分类列表
    */
-  getList() {
-    return http.getList('admin/categories').then(({ models = [] }) => models);
+  getList({ page = 1, size = 10, ...rest } = {}) {
+    return http.getList('admin/categories', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
+      return {
+        rows: models,
+        pager: pageInfo!,
+      };
+    })
   },
 
   /**
