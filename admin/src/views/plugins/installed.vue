@@ -1,19 +1,30 @@
 <template>
   <a-card :bordered="false">
-    <a-table :columns="columns" :data-source="data">
+    <STable
+      ref="table"
+      size="small"
+      rowKey="id"
+      :scroll="{ x: 1300 }"
+      :columns="columns"
+      :data="loadData"
+      :alert="options.alert"
+      :rowSelection="options.rowSelection"
+      showPagination="auto"
+    >
       <span slot="desc" slot-scope="text">{{ text }} <a-divider type="vertical" /> <a>查看详情</a></span>
-      <span slot="action" slot-scope="text, record">
+      <template slot="actions" slot-scope="text, record">
         <a @click="start(record.pluginId)">启用</a>
         <a-divider type="vertical" />
         <a @click="stop(record.pluginId)">停用</a>
         <a-divider type="vertical" />
         <a @click="unload(record.pluginId)">卸载</a>
-      </span>
-    </a-table>
+      </template>
+    </STable>
   </a-card>
 </template>
 
 <script>
+import { STable, Ellipsis } from '@/components';
 import { pluginApi } from '@/includes/datas';
 const columns = [
   {
@@ -33,8 +44,8 @@ const columns = [
   },
   {
     title: '描述',
-    dataIndex: 'desc',
-    key: 'desc',
+    dataIndex: 'description',
+    key: 'description',
     scopedSlots: { customRender: 'desc' },
   },
   {
@@ -44,36 +55,57 @@ const columns = [
   },
   {
     title: '操作',
-    key: 'action',
-    scopedSlots: { customRender: 'action' },
+    key: 'actions',
+    scopedSlots: { customRender: 'actions' },
   },
 ];
 
 export default {
   name: 'PluginsInstalled',
+  components: {
+    STable,
+    Ellipsis,
+  },
   data() {
     return {
       data: [],
       columns,
+      loadData: (parameter) => {
+        return pluginApi.getInstalledPluginList(Object.assign(parameter, this.queryParam)).then((res) => {
+          return res;
+        });
+      },
+      options: {
+        alert: {
+          show: true,
+          clear: () => {
+            this.selectedRowKeys = [];
+          },
+        },
+        rowSelection: {
+          selectedRowKeys: this.selectedRowKeys,
+          onChange: this.onSelectChange,
+        },
+      },
     };
   },
   created() {
-    this.getInstalledPluginList();
   },
   methods: {
-    getInstalledPluginList() {
-      pluginApi.getInstalledPluginList().then((res) => {
-        this.data = res.rows;
+    start(pluginId) {
+      pluginApi.startPlugin(pluginId).then((res) => {
+        this.$refs.table.refresh();
       });
     },
-    start(pluginId) {
-      pluginApi.startPlugin(pluginId).then((res) => {});
-    },
     unload(pluginId) {
-      pluginApi.unload(pluginId).then((res) => {});
+      pluginApi.unload(pluginId).then((res) => {
+        this.$refs.table.refresh();
+      });
     },
     stop(pluginId) {
-      pluginApi.stopPlugin(pluginId).then((res) => {});
+      pluginApi.stopPlugin(pluginId).then((res) => {
+        this.$refs.table.refresh();
+      });
     },
   },
 };
