@@ -13,3 +13,7 @@ export type PagerResponse<T extends Record<string, any>> = {
   rows: T[];
   pager: PagerInfo;
 };
+
+export type ListResponse<T extends Record<string, any>> = {
+  rows: T[];
+};

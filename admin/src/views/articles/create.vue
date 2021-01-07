@@ -92,7 +92,8 @@ export default {
         const createParams = {
           tagsList: tags,
           categoryId: categoryIds.length ? categoryIds[0] : null, // todo: 多分类支持
-          status: saveToDarft ? 1 : 2, // 1 草稿 2 文章
+          postStatus: saveToDarft ? 1 : 2, // 1 草稿 2 文章,
+          commentStatus: 1,
           ...restValues,
         };
 

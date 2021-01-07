@@ -71,6 +71,7 @@ export default {
         if (!err) {
           console.log('Received values of form: ', values);
           const createParams = { ...values };
+          createParams['parentId'] = 0;
           if (this.formType === 'create') {
             tagApi
               .create(createParams)
@@ -111,9 +112,10 @@ export default {
     },
     handleEdit(record) {
       this.id = record.id;
-      tagApi.get(record.id)
+      tagApi
+        .get(record.id)
         .then((response) => {
-          console.log(response)
+          console.log(response);
           const postForm = response;
           this.tagsForm = this.$form.createForm(this, {
             onFieldsChange: (_, changedFields) => {},

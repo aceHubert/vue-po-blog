@@ -1,18 +1,37 @@
 import { http } from '../functions';
 
 // Types
-import { TagApi } from 'types/datas/tag';
-
+import { Tag, TagApi } from 'types/datas/tag';
+function formatTag(users: any, includeContent = false): Tag {
+  const {
+    // 主键
+    id,
+    // 用户名
+    name,
+  } = users;
+  return Object.assign({
+    // 主键
+    id,
+    // 用户名
+    name,
+  });
+}
 export const tagApi: TagApi = {
   /**
    * 获取标签列表
    */
-  getList({ page = 1, size = 10, ...rest } = {}) {
-    return http.getList('admin/tags', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
+  getPageList({ page = 1, size = 10, ...rest } = {}) {
+    return http.getList('admin/terms/page/tags', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
       return {
         rows: models,
         pager: pageInfo!,
       };
+    });
+  },
+
+  getList() {
+    return http.getList('admin/terms/tags').then(({ models }) => {
+      return models.map((tag) => formatTag(tag));
     });
   },
 
@@ -21,7 +40,7 @@ export const tagApi: TagApi = {
    * @param id
    */
   get(id) {
-    return http.get(`admin/tags/${id}`).then(({ model }) => model);
+    return http.get(`admin/terms/detail/${id}`).then(({ model }) => model);
   },
 
   /**
@@ -29,7 +48,7 @@ export const tagApi: TagApi = {
    * @param data
    */
   create(data) {
-    return http.post('admin/tags', data).then(({ model }) => model);
+    return http.post('admin/terms/tags', data).then(({ model }) => model);
   },
 
   /**
@@ -37,7 +56,7 @@ export const tagApi: TagApi = {
    * @param data
    */
   update(id, data) {
-    return http.put(`admin/tags/${id}`, data).then(() => true);
+    return http.put(`admin/terms/tags/${id}`, data).then(() => true);
   },
 
   /**
@@ -45,6 +64,6 @@ export const tagApi: TagApi = {
    * @param id
    */
   delete(id) {
-    return http.delete(`admin/tags/${id}`).then(() => true);
+    return http.delete(`admin/terms/tags/${id}`).then(() => true);
   },
 };

@@ -19,7 +19,8 @@ export type TagsPagerQuery = {
 export type UpdateTagModel = CreateTagModel;
 
 export interface TagApi {
-  getList(query?: TagsPagerQuery): Promise<TagsPagerResponse>;
+  getPageList(query?: TagsPagerQuery): Promise<TagsPagerResponse>;
+  getList(): Promise<Tag[]>;
   get(id: number): Promise<Tag | null>;
   create(data: CreateTagModel): Promise<Tag>;
   update(id: number, data: UpdateTagModel): Promise<true>;

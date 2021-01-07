@@ -11,9 +11,9 @@
           type="text"
           placeholder="请输入邮箱地址"
           v-decorator="[
-            'email',
+            'username',
             {
-              rules: [{ required: true, message: '请输入邮箱地址' }, { validator: validateEmail }],
+              rules: [{ required: true, message: '请输入用户名' }],
               validateTrigger: 'change',
             },
           ]"
@@ -61,13 +61,6 @@ export default {
   },
   methods: {
     ...mapActions('user', ['login']),
-    validateEmail(rule, value, callback) {
-      if (value && !/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/.test(value)) {
-        callback('邮箱地址格式不正确');
-      } else {
-        callback();
-      }
-    },
     handleSubmit() {
       this.logining = true;
       this.loginError = '';

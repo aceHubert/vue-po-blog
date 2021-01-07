@@ -11,22 +11,28 @@
         </a-form-item>
       </a-col>
       <a-col :lg="8" :md="12" :sm="24">
-        <a-form-item :label="$tv('article.form.author', 'Author')">
-          <a-input
-            style="width: 220px; max-width: 100%"
+        <a-form-item :label="$tv('article.form.authorId', 'Author')">
+          <a-select
+            mode="users"
+            style="width: 220px"
             :placeholder="$tv('article.form.authorPlaceholder', 'Please input author')"
-            v-decorator="['author', { rules: rules.author }]"
-          />
+            v-decorator="['authorId']"
+            @change="handleSelectChange"
+          >
+            <a-select-option v-for="item in users" :key="String(item.id)" :value="String(item.id)">
+              {{ item.username }} / {{ item.niceName }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
       </a-col>
     </a-row>
     <a-row :gutter="16">
       <a-col :md="16" :sm="24">
-        <a-form-item :label="$tv('article.form.summary', 'Summary')">
+        <a-form-item :label="$tv('article.form.excerpt', 'Excerpt')">
           <a-textarea
             style="width: 500px; max-width: 100%"
             :placeholder="$tv('article.form.summaryPlaceholder', 'Please input summary')"
-            v-decorator="['summary', { rules: rules.summary }]"
+            v-decorator="['excerpt', { rules: rules.summary }]"
           />
         </a-form-item>
       </a-col>
@@ -54,7 +60,7 @@
     <a-row :gutter="16">
       <a-col :lg="8" :md="12" :sm="24">
         <a-form-item :label="$tv('article.form.category', 'Category')">
-          <a-select
+          <!-- <a-select
             mode="multiple"
             style="width: 220px"
             :placeholder="$tv('article.form.categoryPlaceholder', 'Please choose category')"
@@ -64,7 +70,7 @@
             <a-select-option v-for="item in categories" :key="String(item.id)" :value="String(item.id)">
               {{ item.name }}
             </a-select-option>
-          </a-select>
+          </a-select> -->
         </a-form-item>
       </a-col>
       <a-col :lg="8" :md="12" :sm="24">
@@ -107,7 +113,7 @@
 <script>
 import { mavonEditor as MavonEditor } from 'mavon-editor';
 import { isPlainObject } from '@vue-async/utils';
-import { categoryApi, tagApi } from '@/includes/datas';
+import { categoryApi, tagApi, authApi } from '@/includes/datas';
 import { markdownOption } from '../constants';
 
 // Styles
@@ -129,7 +135,7 @@ export default {
     },
   },
   fetch() {
-    return Promise.all([this.getTags(), this.getCategories()]).catch(() => {
+    return Promise.all([this.getTags(), this.getCategories(), this.getUsers()]).catch(() => {
       // ignoer error
     });
   },
@@ -137,6 +143,7 @@ export default {
     return {
       tags: [],
       categories: [],
+      users: [],
       thumbnailList: [],
       markdownOption: markdownOption(),
     };
@@ -157,8 +164,8 @@ export default {
     const model = Object.assign(
       {
         title: '',
-        author: '',
-        summary: '',
+        authorId: '',
+        excerpt: '',
         thumbnail: { file: null, fileList: [] },
         categoryIds: [],
         tags: [],
@@ -198,7 +205,7 @@ export default {
       summary: [
         {
           required: this.summaryRequired,
-          message: this.$tv('article.form.summaryRequired', 'Summary  is required'),
+          message: this.$tv('article.form.summaryRequired', 'Excerpt  is required'),
           whitespace: true,
         },
       ],
@@ -208,7 +215,13 @@ export default {
   methods: {
     getTags() {
       return tagApi.getList().then((tags) => {
+        console.log(tags);
         this.tags = tags;
+      });
+    },
+    getUsers() {
+      authApi.getList().then((users) => {
+        this.users = users;
       });
     },
     getCategories() {

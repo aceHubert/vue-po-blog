@@ -18,7 +18,7 @@
       <template #author="text">
         {{ text || '-' }}
       </template>
-      <template #summary="text">
+      <template #excerpt="text">
         <ellipsis :length="30" tooltip>{{ text }}</ellipsis>
       </template>
       <template #status="text">

@@ -27,9 +27,9 @@ const table = () => ({
     },
     {
       title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.summary', 'Summary'),
-      dataIndex: 'summary',
+      dataIndex: 'excerpt',
       align: 'left',
-      scopedSlots: { customRender: 'summary' },
+      scopedSlots: { customRender: 'excerpt' },
     },
     {
       title: (i18nRender: (key: string, fallback: string) => string) => i18nRender('article.column.status', 'Status'),
@@ -47,7 +47,7 @@ const table = () => ({
       title: (i18nRender: (key: string, fallback: string) => string) =>
         i18nRender('article.column.createTime', 'CreateTime'),
       align: 'left',
-      dataIndex: 'createTime',
+      dataIndex: 'createdAt',
       width: '250px',
       scopedSlots: { customRender: 'createTime' },
     },

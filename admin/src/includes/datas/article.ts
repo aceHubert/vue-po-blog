@@ -13,29 +13,29 @@ function formatArticle(article: any, includeContent: true): Article;
 function formatArticle(article: any, includeContent = false): any {
   const {
     id,
-    status,
+    postStatus,
     author,
     title,
-    summary,
+    excerpt,
     thumbnail,
     categoryId,
     categoryName,
     tagsList,
     views,
-    createTime,
+    createdAt,
   } = article;
   return Object.assign(
     {
       id,
-      status,
+      postStatus,
       author,
       title,
-      summary,
+      excerpt,
       thumbnail,
       category: { id: categoryId, name: categoryName },
       tags: tagsList,
       views,
-      createTime,
+      createdAt,
     },
     includeContent ? { content: article.content } : null,
   );

@@ -1,19 +1,42 @@
 import { http } from '../functions';
 
 // Types
-import { CategoryApi } from 'types/datas/category';
+import { Category, CategoryApi } from 'types/datas/category';
+
+function formatCategory(users: any, includeContent = false): Category {
+  const {
+    // 主键
+    id,
+    // 用户名
+    name,
+  } = users;
+  return Object.assign({
+    // 主键
+    id,
+    // 用户名
+    name,
+  });
+}
 
 export const categoryApi: CategoryApi = {
   /**
    * 获取分类列表
    */
-  getList({ page = 1, size = 10, ...rest } = {}) {
-    return http.getList('admin/categories', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
-      return {
-        rows: models,
-        pager: pageInfo!,
-      };
-    })
+  getPageList({ page = 1, size = 10, ...rest } = {}) {
+    return http
+      .getList('admin/terms/page/categories', { params: { page, size, ...rest } })
+      .then(({ models, pageInfo }) => {
+        return {
+          rows: models,
+          pager: pageInfo!,
+        };
+      });
+  },
+
+  getList() {
+    return http.getList('admin/terms/tags').then(({ models }) => {
+      return models.map((tag) => formatCategory(tag));
+    });
   },
 
   /**
@@ -21,7 +44,7 @@ export const categoryApi: CategoryApi = {
    * @param id
    */
   get(id) {
-    return http.get(`admin/categories/${id}`).then(({ model }) => model);
+    return http.get(`admin/terms/detail/${id}`).then(({ model }) => model);
   },
 
   /**
@@ -29,7 +52,7 @@ export const categoryApi: CategoryApi = {
    * @param data
    */
   create(data) {
-    return http.post('admin/categories', data).then(({ model }) => model);
+    return http.post('admin/terms/categories', data).then(({ model }) => model);
   },
 
   /**
@@ -37,7 +60,7 @@ export const categoryApi: CategoryApi = {
    * @param data
    */
   update(id, data) {
-    return http.put(`admin/categories/${id}`, data).then(() => true);
+    return http.put(`admin/terms/categories/${id}`, data).then(() => true);
   },
 
   /**
@@ -45,6 +68,6 @@ export const categoryApi: CategoryApi = {
    * @param id
    */
   delete(id) {
-    return http.delete(`admin/categories/${id}`).then(() => true);
+    return http.delete(`admin/terms/categories/${id}`).then(() => true);
   },
 };
