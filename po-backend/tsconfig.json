@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "target": "ES2018",
+    "module": "CommonJS",
+    "lib": ["ES2018","ESNext.AsyncIterable"],
+    "types": ["@types/node"],
+    "paths": {
+      "~/*": ["src/*"],
+      "@/*": ["src/*"]
+    },
+    "emitDecoratorMetadata": true,
+  },
+  "include": ["src", "types"],
+  "exclude": ["node_modules"]
+}
