@@ -69,8 +69,8 @@
   "workspaces": {
     "packages": [
       "packages/devtools",
-      "packages/themes/*",
-      "packages/plugins/*"
+      "po-themes/*",
+      "po-plugins/*"
     ]
   }
 }

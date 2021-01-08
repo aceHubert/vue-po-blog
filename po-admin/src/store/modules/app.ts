@@ -17,7 +17,7 @@ import config, {
 
 // Types
 import { Module } from 'vuex';
-import { RootState } from '../';
+import { RootState } from '..';
 
 export type AppState = {
   layout: Layout;

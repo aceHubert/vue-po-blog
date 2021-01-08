@@ -5,7 +5,7 @@ import { authApi } from '@/includes/datas';
 
 // Types
 import { Module } from 'vuex';
-import { RootState } from '../';
+import { RootState } from '..';
 import { Role } from 'types/datas/auth';
 
 export type UserState = {
