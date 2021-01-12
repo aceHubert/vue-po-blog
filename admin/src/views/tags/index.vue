@@ -86,7 +86,7 @@ export default {
   },
   methods: {
     loadData(parameter) {
-      return tagApi.getList(Object.assign(parameter, this.queryParam));
+      return tagApi.getPageList(Object.assign(parameter, this.queryParam));
     },
     resetData(flag) {
       this.visible = flag;

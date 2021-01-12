@@ -24,7 +24,7 @@ export const categoryApi: CategoryApi = {
    */
   getPageList({ page = 1, size = 10, ...rest } = {}) {
     return http
-      .getList('admin/terms/page/categories', { params: { page, size, ...rest } })
+      .getList('admin/terms/pages/categories', { params: { page, size, ...rest } })
       .then(({ models, pageInfo }) => {
         return {
           rows: models,

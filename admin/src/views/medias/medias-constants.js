@@ -7,14 +7,25 @@ const table = {
       dataIndex: 'id'
     },
     {
-      title: '标签名称',
+      title: '文件名',
       align: 'center',
-      dataIndex: 'name'
+      dataIndex: 'fileName'
     },
     {
-      title: '标签描述',
+      title: '原始文件名',
       align: 'center',
-      dataIndex: 'description'
+      dataIndex: 'originalFileName'
+    },
+    {
+      title: '创建人',
+      align: 'center',
+      dataIndex: 'userName'
+    },
+    {
+      title: '创建时间',
+      align: 'center',
+      dataIndex: 'createdAt',
+      scopedSlots: { customRender: 'createdAt' }
     },
     {
       title: '操作',

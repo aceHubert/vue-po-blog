@@ -74,7 +74,7 @@ export default {
     return {
       queryParam: {},
       loadData: parameter => {
-        return categoryApi.getList(Object.assign(parameter, this.queryParam))
+        return categoryApi.getPageList(Object.assign(parameter, this.queryParam))
           .then(res => {
             console.log(res)
             return res

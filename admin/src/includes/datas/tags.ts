@@ -21,7 +21,7 @@ export const tagApi: TagApi = {
    * 获取标签列表
    */
   getPageList({ page = 1, size = 10, ...rest } = {}) {
-    return http.getList('admin/terms/page/tags', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
+    return http.getList('admin/terms/pages/tags', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
       return {
         rows: models,
         pager: pageInfo!,

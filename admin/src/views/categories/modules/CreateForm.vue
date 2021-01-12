@@ -140,6 +140,9 @@ export default {
                 name: this.$form.createFormField({
                   value: postForm.name,
                 }),
+                  description: this.$form.createFormField({
+                  value: postForm.description,
+                }),
               };
             },
             onValuesChange: (_, values) => {},

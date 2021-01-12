@@ -41,7 +41,7 @@
       <a-col :lg="8" :md="12" :sm="24">
         <a-form-item :label="$tv('article.form.thumbnail', 'Thumbnail')">
           <a-upload
-            action="/api/plumemo-service/admin/medias/upload/"
+            action="/api/plumemo-server/v1/file/upload/"
             class="upload-list-inline"
             list-type="picture-card"
             :file-list="thumbnailList"
