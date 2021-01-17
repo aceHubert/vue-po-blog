@@ -102,10 +102,8 @@ export default {
       this.visible = true;
       this.$refs.createCategoryForm.resetForm();
     },
-    handleEdit(record) {
-      this.$refs.createCategoryForm.handleEdit(record);
-      this.formType = 'edit';
-      this.visible = true;
+    handleEdit(row) {
+      this.$router.push({ name: 'medias-edit', params: { id: row.id } });
     },
     handleSub() {
       this.visible = true;

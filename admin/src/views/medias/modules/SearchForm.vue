@@ -59,7 +59,7 @@
 import { ArticleStatus } from '@/includes/datas/enums';
 
 export default {
-  name: 'ArticleSearch',
+  name: 'MediasSearch',
   props: {
     title: {
       type: String,
