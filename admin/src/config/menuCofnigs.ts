@@ -22,10 +22,10 @@ export function getDefaultMenus(): Menu[] {
           name: 'articles',
           title: 'menu.article.articles',
         },
-        {
-          name: 'articles-create',
-          title: 'menu.article.create',
-        },
+        // {
+        //   name: 'articles-create',
+        //   title: 'menu.article.create',
+        // },
         {
           name: 'tags',
           title: 'menu.article.tags',
@@ -34,23 +34,27 @@ export function getDefaultMenus(): Menu[] {
           name: 'categories',
           title: 'menu.article.categories',
         },
-      ],
-    },
-    {
-      name: 'medias',
-      title: 'menu.media.root',
-      icon: media,
-      children: [
         {
-          name: 'medias',
-          title: 'menu.media.medias',
-        },
-        {
-          name: 'medias-create',
-          title: 'menu.media.create',
+          name: 'comment',
+          title: '评论管理',
         },
       ],
     },
+    // {
+    //   name: 'medias',
+    //   title: 'menu.media.root',
+    //   icon: media,
+    //   children: [
+    //     {
+    //       name: 'medias',
+    //       title: 'menu.media.medias',
+    //     },
+    //     {
+    //       name: 'medias-create',
+    //       title: 'menu.media.create',
+    //     },
+    //   ],
+    // },
     {
       name: 'pages',
       title: 'menu.page.root',
@@ -79,10 +83,10 @@ export function getDefaultMenus(): Menu[] {
           name: 'themes-customize',
           title: 'menu.theme.customize',
         },
-        {
-          name: 'themes-color',
-          title: 'menu.theme.color',
-        },
+        // {
+        //   name: 'themes-color',
+        //   title: 'menu.theme.color',
+        // },
         {
           name: 'themes-widgets',
           title: 'menu.theme.widgets',
@@ -105,20 +109,35 @@ export function getDefaultMenus(): Menu[] {
       ],
     },
     {
-      name: 'tools',
-      title: 'menu.tools.root',
-      icon: tool,
+      name: 'account',
+      title: '用户',
+      icon: plugin,
       children: [
         {
-          name: 'tools-import',
-          title: 'menu.tools.import',
+          name: 'account-users',
+          title: '所有用户',
         },
         {
-          name: 'tools-export',
-          title: 'menu.tools.export',
+          name: 'account-person',
+          title: '个人资料',
         },
       ],
     },
+    // {
+    //   name: 'tools',
+    //   title: 'menu.tools.root',
+    //   icon: tool,
+    //   children: [
+    //     {
+    //       name: 'tools-import',
+    //       title: 'menu.tools.import',
+    //     },
+    //     {
+    //       name: 'tools-export',
+    //       title: 'menu.tools.export',
+    //     },
+    //   ],
+    // },
     {
       name: 'settings',
       title: 'menu.settings.root',

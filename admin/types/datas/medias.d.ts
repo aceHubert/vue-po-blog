@@ -34,4 +34,5 @@ export interface MediaApi {
   get(id: number): Promise<Medias | null>;
   update(id: number, data: UpdateCategoryModel): Promise<true>;
   delete(id: number): Promise<true>;
+  upload(data: any): Promise<string>;
 }

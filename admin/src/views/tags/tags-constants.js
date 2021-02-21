@@ -12,11 +12,6 @@ const table = {
       dataIndex: 'name'
     },
     {
-      title: '标签描述',
-      align: 'center',
-      dataIndex: 'description'
-    },
-    {
       title: '操作',
       dataIndex: 'action',
       align: 'center',

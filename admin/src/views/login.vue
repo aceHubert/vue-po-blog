@@ -11,7 +11,7 @@
           type="text"
           placeholder="请输入邮箱地址"
           v-decorator="[
-            'username',
+            'email',
             {
               rules: [{ required: true, message: '请输入用户名' }],
               validateTrigger: 'change',

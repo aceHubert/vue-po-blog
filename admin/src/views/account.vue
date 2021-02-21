@@ -1,17 +1,17 @@
 <template>
-  <h1>用户中心</h1>
+  <nuxt-child />
 </template>
 
 <router>
 {
   meta:{
-    title: 'User Info',
+    title: 'Account',
   }
 }
 </router>
 
 <script>
 export default {
-  name: 'UserInfo',
+  name: 'Articles',
 };
 </script>

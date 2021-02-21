@@ -7,49 +7,21 @@ const table = {
       dataIndex: 'id'
     },
     {
-      title: '文章名称',
+      title: '用户名',
       align: 'center',
-      dataIndex: 'title',
-      scopedSlots: { customRender: 'titles' }
+      dataIndex: 'name'
     },
     {
-      title: '创建时间',
+      title: '角色',
       align: 'center',
-      dataIndex: 'createTime',
-      scopedSlots: { customRender: 'createTime' }
+      dataIndex: 'roleId',
+      scopedSlots: { customRender: 'role' }
     },
     {
-      title: '摘要',
-      dataIndex: 'summary',
+      title: '用户状态',
       align: 'center',
-      scopedSlots: { customRender: 'summary' }
-    },
-    {
-      title: '文章状态',
       dataIndex: 'status',
-      align: 'center',
       scopedSlots: { customRender: 'status' }
-    },
-    {
-      title: '同步状态',
-      dataIndex: 'syncStatus',
-      align: 'center',
-      scopedSlots: { customRender: 'syncStatus' }
-    },
-    {
-      title: '浏览数',
-      align: 'center',
-      dataIndex: 'views'
-    },
-    {
-      title: '评论数',
-      align: 'center',
-      dataIndex: 'comments'
-    },
-    {
-      title: '权重',
-      align: 'center',
-      dataIndex: 'weight'
     },
     {
       title: '操作',
@@ -64,33 +36,33 @@ const table = {
 
 // 表格里面的列key value
 const filters = {
-  syncStatusFilter(status: number) {
-    enum StatusType {
-      '未同步' = 0,
-      '已同步' = 1,
+  syncStatusFilter (status) {
+    const statusMap = {
+      0: '未同步',
+      1: '已同步'
     }
-    return StatusType[status]
+    return statusMap[status]
   },
-  syncStatusTypeFilter(status: number) {
-    enum StatusType {
-      'error' = 0,
-      'success' = 1,
+  syncStatusTypeFilter (status) {
+    const statusMap = {
+      0: 'error',
+      1: 'success'
     }
-    return StatusType[status]
+    return statusMap[status]
   },
-  statusFilter(status: any) {
-    enum StatusType {
-      '草稿箱' = 1,
-      '已发布' = 2,
+  statusFilter (status) {
+    const statusMap = {
+      1: '草稿箱',
+      2: '已发布'
     }
-    return StatusType[status]
+    return statusMap[status]
   },
-  statusTypeFilter(status: any) {
-    enum StatusType {
-      'error' = 1,
-      'success' = 2,
+  statusTypeFilter (status) {
+    const statusMap = {
+      1: 'error',
+      2: 'success'
     }
-    return StatusType[status]
+    return statusMap[status]
   }
 }
 

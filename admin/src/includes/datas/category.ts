@@ -24,7 +24,7 @@ export const categoryApi: CategoryApi = {
    */
   getPageList({ page = 1, size = 10, ...rest } = {}) {
     return http
-      .getList('admin/terms/pages/categories', { params: { page, size, ...rest } })
+      .getList('admin/categories', { params: { page, size, ...rest } })
       .then(({ models, pageInfo }) => {
         return {
           rows: models,
@@ -34,7 +34,7 @@ export const categoryApi: CategoryApi = {
   },
 
   getList() {
-    return http.getList('admin/terms/tags').then(({ models }) => {
+    return http.getList('admin/categories').then(({ models }) => {
       return models.map((tag) => formatCategory(tag));
     });
   },
@@ -52,7 +52,7 @@ export const categoryApi: CategoryApi = {
    * @param data
    */
   create(data) {
-    return http.post('admin/terms/categories', data).then(({ model }) => model);
+    return http.post('admin/categories', data).then(({ model }) => model);
   },
 
   /**

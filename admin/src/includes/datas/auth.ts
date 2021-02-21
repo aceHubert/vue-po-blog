@@ -8,41 +8,29 @@ function formatUsers(users: any, includeContent = false): Users {
     // 主键
     id,
     // 用户名
-    username,
-    // 用户昵称
-    niceName,
+    name,
     // 邮箱
-    email,
-    // 用户网址
-    url,
+    introduction,
     // 创建时间
     createdAt,
     // 更新时间
-    updatedDt,
+    roleId,
     // 0禁用 1正常
-    userStatus,
-    // 来前台显示出来的用户名字
-    displayName,
+    status,
   } = users;
   return Object.assign({
     // 主键
     id,
     // 用户名
-    username,
-    // 用户昵称
-    niceName,
+    name,
     // 邮箱
-    email,
-    // 用户网址
-    url,
+    introduction,
     // 创建时间
     createdAt,
     // 更新时间
-    updatedDt,
+    roleId,
     // 0禁用 1正常
-    userStatus,
-    // 来前台显示出来的用户名字
-    displayName,
+    status,
   });
 }
 

@@ -51,4 +51,6 @@ export interface ArticleApi {
   update(id: number, data: UpdateArticleModel): Promise<true>;
   updateStatus(id: number, status: ArticleStatus): Promise<true>;
   delete(id: number): Promise<true>;
+  importDataByDB(data: any): Promise<void>;
+  publishByteBlogs(data: any): Promise<void>
 }

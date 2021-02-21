@@ -1,93 +1,98 @@
 <template>
-  <a-card :bordered="false">
-    <SearchForm ref="searchForm" @search="handleSearch" />
-    <STable
-      ref="table"
-      size="small"
-      rowKey="id"
-      :scroll="{ x: 1300 }"
-      :columns="columns"
-      :data="loadData"
-      :alert="options.alert"
-      :rowSelection="options.rowSelection"
-      showPagination="auto"
-    >
-      <template #titles="text">
-        <ellipsis :length="15" tooltip>{{ text }}</ellipsis>
-      </template>
-      <template #author="text">
-        {{ text || '-' }}
-      </template>
-      <template #excerpt="text">
-        <ellipsis :length="30" tooltip>{{ text }}</ellipsis>
-      </template>
-      <template #status="text">
-        <a-badge :status="text | statusTypeFilter" :text="text | statusFilter($i18n.tv.bind($i18n))" />
-      </template>
-      <template #createTime="text">
-        {{ text | dateFormat }}
-      </template>
-      <template slot="actions" slot-scope="text, record">
-        <a :title="$tv('article.btnTips.edit')" @click="handleEdit(record)">{{
-          $tv('article.btnText.edit', 'Edit')
-        }}</a>
-        <a-divider type="vertical" />
-        <a v-if="record.status === 1" :title="$tv('article.btnTips.publish')" @click="handleModifyStatus(record, 2)">{{
-          $tv('article.btnText.publish', 'Publish')
-        }}</a>
-        <a
-          v-else-if="record.status === 2"
-          :title="$tv('article.btnTips.moveToDraft')"
-          @click="handleModifyStatus(record, 1)"
-          >{{ $tv('article.btnText.moveToDraft', 'Move to Draft') }}</a
-        >
-        <a-divider type="vertical" />
-        <a-popconfirm
-          :title="$tv('article.dialog.delete.content', 'Do you really want to delete this article?')"
-          :okText="$tv('article.dialog.delete.okBtn', 'Ok')"
-          :cancelText="$tv('article.dialog.delete.cancelBtn', 'No')"
-          @confirm="handleDelete(record)"
-        >
-          <a href="#none" :title="$tv('article.btnTips.delete')">{{ $tv('article.btnText.delete', 'Delete') }}</a>
-        </a-popconfirm>
-      </template>
-    </STable>
-  </a-card>
+  <div class="app-container">
+    <a-card :bordered="false">
+      <SearchForm ref="searchForm" @reloadData="reloadData" />
+      <div class="table-operator">
+        <a-button type="primary" icon="plus" @click="createHandler">新建</a-button>
+        <a-button type="primary" icon="import" @click="importHandler">导入</a-button>
+      </div>
+      <s-table
+        ref="table"
+        size="default"
+        rowKey="id"
+        :scroll="{ x: 1300 }"
+        :columns="columns"
+        :data="loadData"
+        :alert="options.alert"
+        :rowSelection="options.rowSelection"
+        showPagination="true"
+      >
+        <span slot="status" slot-scope="text">
+          <a-badge :status="text | statusTypeFilter" :text="text | statusFilter" />
+        </span>
+        <span slot="syncStatus" slot-scope="text">
+          <a-badge :status="text | syncStatusTypeFilter" :text="text | syncStatusFilter" />
+        </span>
+        <span slot="summary" slot-scope="text">
+          <ellipsis :length="10" tooltip>{{ text }}</ellipsis>
+        </span>
+        <span slot="createTime" slot-scope="text">
+          {{ text | dateFormat }}
+        </span>
+        <span slot="titles" slot-scope="text">
+          <ellipsis :length="15" tooltip>{{ text }}</ellipsis>
+        </span>
+        <span slot="action" slot-scope="text, record">
+          <template>
+            <a @click="handleEdit(record)">编辑</a>
+            <a-divider type="vertical" />
+            <a @click="handleSync(record)">同步</a>
+            <a-divider type="vertical" />
+            <a v-if="record.status === 1" @click="handleModifyStatus(record, 2)">发布</a>
+            <a v-if="record.status === 2" @click="handleModifyStatus(record, 1)">草稿箱</a>
+            <a-divider type="vertical" />
+            <a-popconfirm
+              title="确定删除这篇文章？"
+              @confirm="handleDelete(record)"
+              @cancel="cancel"
+              okText="Yes"
+              cancelText="No"
+            >
+              <a href="#">删除</a>
+            </a-popconfirm>
+          </template>
+        </span>
+      </s-table>
+
+      <CreateArticleForm
+        :formType="formType"
+        :visible="visible"
+        ref="createArticleForm"
+        @resetData="resetData"
+        @refreshTable="refreshTable"
+      />
+
+      <ImportFormForm @refreshTable="refreshTable" ref="importFormFormForm" />
+    </a-card>
+  </div>
 </template>
 
-<router>
-{
-  prop:true,
-  meta:{
-    title: 'All Articles',
-    keepAlive: true,
-  }
-}
-</router>
-
 <script>
-import { STable, Ellipsis } from '@/components';
-import SearchForm from './modules/SearchForm';
 import { articleApi } from '@/includes/datas';
+import { STable, Ellipsis } from '@/components';
+import CreateArticleForm from './modules/CreateForm';
+import ImportFormForm from './modules/ImportForm';
+import SearchForm from './modules/SearchForm';
 import { filters, table } from './constants';
-
 export default {
-  name: 'ArticleIndex',
+  name: 'ArticleList',
   components: {
     STable,
     Ellipsis,
+    CreateArticleForm,
     SearchForm,
+    ImportFormForm,
   },
   filters: filters,
-  props: {
-    refresh: {
-      type: Boolean,
-      default: false,
-    },
-  },
   data() {
     return {
       queryParam: {},
+      loadData: (parameter) => {
+        console.log('loadData.parameter', parameter);
+        return articleApi.getList(Object.assign(parameter, this.queryParam)).then((res) => {
+          return res;
+        });
+      },
       options: {
         alert: {
           show: true,
@@ -100,59 +105,105 @@ export default {
           onChange: this.onSelectChange,
         },
       },
-      columns: table().columns,
+      columns: table.columns,
+      visible: false,
+      formType: 'create',
     };
   },
+  created() {},
   methods: {
-    loadData(parameter) {
-      return articleApi.getList(Object.assign(parameter, this.queryParam));
+    createHandler() {
+      this.formType = 'create';
+      this.visible = true;
+      this.$refs.createArticleForm.resetForm();
+    },
+    handleEdit(record) {
+      this.$refs.createArticleForm.handleEdit(record);
+      this.formType = 'edit';
+      this.visible = true;
+    },
+    resetData(flag) {
+      this.visible = flag;
+      this.record = null;
     },
     refreshTable() {
       this.$refs.table.refresh();
     },
-    onSelectChange() {
-      console.log(arguments);
-    },
-    handleCreate() {
-      this.$router.push({ name: 'articles-create' });
-    },
-    handleEdit(row) {
-      this.$router.push({ name: 'articles-edit', params: { id: row.id } });
-    },
-    handleSearch(queryParam) {
+    reloadData(queryParam) {
       this.queryParam = queryParam;
       this.refreshTable();
     },
-    handleModifyStatus(row, status) {
-      articleApi
-        .updateStatus(row.id, status)
-        .then(() => {
+    handleModifyStatus(record, status) {
+      articleApi.updateStatus(record.id, status).then((res) => {
+        this.$notification.success({
+          message: '更新状态成功',
+        });
+        this.$refs.table.refresh();
+      });
+    },
+    handleSync(record) {
+      articleApi.publishByteBlogs(record.id).then((res) => {
+        const { success } = res;
+        if (success === 1) {
           this.$notification.success({
-            message: '更新状态成功',
+            message: '同步成功',
+            description: '已存入ByteBlogs草稿箱,您可以去ByteBlogs进行发布',
           });
           this.$refs.table.refresh();
-        })
-        .catch(() => {
-          this.$notification.error({
-            message: '更新失败，请稍后重试',
-          });
-        });
+        }
+      });
     },
     handleDelete(row) {
-      articleApi
-        .delete(row.id)
-        .then(() => {
-          this.$notification.success({
-            message: '删除成功',
-          });
-          this.$refs.table.refresh();
-        })
-        .catch(() => {
-          this.$notification.error({
-            message: '删除失败，请稍后重试',
-          });
+      articleApi.delete(row.id).then((res) => {
+        this.$notification.success({
+          message: '删除成功',
         });
+        this.$refs.table.refresh();
+      });
+    },
+    cancel() {},
+    goByteBlogsEdit() {
+      window.open('https://www.byteblogs.com/editor/posts', '_blank');
+    },
+    draftForm() {
+      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
+        this.$message({
+          message: '请填写必要的标题和内容',
+          type: 'warning',
+        });
+        return;
+      }
+      this.$message({
+        message: '保存成功',
+        type: 'success',
+        showClose: true,
+        duration: 1000,
+      });
+      this.postForm.status = 1;
+    },
+    importHandler() {
+      this.$refs.importFormFormForm.showDrawerVisible(true);
     },
   },
 };
 </script>
+
+<style scoped>
+.edit-input {
+  padding-right: 100px;
+}
+.cancel-btn {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+}
+.ant-upload-select-picture-card i {
+  font-size: 32px;
+  color: #999;
+}
+
+.ant-upload-select-picture-card .ant-upload-text {
+  margin-top: 8px;
+  color: #666;
+}
+</style>

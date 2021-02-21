@@ -13,29 +13,35 @@ function formatArticle(article: any, includeContent: true): Article;
 function formatArticle(article: any, includeContent = false): any {
   const {
     id,
-    postStatus,
+    status,
     author,
     title,
-    excerpt,
+    summary,
     thumbnail,
     categoryId,
     categoryName,
     tagsList,
     views,
-    createdAt,
+    syncStatus,
+    createTime,
+    comments,
+    weight
   } = article;
   return Object.assign(
     {
       id,
-      postStatus,
+      status,
       author,
       title,
-      excerpt,
+      summary,
       thumbnail,
       category: { id: categoryId, name: categoryName },
-      tags: tagsList,
+      tagsList,
       views,
-      createdAt,
+      syncStatus,
+      createTime,
+      comments,
+      weight
     },
     includeContent ? { content: article.content } : null,
   );
@@ -106,4 +112,17 @@ export const articleApi: ArticleApi = {
   delete(id) {
     return http.delete(`admin/posts/${id}`).then(() => true);
   },
+  /**
+   * 通过mysql迁移文章
+   * @param data
+   */
+  importDataByDB(data) {
+    return http.post(`admin/blog-move/mysql`, data, {
+      timeout: 500000,
+    });
+  },
+
+  publishByteBlogs(data) {
+    return http.post(`posts/byte-blogs/v1/publish`, data);
+  }
 };
