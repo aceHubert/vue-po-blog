@@ -1,7 +1,7 @@
 /**
  * 默认左侧菜单配置
  */
-import { dashboard, page, article, media, theme, plugin, tool, setting } from '@/assets/icons';
+import { dashboard, page, article, theme, plugin, setting } from '@/assets/icons';
 
 // Types
 import { Menu } from 'types/functions';

@@ -55,4 +55,5 @@ export interface AuthApi {
   getLoginUserInfo(): Promise<LoginUserInfo>;
   getList(): Promise<Users[]>;
   getPageList(query: UsersPagerQuery): Promise<UsersPagerResponse>;
+  updatePassword(data: any): Promise<void>;
 }

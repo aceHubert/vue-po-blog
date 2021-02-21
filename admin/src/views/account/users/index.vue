@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <a-card :bordered="false">
-      <SearchForm ref="searchForm" @reloadData="reloadData"/>
+      <SearchForm ref="searchForm" @reloadData="reloadData" />
       <s-table
         ref="table"
         size="default"
@@ -33,8 +33,8 @@
 
         <span slot="action" slot-scope="text, record">
           <template>
-            <a v-if="record.status === 0 && record.roleId === 1" @click="handleEditStatus(record,1)">锁定</a>
-            <a v-if="record.status === 1 && record.roleId === 1" @click="handleEditStatus(record,0)">解锁</a>
+            <a v-if="record.status === 0 && record.roleId === 1" @click="handleEditStatus(record, 1)">锁定</a>
+            <a v-if="record.status === 1 && record.roleId === 1" @click="handleEditStatus(record, 0)">解锁</a>
             <a-divider v-if="record.roleId === 1" type="vertical" />
             <a-popconfirm
               title="确定删除这个用户？"
@@ -53,81 +53,81 @@
 </template>
 
 <script>
-import { authApi } from '@/includes/datas'
-import { STable, Ellipsis } from '@/components'
-import SearchForm from './modules/SearchForm'
-import { filters, table } from './auth-constants'
+import { authApi } from '@/includes/datas';
+import { STable, Ellipsis } from '@/components';
+import SearchForm from './modules/SearchForm';
+import { filters, table } from './auth-constants';
 export default {
   name: 'AuthList',
   components: {
     STable,
     Ellipsis,
-    SearchForm
+    SearchForm,
   },
   filters: filters,
-  data () {
+  data() {
     return {
       queryParam: {},
-      loadData: parameter => {
-        return authApi.getPageList(Object.assign(parameter, this.queryParam)).then(res => {
-          return res
-        })
+      loadData: (parameter) => {
+        return authApi.getPageList(Object.assign(parameter, this.queryParam)).then((res) => {
+          return res;
+        });
       },
       options: {
         alert: {
           show: true,
           clear: () => {
-            this.selectedRowKeys = []
-          }
+            this.selectedRowKeys = [];
+          },
         },
         rowSelection: {
           selectedRowKeys: this.selectedRowKeys,
-          onChange: this.onSelectChange
-        }
+          onChange: this.onSelectChange,
+        },
       },
       columns: table.columns,
       visible: false,
-      formType: 'create'
-    }
+      formType: 'create',
+    };
   },
-  created () {},
+  created() {},
   methods: {
-    createHandler () {
-      this.formType = 'create'
-      this.visible = true
-      this.$refs.createUserForm.resetForm()
+    createHandler() {
+      this.formType = 'create';
+      this.visible = true;
+      this.$refs.createUserForm.resetForm();
     },
-    handleEditStatus (record, status) {
-      record.status = status
-      updateStatus(record).then(res => {
+    handleEditStatus(record, status) {
+      record.status = status;
+      updateStatus(record).then((res) => {
         this.$notification.success({
-          message: status ? '锁定成功' : '解锁成功'
-        })
-        this.$refs.table.refresh()
-      })
+          message: status ? '锁定成功' : '解锁成功',
+        });
+        this.$refs.table.refresh();
+      });
     },
-    handleDelete (record) {
-      authApi.delete(record.id).then(res => {
+    handleDelete(record) {
+      authApi.delete(record.id).then((res) => {
         this.$notification.success({
-          message: '删除成功'
-        })
-        this.$refs.table.refresh()
-      })
+          message: '删除成功',
+        });
+        this.$refs.table.refresh();
+      });
     },
-    resetData (flag) {
-      this.visible = flag
-      this.record = null
+    resetData(flag) {
+      this.visible = flag;
+      this.record = null;
     },
-    refreshTable () {
-      this.$refs.table.refresh()
+    refreshTable() {
+      this.$refs.table.refresh();
     },
-    reloadData (queryParam) {
-      this.queryParam = queryParam
-      this.refreshTable()
+    reloadData(queryParam) {
+      this.queryParam = queryParam;
+      this.refreshTable();
     },
-    cancel () { }
-  }
-}
+    cancel() {},
+  },
+};
 </script>
 
 <style scoped>

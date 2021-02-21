@@ -77,4 +77,10 @@ export const authApi: AuthApi = {
       return models.map((plugin) => formatUsers(plugin));
     });
   },
+ /**
+  * 获取用户列表
+  */
+  updatePassword(data) {
+    return http.put('admin/users/password', data);
+  },
 };

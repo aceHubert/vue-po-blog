@@ -1,7 +1,7 @@
 import { http } from '../functions';
 
 // Types
-import { Comment, CommentApi } from 'types/datas/comment';
+import { CommentApi } from 'types/datas/comment';
 
 
 export const commentApi: CommentApi = {
