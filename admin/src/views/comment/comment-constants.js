@@ -4,59 +4,59 @@ const table = {
     {
       title: 'ID',
       align: 'center',
-      dataIndex: 'id'
+      dataIndex: 'id',
     },
     {
       title: '作者',
       align: 'center',
-      dataIndex: 'authorName'
+      dataIndex: 'authorName',
     },
     {
       title: '回复对象',
       align: 'center',
       dataIndex: 'parentUserName',
-      scopedSlots: { customRender: 'parentUserName' }
+      scopedSlots: { customRender: 'parentUserName' },
     },
     {
       title: '文章标题',
       align: 'center',
       dataIndex: 'title',
-      scopedSlots: { customRender: 'postTitle' }
+      scopedSlots: { customRender: 'postTitle' },
     },
     {
       title: '评论内容',
       align: 'center',
       dataIndex: 'content',
-      scopedSlots: { customRender: 'content' }
+      scopedSlots: { customRender: 'content' },
     },
     {
       title: '操作',
       dataIndex: 'action',
       align: 'center',
       width: '150px',
-      scopedSlots: { customRender: 'action' }
-    }
-  ]
-}
+      scopedSlots: { customRender: 'action' },
+    },
+  ],
+};
 
 // 表格里面的列key value
 const filters = {
-  syncStatusTypeFilter (status) {
+  syncStatusTypeFilter(status) {
     const statusMap = {
       0: 'error',
-      1: 'success'
-    }
-    return statusMap[status]
+      1: 'success',
+    };
+    return statusMap[status];
   },
-  statusTypeFilter (status) {
+  statusTypeFilter(status) {
     const statusMap = {
       1: 'error',
-      2: 'success'
-    }
-    return statusMap[status]
+      2: 'success',
+    };
+    return statusMap[status];
   },
-  tagsListFilter (tagsList) {
-    return '这是一个测试'
-  }
-}
-export { table, filters }
+  tagsListFilter(tagsList) {
+    return '这是一个测试';
+  },
+};
+export { table, filters };

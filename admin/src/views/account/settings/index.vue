@@ -33,8 +33,7 @@
 import { deviceMixin } from '@/mixins';
 
 export default {
-  components: {
-  },
+  components: {},
   mixins: [deviceMixin],
   data() {
     return {

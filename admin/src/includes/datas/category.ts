@@ -23,14 +23,12 @@ export const categoryApi: CategoryApi = {
    * 获取分类列表
    */
   getPageList({ page = 1, size = 10, ...rest } = {}) {
-    return http
-      .getList('admin/categories', { params: { page, size, ...rest } })
-      .then(({ models, pageInfo }) => {
-        return {
-          rows: models,
-          pager: pageInfo!,
-        };
-      });
+    return http.getList('admin/categories', { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
+      return {
+        rows: models,
+        pager: pageInfo!,
+      };
+    });
   },
 
   getList() {

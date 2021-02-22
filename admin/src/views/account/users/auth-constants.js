@@ -4,24 +4,24 @@ const table = {
     {
       title: 'ID',
       align: 'center',
-      dataIndex: 'id'
+      dataIndex: 'id',
     },
     {
       title: '用户名',
       align: 'center',
-      dataIndex: 'name'
+      dataIndex: 'name',
     },
     {
       title: '角色',
       align: 'center',
       dataIndex: 'roleId',
-      scopedSlots: { customRender: 'role' }
+      scopedSlots: { customRender: 'role' },
     },
     {
       title: '用户状态',
       align: 'center',
       dataIndex: 'status',
-      scopedSlots: { customRender: 'status' }
+      scopedSlots: { customRender: 'status' },
     },
     {
       title: '操作',
@@ -29,42 +29,42 @@ const table = {
       align: 'center',
       fixed: 'right',
       width: '250px',
-      scopedSlots: { customRender: 'action' }
-    }
-  ]
-}
+      scopedSlots: { customRender: 'action' },
+    },
+  ],
+};
 
 // 表格里面的列key value
 const filters = {
-  syncStatusFilter (status) {
+  syncStatusFilter(status) {
     const statusMap = {
       0: '未同步',
-      1: '已同步'
-    }
-    return statusMap[status]
+      1: '已同步',
+    };
+    return statusMap[status];
   },
-  syncStatusTypeFilter (status) {
+  syncStatusTypeFilter(status) {
     const statusMap = {
       0: 'error',
-      1: 'success'
-    }
-    return statusMap[status]
+      1: 'success',
+    };
+    return statusMap[status];
   },
-  statusFilter (status) {
+  statusFilter(status) {
     const statusMap = {
       1: '草稿箱',
-      2: '已发布'
-    }
-    return statusMap[status]
+      2: '已发布',
+    };
+    return statusMap[status];
   },
-  statusTypeFilter (status) {
+  statusTypeFilter(status) {
     const statusMap = {
       1: 'error',
-      2: 'success'
-    }
-    return statusMap[status]
-  }
-}
+      2: 'success',
+    };
+    return statusMap[status];
+  },
+};
 
 // md配置
 const markdownOption = {
@@ -93,7 +93,7 @@ const markdownOption = {
   navigation: true, // 导航目录
   subfield: true, // 单双栏模式
   preview: true, // 预览
-  htmlcode: true// 展示html源码
-}
+  htmlcode: true, // 展示html源码
+};
 
-export { table, filters, markdownOption }
+export { table, filters, markdownOption };

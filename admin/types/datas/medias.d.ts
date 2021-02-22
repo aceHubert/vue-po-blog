@@ -1,7 +1,6 @@
 import { type } from 'os';
 import { PagerResponse } from './request';
 
-
 export type Medias = {
   id: number;
   name: string;
@@ -19,7 +18,7 @@ export type UpdateCategoryModel = {
   id: number;
   alt: string;
   description: string;
-  title: string
+  title: string;
 };
 
 export type MediasPagerResponse = PagerResponse<Medias>;
@@ -27,7 +26,7 @@ export type MediasPagerResponse = PagerResponse<Medias>;
 export type MediasPagerQuery = {
   page?: number;
   size?: number;
-}
+};
 
 export interface MediaApi {
   getPageList(query?: MediasPagerQuery): Promise<MediasPagerResponse>;

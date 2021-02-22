@@ -1,12 +1,6 @@
 <template>
   <div>
-    <a-drawer
-      :title="title"
-      placement="right"
-      :closable="true"
-      @close="onClose"
-      :visible="drawerVisible"
-      :width="950">
+    <a-drawer :title="title" placement="right" :closable="true" @close="onClose" :visible="drawerVisible" :width="950">
       <a-form @submit="handleSubmit" :form="form" class="form">
         <a-row class="form-row" :gutter="16">
           <a-col :lg="24" :md="12" :sm="24">
@@ -56,7 +50,7 @@
                 placeholder="请选择标签"
                 v-decorator="['tagsList']"
               >
-                <a-select-option v-for="(item) in dynamicTags" :key="String(item.id)" :value="String(item.id)" >
+                <a-select-option v-for="item in dynamicTags" :key="String(item.id)" :value="String(item.id)">
                   {{ item.name }}
                 </a-select-option>
               </a-select>
@@ -102,7 +96,7 @@
                   :box-shadow="false"
                   :subfield="false"
                   placeholder="开始你的表演"
-                  style="height: 835px;z-index: 5"
+                  style="height: 835px; z-index: 5"
                   @imgAdd="$imgAdd"
                 />
               </a-form-item>
@@ -119,15 +113,11 @@
             padding: '10px 16px',
             background: '#fff',
             textAlign: 'right',
-            zIndex: '10'
+            zIndex: '10',
           }"
         >
-          <a-button :style="{marginRight: '8px'}" @click="onClose">
-            取消
-          </a-button>
-          <a-button type="primary" @click="handleSubmit">
-            提交
-          </a-button>
+          <a-button :style="{ marginRight: '8px' }" @click="onClose"> 取消 </a-button>
+          <a-button type="primary" @click="handleSubmit"> 提交 </a-button>
         </div>
       </a-form>
     </a-drawer>
@@ -135,24 +125,24 @@
 </template>
 
 <script>
-import { markdownOption } from '../constants'
-import { mavonEditor } from 'mavon-editor'
+import { markdownOption } from '../constants';
+import { mavonEditor } from 'mavon-editor';
 import { categoryApi, tagApi, authApi, articleApi, mediaApi } from '@/includes/datas';
 export default {
   name: 'CreateArticleForm',
   components: {
-    mavonEditor
+    mavonEditor,
   },
   props: {
     formType: {
       type: String,
-      default: 'create'
+      default: 'create',
     },
     visible: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
-  data () {
+  data() {
     return {
       title: '新增文章',
       isSync: 0,
@@ -169,222 +159,227 @@ export default {
       categoryList: [],
       id: null,
       drawerVisible: false,
-      form: this.$form.createForm(this, { name: 'create_article' })
-    }
+      form: this.$form.createForm(this, { name: 'create_article' }),
+    };
   },
   watch: {
-    visible (val) {
-      this.drawerVisible = val
+    visible(val) {
+      this.drawerVisible = val;
     },
-    formType (val) {
-      this.title = (val === 'create' ? '新增文章' : '更新文章')
-    }
+    formType(val) {
+      this.title = val === 'create' ? '新增文章' : '更新文章';
+    },
   },
-  created () {
-    this.getTagsList()
-    this.getCategoryList()
+  created() {
+    this.getTagsList();
+    this.getCategoryList();
   },
   methods: {
-    handleSubmit (e) {
-      e.preventDefault()
+    handleSubmit(e) {
+      e.preventDefault();
       this.form.validateFieldsAndScroll((err, values) => {
         if (!err && this.content !== null) {
-          console.log('Received values of form: ', values)
-          const createParams = { ...values }
+          console.log('Received values of form: ', values);
+          const createParams = { ...values };
 
-          const arr = []
+          const arr = [];
           if (createParams.tagsList !== undefined) {
             createParams.tagsList.forEach((item, index) => {
-              this.dynamicTags.forEach(item1 => {
+              this.dynamicTags.forEach((item1) => {
                 if (item1.id === Number(item)) {
-                  arr[index] = item1
+                  arr[index] = item1;
                 }
-              })
-            })
+              });
+            });
           }
 
-          createParams.tagsList = [...arr]
+          createParams.tagsList = [...arr];
           // 1 草稿 2 文章
-          createParams['status'] = 2
-          createParams['content'] = this.content
+          createParams['status'] = 2;
+          createParams['content'] = this.content;
 
-          if (createParams.thumbnail !== undefined &&
+          if (
+            createParams.thumbnail !== undefined &&
             createParams.thumbnail !== null &&
             createParams.thumbnail.file !== null &&
-            createParams.thumbnail.file !== undefined) {
-            createParams.thumbnail = createParams.thumbnail.file.response.extra
+            createParams.thumbnail.file !== undefined
+          ) {
+            createParams.thumbnail = createParams.thumbnail.file.response.extra;
           }
 
           if (this.formType === 'create') {
-            articleApi.create(createParams)
-              .then(response => {
+            articleApi
+              .create(createParams)
+              .then((response) => {
                 this.$notification.success({
-                  message: response.message
-                })
-                this.$emit('refreshTable')
+                  message: response.message,
+                });
+                this.$emit('refreshTable');
               })
-              .catch(err => {
-                console.log(err)
-              })
+              .catch((err) => {
+                console.log(err);
+              });
           } else {
-            createParams['id'] = this.id
-            articleApi.update(createParams)
-              .then(response => {
+            createParams['id'] = this.id;
+            articleApi
+              .update(createParams)
+              .then((response) => {
                 this.$notification.success({
-                  message: response.message
-                })
-                this.$emit('refreshTable')
+                  message: response.message,
+                });
+                this.$emit('refreshTable');
               })
-              .catch(err => {
-                console.log(err)
-              })
+              .catch((err) => {
+                console.log(err);
+              });
           }
 
-          this.content = ''
-          this.form.resetFields()
-          this.drawerVisible = false
-          this.$emit('resetData', false)
+          this.content = '';
+          this.form.resetFields();
+          this.drawerVisible = false;
+          this.$emit('resetData', false);
         }
-      })
+      });
     },
-    handleEdit (record) {
-      this.id = record.id
-      articleApi.get(record.id)
-        .then(model => {
-          const postForm = model
-          console.log(postForm)
-          this.tagsList = postForm.tagsList
-          this.content = postForm.content
+    handleEdit(record) {
+      this.id = record.id;
+      articleApi
+        .get(record.id)
+        .then((model) => {
+          const postForm = model;
+          console.log(postForm);
+          this.tagsList = postForm.tagsList;
+          this.content = postForm.content;
 
           if (postForm.thumbnail !== null && postForm.thumbnail !== undefined) {
             this.fileList[0] = {
               uid: '-1',
               name: 'xxx.png',
               status: 'done',
-              url: postForm.thumbnail
-            }
+              url: postForm.thumbnail,
+            };
           }
 
-          const arr = []
+          const arr = [];
           if (postForm.tagsList !== undefined && postForm.tagsList !== null) {
             postForm.tagsList.forEach((item, index) => {
-              arr[index] = String(item.id)
-            })
+              arr[index] = String(item.id);
+            });
           }
 
-          this.form.resetFields()
+          this.form.resetFields();
           this.form = this.$form.createForm(this, {
             onFieldsChange: (_, changedFields) => {},
             mapPropsToFields: () => {
               return {
                 title: this.$form.createFormField({
-                  value: postForm.title
+                  value: postForm.title,
                 }),
                 thumbnail: this.$form.createFormField({
-                  value: postForm.thumbnail
+                  value: postForm.thumbnail,
                 }),
                 content: this.$form.createFormField({
-                  value: postForm.content
+                  value: postForm.content,
                 }),
                 isComment: this.$form.createFormField({
-                  value: postForm.isComment
+                  value: postForm.isComment,
                 }),
                 categoryId: this.$form.createFormField({
-                  value: postForm.categoryId === 0 || postForm.categoryId === undefined ? '' : postForm.categoryId + ''
+                  value: postForm.categoryId === 0 || postForm.categoryId === undefined ? '' : postForm.categoryId + '',
                 }),
                 weight: this.$form.createFormField({
-                  value: postForm.weight
+                  value: postForm.weight,
                 }),
                 tagsList: this.$form.createFormField({
-                  value: arr
-                })
-              }
+                  value: arr,
+                }),
+              };
             },
             onValuesChange: (_, values) => {
-              console.log(values)
-            }
-          })
+              console.log(values);
+            },
+          });
         })
-        .catch(err => {
-          console.log(err)
-        })
-      this.drawerVisible = true
+        .catch((err) => {
+          console.log(err);
+        });
+      this.drawerVisible = true;
     },
-    onClose () {
-      this.resetForm()
-      this.drawerVisible = false
-      this.$emit('resetData', false)
+    onClose() {
+      this.resetForm();
+      this.drawerVisible = false;
+      this.$emit('resetData', false);
     },
-    resetForm () {
-      this.content = ''
-      this.form.resetFields()
+    resetForm() {
+      this.content = '';
+      this.form.resetFields();
     },
-    getTagsList () {
-      tagApi.getList().then(models => {
-        this.dynamicTags = models
-      })
+    getTagsList() {
+      tagApi.getList().then((models) => {
+        this.dynamicTags = models;
+      });
     },
-    getCategoryList () {
-      categoryApi.getList().then(models => {
-        this.categoryList = models
-      })
+    getCategoryList() {
+      categoryApi.getList().then((models) => {
+        this.categoryList = models;
+      });
     },
-    handleCancel () {
-      this.previewVisible = false
+    handleCancel() {
+      this.previewVisible = false;
     },
-    handlePreview (file) {
-      this.previewImage = file.url || file.thumbUrl
-      this.previewVisible = true
+    handlePreview(file) {
+      this.previewImage = file.url || file.thumbUrl;
+      this.previewVisible = true;
     },
-    handleChange ({ fileList }) {
-      console.log(fileList)
-      this.fileList = fileList
+    handleChange({ fileList }) {
+      console.log(fileList);
+      this.fileList = fileList;
     },
-    handleSelectChange (value) {
-      console.log(`Selected: ${value}`)
+    handleSelectChange(value) {
+      console.log(`Selected: ${value}`);
     },
-    beforeUpload (file) {
-      const isJPG = file.type === 'image/jpeg'
+    beforeUpload(file) {
+      const isJPG = file.type === 'image/jpeg';
       if (!isJPG) {
-        this.$message.error('You can only upload JPG file!')
+        this.$message.error('You can only upload JPG file!');
       }
-      const isLt2M = file.size / 1024 / 1024 < 2
+      const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        this.$message.error('Image must smaller than 2MB!')
+        this.$message.error('Image must smaller than 2MB!');
       }
-      return isJPG && isLt2M
+      return isJPG && isLt2M;
     },
-    $imgAdd (pos, $file) {
+    $imgAdd(pos, $file) {
       // 第一步.将图片上传到服务器.
-      var formdata = new FormData()
-      formdata.append('file', $file)
-      mediaApi.upload(formdata).then(res => {
-        console.log(res)
-        const url = res.extra
+      var formdata = new FormData();
+      formdata.append('file', $file);
+      mediaApi.upload(formdata).then((res) => {
+        console.log(res);
+        const url = res.extra;
         // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
         // $vm.$img2Url 详情见本页末尾
-        this.$refs.md.$img2Url(pos, url)
-      })
-    }
-  }
-}
+        this.$refs.md.$img2Url(pos, url);
+      });
+    },
+  },
+};
 </script>
 <style>
-  .edit-input {
-    padding-right: 100px;
-  }
-  .cancel-btn {
-    position: absolute;
-    right: 15px;
-    top: 10px;
-  }
-  .ant-upload-select-picture-card i {
-    font-size: 32px;
-    color: #999;
-  }
+.edit-input {
+  padding-right: 100px;
+}
+.cancel-btn {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+}
+.ant-upload-select-picture-card i {
+  font-size: 32px;
+  color: #999;
+}
 
-  .ant-upload-select-picture-card .ant-upload-text {
-    margin-top: 8px;
-    color: #666;
-  }
+.ant-upload-select-picture-card .ant-upload-text {
+  margin-top: 8px;
+  color: #666;
+}
 </style>

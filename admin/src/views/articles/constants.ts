@@ -4,52 +4,52 @@ const table = {
     {
       title: 'ID',
       align: 'center',
-      dataIndex: 'id'
+      dataIndex: 'id',
     },
     {
       title: '文章名称',
       align: 'center',
       dataIndex: 'title',
-      scopedSlots: { customRender: 'titles' }
+      scopedSlots: { customRender: 'titles' },
     },
     {
       title: '创建时间',
       align: 'center',
       dataIndex: 'createTime',
-      scopedSlots: { customRender: 'createTime' }
+      scopedSlots: { customRender: 'createTime' },
     },
     {
       title: '摘要',
       dataIndex: 'summary',
       align: 'center',
-      scopedSlots: { customRender: 'summary' }
+      scopedSlots: { customRender: 'summary' },
     },
     {
       title: '文章状态',
       dataIndex: 'status',
       align: 'center',
-      scopedSlots: { customRender: 'status' }
+      scopedSlots: { customRender: 'status' },
     },
     {
       title: '同步状态',
       dataIndex: 'syncStatus',
       align: 'center',
-      scopedSlots: { customRender: 'syncStatus' }
+      scopedSlots: { customRender: 'syncStatus' },
     },
     {
       title: '浏览数',
       align: 'center',
-      dataIndex: 'views'
+      dataIndex: 'views',
     },
     {
       title: '评论数',
       align: 'center',
-      dataIndex: 'comments'
+      dataIndex: 'comments',
     },
     {
       title: '权重',
       align: 'center',
-      dataIndex: 'weight'
+      dataIndex: 'weight',
     },
     {
       title: '操作',
@@ -57,10 +57,10 @@ const table = {
       align: 'center',
       fixed: 'right',
       width: '250px',
-      scopedSlots: { customRender: 'action' }
-    }
-  ]
-}
+      scopedSlots: { customRender: 'action' },
+    },
+  ],
+};
 
 // 表格里面的列key value
 const filters = {
@@ -69,30 +69,30 @@ const filters = {
       '未同步' = 0,
       '已同步' = 1,
     }
-    return StatusType[status]
+    return StatusType[status];
   },
   syncStatusTypeFilter(status: number) {
     enum StatusType {
       'error' = 0,
       'success' = 1,
     }
-    return StatusType[status]
+    return StatusType[status];
   },
   statusFilter(status: any) {
     enum StatusType {
       '草稿箱' = 1,
       '已发布' = 2,
     }
-    return StatusType[status]
+    return StatusType[status];
   },
   statusTypeFilter(status: any) {
     enum StatusType {
       'error' = 1,
       'success' = 2,
     }
-    return StatusType[status]
-  }
-}
+    return StatusType[status];
+  },
+};
 
 // md配置
 const markdownOption = {
@@ -121,7 +121,7 @@ const markdownOption = {
   navigation: true, // 导航目录
   subfield: true, // 单双栏模式
   preview: true, // 预览
-  htmlcode: true// 展示html源码
-}
+  htmlcode: true, // 展示html源码
+};
 
-export { table, filters, markdownOption }
+export { table, filters, markdownOption };

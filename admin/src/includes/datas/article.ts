@@ -25,7 +25,7 @@ function formatArticle(article: any, includeContent = false): any {
     syncStatus,
     createTime,
     comments,
-    weight
+    weight,
   } = article;
   return Object.assign(
     {
@@ -41,7 +41,7 @@ function formatArticle(article: any, includeContent = false): any {
       syncStatus,
       createTime,
       comments,
-      weight
+      weight,
     },
     includeContent ? { content: article.content } : null,
   );
@@ -124,5 +124,5 @@ export const articleApi: ArticleApi = {
 
   publishByteBlogs(data) {
     return http.post(`posts/byte-blogs/v1/publish`, data);
-  }
+  },
 };
