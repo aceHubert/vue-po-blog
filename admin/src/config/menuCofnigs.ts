@@ -121,6 +121,10 @@ export function getDefaultMenus(): Menu[] {
           name: 'account-person',
           title: '个人资料',
         },
+        {
+          name: 'account-settings',
+          title: '个人设置',
+        },
       ],
     },
     // {

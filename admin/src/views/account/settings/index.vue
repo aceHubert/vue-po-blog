@@ -22,7 +22,7 @@
           <div class="account-settings-info-title">
             <span>{{ $route.meta.title }}</span>
           </div>
-          <route-view></route-view>
+          <nuxt-child />
         </div>
       </div>
     </a-card>
@@ -30,15 +30,12 @@
 </template>
 
 <script>
-import { PageView, RouteView } from '@/layouts';
-import { mixinDevice } from '@/utils/mixin.js';
+import { deviceMixin } from '@/mixins';
 
 export default {
   components: {
-    RouteView,
-    PageView,
   },
-  mixins: [mixinDevice],
+  mixins: [deviceMixin],
   data() {
     return {
       // horizontal  inline

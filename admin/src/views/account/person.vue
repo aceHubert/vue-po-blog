@@ -1,5 +1,4 @@
 <template>
-<template>
   <div class="account-settings-info-view">
     <a-row :gutter="16">
       <a-col :md="24" :lg="16">
@@ -39,7 +38,6 @@
     <avatar-modal ref="modal" @ok="setavatar" :imgUrl="this.info.avatar"/>
 
   </div>
-</template>
 </template>
 
 <router>
