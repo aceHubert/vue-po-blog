@@ -7,7 +7,7 @@ export const optionsApi: OptionsApi = {
 
     getList(optionsNameList) {
         return http
-            .getList('admin/options', { params: { optionsNameList: optionsNameList } })
+            .getList('admin/configs', { params: { keys: optionsNameList } })
             .then(({ models }) => {
                 return {
                     rows: models
@@ -15,7 +15,7 @@ export const optionsApi: OptionsApi = {
             });;
     },
     create(data) {
-        return http.post("admin/options", data).then(() => true)
+        return http.put("admin/configs", data).then(() => true)
     }
 
 

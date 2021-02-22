@@ -78,6 +78,14 @@
   </div>
 </template>
 
+<router>
+{
+  meta:{
+    title: '修改密码',
+  }
+}
+</router>
+
 <script>
 import { authApi } from '@/includes/datas';
 const levelNames = {

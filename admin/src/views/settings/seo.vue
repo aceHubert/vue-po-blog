@@ -15,3 +15,68 @@
     </a-card>
   </div>
 </template>
+
+<script>
+import { optionsApi } from '@/includes/datas/options';
+export default {
+  name: 'SettingsSeo',
+  data() {
+    return {
+      formLayout: 'horizontal',
+      form: this.$form.createForm(this, { name: 'coordinated_' }),
+      optionsNameList: ['keywords', 'description'],
+      model: {},
+      membership: false,
+    };
+  },
+  fetch() {
+    return Promise.all([this.getOptions()]).catch(() => {
+      // ignoer error
+    });
+  },
+  created() {},
+  methods: {
+    handleSubmit(e) {
+      e.preventDefault();
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          console.log('Received values of form: ', values);
+
+          let arr = [];
+          Object.keys(values).forEach((key) => {
+            console.log(key, values[key]);
+            arr.push({
+              configKey: key,
+              configValue: values[key],
+            });
+          });
+          optionsApi.create(arr).then((res) => {
+            console.log(res);
+          });
+        }
+      });
+    },
+    getOptions() {
+      optionsApi.getList(this.optionsNameList.join(',')).then((res) => {
+        let model = res.rows.reduce((obj, curr) => {
+          obj[curr['configKey']] = curr['configValue'];
+          return obj;
+        }, {});
+
+        this.form = this.$form.createForm(this, {
+          name: 'coordinated',
+          mapPropsToFields: () => {
+            // 默认值
+            return Object.keys(model).reduce((prev, key) => {
+              prev[key] = this.$form.createFormField({
+                value: model[key],
+              });
+              return prev;
+            }, {});
+          },
+        });
+      });
+    },
+  },
+};
+</script>

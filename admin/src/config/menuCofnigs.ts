@@ -118,13 +118,9 @@ export function getDefaultMenus(): Menu[] {
           title: '所有用户',
         },
         {
-          name: 'account-person',
-          title: '个人资料',
-        },
-        {
-          name: 'account-settings',
+          name: 'account-settings-person',
           title: '个人设置',
-        },
+        }
       ],
     },
     // {
@@ -150,6 +146,10 @@ export function getDefaultMenus(): Menu[] {
         {
           name: 'settings-general',
           title: 'menu.settings.general',
+        },
+        {
+          name: 'settings-seo',
+          title: 'seo设置',
         },
       ],
     },

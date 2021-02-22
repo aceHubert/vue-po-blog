@@ -5,28 +5,14 @@
         <a-form-item label="站点标题">
           <a-input v-decorator="['title', { rules: [{ required: true, message: '请输入标题!' }] }]" />
         </a-form-item>
-        <a-form-item label="描述">
-          <a-input v-decorator="['description', { rules: [{ required: true, message: '请输入描述!' }] }]" />
-        </a-form-item>
         <a-form-item label="站点地址（URL）">
           <a-input v-decorator="['siteurl', { rules: [{ required: true, message: '请输入站点地址（URL）!' }] }]" />
         </a-form-item>
-        <a-form-item label="邮件地址">
-          <a-input v-decorator="['adminEmail', { rules: [{ required: true, message: '请输入邮件地址!' }] }]" />
+        <a-form-item label="输入版权所有信息">
+          <a-input v-decorator="['copyright', { rules: [{ required: true, message: '输入版权所有信息!' }] }]" />
         </a-form-item>
-        <a-form-item label="成员资格"> <a-switch v-decorator="['membership']" />任何人都可以注册 </a-form-item>
-        <a-form-item label="新用户默认角色">
-          <a-select
-            v-decorator="['roleId', { rules: [{ required: true, message: '请选择角色!' }] }]"
-            placeholder="请选择角色"
-            @change="handleSelectChange"
-          >
-            <a-select-option value="1"> 管理员 </a-select-option>
-            <a-select-option value="2"> 编辑者 </a-select-option>
-            <a-select-option value="3"> 作者 </a-select-option>
-            <a-select-option value="4"> 投稿者 </a-select-option>
-            <a-select-option value="5"> 订阅者 </a-select-option>
-          </a-select>
+        <a-form-item label="备案号">
+          <a-input v-decorator="['icp', { rules: [{ required: true, message: '输入备案号信息!' }] }]" />
         </a-form-item>
         <a-form-item label="站点语言">
           <a-select
@@ -62,7 +48,7 @@ export default {
     return {
       formLayout: 'horizontal',
       form: this.$form.createForm(this, { name: 'coordinated_' }),
-      optionsNameList: ['title', 'description', 'siteurl', 'adminEmail', 'roleId', 'language', 'membership'],
+      optionsNameList: ['title', 'siteurl', 'icp', 'copyright', 'language'],
       model: {},
       membership: false,
     };
@@ -84,8 +70,8 @@ export default {
           Object.keys(values).forEach((key) => {
             console.log(key, values[key]);
             arr.push({
-              name: key,
-              value: values[key],
+              configKey: key,
+              configValue: values[key],
             });
           });
           optionsApi.create(arr).then((res) => {
@@ -105,7 +91,7 @@ export default {
     getOptions() {
       optionsApi.getList(this.optionsNameList.join(',')).then((res) => {
         let model = res.rows.reduce((obj, curr) => {
-          obj[curr['name']] = curr['value'];
+          obj[curr['configKey']] = curr['configValue'];
           return obj;
         }, {});
 

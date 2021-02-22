@@ -43,7 +43,7 @@
 <router>
 {
   meta:{
-    title: 'User Info',
+    title: '个人资料',
   }
 }
 </router>
