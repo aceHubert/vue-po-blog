@@ -7,3 +7,4 @@ export { tagApi } from './tags';
 export { pluginApi } from './plugins';
 export { mediaApi } from './medias';
 export { commentApi } from './comments';
+export { dashboardApi } from './dashboard';

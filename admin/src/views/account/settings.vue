@@ -29,7 +29,6 @@
   </div>
 </template>
 
-
 <router>
 {
   meta:{

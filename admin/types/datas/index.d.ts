@@ -5,3 +5,4 @@ export * from './article';
 export * from './page';
 export * from './site';
 export * from './auth';
+export * from './dashboard';

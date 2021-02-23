@@ -15,8 +15,6 @@
     </a-card>
   </div>
 </template>
-<<<<<<< HEAD
-=======
 
 <script>
 import { optionsApi } from '@/includes/datas/options';
