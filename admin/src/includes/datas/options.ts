@@ -4,19 +4,14 @@ import { http } from '../functions';
 import { OptionsApi } from 'types/datas/options';
 
 export const optionsApi: OptionsApi = {
-
-    getList(optionsNameList) {
-        return http
-            .getList('admin/options', { params: { optionsNameList: optionsNameList } })
-            .then(({ models }) => {
-                return {
-                    rows: models
-                };
-            });;
-    },
-    create(data) {
-        return http.post("admin/options", data).then(() => true)
-    }
-
-
-}
+  getList(optionsNameList) {
+    return http.getList('admin/configs', { params: { keys: optionsNameList } }).then(({ models }) => {
+      return {
+        rows: models,
+      };
+    });
+  },
+  create(data) {
+    return http.put('admin/configs', data).then(() => true);
+  },
+};
