@@ -1,45 +1,48 @@
 <template>
   <a-card :bordered="false">
-    <a-tabs default-active-key="1" @change="callback">
-      <a-tab-pane key="1" tab="全部">
-        <a-row :gutter="18">
-          <a-col :xs="8" :sm="4" :md="6" :lg="8" :xl="8" v-for="(item, index) in rows" :key="index">
-            <a-card hoverable>
-              <a-row type="flex" justify="space-between">
-                <a-col :span="5" style="margin: auto 0px">
-                  <img src="https://ps.w.org/contact-form-7/assets/icon.svg?rev=2339255" />
-                </a-col>
-                <a-col :span="13">
-                  <p>{{ item.title }}</p>
-                  <p>{{ item.description }}</p>
-                  <p>作者: {{ item.userName }}</p>
-                </a-col>
-                <a-col :span="4">
-                  <a-button type="primary" @click="downloadPlugin(item.pluginId)">现在安装</a-button>
-                  <a-button type="link" @click="handleOk"> 更新详情 </a-button>
-                </a-col>
-              </a-row>
-              <a-divider />
-              <a-row>
-                <a-col :span="12">
-                  <p><a-rate :default-value="2.5" allow-half /> <span class="ant-rate-text">(122)</span></p>
+    <a-spin :spinning="loading">
+      <a-tabs default-active-key="1" @change="callback">
+        <a-tab-pane key="1" tab="全部">
+          <a-row :gutter="18" v-if="rows.length > 0">
+            <a-col :xs="8" :sm="4" :md="6" :lg="8" :xl="8" v-for="(item, index) in rows" :key="index">
+              <a-card hoverable>
+                <a-row type="flex" justify="space-between">
+                  <a-col :span="5" style="margin: auto 0px">
+                    <img src="https://ps.w.org/contact-form-7/assets/icon.svg?rev=2339255" />
+                  </a-col>
+                  <a-col :span="13">
+                    <p>{{ item.title }}</p>
+                    <p>{{ item.description }}</p>
+                    <p>作者: {{ item.userName }}</p>
+                  </a-col>
+                  <a-col :span="4">
+                    <a-button type="primary" @click="downloadPlugin(item.pluginId)">现在安装</a-button>
+                    <a-button type="link" @click="handleOk"> 更新详情 </a-button>
+                  </a-col>
+                </a-row>
+                <a-divider />
+                <a-row>
+                  <a-col :span="12">
+                    <p><a-rate :default-value="2.5" allow-half /> <span class="ant-rate-text">(122)</span></p>
 
-                  <p>安装: 80000+次</p>
-                </a-col>
-                <a-col :span="12" style="text-align: right">
-                  <p>最后更新: 3月前</p>
-                  <p>兼容当前版本</p>
-                </a-col>
-              </a-row>
-            </a-card>
-          </a-col>
-        </a-row>
-      </a-tab-pane>
-      <a-tab-pane key="2" tab="热门" force-render> Content of Tab Pane 2 </a-tab-pane>
-      <a-tab-pane key="3" tab="推荐"> Content of Tab Pane 3 </a-tab-pane>
-      <a-tab-pane key="4" tab="收藏"> Content of Tab Pane 3 </a-tab-pane>
-    </a-tabs>
-
+                    <p>安装: 80000+次</p>
+                  </a-col>
+                  <a-col :span="12" style="text-align: right">
+                    <p>最后更新: 3月前</p>
+                    <p>兼容当前版本</p>
+                  </a-col>
+                </a-row>
+              </a-card>
+            </a-col>
+          </a-row>
+          <a-empty v-else />
+        </a-tab-pane>
+        <a-tab-pane key="2" tab="热门" force-render><a-empty /> </a-tab-pane>
+        <a-tab-pane key="3" tab="推荐"><a-empty /> </a-tab-pane>
+        <a-tab-pane key="4" tab="收藏"> <a-empty /> </a-tab-pane>
+        <a-input-search placeholder="搜索插件" style="width: 300px" slot="tabBarExtraContent" @search="onSearch" />
+      </a-tabs>
+    </a-spin>
     <a-modal v-model="visible" title="插件详情" @ok="handleOk" okText="立刻安装" cancelText="取消" :width="880">
       <a-row>
         <a-col>
@@ -99,6 +102,7 @@ export default {
     return {
       visible: false,
       rows: [],
+      loading: false,
     };
   },
   created() {
@@ -111,13 +115,16 @@ export default {
     handleOk() {
       this.visible = true;
     },
-    getList() {
-      pluginApi.getList().then((res) => {
+    getList(keyword) {
+      this.loading = true;
+      pluginApi.getList({ pluginType: 2, keyword: keyword }).then((res) => {
         console.log(res);
         this.rows = res.rows;
+        this.loading = false;
       });
     },
     downloadPlugin(pluginId) {
+      this.loading = true;
       pluginApi.downloadPlugin(pluginId).then((res) => {
         const { success } = res;
         if (success === 1) {
@@ -125,7 +132,12 @@ export default {
             message: '插件安装成功',
           });
         }
+
+         this.loading = false
       });
+    },
+    onSearch(keyword) {
+      this.getList(keyword);
     },
   },
 };

@@ -7,7 +7,7 @@
 <script>
 import moment from 'moment';
 import G2 from '@antv/g2';
-import { getPostsStatistics } from '@/api/dashboard';
+import { dashboardApi } from '@/includes/datas/dashboard';
 const DataSet = require('@antv/data-set');
 export default {
   name: 'ViewChart',
@@ -95,7 +95,7 @@ export default {
       this.chart.render();
     },
     getPostsStatistics(type = 'day', startTime, endTime) {
-      getPostsStatistics({ type, startTime, endTime }).then((response) => {
+      dashboardApi.getPostsStatistics({ type, startTime, endTime }).then((response) => {
         this.viewCharts(response.models, type);
       });
     },

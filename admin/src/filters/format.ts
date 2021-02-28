@@ -12,3 +12,8 @@ export const numberFormat = function (value: number) {
 export const dateFormat = function (value: moment.MomentInput, pattern = 'YYYY-MM-DD HH:mm:ss') {
   return value ? moment(value).format(pattern) : '';
 };
+
+
+export const timeFromNow = function (value: moment.MomentInput, pattern = 'YYYY-MM-DD HH:mm:ss') {
+  return value ? moment(value).fromNow() : '';
+};

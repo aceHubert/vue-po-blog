@@ -63,7 +63,7 @@ export default {
   data() {
     return {
       menus: [], //菜单
-      currentUser: null, // 当前用户信息
+      currentUser: this.$store.state.user, // 当前用户信息
       supportLanguages: localeFuncs.getSupportLanguages(), // 语言支持列表
       query: {}, // 媒体查询
       isMobile: false, // 是否手机模式
@@ -121,11 +121,6 @@ export default {
       window.umi_plugin_ant_themeVar = config.themeVar;
     }
 
-    setTimeout(() => {
-      this.currentUser = {
-        name: 'Serati Ma',
-      };
-    }, 1500);
   },
   methods: {
     i18nRender(key) {

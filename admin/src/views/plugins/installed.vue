@@ -70,7 +70,9 @@ export default {
     return {
       data: [],
       columns,
+      queryParam: {},
       loadData: (parameter) => {
+        parameter['pluginType'] = 2;
         return pluginApi.getInstalledPluginList(Object.assign(parameter, this.queryParam)).then((res) => {
           return res;
         });
@@ -89,8 +91,7 @@ export default {
       },
     };
   },
-  created() {
-  },
+  created() {},
   methods: {
     start(pluginId) {
       pluginApi.startPlugin(pluginId).then((res) => {

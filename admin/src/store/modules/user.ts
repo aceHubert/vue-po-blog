@@ -39,6 +39,9 @@ const user: Module<UserState, RootState> = {
       state.info = info;
     },
   },
+  getters: {
+    name: (state: UserState) => state.name
+  },
   actions: {
     // 登录
     login({ dispatch }, loginQuery) {

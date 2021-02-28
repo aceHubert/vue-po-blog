@@ -47,7 +47,7 @@ export const authApi: AuthApi = {
    * 退出登录
    */
   logout() {
-    return http.post('admin/user/logout').then(() => true);
+    return http.post('admin/users/logout').then(() => true);
   },
 
   /**

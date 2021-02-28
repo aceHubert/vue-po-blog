@@ -110,7 +110,8 @@ export default {
       formType: 'create',
     };
   },
-  created() {},
+  created() {
+  },
   methods: {
     createHandler() {
       this.formType = 'create';

@@ -79,18 +79,18 @@ export function getDefaultMenus(): Menu[] {
           name: 'themes-libs',
           title: 'menu.theme.libs',
         },
-        {
-          name: 'themes-customize',
-          title: 'menu.theme.customize',
-        },
+        // {
+        //   name: 'themes-customize',
+        //   title: 'menu.theme.customize',
+        // },
         // {
         //   name: 'themes-color',
         //   title: 'menu.theme.color',
         // },
-        {
-          name: 'themes-widgets',
-          title: 'menu.theme.widgets',
-        },
+        // {
+        //   name: 'themes-widgets',
+        //   title: 'menu.theme.widgets',
+        // },
       ],
     },
     {

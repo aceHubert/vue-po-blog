@@ -100,10 +100,10 @@
   resolved "https://registry.yarnpkg.com/@antv/g2-plugin-slider/-/g2-plugin-slider-2.1.1.tgz#c20c5f1cf085bea478f8ab1fc84837e45c46a065"
   integrity sha512-nB678VEGG3FkrvkDDFADAKjLQIeXzITEYqey5oeOpbf0vT5jOa55lQDyJDZ79cK8PmU/Hz6VPeSb3CNQBA+/FQ==
 
-"@antv/g2@~3.5.3":
+"@antv/g2@^3.5.11", "@antv/g2@~3.5.3":
   version "3.5.17"
-  resolved "https://registry.yarnpkg.com/@antv/g2/-/g2-3.5.17.tgz#02c8bac610d21d28b4e23600bc76c48e7f59c919"
-  integrity sha512-gOjfA6pwXYEC5mrLbvg1kA3jZI5J5T2kQeGse+iBBsNc1Vje7zs9G+BleUaI4MLXSnqwhsj/ohfkP7d+h4ArNg==
+  resolved "https://registry.npm.taobao.org/@antv/g2/download/@antv/g2-3.5.17.tgz#02c8bac610d21d28b4e23600bc76c48e7f59c919"
+  integrity sha1-Asi6xhDSHSi04jYAvHbEjn9ZyRk=
   dependencies:
     "@antv/adjust" "~0.1.0"
     "@antv/attr" "~0.1.2"

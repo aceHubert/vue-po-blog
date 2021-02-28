@@ -25,4 +25,10 @@ export const dashboardApi: DashboardApi = {
   getViewsChart(query?: any) {
     return http.get('/byteblogs/user-views/v1/chart', { params: query });
   },
+  // getSystem(query?: any) {
+  //   return http.get('/byteblogs/user-views/v1/chart', { params: query });
+  // },
+  // getMemory(query?: any) {
+  //   return http.get('/monitor/memory/v1/gett', { params: query });
+  // },
 };

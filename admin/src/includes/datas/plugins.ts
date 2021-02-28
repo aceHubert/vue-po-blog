@@ -22,7 +22,7 @@ export const pluginApi: PluginsApi = {
    */
   getList({ page = 1, size = 10, ...rest } = {}) {
     return http
-      .getList('/admin/byteblogs/plugins', { params: { page, size, ...rest } })
+      .getList('/admin/modules/plumemo-plugins', { params: { page, size, ...rest } })
       .then(({ models, pageInfo }) => {
         return {
           rows: models.map((plugin) => formatPlugin(plugin)),
@@ -50,7 +50,7 @@ export const pluginApi: PluginsApi = {
    * 获取已安装的插件列表
    */
   getInstalledPluginList({ page = 1, size = 10, ...rest } = {}) {
-    return http.getList(`admin/modules/installed`).then(({ models, pageInfo }) => {
+    return http.getList(`admin/modules/installed`, { params: { page, size, ...rest } }).then(({ models, pageInfo }) => {
       return {
         rows: models,
         pager: pageInfo!,
