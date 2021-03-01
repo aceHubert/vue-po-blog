@@ -67,12 +67,12 @@ module.exports = (configContext) => {
       // 在 devtools 时调试主题模块代理
       ...(configContext.devProxyThemeTarget
         ? {
-            '/api/plumemo-service/v1/modules/theme': {
+            '/api/plumemo-service/modules/themes': {
               target: configContext.devProxyThemeTarget,
               changeOrigin: false,
               ws: false,
               pathRewrite: {
-                '^/api/plumemo-service/v1/modules/theme': '',
+                '^/api/plumemo-service/modules/themes': '',
               },
             },
           }
@@ -80,12 +80,12 @@ module.exports = (configContext) => {
       // 在 devtools 时调试插件模块代理
       ...(configContext.devProxyPluginTarget
         ? {
-            '/api/plumemo-service/v1/modules/plugins': {
+            '/api/plumemo-service/modules/plugins': {
               target: configContext.devProxyPluginTarget,
               changeOrigin: false,
               ws: false,
               pathRewrite: {
-                '^/api/plumemo-service/v1/modules/plugins': '',
+                '^/api/plumemo-service/modules/plugins': '',
               },
             },
           }

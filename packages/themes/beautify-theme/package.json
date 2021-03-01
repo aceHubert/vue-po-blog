@@ -33,7 +33,7 @@
     "./src/*.ts"
   ],
   "scripts": {
-    "dev": "po dev --name beautifyTheme --filename index --dest dist/beautify-theme --proxy-api-target https://preview.plumemo.com src/main.ts",
+    "dev": "po dev --name beautifyTheme --filename index --dest dist/beautify-theme --proxy-api-target http://localhost:8086 src/main.ts",
     "dev:admin": "po dev --name beautifyThemeAdmin --filename index --dest dist/admin --port 5006 --admin --proxy-api-target https://preview.plumemo.com src/admin/main.ts",
     "build:front": "po build --name beautifyTheme --filename index --dest dist/beautify-theme src/main.ts",
     "build:widgets": "po build --dest dist/widgets src/widgets",

@@ -40,7 +40,7 @@ export const siteApi: SiteApi = {
 
   /** 获取主题模块 */
   getThemeModule() {
-    return http.get('modules/theme').then(({ model }) => model);
+    return http.get('modules/themes').then(({ model }) => model);
   },
 
   /** 获取插件模块 */

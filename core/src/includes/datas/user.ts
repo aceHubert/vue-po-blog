@@ -11,6 +11,6 @@ export const userApi: UserApi = {
    * 获取用户信息
    */
   getInfo() {
-    return http.get('user/master').then(({ model = {} }) => model);
+    return http.get('users/master').then(({ model = {} }) => model);
   },
 };

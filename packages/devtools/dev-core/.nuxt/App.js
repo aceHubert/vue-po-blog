@@ -1,15 +1,16 @@
 import Vue from 'vue'
 
 import { getMatchedComponentsInstances, getChildrenComponentInstancesUsingFetch, promisify, globalHandleError, urlJoin, sanitizeComponent } from './utils'
-import NuxtError from '../src/layouts/error.tsx'
+import NuxtError from '..\\src\\layouts\\error.tsx'
 import NuxtLoading from '~/components/PageLoading'
 
-import '../src/assets/styles/index.scss'
+import '..\\src\\assets\\styles\\index.scss'
 
-import _77180f1e from '../src/layouts/blank.tsx'
-import _6f6c098b from '../src/layouts/default.tsx'
+import _77180f1e from '..\\src\\layouts\\blank.tsx'
+import _6f6c098b from '..\\src\\layouts\\default.tsx'
+import _df05644a from '..\\src\\layouts\\root\\index.tsx'
 
-const layouts = { "_blank": sanitizeComponent(_77180f1e),"_default": sanitizeComponent(_6f6c098b) }
+const layouts = { "_blank": sanitizeComponent(_77180f1e),"_default": sanitizeComponent(_6f6c098b),"_root/index": sanitizeComponent(_df05644a) }
 
 export default {
   render (h, props) {

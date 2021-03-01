@@ -3,8 +3,8 @@ import Router from 'vue-router'
 import { interopDefault } from './utils'
 import scrollBehavior from './router.scrollBehavior.js'
 
-import _60d925c6 from '../src/views/index.tsx'
-import _00ecbbd7 from '../src/layouts/error.tsx'
+import _3a46af13 from '..\\src\\views\\index.tsx'
+import _fddf8564 from '..\\src\\layouts\\error.tsx'
 
 // TODO: remove in Nuxt 3
 const emptyFn = () => {}
@@ -24,16 +24,16 @@ export const routerOptions = {
 
   routes: [{
     path: "/",
-    component: _60d925c6,
+    component: _3a46af13,
     name: "index"
   }, {
     path: "/error",
-    component: _00ecbbd7,
+    component: _fddf8564,
     props: true,
     name: "error"
   }, {
     path: "*",
-    component: _00ecbbd7,
+    component: _fddf8564,
     props: {"error":{"statusCode":404}}
   }],
 

@@ -66,12 +66,12 @@ module.exports = (configContext) => {
       // 在 devtools 时调试后台模块代理
       ...(configContext.devProxyModuleTarget
         ? {
-            '/api/plumemo-service/v1/plumemo/module/admins': {
+            '/api/plumemo-service/plumemo/module/admins': {
               target: configContext.devProxyModuleTarget,
               changeOrigin: false,
               ws: false,
               pathRewrite: {
-                '^/api/blog/v1/plumemo/module/admins': '',
+                '^/api/blog/plumemo/module/admins': '',
               },
             },
           }
@@ -79,7 +79,7 @@ module.exports = (configContext) => {
       // 在 dev 或 devtools 模式下接口代理(此代理在 BASE_URL 被设置成跨域后无效, 请在 dev 模式下不要设置此环境变量)
       ...((configContext.dev && process.env.PROXYAPI_URL) || configContext.devProxyApiTarget
         ? {
-            '/api/plumemo-service/v1': {
+            '/api/plumemo-service': {
               /**
                * devProxyApiTarget: 在 devtools 自定义接口地址
                * PROXYAPI_URL: 在 scripts serve 自定义环境变量接口地址
