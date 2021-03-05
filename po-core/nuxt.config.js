@@ -152,12 +152,13 @@ module.exports = (configContext) => {
       transpile: ['@vue-async/module-loader'],
       extractCSS: true,
       loaders: {
-        scss: {
-          // implementation: require('sass'),
-          // fiber: require('fibers'),
-          data: `
-        @import "./src/assets/styles/fn.scss";
-        `,
+        less: {
+          lessOptions: {
+            javascriptEnabled: true,
+            modifyVars: {
+              hack: 'true;@import "./src/assets/styles/fn.less"',
+            },
+          },
         },
         cssModules: {
           modules: {
