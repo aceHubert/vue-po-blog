@@ -1,15 +1,11 @@
-import Breadcrumb from './Breadcrumb.vue';
-import RightContent from './RightContent.vue';
-import AvatarDropdown from './AvatarDropdown.vue';
-import SelectLangDropdown from './SelectLangDropdown.vue';
+import Breadcrumb from './Breadcrumb';
+import RightContent from './RightContent';
 
-export { Breadcrumb, RightContent, AvatarDropdown, SelectLangDropdown };
+export { Breadcrumb, RightContent };
 export default {
   // eslint-disable-next-line @typescript-eslint/camelcase
   $_subcomponents: {
     Breadcrumb,
     RightContent,
-    AvatarDropdown,
-    SelectLangDropdown,
   },
 };

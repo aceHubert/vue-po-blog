@@ -1,67 +1,88 @@
-import Vue from 'vue';
-import { mapState } from 'vuex';
-import {
-  SET_LAYOUT,
-  SET_THEME,
-  SET_PRIMARY_COLOR,
-  SET_CONTENT_WIDTH,
-  TOGGLE_FIXED_HEADER,
-  TOGGLE_FIX_SIDEBAR,
-  TOGGLE_COLOR_WEAK,
-  TOGGLE_SIDE_COLLAPSED,
-  Layout,
-  Theme,
-  ContentWidth,
-} from '@/config/proLayoutConfigs';
+import { Vue, Component } from 'nuxt-property-decorator';
+import appStore from '@/store/modules/app';
+import { Layout, Theme, ContentWidth } from '@/config/proLayoutConfigs';
 
-// Types
-import { AppState } from '@/store/modules/app';
+@Component
+export default class AppMixin extends Vue {
+  get layout() {
+    return appStore.layout;
+  }
 
-export default Vue.extend({
-  computed: {
-    ...mapState<AppState, Dictionary<(state: AppState) => any>>('app', {
-      layout: (state) => state.layout,
-      theme: (state) => state.theme,
-      primaryColor: (state) => state.primaryColor,
-      fixedHeader: (state) => state.fixedHeader,
-      fixSiderbar: (state) => state.fixSidebar,
-      contentWidth: (state) => state.contentWidth,
-      sideCollapsed: (state) => state.sideCollapsed,
-      colorWeak: (state) => state.colorWeak,
-      autoHideHeader: (state) => state.autoHideHeader,
-      multiTab: (state) => state.multiTab,
-    }),
-  },
-  methods: {
-    isTopMenu() {
-      return this.layoutMode === 'topmenu';
-    },
-    isSideMenu() {
-      return !this.isTopMenu();
-    },
-    setLayout(val: Layout) {
-      this.$store.commit(`app/${SET_LAYOUT}`, val);
-    },
-    setTheme(val: Theme) {
-      this.$store.commit(`app/${SET_THEME}`, val);
-    },
-    setPrimaryColor(val: string) {
-      this.$store.commit(`app/${SET_PRIMARY_COLOR}`, val);
-    },
-    setContentWidth(val: ContentWidth) {
-      this.$store.commit(`app/${SET_CONTENT_WIDTH}`, val);
-    },
-    setFixedHeader(val: boolean) {
-      this.$store.commit(`app/${TOGGLE_FIXED_HEADER}`, val);
-    },
-    setFixedSidebar(val: boolean) {
-      this.$store.commit(`app/${TOGGLE_FIX_SIDEBAR}`, val);
-    },
-    setSideCollapsed(val: boolean) {
-      this.$store.commit(`app/${TOGGLE_SIDE_COLLAPSED}`, val);
-    },
-    setColorWeak(val: boolean) {
-      this.$store.commit(`app/${TOGGLE_COLOR_WEAK}`, val);
-    },
-  },
-});
+  get theme() {
+    return appStore.theme;
+  }
+
+  get isDark() {
+    return appStore.isDark;
+  }
+
+  get isLight() {
+    return appStore.isLight;
+  }
+
+  get primaryColor() {
+    return appStore.primaryColor;
+  }
+
+  get fixedHeader() {
+    return appStore.fixedHeader;
+  }
+
+  get fixSiderbar() {
+    return appStore.fixSidebar;
+  }
+
+  get contentWidth() {
+    return appStore.contentWidth;
+  }
+
+  get sideCollapsed() {
+    return appStore.sideCollapsed;
+  }
+
+  get colorWeak() {
+    return appStore.colorWeak;
+  }
+
+  get autoHideHeader() {
+    return appStore.autoHideHeader;
+  }
+
+  get multiTab() {
+    return appStore.multiTab;
+  }
+
+  isTopMenu() {
+    return this.layout === Layout.topMenu;
+  }
+  isSideMenu() {
+    return !this.isTopMenu();
+  }
+  setLayout(val: Layout) {
+    appStore.setLayout(val);
+  }
+  setTheme(val: Theme) {
+    appStore.setTheme(val);
+  }
+  setPrimaryColor(val: string) {
+    appStore.setPrimaryColor(val);
+  }
+  setContentWidth(val: ContentWidth) {
+    appStore.setContentWidth(val);
+  }
+  setFixedHeader(val: boolean) {
+    appStore.toggleFixedHeader(val);
+  }
+  setFixedSidebar(val: boolean) {
+    appStore.toggleFixSidebar(val);
+  }
+  setSideCollapsed(val: boolean) {
+    appStore.toggleSideCollapsed(val);
+  }
+  setAutoHideHeader(val: boolean) {
+    appStore.toggleAutoHideHeader(val);
+  }
+  setColorWeak(val: boolean) {
+    appStore.toggleColorWeak(val);
+  }
+}

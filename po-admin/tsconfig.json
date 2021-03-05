@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "outDir": "dist",
     "jsx": "preserve",
+    "jsxFactory": "VueTsxSupport",
     "types": ["@types/node", "@nuxt/types"],
     "paths": {
       "~/*": ["src/*"],

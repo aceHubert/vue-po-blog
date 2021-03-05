@@ -5,8 +5,7 @@ import { hook, globalLocale, localeFuncs } from '@/includes/functions';
 
 // Locales
 import enUS from '@/lang/en-US';
-import { APP_LANGUAGE } from '@/config/proLayoutConfigs';
-import { genLocaleConfig } from '../router/utils';
+import { genLocaleConfig } from '@/utils/router';
 
 // Types
 import { Route } from 'vue-router';
@@ -48,7 +47,7 @@ Object.defineProperties(Vue.prototype, {
 const plugin: Plugin = async (cxt) => {
   const { app } = cxt;
 
-  let defaultLocale = Vue.ls.get(APP_LANGUAGE, localeFuncs.getDefaultLocale());
+  let defaultLocale = localeFuncs.getDefaultLocale();
   const fallbackLocale = 'en-US';
   const messages: Dictionary<any> = {
     'en-US': enUS, // fallback locale
@@ -92,7 +91,6 @@ const plugin: Plugin = async (cxt) => {
 
   function setLocale(locale: string) {
     i18n.locale = locale;
-    Vue.ls.set(APP_LANGUAGE, locale);
     if (hasDocument) {
       document.querySelector('html')!.setAttribute('lang', locale);
     }

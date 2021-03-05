@@ -1,14 +1,14 @@
 import VueI18n, { IVueI18n } from 'vue-i18n';
-import { AxiosInstance, AxiosStatic } from 'axios';
-import { CategoryApi, TagApi, ArticleApi } from './datas';
+import { AxiosStatic } from 'axios';
+import { ApolloClient } from 'apollo-client';
+import { VueExtraPrototypes } from './vue';
+import { HttpInstance } from './functions';
 
 declare module '@nuxt/types' {
-  interface Context {
+  interface Context extends VueExtraPrototypes {
     axios: AxiosStatic;
-    $http: AxiosInstance;
+    httpClient: HttpInstance;
+    graphqlClient: InstanceType<typeof ApolloClient>;
     $i18n: VueI18n & IVueI18n;
-    categoryApi: CategoryApi;
-    tagApi: TagApi;
-    articleApi: ArticleApi;
   }
 }

@@ -1,15 +1,11 @@
-import merge from 'lodash.merge';
 import { trailingSlash } from '@/utils/path';
-import { getDefaultMenus } from '@/config/menuCofnigs';
-import { menu as menuIcon } from '@/assets/icons';
 
 // Types
 import { SettingsFunctions, SiteSettings } from 'types/functions/settings';
 
 export const globalSettings: SiteSettings = {
-  domain: '',
-  staticDir: 'static/',
-  siderMenus: getDefaultMenus(),
+  baseUrl: process.env.baseUrl!, // api请求的域名，api在不同域名或ssr情况下是必须的
+  basePath: 'admin/', // 与vue-router 配置的 base 保持一致
 };
 
 const settingsFunctions: SettingsFunctions = {
@@ -17,74 +13,60 @@ const settingsFunctions: SettingsFunctions = {
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 配置的域名（末尾带有"/")
+   * baseUrl（末尾带有"/")
    */
-  getDomain() {
-    return trailingSlash(globalSettings.domain);
+  getBaseUrl() {
+    return trailingSlash(globalSettings.baseUrl);
   },
 
   /**
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 相对于配置域名的静态文件目录（末尾带有"/"）
+   * vue-router base
    */
-  getStaticDir() {
-    return trailingSlash(globalSettings.staticDir);
+  getBasePath() {
+    return trailingSlash(globalSettings.basePath);
   },
 
   /**
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * API 地址(v1)，如果不是http(s) 绝对路径，则会以当前域名为绝对路径
+   * 初始化程序地址
+   */
+  // getInitPath() {
+  //   return this.getBaseUrl() + this.getBasePath() + 'init';
+  // },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * API 地址，[baseUrl]/api
    */
   getApiPath() {
-    return trailingSlash(process.env.baseUrl!) + 'api/plumemo-service/v1/';
-  },
-
-  /**
-   * @author Hubert
-   * @since 2020-11-12
-   * @version 0.0.1
-   * 侧边栏菜单
-   */
-  getSiderMenus() {
-    return globalSettings.siderMenus;
-  },
-
-  /**
-   * @author Hubert
-   * @since 2020-11-12
-   * @version 0.0.1
-   * 添加侧边栏菜单
-   */
-  addSiderMenus(menus, parentName) {
-    if (parentName) {
-      const parent = globalSettings.siderMenus.find((menu) => menu.name === parentName);
-      // 只有 children 被定义了才能加
-      if (parent && parent.children) {
-        parent.children.push(...menus);
-      }
-    } else {
-      menus.forEach((menu) => {
-        if (!menu.icon) {
-          // todo: 替换一个公用 icon
-          menu.icon = menuIcon;
-        }
-      });
-      globalSettings.siderMenus.push(...menus);
-    }
+    return trailingSlash(globalSettings.baseUrl) + 'api';
   },
 
   /**
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 设置网站配置
+   * Graphql 地址 [baseUrl]/graphql
    */
-  setSiteSettings(settings) {
-    merge(globalSettings, settings);
+  getGraphqlPath() {
+    return trailingSlash(globalSettings.baseUrl) + 'graphql';
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * Graphql ws地址
+   */
+  getGraphqlWsPath() {
+    return trailingSlash(globalSettings.baseUrl).replace(/http(s?)/, 'ws') + 'graphql';
   },
 };
 

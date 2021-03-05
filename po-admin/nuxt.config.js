@@ -1,49 +1,59 @@
 /* eslint-disable prettier/prettier */
-
-const isProd = process.env.NOEW_ENV === 'production';
-
-// eslint-disable-next-line no-unused-vars
-const assetsCDN = {
-  externals: {
-    vue: 'Vue',
-    'vue-router': 'VueRouter',
-    vuex: 'Vuex',
-    'vue-i18n': 'VueI18n',
-    'vue-meta': 'VueMeta',
-  },
-  css: [
-    // { href: '//cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css', prefetch: true },
-  ],
-  js: [
-    { src: '//cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js', preload: true },
-    { src: '//cdn.jsdelivr.net/npm/vue-router@3.3.4/dist/vue-router.min.js', preload: true },
-    { src: '//cdn.jsdelivr.net/npm/vuex@3.5.1/dist/vuex.min.js', preload: true },
-    { src: '//cdn.jsdelivr.net/npm/vue-i18n@8.20.0/dist/vue-i18n.min.js', preload: true },
-    { src: '//cdn.jsdelivr.net/npm/vue-meta@2.4.0/dist/vue-meta.min.js', preload: true },
-  ],
-};
+const path = require('path');
+const fs = require('fs');
 
 const port = process.env.PORT || 5009;
 const host = process.env.HOST || 'localhost';
+const https = false;
+const baseUrl = `http${https ? 's' : ''}://${host}:${port}`;
+// 从执行根目录下读取
+const configPath = path.resolve(process.cwd(), 'po-config.json');
+
+const configs = {
+  frontend: {
+    baseUrl,
+  },
+  backend: {},
+};
+
+try {
+  fs.accessSync(configPath, fs.constants.R_OK);
+  const _configs = require(configPath);
+  if (_configs.frontend) {
+    configs.frontend = Object.assign(configs.frontend, _configs.frontend);
+  }
+  if (_configs.backend) {
+    configs.backend = Object.assign(configs.backend, _configs.backend);
+  }
+} catch (err) {
+  // eslint-disable-next-line no-console
+  console.log(err.message);
+}
 
 module.exports = (configContext) => {
   return {
     vue: {
       config: {
         productionTip: false,
-        devtools: !isProd,
+        devtools: configContext.dev,
       },
     },
     server: {
       port, // default: 3000
       host, // default: localhost,
-      https: false,
+      https,
     },
     env: {
-      // axios baseUrl (服务端 axios 请求时必须有前缀)
-      baseUrl: process.env.BASE_URL || `http://${host}:${port}`,
+      // set envs
+      baseUrl, // fallback baseUrl
     },
-    ssr: false,
+    publicRuntimeConfig: Object.assign(
+      {},
+      configs.frontend,
+      configContext.dev ? { baseUrl } : {}, // 在dev模式下启用代理解决跨域问题
+    ),
+    privateRuntimeConfig: configs.backend || {},
+    ssr: true,
     srcDir: 'src/',
     dir: {
       pages: 'views',
@@ -63,45 +73,55 @@ module.exports = (configContext) => {
     css: ['~/assets/styles/index.less'],
     modules: ['@nuxtjs/proxy'],
     proxy: {
-      // 在 devtools 时调试后台模块代理
-      ...(configContext.devProxyModuleTarget
+      // // 在 devtools 时调试后台模块代理
+      // ...(configContext.devProxyModuleTarget
+      //   ? {
+      //       '/api': {
+      //         target: configContext.devProxyModuleTarget,
+      //         changeOrigin: false,
+      //         ws: false,
+      //       },
+      //       '/graphql': {
+      //         target: configContext.devProxyApiTarget,
+      //         changeOrigin: false,
+      //         ws: false,
+      //       },
+      //     }
+      //   : null),
+      // // 在 devtools 模式下接口代理
+      // ...(configContext.devProxyApiTarget
+      //   ? {
+      //       '/api': {
+      //         target: configContext.devProxyApiTarget,
+      //         changeOrigin: false,
+      //         ws: false,
+      //       },
+      //       '/graphql': {
+      //         target: configContext.devProxyApiTarget,
+      //         changeOrigin: false,
+      //         ws: false,
+      //       },
+      //     }
+      //   : null),
+      // 在 dev 模式下启动代理解决跨域问题
+      ...(configContext.dev
         ? {
-            '/api/plumemo-service/v1/plumemo/module/admins': {
-              target: configContext.devProxyModuleTarget,
-              changeOrigin: false,
-              ws: false,
-              pathRewrite: {
-                '^/api/blog/v1/plumemo/module/admins': '',
-              },
+            '/api': {
+              target: configs.frontend.baseUrl,
             },
-          }
-        : null),
-      // 在 dev 或 devtools 模式下接口代理(此代理在 BASE_URL 被设置成跨域后无效, 请在 dev 模式下不要设置此环境变量)
-      ...((configContext.dev && process.env.PROXYAPI_URL) || configContext.devProxyApiTarget
-        ? {
-            '/api/plumemo-service/v1': {
-              /**
-               * devProxyApiTarget: 在 devtools 自定义接口地址
-               * PROXYAPI_URL: 在 scripts serve 自定义环境变量接口地址
-               * fallback 到当前 domain
-               */
-              target: configContext.devProxyApiTarget || process.env.PROXYAPI_URL || '/',
+            '/graphql': {
+              target: configs.frontend.baseUrl,
             },
           }
         : null),
     },
+
     plugins: [
-      // 第三方模块分开引用（部分第三方模块不支持服务端渲染）
       { src: 'plugins/vue-antd' },
-      { src: 'plugins/vue-ls' },
-      { src: 'plugins/vue-cropper', ssr: false },
-      { src: 'plugins/vue-clipboard' },
-      { src: 'plugins/vue-viser' },
-      { src: 'plugins/i18n' }, // locale
-      // 第三方模块加载完成
-      { src: 'plugins/pre-init' }, // pre-init
-      { src: 'plugins/module-loader', ssr: false }, // modules load
-      { src: 'plugins/router' }, // router
+      { src: 'plugins/i18n' },
+      { src: 'plugins/vue-mavon-editor', ssr: false },
+      { src: 'plugins/vue-ls', ssr: false },
+      { src: 'plugins/bootstrap' },
     ],
     router: {
       base: '/admin/',
@@ -110,11 +130,12 @@ module.exports = (configContext) => {
         routes.push(
           {
             path: '/',
+            name: 'home',
             redirect: { name: 'dashboard' },
           },
           {
             path: '*',
-            redirect: { name: '404' },
+            redirect: { path: '/page-not-found' },
           },
         );
       },
@@ -139,7 +160,14 @@ module.exports = (configContext) => {
         pages: false,
         layouts: false,
       },
-      transpile: ['@vue-async/module-loader'],
+      transpile: [
+        'lodash-es',
+        'vue-tsx-support',
+        'ant-design-vue',
+        '@ant-design-vue/pro-layout',
+        '@vue-async/module-loader',
+        '@vue-async/utils',
+      ],
       extractCSS: true,
       loaders: {
         less: {
@@ -152,7 +180,7 @@ module.exports = (configContext) => {
         },
         cssModules: {
           modules: {
-            localIdentName: isProd ? '[hash:base64]' : '[path]_[name]_[local]_[hash:base64:5]',
+            localIdentName: configContext.dev ? '[hash:base64]' : '[path]_[name]_[local]_[hash:base64:5]',
           },
           localsConvention: 'camelCaseOnly',
         },
@@ -160,8 +188,16 @@ module.exports = (configContext) => {
       /*
        ** You can extend webpack config here
        */
-      // eslint-disable-next-line no-unused-vars
-      extend(config, ctx) {},
+      extend(config, ctx) {
+        if (ctx.isClient) {
+          // https://github.com/webpack/webpack/issues/5423
+          config.node = Object.assign({}, config.node, {
+            fs: 'empty',
+            path: 'empty',
+            module: 'empty',
+          });
+        }
+      },
     },
     // 启动加载 loading 配置
     loadingIndicator: {
@@ -170,6 +206,6 @@ module.exports = (configContext) => {
       background: 'white',
     },
     // 忽略文件的 auto build
-    ignore: ['views/*/modules/*.vue', 'views/*/constants.ts'],
+    ignore: ['views/*/styles/**/*', 'views/*/modules/**/*'],
   };
 };

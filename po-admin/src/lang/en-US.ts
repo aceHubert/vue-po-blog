@@ -1,5 +1,6 @@
 /**
  * English
+ * 组件和页面中使用$tv()方法默认fallback英文，如需要自定义，可在这里重写
  */
 // @ts-ignore
 import antdEnUS from 'ant-design-vue/es/locale-provider/en_US';
@@ -35,49 +36,6 @@ const locale = {
   'app.setting.loading': 'Loading theme',
   'app.setting.copyinfo': 'copy success，please replace defaultSettings in src/models/setting.js',
   'app.setting.production.hint': 'Setting panel shows in development environment only, please manually modify',
-
-  // 菜单
-  menu: {
-    dashboard: 'Dashboard',
-    article: {
-      root: 'Article',
-      articles: 'All Articles',
-      create: 'New Article',
-      tags: 'Tags',
-      categories: 'Categories',
-    },
-    media: {
-      root: 'Media',
-      medias: 'Medias',
-      create: 'New Media',
-    },
-    page: {
-      root: 'Page',
-      pages: 'All Pages',
-      create: 'New Page',
-    },
-    theme: {
-      root: 'Theme',
-      themes: 'Themes',
-      customize: 'Cuztomize',
-      color: 'Color',
-      widgets: 'Widgets',
-    },
-    plugin: {
-      root: 'Plugin',
-      plugins: 'Plugins',
-      installed: 'Installed',
-    },
-    tools: {
-      root: 'Tools',
-      import: 'Import',
-      export: 'Export',
-    },
-    settings: {
-      root: 'Settings',
-      general: 'General',
-    },
-  },
 
   // 常规
   common: {
@@ -120,11 +78,19 @@ const locale = {
 
   // 错误消息
   error: {
-    404: 'Page not found',
-    500: 'System error',
+    404: 'Page not found!',
+    500: 'System error, please try again later!',
+
+    // backend 返回错误
+    GRAPHQL_PARSE_FAILED: 'Parse failed!', //SyntaxError
+    BAD_USER_INPUT: 'Input incorrect!', //UserInputError
+    GRAPHQL_VALIDATION_FAILED: 'Validation failed!', //ValidationError
+    UNAUTHENTICATED: 'Unauthentication', //AuthenticationError
+    FORBIDDEN: 'Forbidden', //ForbiddenError
+    EXECUTE_FAILED: 'Execute failed!', // RuntimeError
 
     // plugins error
-    modulesLoadError: 'Modules load error',
+    modulesLoadError: 'Modules load error!',
   },
 };
 

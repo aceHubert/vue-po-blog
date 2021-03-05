@@ -10,7 +10,7 @@ import settingsFunctions from './functions/settings';
 import { ModuleOptions } from 'types/module-options';
 
 const { getDefaultLocale, getSupportLanguages, addSupportLanguages, setDefaultLocale, setLocale } = localeFunctions;
-const { getDomain, getStaticDir, getApiPath, getSiderMenus, addSiderMenus } = settingsFunctions;
+const { getBaseUrl, getGraphqlPath, getGraphqlWsPath, getApiPath } = settingsFunctions;
 
 const moduleOptions: Omit<ModuleOptions, 'addRoutes'> = {
   hook,
@@ -19,11 +19,10 @@ const moduleOptions: Omit<ModuleOptions, 'addRoutes'> = {
   addSupportLanguages,
   setDefaultLocale,
   setLocale,
-  getDomain,
-  getStaticDir,
+  getBaseUrl,
+  getGraphqlPath,
+  getGraphqlWsPath,
   getApiPath,
-  getSiderMenus,
-  addSiderMenus,
 };
 
 export default moduleOptions;

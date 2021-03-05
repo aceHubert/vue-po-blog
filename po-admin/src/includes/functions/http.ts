@@ -1,7 +1,7 @@
-import Vue from 'vue';
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { store } from '@/store';
-import { ACCESS_TOKEN } from '@/config/proLayoutConfigs';
+import appStore from '@/store/modules/app';
+import userStore from '@/store/modules/user';
+import { isAbsoluteUrl } from '@/utils/path';
 import settingsFuncs from './settings';
 import hook from './hooks';
 
@@ -12,12 +12,11 @@ import { HttpInstance, Response } from 'types/functions/http';
  * @author Hubert
  * @since 2020-09-04
  * @version 0.0.1
- * http factory（内部接口使用）
- * baseURL 从配置中得到
- * timeout 10s
+ * http instance
+ * 返回结果通过 interceptors.response 有作修改
+ * timeout 默认 10s
  */
 const instance = axios.create({
-  baseURL: settingsFuncs.getApiPath(),
   timeout: 10000,
 }) as HttpInstance;
 
@@ -27,55 +26,32 @@ const instance = axios.create({
 instance.getList = instance.get;
 
 /**
- * default interceptor
+ * request interceptor
+ * 添加 Authorization header
+ * 添加 baseUrl (有条件情况下)
  */
+instance.interceptors.request.use((config: AxiosRequestConfig) => {
+  return hook('pre_request')
+    .exec(config)
+    .then(() => {
+      // 如果请求地址非绝对地址的话，添加上baseUrl
+      if (!(config.url && isAbsoluteUrl(config.url))) {
+        config.baseURL = settingsFuncs.getApiPath();
+      }
+      const token = userStore.accessToken;
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`; // 让每个请求携带自定义 token 请根据实际情况自行修改
+      }
+      return config;
+    });
+});
 
-// request interceptor
-instance.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
-    return hook('pre_request')
-      .exec(config)
-      .then(() => {
-        const token = Vue.ls.get(ACCESS_TOKEN);
-        if (token) {
-          config.headers['Authorization'] = token; //`Bearer ${token}`; // 让每个请求携带自定义 token 请根据实际情况自行修改
-        }
-        return config;
-      });
-  },
-  (err: AxiosError) => {
-    return hook('request_error')
-      .exec(err)
-      .then(() => {
-        if (err.response) {
-          const data = err.response.data;
-          const token = Vue.ls.get(ACCESS_TOKEN);
-          if (err.response.status === 403) {
-            // notification.error({
-            //   message: 'Forbidden',
-            //   description: data.message,
-            // });
-          }
-          if (err.response.status === 401 && !(data.result && data.result.isLogin)) {
-            // notification.error({
-            //   message: 'Unauthorized',
-            //   description: 'Authorization verification failed',
-            // });
-            if (token) {
-              store.dispatch('user/logout').then(() => {
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1500);
-              });
-            }
-          }
-        }
-        return Promise.reject(err);
-      });
-  },
-);
-
-// response interceptor
+/**
+ * response interceptor
+ * 修改 response 结果适配到 HttpInstance
+ * 如返回401会通过 refresh token 刷新 access token 后重试，失败则登出
+ * 如遇到网络问题会进行重试
+ */
 instance.interceptors.response.use(
   (resp: AxiosResponse<Response<any>>) => {
     return hook('pre_response')
@@ -83,11 +59,7 @@ instance.interceptors.response.use(
       .then(() => {
         const data = resp.data;
         if (!data.success) {
-          // notification.error({
-          //   message: res.message || 'Error',
-          //   duration: 3,
-          // });
-          return Promise.reject(new Error(data.message || 'Error'));
+          return Promise.reject(new Error(data.message || 'Response error'));
         } else {
           return data;
         }
@@ -98,25 +70,23 @@ instance.interceptors.response.use(
       .exec(err)
       .then(() => {
         if (err.response) {
-          const data = err.response.data;
-          const token = Vue.ls.get(ACCESS_TOKEN);
-          if (err.response.status === 403) {
-            // notification.error({
-            //   message: 'Forbidden',
-            //   description: data.message,
-            // });
-          }
-          if (err.response.status === 401 && !(data.result && data.result.isLogin)) {
-            // notification.error({
-            //   message: 'Unauthorized',
-            //   description: 'Authorization verification failed',
-            // });
-            if (token) {
-              store.dispatch('Logout').then(() => {
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1500);
+          const statusCode = err.response.status;
+          if (statusCode === 401) {
+            // 401 后通过 refresh token 重新获取 access token,如果再不成功则退出重新登录
+            return userStore
+              .refreshToken()
+              .then(() => {
+                const config = err.config;
+                config.headers['Authorization'] = `Bearer ${userStore.accessToken}`;
+                return instance(config);
+              })
+              .catch(() => {
+                appStore.goToLogoutPage();
               });
+          } else if (statusCode === 500) {
+            // 需要初始化
+            if (err.response.data && err.response.data.initRequired) {
+              appStore.goToInitPage();
             }
           }
         } else if (err.request) {
@@ -139,7 +109,7 @@ instance.interceptors.response.use(
                 const backoff = new Promise((resolve) => {
                   const backOffDelay = config.retryDelay ? (1 / 2) * (Math.pow(2, config.__retryCount!) - 1) * 1000 : 1;
                   setTimeout(() => {
-                    resolve();
+                    resolve(null);
                   }, backOffDelay);
                 });
 
@@ -154,8 +124,8 @@ instance.interceptors.response.use(
         // Compatible server-side custom error
         if (!err.isAxiosError) {
           const error = (err.response && err.response.data) || {};
-          err.code = error.resultCode || 500;
-          err.message = error.message || 'System error!';
+          err.code = error.statusCode || 500;
+          err.message = error.message || err.message || 'net::ERR_CONNECTION_REFUSED';
         }
         return Promise.reject(err);
       });

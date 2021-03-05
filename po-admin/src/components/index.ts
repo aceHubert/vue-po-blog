@@ -1,11 +1,7 @@
-// chart
-export * from './Charts';
-
-// pro components
-export * from './Ellipsis';
-export * from './STable';
+// components
+export * from './AsyncTable';
+export * from './SearchFrom';
 
 // layouts
 export * from './GlobalHeader';
 export * from './GlobalFooter';
-export * from './ExceptionPage';

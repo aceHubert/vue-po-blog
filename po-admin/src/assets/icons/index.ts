@@ -9,13 +9,14 @@
 import github from './github.svg'; // path to your '*.svg?inline' file.
 import bxAnaalyse from './bx-analyse.svg?inline'; // path to your '*.svg?inline' file.
 import dashboard from './dashboard.svg?inline';
-import article from './article.svg?inline';
-import media from './media.svg?inline';
+import post from './article.svg?inline';
+import image from './image.svg?inline';
 import page from './page.svg?inline';
 import theme from './theme.svg?inline';
 import plugin from './plugin.svg?inline';
+import user from './user.svg?inline';
 import tool from './tool.svg?inline';
 import setting from './setting.svg?inline';
 import menu from './menu.svg?inline';
 
-export { dashboard, article, media, theme, plugin, page, tool, setting, menu, bxAnaalyse, github };
+export { dashboard, post, image, theme, plugin, page, user, tool, setting, menu, bxAnaalyse, github };

@@ -12,16 +12,14 @@ export type SubMenu = {
 };
 
 export type SiteSettings = {
-  domain: string;
-  staticDir: string;
-  siderMenus: Menu[];
+  baseUrl: string;
+  basePath: string;
 };
 
 export interface SettingsFunctions {
-  getDomain(): SiteSettings['domain'];
-  getStaticDir(): SiteSettings['staticDir'];
-  getSiderMenus(): SiteSettings['siderMenus'];
+  getBaseUrl(): string;
+  getBasePath(): string;
   getApiPath(): string;
-  addSiderMenus(menus: Menu[], parentName?: string): void;
-  setSiteSettings(settings: Partial<SiteSettings>): void;
+  getGraphqlPath(): string;
+  getGraphqlWsPath(): string;
 }

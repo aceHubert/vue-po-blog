@@ -6,4 +6,5 @@ import './i18n';
 
 export * from './datas';
 export * from './functions';
+export * from './constants';
 export * from './module-options';

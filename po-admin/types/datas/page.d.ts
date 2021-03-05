@@ -1,4 +1,4 @@
-import { PagerQuery, PagerResponse } from './request';
+import { PagerQuery, PagerResponse } from './pager';
 import { PageStatus } from 'src/includes/datas/enums';
 
 export type Page = {
@@ -25,12 +25,3 @@ export type PagePagerQuery = PagerQuery<{
 }>;
 
 export type PagePagerResponse = PagerResponse<PageWithoutContent>;
-
-export interface PageApi {
-  getList(query?: PagePagerQuery): Promise<PagePagerResponse>;
-  get(id: number): Promise<Page>;
-  create(data: CreatePageModel): Promise<Page>;
-  update(id: number, data: UpdatePageModel): Promise<true>;
-  updateStatus(id: number, status: PageStatus): Promise<true>;
-  delete(id: number): Promise<true>;
-}

@@ -7,14 +7,11 @@ import hook from './functions/hooks';
 import localeFunctions from './functions/locale';
 import settingsFunctions from './functions/settings';
 
-// apis
-import { categoryApi, tagApi, articleApi } from './datas';
-
 // Types
 import { VueExtraPrototypes } from 'types/vue';
 
 const { getDefaultLocale, getSupportLanguages, addSupportLanguages, setDefaultLocale, setLocale } = localeFunctions;
-const { getDomain, getStaticDir, getApiPath, getSiderMenus } = settingsFunctions;
+const { getBaseUrl, getGraphqlPath, getGraphqlWsPath, getApiPath } = settingsFunctions;
 
 const prototypes: VueExtraPrototypes = {
   hook,
@@ -23,13 +20,10 @@ const prototypes: VueExtraPrototypes = {
   addSupportLanguages,
   setDefaultLocale,
   setLocale,
-  getDomain,
-  getStaticDir,
+  getBaseUrl,
+  getGraphqlPath,
+  getGraphqlWsPath,
   getApiPath,
-  getSiderMenus,
-  categoryApi,
-  tagApi,
-  articleApi,
 };
 
 export default prototypes;

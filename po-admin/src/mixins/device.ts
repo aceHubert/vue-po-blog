@@ -1,5 +1,5 @@
-import Vue from 'vue';
-import enquireJs from 'enquire.js';
+import { Vue, Component, ProvideReactive } from 'nuxt-property-decorator';
+import { createMediaQueryDispatcher } from '@/utils/enquire';
 
 export enum DeviceType {
   Desktop = 'desktop',
@@ -14,49 +14,40 @@ const queries = {
   [DeviceType.Mobile]: 'screen and (max-width: 576px)',
 };
 
-type Data = {
-  device: string;
-};
+@Component
+export default class DeviceMixin extends Vue {
+  enquireJs!: ReturnType<typeof createMediaQueryDispatcher>;
 
-type Methods = {
-  isMobile: () => boolean;
-  isDesktop: () => boolean;
-  isTablet: () => boolean;
-};
+  @ProvideReactive()
+  device: DeviceType = DeviceType.Desktop;
 
-export default Vue.extend<Data, Methods, {}>({
-  provide() {
-    return {
-      isMobile: this.isMobile,
-      isTablet: this.isTablet,
-      isDesktop: this.isDesktop,
-    };
-  },
-  data() {
-    return {
-      device: DeviceType.Desktop,
-    };
-  },
-  methods: {
-    isMobile() {
-      return this.device === DeviceType.Mobile;
-    },
-    isDesktop() {
-      return this.device === DeviceType.Desktop;
-    },
-    isTablet() {
-      return this.device === DeviceType.Tablet;
-    },
-  },
+  @ProvideReactive()
+  get isMobile() {
+    return this.device === DeviceType.Mobile;
+  }
+
+  @ProvideReactive()
+  get isDesktop() {
+    return this.device === DeviceType.Desktop;
+  }
+
+  @ProvideReactive()
+  get isTablet() {
+    return this.device === DeviceType.Tablet;
+  }
+
   mounted() {
-    enquireJs
+    this.enquireJs = createMediaQueryDispatcher();
+    this.enquireJs
       .register(queries[DeviceType.Mobile], () => (this.device = DeviceType.Mobile))
       .register(queries[DeviceType.Tablet], () => (this.device = DeviceType.Tablet))
       .register(queries[DeviceType.Desktop], () => (this.device = DeviceType.Desktop));
-  },
+  }
+
   beforeDestroy() {
-    enquireJs.unregister(queries[DeviceType.Mobile]);
-    enquireJs.unregister(queries[DeviceType.Tablet]);
-    enquireJs.unregister(queries[DeviceType.Desktop]);
-  },
-});
+    this.enquireJs
+      .unregister(queries[DeviceType.Mobile])
+      .unregister(queries[DeviceType.Tablet])
+      .unregister(queries[DeviceType.Desktop]);
+  }
+}

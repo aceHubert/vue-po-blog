@@ -1,4 +1,4 @@
-import merge from 'lodash.merge';
+import { merge } from 'lodash-es';
 
 // Types
 import { LocaleFunctions, LocaleConfig } from 'types/functions/locale';

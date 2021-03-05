@@ -1,94 +1,181 @@
-import Vue from 'vue';
+// import Vue from 'vue';
+import { VuexModule, Module, VuexMutation, VuexAction, getModule } from 'nuxt-property-decorator';
+import { store } from '@/store';
+import { httpClient, graphqlClient, gql } from '@/includes/functions';
 import config, {
-  SET_LAYOUT,
-  SET_THEME,
-  SET_PRIMARY_COLOR,
-  SET_CONTENT_WIDTH,
-  TOGGLE_SIDE_COLLAPSED,
-  TOGGLE_FIXED_HEADER,
-  TOGGLE_FIX_SIDEBAR,
-  TOGGLE_AUTO_HIDE_HEADER,
-  TOGGLE_COLOR_WEAK,
-  TOGGLE_MULTI_TAB,
+  // SET_LAYOUT,
+  // SET_THEME,
+  // SET_PRIMARY_COLOR,
+  // SET_CONTENT_WIDTH,
+  // TOGGLE_SIDE_COLLAPSED,
+  // TOGGLE_FIXED_HEADER,
+  // TOGGLE_FIX_SIDEBAR,
+  // TOGGLE_AUTO_HIDE_HEADER,
+  // TOGGLE_COLOR_WEAK,
+  // TOGGLE_MULTI_TAB,
   Layout,
   Theme,
   ContentWidth,
 } from '@/config/proLayoutConfigs';
 
-// Types
-import { Module } from 'vuex';
-import { RootState } from '..';
-
-export type AppState = {
-  layout: Layout;
-  theme: Theme;
-  primaryColor: string | null;
-  contentWidth: ContentWidth;
-  fixedHeader: boolean;
-  fixSidebar: boolean;
-  sideCollapsed: boolean;
-  colorWeak: boolean;
-  autoHideHeader: boolean;
-  multiTab: boolean;
+export type CheckResponse = {
+  initRequired: boolean;
 };
 
-const app: Module<AppState, RootState> = {
-  namespaced: true,
-  state: () => ({
-    layout: config.settings.layout,
-    theme: config.settings.theme,
-    primaryColor: config.settings.primaryColor,
-    contentWidth: config.settings.contentWidth,
-    fixedHeader: config.settings.fixedHeader,
-    fixSidebar: config.settings.fixSiderbar,
-    sideCollapsed: config.settings.sideCollapsed,
-    colorWeak: config.settings.colorWeak,
-    // 下面两个暂时没有用
-    autoHideHeader: config.settings.autoHideHeader,
-    multiTab: config.settings.multiTab,
-  }),
-  mutations: {
-    [SET_LAYOUT]: (state, mode) => {
-      state.layout = mode;
-      Vue.ls.set(SET_LAYOUT, mode);
-    },
-    [SET_THEME]: (state, theme) => {
-      state.theme = theme;
-      Vue.ls.set(SET_THEME, theme);
-    },
-    [SET_PRIMARY_COLOR]: (state, color) => {
-      state.primaryColor = color;
-      Vue.ls.set(SET_PRIMARY_COLOR, color);
-    },
-    [SET_CONTENT_WIDTH]: (state, type) => {
-      state.contentWidth = type;
-      Vue.ls.set(SET_CONTENT_WIDTH, type);
-    },
-    [TOGGLE_FIXED_HEADER]: (state, mode) => {
-      state.fixedHeader = mode;
-      Vue.ls.set(TOGGLE_FIXED_HEADER, mode);
-    },
-    [TOGGLE_FIX_SIDEBAR]: (state, mode) => {
-      state.fixSidebar = mode;
-      Vue.ls.set(TOGGLE_FIX_SIDEBAR, mode);
-    },
-    [TOGGLE_SIDE_COLLAPSED]: (state, mode) => {
-      state.sideCollapsed = mode;
-      Vue.ls.set(TOGGLE_SIDE_COLLAPSED, mode);
-    },
-    [TOGGLE_COLOR_WEAK]: (state, mode) => {
-      state.colorWeak = mode;
-      Vue.ls.set(TOGGLE_COLOR_WEAK, mode);
-    },
-    [TOGGLE_AUTO_HIDE_HEADER]: (state, mode) => {
-      state.autoHideHeader = mode;
-      Vue.ls.set(TOGGLE_AUTO_HIDE_HEADER, mode);
-    },
-    [TOGGLE_MULTI_TAB]: (state, mode) => {
-      state.multiTab = mode;
-      Vue.ls.set(TOGGLE_MULTI_TAB, mode);
-    },
-  },
-};
+@Module({ store, name: 'app', namespaced: true, dynamic: true, stateFactory: true })
+class AppStore extends VuexModule {
+  layout: Layout = config.settings.layout;
+  theme: Theme = config.settings.theme;
+  primaryColor = config.settings.primaryColor;
+  contentWidth: ContentWidth = config.settings.contentWidth;
+  fixedHeader = config.settings.fixedHeader;
+  fixSidebar = config.settings.fixSiderbar;
+  sideCollapsed = config.settings.sideCollapsed;
+  colorWeak = config.settings.colorWeak;
+  // 下面两个暂时没有用
+  autoHideHeader = config.settings.autoHideHeader;
+  multiTab = config.settings.multiTab;
 
-export default app;
+  get isDark() {
+    return this.theme === Theme.Dark;
+  }
+
+  get isLight() {
+    return !this.isDark;
+  }
+
+  @VuexMutation
+  setLayout(mode: Layout) {
+    this.layout = mode;
+    // Vue.ls.set(SET_LAYOUT, mode);
+  }
+
+  @VuexMutation
+  setTheme(theme: Theme) {
+    this.theme = theme;
+    // Vue.ls.set(SET_THEME, theme);
+  }
+
+  @VuexMutation
+  setPrimaryColor(color: string) {
+    this.primaryColor = color;
+    // Vue.ls.set(SET_PRIMARY_COLOR, color);
+  }
+
+  @VuexMutation
+  setContentWidth(type: ContentWidth) {
+    this.contentWidth = type;
+    // Vue.ls.set(SET_CONTENT_WIDTH, type);
+  }
+
+  @VuexMutation
+  toggleFixedHeader(mode: boolean) {
+    this.fixedHeader = mode;
+    // Vue.ls.set(TOGGLE_FIXED_HEADER, mode);
+  }
+
+  @VuexMutation
+  toggleFixSidebar(mode: boolean) {
+    this.fixSidebar = mode;
+    // Vue.ls.set(TOGGLE_FIX_SIDEBAR, mode);
+  }
+
+  @VuexMutation
+  toggleSideCollapsed(mode: boolean) {
+    this.sideCollapsed = mode;
+    // Vue.ls.set(TOGGLE_SIDE_COLLAPSED, mode);
+  }
+
+  @VuexMutation
+  toggleColorWeak(mode: boolean) {
+    this.colorWeak = mode;
+    // Vue.ls.set(TOGGLE_COLOR_WEAK, mode);
+  }
+
+  @VuexMutation
+  toggleAutoHideHeader(mode: boolean) {
+    this.autoHideHeader = mode;
+    // Vue.ls.set(TOGGLE_AUTO_HIDE_HEADER, mode);
+  }
+
+  @VuexMutation
+  toggleMultiTab(mode: boolean) {
+    this.multiTab = mode;
+    // Vue.ls.set(TOGGLE_MULTI_TAB, mode);
+  }
+
+  /**
+   * 检查DB是否需要初始化, false 表示不需要初始了
+   */
+  @VuexAction({ rawError: true })
+  checkDB() {
+    return httpClient.get<CheckResponse>('/init/check').then((model) => {
+      if (model.success) {
+        return model.initRequired;
+      } else {
+        // 不会返回 false
+        return false;
+      }
+    });
+  }
+
+  /**
+   * 初始化数据库
+   * 如果数据库已经初始化，则会返回false。可以通过checkDB 判断
+   * @param params 初始化参数
+   */
+  @VuexAction({ rawError: true })
+  initDB(params: InitParams) {
+    return httpClient.post('/init/start', params).then((model) => {
+      if (model.success) {
+        return true;
+      } else {
+        throw new Error(model.message);
+      }
+    });
+  }
+
+  /**
+   * 获取自动加载的配置参数
+   */
+  @VuexAction({ rawError: true })
+  getAutoLoadOptions() {
+    return graphqlClient
+      .query<{ options: Array<{ name: string; value: string }> }>({
+        query: gql`
+          query getAutoloadOptions {
+            options(autoload: Yes) {
+              name: optionName
+              value: optionValue
+            }
+          }
+        `,
+      })
+      .then(({ data }) => {
+        return data.options.reduce((prev, curr) => {
+          prev[curr.name] = curr.value;
+          return prev;
+        }, {} as Dictionary<string>);
+      });
+  }
+
+  /**
+   * 跳转到 init 页面
+   * 不在 Vue instance 的情况下，获取不到VueRouter对象
+   */
+  @VuexAction
+  goToInitPage() {
+    return store.$router.replace('/init');
+  }
+
+  /**
+   * 跳转到 logout 页面
+   * 不在 Vue instance 的情况下，获取不到VueRouter对象
+   */
+  @VuexAction
+  goToLogoutPage() {
+    return store.$router.replace('/logout');
+  }
+}
+
+export default getModule(AppStore);

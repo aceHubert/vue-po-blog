@@ -6,7 +6,7 @@ export interface ModuleOptions
       LocaleFunctions,
       'getDefaultLocale' | 'getSupportLanguages' | 'addSupportLanguages' | 'setDefaultLocale' | 'setLocale'
     >,
-    Pick<SettingsFunctions, 'getDomain' | 'getStaticDir' | 'getApiPath' | 'getSiderMenus' | 'addSiderMenus'> {
+    Pick<SettingsFunctions, 'getBaseUrl' | 'getGraphqlPath' | 'getGraphqlWsPath' | 'getApiPath'> {
   hook: HookFunction;
   addRoutes(routes: RouteConfig[], megreFn?: (oldRoutes: RouteConfig[], newRoutes: RouteConfig[]) => void): void;
 }

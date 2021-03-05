@@ -3,8 +3,8 @@
  */
 import LogoSvg from '@/assets/images/logo.svg?inline';
 
-export const ACCESS_TOKEN = 'ACCESS_TOKEN';
-export const APP_LANGUAGE = 'APP_LANGUAGE';
+export const ACCESS_TOKEN = 'po_access_token';
+export const REFRESH_TOKEN = 'po_refresh_token';
 
 export const SET_LAYOUT = 'LAYOUT';
 export const SET_THEME = 'THEME';
@@ -50,7 +50,7 @@ export default {
    * multiTab - 多 tab 页模式： boolean
    */
   settings: {
-    title: 'Admin',
+    title: 'CRM',
     logo: LogoSvg,
     layout: Layout.sideMenu,
     theme: Theme.Dark,

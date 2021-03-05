@@ -2,21 +2,27 @@
  * 修改 axios response 的返回 为 response.data 的内容
  */
 import { AxiosInterceptorManager, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { PagerInfo } from '../datas/request';
 
-// response from service
-export interface Response<T> {
-  success: boolean;
+type ResponseError = {
+  success: false;
   message: string;
-  resultCode: string;
-  model: T;
-}
+};
 
 // response from service
-export interface PagerResponse<T> extends Omit<Response<T>, 'model'> {
-  models: Array<T>;
-  pageInfo?: PagerInfo;
-}
+export type Response<T> =
+  | ({
+      success: true;
+    } & T)
+  | ResponseError;
+
+// response from service
+export type PagerResponse<T> =
+  | {
+      success: true;
+      rows: Array<T>;
+      total: number;
+    }
+  | ResponseError;
 
 export interface HttpInterceptorManager<V> extends AxiosInterceptorManager<V> {
   use<R = V>(onFulfilled?: (value: V) => R | Promise<R>, onRejected?: (error: any) => any): number;

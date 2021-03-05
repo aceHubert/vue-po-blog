@@ -1,6 +1,6 @@
 import { AxiosStatic } from 'axios';
+import { ApolloClient } from 'apollo-client';
 import { IVueI18n } from 'vue-i18n';
-import { CategoryApi, TagApi, ArticleApi } from './datas';
 import { HookFunction, HttpInstance, LocaleFunctions, SettingsFunctions } from './functions';
 
 export interface VueExtraPrototypes
@@ -8,22 +8,23 @@ export interface VueExtraPrototypes
       LocaleFunctions,
       'getDefaultLocale' | 'getSupportLanguages' | 'addSupportLanguages' | 'setDefaultLocale' | 'setLocale'
     >,
-    Pick<SettingsFunctions, 'getDomain' | 'getStaticDir' | 'getSiderMenus' | 'getApiPath'> {
+    Pick<SettingsFunctions, 'getBaseUrl' | 'getGraphqlPath' | 'getGraphqlWsPath' | 'getApiPath'> {
   hook: HookFunction;
-  categoryApi: CategoryApi;
-  tagApi: TagApi;
-  articleApi: ArticleApi;
 }
 
 declare module 'vue/types/vue' {
   interface Vue extends VueExtraPrototypes {
     axios: AxiosStatic;
-    $http: HttpInstance;
+    httpClient: HttpInstance;
+    graphqlClient: InstanceType<typeof ApolloClient>;
     $tv: IVueI18n['tv'];
+    $userOptions: Dictionary<string>;
+    updateRouteQuery(query: Dictionary<string | undefined>, options?: { replace?: boolean }): void;
   }
 
   interface VueConstructor {
     axios: AxiosStatic;
-    $http: HttpInstance;
+    httpClient: HttpInstance;
+    graphqlClient: InstanceType<typeof ApolloClient>;
   }
 }
