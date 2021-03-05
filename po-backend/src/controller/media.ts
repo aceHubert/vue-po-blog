@@ -16,12 +16,12 @@ export default class MediaResolver extends createMetaResolver(Media, MediaMeta, 
     @Fields() fields: ResolveTree,
     @Ctx('dataSources') { media }: DataSources,
   ) {
-    return media.get(id, Object.keys(fields.fieldsByTypeName.Media));
+    return media.get(id, this.getFieldNames(fields.fieldsByTypeName.Media));
   }
 
   @Query((returns) => PagedMedia, { description: '获取媒体分页列表' })
   medias(@Args() args: PagedMediaQueryArgs, @Fields() fields: ResolveTree, @Ctx('dataSources') { media }: DataSources) {
-    return media.getPaged(args, Object.keys(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.User));
+    return media.getPaged(args, this.getFieldNames(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.User));
   }
 
   @Mutation((returns) => Media, { nullable: true, description: '添加媒体' })

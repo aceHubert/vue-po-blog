@@ -1,6 +1,6 @@
 import { Field, ObjectType, InputType, ArgsType, ID } from 'type-graphql';
+import { LinkTarget, LinkVisible } from '@/dataSources';
 import { PagedQueryArgs, PagedResponse } from './general';
-import { LinkTarget, LinkVisible } from './enums';
 
 // Types
 import { LinkCreationAttributes } from '@/dataSources/entities/links';

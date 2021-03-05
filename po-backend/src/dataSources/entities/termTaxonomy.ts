@@ -21,7 +21,7 @@ export default class TermTaxonomy extends Model<TermTaxonomyAttributes, TermTaxo
   public count!: number;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   TermTaxonomy.init(
     {
       id: {
@@ -70,4 +70,19 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
       comment: '协议分类表',
     },
   );
+};
+
+// 关联
+export const associate: TableAssociateFunc = function associate(models) {
+  // TermTaxonomy.id <--> TermRelationships.taxonomyId
+  models.TermTaxonomy.hasMany(models.TermRelationships, {
+    foreignKey: 'taxonomyId',
+    sourceKey: 'id',
+    constraints: false,
+  });
+  models.TermRelationships.belongsTo(models.TermTaxonomy, {
+    foreignKey: 'taxonomyId',
+    targetKey: 'id',
+    constraints: false,
+  });
 };

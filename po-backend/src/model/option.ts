@@ -1,5 +1,5 @@
 import { Field, ObjectType, InputType, ArgsType, ID } from 'type-graphql';
-import { OptionAutoload } from './enums';
+import { OptionAutoload } from '@/dataSources';
 
 // Types
 import { OptionCreationAttributes } from '@/dataSources/entities/options';

@@ -5,9 +5,24 @@ import Meta, { MetaAddModel } from './meta';
 import { TermMetaCreationAttributes } from '@/dataSources/entities/termMeta';
 
 @ObjectType({ description: '协议模型' })
-export default class Term {
-  @Field(() => ID, { description: 'Id' })
-  id!: number;
+export default class TermTaxonomy {
+  @Field(() => ID, { description: 'Taxonomy Id' })
+  taxonomyId!: number;
+
+  // @Field({ description: '类别' })
+  // taxonomy!: string;
+
+  @Field({ description: '类别说明' })
+  description!: string;
+
+  @Field((type) => Int, { description: '关联对象类别数量' })
+  count!: number;
+
+  // @Field((type) => ID, { description: '父 Taxonomy Id' })
+  // parentId!: number;
+
+  @Field(() => ID, { description: 'Term Id' })
+  termId!: number;
 
   @Field({ description: 'Name' })
   name!: string;
@@ -17,23 +32,23 @@ export default class Term {
 
   @Field((type) => Int, { description: '分组' })
   group!: number;
+}
 
-  @Field({ description: '类别' })
-  taxonomy!: string;
+@ObjectType({ description: '协议关系模型(包含TermTaxonomy)' })
+export class TermTaxonomyRelationship extends TermTaxonomy {
+  // @Field(() => ID, { description: 'Post/Link等对象 Id' })
+  // objectId!: number;
 
-  @Field({ description: '类别说明' })
-  description!: string;
-
-  @Field((type) => Int, { description: '关联类别数量' })
-  count!: number;
+  @Field((type) => Int, { description: '排序' })
+  order!: number;
 }
 
 @ObjectType({ description: '协议关系模型' })
 export class TermRelationship {
-  @Field(() => ID, { description: 'Post/Link Id' })
+  @Field(() => ID, { description: 'Post/Link等对象 Id' })
   objectId!: number;
 
-  @Field(() => ID, { description: '分类 Id' })
+  @Field(() => ID, { description: 'Taxonomy Id' })
   taxonomyId!: number;
 
   @Field((type) => Int, { description: '排序' })
@@ -51,8 +66,20 @@ export class TermQueryArgs {
   @Field((type) => ID, { nullable: true, defaultValue: 0, description: '父 Id' })
   parentId!: number;
 
-  @Field((type) => Int, { nullable: true, defaultValue: 0, description: '分组' })
-  group!: number;
+  @Field((type) => Int, { nullable: true, description: '分组' })
+  group?: number;
+}
+
+/**
+ * 查询协议关系参数
+ */
+@ArgsType()
+export class TermRelationshipQueryArgs {
+  @Field((type) => ID, { description: 'Post/Link等对象 ID' })
+  objectId!: number;
+
+  @Field({ description: '类别' })
+  taxonomy!: string;
 }
 
 @ObjectType({ description: '协议元数据模型' })
@@ -69,7 +96,7 @@ export class TermMetaAddModel extends MetaAddModel implements TermMetaCreationAt
 
 @InputType({ description: '协议关系新建模型' })
 export class TermRelationshipAddModel {
-  @Field((type) => ID, { description: 'Post/Link Id' })
+  @Field((type) => ID, { description: 'Post/Link等对象 Id' })
   objectId!: number;
 
   @Field((type) => ID, { description: '分类 Id' })
@@ -92,6 +119,9 @@ export class TermAddModel {
 
   @Field((type) => Int, { nullable: true, description: '分组' })
   group?: number;
+
+  @Field((type) => ID, { nullable: true, description: '如果提供，则自动绑定关系' })
+  objectId?: number;
 
   @Field((type) => [MetaAddModel], { nullable: true, description: '协议元数据' })
   public metas?: MetaAddModel[];

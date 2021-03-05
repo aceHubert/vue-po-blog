@@ -26,7 +26,7 @@ export default class OptionDataSource extends SequelizeDataSource {
       },
       offset,
       limit,
-      order: [['created_at', 'DESC']],
+      order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
       rows,
       total,

@@ -1,5 +1,5 @@
 import { Model, DataTypes, Optional } from 'sequelize';
-import { CommentType } from '../../model/enums';
+import { CommentType } from '../helper/enums';
 
 export interface CommentAttributes {
   id: number;
@@ -44,7 +44,7 @@ export default class Comments extends Model<CommentAttributes, CommentCreationAt
   public readonly updatedAt!: Date;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   Comments.init(
     {
       id: {
@@ -127,4 +127,16 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
       comment: '评论表',
     },
   );
+};
+
+// 关联
+export const associate: TableAssociateFunc = function associate(models) {
+  // Users.id <--> UserMeta.userId
+  models.Comments.hasMany(models.CommentMeta, {
+    foreignKey: 'commentId',
+    sourceKey: 'id',
+    as: 'CommentMetas',
+    constraints: false,
+  });
+  models.CommentMeta.belongsTo(models.Comments, { foreignKey: 'commentId', targetKey: 'id', constraints: false });
 };

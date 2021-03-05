@@ -1,7 +1,5 @@
-import { Resolver, Query, Mutation, Authorized, Arg, Args, Ctx, ID } from 'type-graphql';
-import { AuthenticationError } from 'apollo-server-express';
-import jwt from 'jsonwebtoken';
-import { configs } from '@/utils/getConfig';
+import { Resolver, Query, Mutation, Arg, Args, Ctx, ID, Authorized } from 'type-graphql';
+import { UserRole, UserStatus } from '@/dataSources';
 import { createMetaResolver } from './meta';
 
 // Types
@@ -10,36 +8,69 @@ import { DataSources } from '@/dataSources';
 import User, {
   PagedUserQueryArgs,
   PagedUser,
+  UserStatusCount,
+  UserRoleCount,
   UserAddModel,
   UserUpdateModel,
-  UserLoginModel,
   UserMeta,
   UserMetaAddModel,
 } from '@/model/user';
-import { UserStatus } from '@/model/enums';
 
 @Resolver((returns) => User)
 export default class UserResolver extends createMetaResolver(User, UserMeta, UserMetaAddModel, {
   name: '用户',
 }) {
-  @Authorized('Admin')
+  @Authorized()
   @Query((returns) => User, { nullable: true, description: '获取用户' })
-  user(@Arg('id', (type) => ID!) id: number, @Fields() fields: ResolveTree, @Ctx('dataSources') { user }: DataSources) {
-    return user.get(id, Object.keys(fields.fieldsByTypeName.User));
+  user(@Fields() fields: ResolveTree, @Ctx('dataSources') { user }: DataSources) {
+    return user.get(null, this.getFieldNames(fields.fieldsByTypeName.User));
   }
 
-  @Authorized('Admin')
+  @Authorized(UserRole.Administrator)
+  @Query((returns) => User, { nullable: true, description: '获取用户(必须有编辑用户权限)' })
+  userById(
+    @Arg('id', (type) => ID!) id: number,
+    @Fields() fields: ResolveTree,
+    @Ctx('dataSources') { user }: DataSources,
+  ) {
+    return user.get(id, this.getFieldNames(fields.fieldsByTypeName.User));
+  }
+
+  @Authorized()
   @Query((returns) => PagedUser, { description: '获取用户分页列表' })
   users(@Args() args: PagedUserQueryArgs, @Fields() fields: ResolveTree, @Ctx('dataSources') { user }: DataSources) {
-    return user.getPaged(args, Object.keys(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.User));
+    return user.getPaged(
+      args,
+      this.getFieldNames(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.UserWithRole),
+    );
+  }
+
+  @Query((returns) => [UserStatusCount], { description: '获取用户状态分组数量' })
+  userCountByStatus(@Ctx('dataSources') { user }: DataSources) {
+    return user.getCountByStatus();
+  }
+
+  @Query((returns) => [UserRoleCount], { description: '获取用户角色分组数量' })
+  userCountByRole(@Ctx('dataSources') { user }: DataSources) {
+    return user.getCountByRole();
   }
 
   @Query((returns) => Boolean, { description: '判断登录名是否存在' })
   isLoginNameExists(@Arg('loginName', (type) => String) loginName: string, @Ctx('dataSources') { user }: DataSources) {
-    return user.isExists(loginName);
+    return user.isLoginNameExists(loginName);
   }
 
-  @Authorized('Admin')
+  @Query((returns) => Boolean, { description: '判断手机号码是否存在' })
+  isMobileExists(@Arg('mobile', (type) => String) mobile: string, @Ctx('dataSources') { user }: DataSources) {
+    return user.isMobileExists(mobile);
+  }
+
+  @Query((returns) => Boolean, { description: '判断email是否存在' })
+  isEmailExists(@Arg('email', (type) => String) email: string, @Ctx('dataSources') { user }: DataSources) {
+    return user.isEmailExists(email);
+  }
+
+  @Authorized()
   @Mutation((returns) => User, {
     nullable: true,
     description: '添加用户（如果登录名已在在，则返回 null；使用 "isLoginNameExists" 查询判断）',
@@ -48,21 +79,7 @@ export default class UserResolver extends createMetaResolver(User, UserMeta, Use
     return user.create(model);
   }
 
-  @Mutation((returns) => String, { description: '登录方法' })
-  login(@Arg('model', (type) => UserLoginModel) model: UserLoginModel, @Ctx('dataSources') { user }: DataSources) {
-    return user.login(model).then((payload) => {
-      if (payload) {
-        return jwt.sign(payload, configs.get('jwt_screct'), {
-          algorithm: configs.get('jwt_algorithm'),
-          expiresIn: configs.get('jwt_expiresIn'),
-        });
-      } else {
-        throw new AuthenticationError('Login Unsuccessfly');
-      }
-    });
-  }
-
-  @Authorized('Admin')
+  @Authorized()
   @Mutation((returns) => Boolean, { description: '修改用户状态' })
   updateUser(
     @Arg('id', (type) => ID) id: number,
@@ -72,13 +89,22 @@ export default class UserResolver extends createMetaResolver(User, UserMeta, Use
     return user.update(id, model);
   }
 
-  @Authorized('Admin')
+  @Authorized()
   @Mutation((returns) => Boolean, { description: '修改用户状态' })
   updateUserStatus(
-    @Arg('id', (type) => ID) id: number,
+    @Arg('id', (type) => ID, { description: 'User Id' }) id: number,
     @Arg('status', (type) => UserStatus) status: UserStatus,
     @Ctx('dataSources') { user }: DataSources,
   ) {
     return user.updateStatus(id, status);
+  }
+
+  @Authorized()
+  @Mutation((returns) => Boolean, { description: '删除（永久）用户' })
+  deleteUser(
+    @Arg('id', (type) => ID, { description: 'User Id' }) id: number,
+    @Ctx('dataSources') { user }: DataSources,
+  ) {
+    return user.delete(id);
   }
 }

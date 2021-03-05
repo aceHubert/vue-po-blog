@@ -1,5 +1,16 @@
 import { Model, DataTypes, Optional } from 'sequelize';
-import { PostType, PostStatus, PostCommentStatus } from '@/model/enums';
+import { PostType, PostStatus, PostCommentStatus } from '../helper/enums';
+
+// 仅内部使用
+export enum PostOperateStatus {
+  AutoDraft = 'auto draft', // 新建
+  Inherit = 'inherit', // 编辑
+}
+
+// 仅内部使用
+export enum PostOperateType {
+  Revision = 'revision', //状态为 inherit
+}
 
 export interface PostAttributes {
   id: number;
@@ -9,7 +20,8 @@ export interface PostAttributes {
   content: string;
   excerpt: string;
   type: PostType;
-  status: PostStatus;
+  status: PostStatus | PostOperateStatus;
+  parent: number;
   commentStatus: PostCommentStatus;
   commentCount: number;
 }
@@ -18,7 +30,7 @@ export interface PostAttributes {
 export interface PostCreationAttributes
   extends Optional<
     PostAttributes,
-    'id' | 'name' | 'author' | 'excerpt' | 'type' | 'status' | 'commentStatus' | 'commentCount'
+    'id' | 'name' | 'author' | 'excerpt' | 'type' | 'parent' | 'status' | 'commentStatus' | 'commentCount'
   > {}
 
 export default class Posts extends Model<PostAttributes, PostCreationAttributes> {
@@ -30,6 +42,7 @@ export default class Posts extends Model<PostAttributes, PostCreationAttributes>
   public excerpt!: string;
   public type!: PostType;
   public status!: PostStatus;
+  public parent!: number;
   public commentStatus!: PostCommentStatus;
   public commentCount!: number;
 
@@ -38,7 +51,7 @@ export default class Posts extends Model<PostAttributes, PostCreationAttributes>
   public readonly updatedAt!: Date;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   Posts.init(
     {
       id: {
@@ -49,7 +62,6 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
       name: {
         type: DataTypes.STRING(200),
         allowNull: false,
-        unique: true,
         comment: '唯一名称，用于URL地址',
       },
       title: {
@@ -83,6 +95,10 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
         defaultValue: 'publish',
         comment: '状态，如 draft：草稿；publish：发布；等',
       },
+      parent: {
+        type: DataTypes.BIGINT({ unsigned: true }),
+        comment: '父 Id',
+      },
       commentStatus: {
         type: DataTypes.STRING(20),
         allowNull: false,
@@ -108,4 +124,23 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
       comment: '文章表',
     },
   );
+};
+
+// 关联
+export const associate: TableAssociateFunc = function associate(models) {
+  // Posts.id <--> PostMeta.postId
+  models.Posts.hasMany(models.PostMeta, {
+    foreignKey: 'postId',
+    sourceKey: 'id',
+    as: 'PostMetas',
+    constraints: false,
+  });
+  models.PostMeta.belongsTo(models.Posts, { foreignKey: 'postId', targetKey: 'id', constraints: false });
+
+  // Posts.id --> TermRelationships.objectId
+  models.Posts.hasMany(models.TermRelationships, {
+    foreignKey: 'objectId',
+    sourceKey: 'id',
+    constraints: false,
+  });
 };

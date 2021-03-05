@@ -1,42 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { Sequelize, ModelCtor, Options } from 'sequelize';
+import { Sequelize, Options } from 'sequelize';
 import { configs } from '@/utils/getConfig';
 
-import Opitons from './options';
-import Users from './users';
-import UserMeta from './userMeta';
-import Posts from './posts';
-import PostMeta from './postMeta';
-import Comments from './comments';
-import CommentMeta from './commentMeta';
-import Medias from './medias';
-import MediaMeta from './mediaMeta';
-import Links from './links';
-import Terms from './terms';
-import TermMeta from './termMeta';
-import TermTaxonomy from './termTaxonomy';
-import TermRelationships from './termRelationships';
-
-export type Models = {
-  Options: ModelCtor<Opitons>;
-  Users: ModelCtor<Users>;
-  UserMeta: ModelCtor<UserMeta>;
-  Posts: ModelCtor<Posts>;
-  PostMeta: ModelCtor<PostMeta>;
-  Comments: ModelCtor<Comments>;
-  CommentMeta: ModelCtor<CommentMeta>;
-  Medias: ModelCtor<Medias>;
-  MediaMeta: ModelCtor<MediaMeta>;
-  Links: ModelCtor<Links>;
-  Terms: ModelCtor<Terms>;
-  TermMeta: ModelCtor<TermMeta>;
-  TermTaxonomy: ModelCtor<TermTaxonomy>;
-  TermRelationships: ModelCtor<TermRelationships>;
-};
-
-const basename = path.basename(__filename);
-const models: Partial<Models> = {};
 let sequelize: Sequelize;
 const sequelizeOpts: Options = {
   host: configs.get('DB_HOST'),
@@ -64,24 +30,31 @@ if (useDbVariable) {
   );
 }
 
-fs.readdirSync(__dirname)
-  .filter((file) => {
-    return file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.ts';
-  })
-  .forEach((file) => {
-    const { init, default: model } = require(path.join(__dirname, file));
-    init &&
-      (init as TableInitFn)(sequelize, {
-        prefix: tablePrefix,
-      });
-    models[model.name as keyof Models] = model;
-  });
+const models = (function initializer() {
+  const models: Partial<Models> = {};
+  const basename = path.basename(__filename);
 
-// Object.keys(models).forEach((modelName) => {
-//   if (models[modelName].associate) {
-//     models[modelName].associate(models);
-//   }
-// });
+  fs.readdirSync(__dirname)
+    .filter((file) => {
+      return file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.ts';
+    })
+    .forEach((file) => {
+      const { init, associate, default: model } = require(path.join(__dirname, file));
+      init &&
+        (init as TableInitFunc)(sequelize, {
+          prefix: tablePrefix,
+        });
+      model.associate = associate;
+      models[model.name as keyof Models] = model;
+    });
+
+  Object.values(models).forEach((model: any) => {
+    if (model.associate) {
+      model.associate(models);
+    }
+  });
+  return models as Models;
+})();
 
 export { sequelize, Sequelize };
 

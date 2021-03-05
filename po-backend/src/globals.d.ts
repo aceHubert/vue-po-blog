@@ -1,5 +1,22 @@
-import { Sequelize, Dialect } from 'sequelize';
+import { Context } from 'apollo-server-core';
+import { Sequelize, Dialect, ModelCtor } from 'sequelize';
 import { Algorithm } from 'jsonwebtoken';
+
+import { DataSources, AuthHelper, UserRole } from '@/dataSources';
+import Opitons from '@/dataSources/entities/options';
+import Users from '@/dataSources/entities/users';
+import UserMeta from '@/dataSources/entities/userMeta';
+import Posts from '@/dataSources/entities/posts';
+import PostMeta from '@/dataSources/entities/postMeta';
+import Comments from '@/dataSources/entities/comments';
+import CommentMeta from '@/dataSources/entities/commentMeta';
+import Medias from '@/dataSources/entities/medias';
+import MediaMeta from '@/dataSources/entities/mediaMeta';
+import Links from '@/dataSources/entities/links';
+import Terms from '@/dataSources/entities/terms';
+import TermMeta from '@/dataSources/entities/termMeta';
+import TermTaxonomy from '@/dataSources/entities/termTaxonomy';
+import TermRelationships from '@/dataSources/entities/termRelationships';
 
 declare global {
   export type Config = {
@@ -15,29 +32,52 @@ declare global {
     jwt_screct: string;
     jwt_algorithm: Algorithm;
     jwt_expiresIn: string | number;
+    jwt_refresh_token_expiresIn: string | number;
   };
 
-  export interface TableInitFn {
-    (sequelize: Sequelize, options: TableInitOptions): void;
-  }
+  export type Models = {
+    Options: ModelCtor<Opitons>;
+    Users: ModelCtor<Users>;
+    UserMeta: ModelCtor<UserMeta>;
+    Posts: ModelCtor<Posts>;
+    PostMeta: ModelCtor<PostMeta>;
+    Comments: ModelCtor<Comments>;
+    CommentMeta: ModelCtor<CommentMeta>;
+    Medias: ModelCtor<Medias>;
+    MediaMeta: ModelCtor<MediaMeta>;
+    Links: ModelCtor<Links>;
+    Terms: ModelCtor<Terms>;
+    TermMeta: ModelCtor<TermMeta>;
+    TermTaxonomy: ModelCtor<TermTaxonomy>;
+    TermRelationships: ModelCtor<TermRelationships>;
+  };
 
   export type TableInitOptions = {
     prefix: string;
   };
 
-  export type ContextType = {
-    token: string;
-    user?: {
-      role: string;
-    };
-  };
+  export interface TableInitFunc {
+    (sequelize: Sequelize, options: TableInitOptions): void;
+  }
+
+  export interface TableAssociateFunc {
+    (models: Models): void;
+  }
 
   export type JwtPayload = {
     id: number;
-    mobile?: string;
-    email?: string;
-    role: string;
+    loginName: string;
+    role: UserRole | null;
+    createdAt: Date;
   };
+
+  export type ContextType = Context<{
+    token: string | null;
+    user: JwtPayload | null;
+    // eslint-disable-next-line no-undef
+    authHelper: InstanceType<typeof AuthHelper>;
+    dataSources: DataSources;
+  }>;
 
   export type Dictionary<T> = Record<string, T>;
 }

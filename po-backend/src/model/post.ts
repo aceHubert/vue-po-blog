@@ -1,6 +1,6 @@
 import { Field, ObjectType, ArgsType, InputType, ID, Int } from 'type-graphql';
-import { PagedQueryArgs, PagedResponse } from './general';
-import { PostStatus, PostCommentStatus } from './enums';
+import { PostStatus, PostCommentStatus } from '@/dataSources';
+import { PagedQueryArgs, PagedResponse, Count } from './general';
 import Meta, { MetaAddModel } from './meta';
 
 // Types
@@ -18,8 +18,8 @@ export default class Post {
   @Field({ description: '内容' })
   content!: string;
 
-  @Field({ description: '摘要' })
-  excerpt!: string;
+  @Field({ nullable: true, description: '摘要' })
+  excerpt?: string;
 
   @Field((type) => PostStatus, { description: '状态' })
   status!: PostStatus;
@@ -42,13 +42,49 @@ export default class Post {
  */
 @ArgsType()
 export class PagedPostQueryArgs extends PagedQueryArgs {
-  @Field((type) => PostStatus, { nullable: true, description: '文章状态' })
+  @Field({ nullable: true, description: '搜索关键字（根据标题模糊查询）' })
+  keyword?: string;
+
+  @Field({ nullable: true, description: '文章作者' })
+  author?: number;
+
+  @Field((type) => PostStatus, { nullable: true, description: '文章状态(如果为空，则搜索状态为非 Trash 的文章)' })
   status?: PostStatus;
+
+  @Field((type) => [ID!], { nullable: true, description: '类别 Id' })
+  categoryIds?: number[];
+
+  @Field({ nullable: true, description: '日期，格式：yyyy(年)、yyyyMM(月)、yyyyMMdd(日)' })
+  date?: string;
 }
 
 @ObjectType({ description: '文章分页模型' })
 export class PagedPost extends PagedResponse(Post) {
   // other fields
+}
+
+@ObjectType({ description: '文章按状态分组数量模型' })
+export class PostStatusCount extends Count {
+  @Field((type) => PostStatus, { description: '文章状态' })
+  status!: PostStatus;
+}
+
+@ObjectType({ description: `文章按天分组数量模型` })
+export class PostDayCount extends Count {
+  @Field({ description: '日期，格式：yyyyMMdd' })
+  day!: string;
+}
+
+@ObjectType({ description: `文章按月分组数量模型` })
+export class PostMonthCount extends Count {
+  @Field({ description: '日期，格式：yyyyMM' })
+  month!: string;
+}
+
+@ObjectType({ description: `文章按年分组数量模型` })
+export class PostYearCount extends Count {
+  @Field({ description: '日期，格式：yyyy' })
+  year!: string;
 }
 
 @ObjectType({ description: '文章元数据模型' })
@@ -77,9 +113,6 @@ export class PostAddModel implements PostCreationAttributes {
   @Field({ nullable: true, description: '摘要' })
   excerpt?: string;
 
-  @Field((type) => PostStatus, { nullable: true, description: '状态' })
-  status?: PostStatus;
-
   @Field((type) => PostCommentStatus, { nullable: true, description: '评论状态' })
   commentStatus?: PostCommentStatus;
 
@@ -97,4 +130,10 @@ export class PostUpdateModel {
 
   @Field({ nullable: true, description: '摘要' })
   excerpt?: string;
+
+  @Field((type) => PostStatus, { nullable: true, description: '状态' })
+  status?: PostStatus;
+
+  @Field((type) => PostCommentStatus, { nullable: true, description: '评论状态' })
+  commentStatus?: PostCommentStatus;
 }

@@ -1,6 +1,6 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import md5 from 'md5';
-import { UserStatus } from '../../model/enums';
+import { UserStatus } from '../helper/enums';
 
 export interface UserAttributes {
   id: number;
@@ -19,6 +19,8 @@ export interface UserCreationAttributes
   extends Optional<UserAttributes, 'id' | 'niceName' | 'displayName' | 'mobile' | 'status'> {}
 
 export default class Users extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+  public static readonly associations = {};
+
   public id!: number;
   public loginName!: string;
   public loginPwd!: string;
@@ -34,7 +36,8 @@ export default class Users extends Model<UserAttributes, UserCreationAttributes>
   public readonly updatedAt!: Date;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+// 初始化
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   Users.init(
     {
       id: {
@@ -59,7 +62,8 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
       niceName: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        comment: '用户昵称',
+        unique: true,
+        comment: '友好显示在链接中等',
       },
       displayName: {
         type: DataTypes.STRING(50),
@@ -95,4 +99,16 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
       comment: '用户表',
     },
   );
+};
+
+// 关联
+export const associate: TableAssociateFunc = function associate(models) {
+  // Users.id <--> UserMeta.userId
+  models.Users.hasMany(models.UserMeta, {
+    foreignKey: 'userId',
+    sourceKey: 'id',
+    as: 'UserMetas',
+    constraints: false,
+  });
+  models.UserMeta.belongsTo(models.Users, { foreignKey: 'userId', targetKey: 'id', constraints: false });
 };

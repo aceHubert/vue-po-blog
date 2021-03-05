@@ -22,9 +22,3 @@ export abstract class MetaAddModel {
   @Field({ description: '元数据 Value' })
   metaValue!: string;
 }
-
-@InputType({ description: '元数据修改实体模型' })
-export class MetaUpdateModel {
-  @Field({ description: '元数据 Value' })
-  metaValue!: string;
-}

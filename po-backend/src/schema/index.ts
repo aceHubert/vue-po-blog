@@ -1,9 +1,9 @@
 import { buildSchemaSync } from 'type-graphql';
-import { customAuthChecker } from './customAuthChecker';
-import { registerEnums } from './registerEnums';
+
+import { authChecker } from './authChecker';
+import { enumsRegister } from './enumsRegister';
 
 // resolver
-import InitResolver from '@/controller/init';
 import OptionResolver from '@/controller/option';
 import UserResolver from '@/controller/user';
 import PostResolver from '@/controller/post';
@@ -17,11 +17,10 @@ import LinkResolver from '@/controller/link';
 import { ErrorInterceptor } from '@/middleware/errorInterceptor';
 
 // 注册enums
-registerEnums();
+enumsRegister();
 
 export const schema = buildSchemaSync({
   resolvers: [
-    InitResolver,
     OptionResolver,
     UserResolver,
     PostResolver,
@@ -32,6 +31,6 @@ export const schema = buildSchemaSync({
     LinkResolver,
   ],
   globalMiddlewares: [ErrorInterceptor],
-  authChecker: customAuthChecker,
+  authChecker,
   authMode: 'error',
 });

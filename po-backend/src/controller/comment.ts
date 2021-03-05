@@ -24,7 +24,7 @@ export default class CommentResolver extends createMetaResolver(Comment, Comment
     @Fields() fields: ResolveTree,
     @Ctx('dataSources') { comment }: DataSources,
   ) {
-    let fixFields = Object.keys(fields.fieldsByTypeName.Comment);
+    let fixFields = this.getFieldNames(fields.fieldsByTypeName.Comment);
     if (fixFields.includes('user')) {
       fixFields = ['userId'].concat(fixFields);
     }
@@ -41,7 +41,10 @@ export default class CommentResolver extends createMetaResolver(Comment, Comment
     @Fields() fields: ResolveTree,
     @Ctx('dataSources') { comment }: DataSources,
   ) {
-    return comment.getPaged(args, Object.keys(fields.fieldsByTypeName.PagedComment.rows.fieldsByTypeName.Comment));
+    return comment.getPaged(
+      args,
+      this.getFieldNames(fields.fieldsByTypeName.PagedComment.rows.fieldsByTypeName.Comment),
+    );
   }
 
   @FieldResolver((returns) => PagedComment, { description: '回复的评论（分页）' })
@@ -55,12 +58,15 @@ export default class CommentResolver extends createMetaResolver(Comment, Comment
       ...args,
       parentId,
     };
-    return comment.getPaged(fixArgs, Object.keys(fields.fieldsByTypeName.PagedComment.rows.fieldsByTypeName.Comment));
+    return comment.getPaged(
+      fixArgs,
+      this.getFieldNames(fields.fieldsByTypeName.PagedComment.rows.fieldsByTypeName.Comment),
+    );
   }
 
   @FieldResolver((returns) => User, { nullable: true, description: '评论用户' })
   user(@Root('userId') userId: number, @Fields() fields: ResolveTree, @Ctx('dataSources') { user }: DataSources) {
-    return user.get(userId, Object.keys(fields.fieldsByTypeName.User));
+    return user.get(userId, this.getFieldNames(fields.fieldsByTypeName.User));
   }
 
   @Mutation((returns) => Comment, {

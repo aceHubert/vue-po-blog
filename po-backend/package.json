@@ -7,7 +7,7 @@
   "main": "index.js",
   "typeings": "types/index.d.ts",
   "scripts": {
-    "dev": "nodemon",
+    "serve": "nodemon",
     "start": "node dist/index.js",
     "build": "rimraf ./dist && tsc",
     "tsc": "tsc"
@@ -25,12 +25,14 @@
     "@vue-async/utils": "^1.1.0",
     "apollo-datasource-rest": "^0.9.3",
     "apollo-server-express": "^2.16.1",
+    "body-parser": "^1.19.0",
     "class-validator": "^0.12.2",
     "express-jwt": "^6.0.0",
     "graphql": "^15.1.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
     "md5": "^2.3.0",
+    "moment": "^2.29.1",
     "mysql2": "^2.2.5",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.3.5",
@@ -39,7 +41,6 @@
   "devDependencies": {
     "@types/express": "^4.16.1",
     "@types/express-graphql": "^0.6.2",
-    "@types/express-jwt": "^6.0.0",
     "@types/graphql": "^14.0.7",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash": "^4.14.155",

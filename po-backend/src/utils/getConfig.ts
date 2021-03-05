@@ -12,7 +12,7 @@ class ReadConfigs {
   }
 
   protected initialize() {
-    const configFromFile: Partial<Config> = (() => {
+    const configFromFile: Partial<{ backend: Config }> = (() => {
       try {
         fs.accessSync(this.configPath, fs.constants.R_OK);
         return require(this.configPath);
@@ -40,9 +40,10 @@ class ReadConfigs {
           table_prefix: 'po_',
           jwt_screct: 'e83a8c67-3df0-4feb-8d90-09a354b23b1f',
           jwt_algorithm: 'HS256',
-          jwt_expiresIn: '2h',
+          jwt_expiresIn: '30m',
+          jwt_refresh_token_expiresIn: '15d',
         },
-        configFromFile,
+        configFromFile.backend,
       ),
     );
   }

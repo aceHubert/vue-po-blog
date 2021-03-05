@@ -1,8 +1,8 @@
-import { Field, ObjectType, ArgsType, InputType, ID } from 'type-graphql';
+import { Field, ObjectType, ArgsType, InputType, ID, createUnionType, Authorized } from 'type-graphql';
 import { Length, MinLength, IsEmail } from 'class-validator';
-import { PagedQueryArgs, PagedResponse } from './general';
+import { UserStatus, UserRole, UserRoleWithNone } from '@/dataSources';
+import { PagedQueryArgs, PagedResponse, Count } from './general';
 import Meta, { MetaAddModel } from './meta';
-import { UserStatus } from './enums';
 
 // Types
 import { UserCreationAttributes } from '@/dataSources/entities/users';
@@ -13,6 +13,7 @@ export default class User {
   @Field((type) => ID, { description: 'Id' })
   id!: number;
 
+  @Authorized(UserRole.Administrator)
   @Field({ description: '登录名' })
   loginName!: string;
 
@@ -31,6 +32,7 @@ export default class User {
   @Field({ description: '注册时客户端的 URL' })
   url!: string;
 
+  @Authorized(UserRole.Administrator)
   @Field((type) => UserStatus, { description: '用户状态' })
   status!: UserStatus;
 
@@ -41,18 +43,45 @@ export default class User {
   createdAt!: Date;
 }
 
+@ObjectType({ description: '用户模型(包含角色)' })
+export class UserWithRole extends User {
+  @Field((type) => UserRoleWithNone, { nullable: true, description: '用户角色(包含 None)' })
+  role!: UserRoleWithNone;
+}
+
 /**
  * 用户查询分页参数
  */
 @ArgsType()
 export class PagedUserQueryArgs extends PagedQueryArgs {
-  @Field((type) => UserStatus, { defaultValue: UserStatus.Enable, description: '用户状态' })
+  @Field({ nullable: true, description: '搜索关键字（根据登录名模糊查询）' })
+  keyword?: string;
+
+  @Field((type) => UserStatus, { nullable: true, description: '用户状态' })
   status!: UserStatus;
+
+  @Field((type) => UserRoleWithNone, {
+    nullable: true,
+    description: '用户角色（如果为空，则查询有角色（即非 None 的）的用户）',
+  })
+  role?: UserRoleWithNone;
 }
 
 @ObjectType({ description: '用户分页模型' })
-export class PagedUser extends PagedResponse(User) {
+export class PagedUser extends PagedResponse(UserWithRole) {
   // other fields
+}
+
+@ObjectType({ description: `用户按状态分组数量模型` })
+export class UserStatusCount extends Count {
+  @Field((type) => UserStatus, { description: '状态' })
+  status!: UserStatus;
+}
+
+@ObjectType({ description: `用户按角色分组数量模型` })
+export class UserRoleCount extends Count {
+  @Field((type) => UserRoleWithNone, { description: '角色' })
+  role!: UserRoleWithNone;
 }
 
 @ObjectType({ description: '用户元数据模型' })
@@ -94,10 +123,10 @@ export class UserAddModel implements UserCreationAttributes {
   url!: string;
 
   @Field(() => UserStatus, { defaultValue: UserStatus.Enable, description: '状态' })
-  status?: UserStatus;
+  status!: UserStatus;
 
-  @Field((type) => [MetaAddModel], { nullable: true, description: '页面元数据' })
-  metas?: MetaAddModel[];
+  @Field(() => UserRole, { defaultValue: UserRole.Subscriber, description: '角色' })
+  role!: UserRole;
 }
 
 @InputType({ description: '用户修改模型' })
@@ -117,12 +146,58 @@ export class UserUpdateModel {
   email!: string;
 }
 
-@InputType({ description: '用户登录模型' })
-export class UserLoginModel {
-  @Field({ description: '登录名' })
-  loginName!: string;
-
-  @Field({ description: '登录密码' })
-  @MinLength(6, { message: '最小长度不得小于6位' })
-  loginPwd!: string;
+@ObjectType({ description: '返回是否成功' })
+abstract class IsSuccessResponse<S extends boolean> {
+  @Field({ description: '登录是否成功' })
+  success!: S;
 }
+
+@ObjectType({ description: '用户登录成功返回模型' })
+class UserLoginSuccessResponse extends IsSuccessResponse<true> {
+  @Field({ description: 'Token' })
+  token!: string;
+}
+
+@ObjectType({ description: '用户登录失败返回模型' })
+class UserLoginFailedResponse extends IsSuccessResponse<false> {
+  @Field({ description: 'Message' })
+  message!: string;
+}
+
+export const UserLoginUnionResponse = createUnionType({
+  name: 'UserLoginUnionType',
+  description: '用户登录返回模型',
+  types: () => [UserLoginSuccessResponse, UserLoginFailedResponse] as const,
+  resolveType: (value) => {
+    if (value.success) {
+      return UserLoginSuccessResponse;
+    } else {
+      return UserLoginFailedResponse;
+    }
+  },
+});
+
+@ObjectType({ description: '用户登录成功返回模型' })
+class RefreshTokenSuccessResponse extends IsSuccessResponse<true> {
+  @Field({ description: 'Token' })
+  token!: string;
+}
+
+@ObjectType({ description: '用户登录失败返回模型' })
+class RefreshTokenFailedResponse extends IsSuccessResponse<false> {
+  @Field({ description: 'Message' })
+  message!: string;
+}
+
+export const RefreshTokenUnionResponse = createUnionType({
+  name: 'RefreshTokenUnionType',
+  description: '更新 Token 返回模型',
+  types: () => [RefreshTokenSuccessResponse, RefreshTokenFailedResponse] as const,
+  resolveType: (value) => {
+    if (value.success) {
+      return RefreshTokenSuccessResponse;
+    } else {
+      return RefreshTokenFailedResponse;
+    }
+  },
+});

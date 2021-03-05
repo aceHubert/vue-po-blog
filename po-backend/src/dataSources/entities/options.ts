@@ -1,5 +1,5 @@
 import { Model, DataTypes, Optional } from 'sequelize';
-import { OptionAutoload } from '@/model/enums';
+import { OptionAutoload } from '../helper/enums';
 
 export interface OptionAttributes {
   id: number;
@@ -18,7 +18,7 @@ export default class Options extends Model<OptionAttributes, OptionCreationAttri
   public autoload!: OptionAutoload;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   Options.init(
     {
       id: {
@@ -41,7 +41,7 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: 'yes',
-        comment: '是否应用启动自动加载, yes：是；no：否',
+        comment: '是否自动加载, yes：是；no：否;',
       },
     },
     {

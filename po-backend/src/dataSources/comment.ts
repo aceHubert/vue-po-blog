@@ -39,7 +39,7 @@ export default class CommentDataSource extends MetaDataSource<CommentMeta, Comme
       },
       offset,
       limit,
-      order: [['created_at', 'DESC']],
+      order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
       rows,
       total,

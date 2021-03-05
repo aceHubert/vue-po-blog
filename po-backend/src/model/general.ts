@@ -46,3 +46,9 @@ export function PagedResponse<TItemsFieldValue>(
   }
   return PagedClass;
 }
+
+@ObjectType({ isAbstract: true, description: '分组数量模型' })
+export abstract class Count {
+  @Field((type) => Int, { description: '分组数量' })
+  count!: number;
+}

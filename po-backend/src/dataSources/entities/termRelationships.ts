@@ -15,7 +15,7 @@ export default class TermRelationships extends Model<TermRelationshipAttributes,
   public order!: number;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   TermRelationships.init(
     {
       objectId: {

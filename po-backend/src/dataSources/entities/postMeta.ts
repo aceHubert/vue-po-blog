@@ -5,19 +5,21 @@ export interface PostMetaAttributes {
   postId: number;
   metaKey: string;
   metaValue: string;
+  private: 'yes' | 'no';
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostMetaCreationAttributes extends Optional<PostMetaAttributes, 'id'> {}
+export interface PostMetaCreationAttributes extends Optional<PostMetaAttributes, 'id' | 'private'> {}
 
 export default class PostMeta extends Model<PostMetaAttributes, PostMetaCreationAttributes> {
   public id!: number;
   public postId!: number;
   public metaKey!: string;
   public metaValue!: string;
+  public private!: string;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   PostMeta.init(
     {
       id: {
@@ -40,6 +42,12 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
         type: new DataTypes.TEXT('long'),
         allowNull: false,
         comment: '元数据Value',
+      },
+      private: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: 'no',
+        comment: '私有 Meta 不可返回给前端, yes：是；no：否; ',
       },
     },
     {

@@ -20,7 +20,7 @@ export default class MediaDataSource extends MetaDataSource<MediaMeta, MediaMeta
       },
       offset,
       limit,
-      order: [['created_at', 'DESC']],
+      order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
       rows,
       total,

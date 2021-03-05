@@ -1,6 +1,6 @@
 import { Field, ObjectType, ArgsType, InputType, ID } from 'type-graphql';
+import { CommentType } from '@/dataSources';
 import { PagedQueryArgs, PagedResponse } from './general';
-import { CommentType } from './enums';
 import Meta, { MetaAddModel } from './meta';
 
 // Types

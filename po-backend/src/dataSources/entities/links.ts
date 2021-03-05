@@ -1,5 +1,5 @@
 import { Model, DataTypes, Optional } from 'sequelize';
-import { LinkTarget, LinkVisible } from '../../model/enums';
+import { LinkTarget, LinkVisible } from '../helper/enums';
 
 export interface LinkAttributes {
   id: number;
@@ -30,7 +30,7 @@ export default class Links extends Model<LinkAttributes, LinkCreationAttributes>
   public rss?: string;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   Links.init(
     {
       id: {
@@ -95,4 +95,14 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
       comment: '外部链接表',
     },
   );
+};
+
+// 关联
+export const associate: TableAssociateFunc = function associate(models) {
+  // Links.id <--> TermRelationships.objectId
+  models.Links.hasMany(models.TermRelationships, {
+    foreignKey: 'objectId',
+    sourceKey: 'id',
+    constraints: false,
+  });
 };

@@ -26,7 +26,7 @@ export default class Medias extends Model<MediaAttributes, MediaCreationAttribut
   public readonly createdAt!: Date;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   Medias.init(
     {
       id: {
@@ -78,4 +78,16 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
       comment: '媒体表',
     },
   );
+};
+
+// 关联
+export const associate: TableAssociateFunc = function associate(models) {
+  // Medias.id <--> MediaMeta.mediaId
+  models.Medias.hasMany(models.MediaMeta, {
+    foreignKey: 'mediaId',
+    sourceKey: 'id',
+    as: 'MediaMetas',
+    constraints: false,
+  });
+  models.MediaMeta.belongsTo(models.Medias, { foreignKey: 'mediaId', targetKey: 'id', constraints: false });
 };

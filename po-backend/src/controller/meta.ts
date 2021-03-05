@@ -1,13 +1,15 @@
 /**
- * DataSources 必须有 getMetas/createMeta 方法
+ * DataSources 必须有 getMetas/createMeta/updateMeta/updateMetaByKey/deleteMeta 方法
  */
 import { Resolver, FieldResolver, Query, Mutation, ClassType, Ctx, Root, Arg, ID } from 'type-graphql';
 import { lowerFirst } from 'lodash';
+import { RuntimeError } from '@/utils/errors';
+import BaseResolver from './base';
 
 // Types
 import { Fields, ResolveTree } from '@/utils/fieldsDecorators';
 import { DataSources } from '@/dataSources';
-import Meta, { MetaUpdateModel } from '@/model/meta';
+import Meta from '@/model/meta';
 
 export type Options = {
   /** DataSources Key, 默认值为 rootTypeClass.name */
@@ -23,7 +25,7 @@ export function createMetaResolver<MetaModelType, MetaAddModelType>(
   { dataSourceKey, name }: Options = {},
 ) {
   @Resolver((returns) => rootTypeClass, { isAbstract: true })
-  abstract class MetaResolver {
+  abstract class MetaResolver extends BaseResolver {
     /**
      * objectTypeClass.name 必须和 DataSources 中保持一致
      * @param dataSources
@@ -31,7 +33,7 @@ export function createMetaResolver<MetaModelType, MetaAddModelType>(
     protected getDataSource(dataSources: DataSources) {
       const name = dataSourceKey || (lowerFirst(rootTypeClass.name) as keyof DataSources);
       if (dataSources[name] === null) {
-        throw new Error(`Can not found the DataSource from name ${name}`);
+        throw new RuntimeError(`Could not found the DataSource from name ${name}`);
       }
       return dataSources[name] as any;
     }
@@ -42,7 +44,7 @@ export function createMetaResolver<MetaModelType, MetaAddModelType>(
     })
     getMetas(
       @Arg(`${lowerFirst(rootTypeClass.name)}Id`, (type) => ID, { description: `${rootTypeClass.name} Id` })
-      rootId: string,
+      modelId: string,
       @Arg('metaKeys', (type) => [String!], { nullable: true, description: 'Meta keys' })
       metaKeys: string[] | undefined,
       @Fields() fields: ResolveTree,
@@ -50,7 +52,7 @@ export function createMetaResolver<MetaModelType, MetaAddModelType>(
     ) {
       const ds = this.getDataSource(dataSources);
       if (ds.getMetas) {
-        return ds.getMetas(rootId, metaKeys, Object.keys(fields.fieldsByTypeName[metaTypeClass.name]));
+        return ds.getMetas(modelId, metaKeys, this.getFieldNames(fields.fieldsByTypeName[metaTypeClass.name]));
       } else {
         return [];
       }
@@ -58,7 +60,7 @@ export function createMetaResolver<MetaModelType, MetaAddModelType>(
 
     @FieldResolver((returns) => [Meta], { description: `${name || rootTypeClass.name} 元数据` })
     metas(
-      @Root('id') rootId: number,
+      @Root('id') modelId: number,
       @Arg('metaKeys', (type) => [String!], { nullable: true, description: 'Meta keys' })
       metaKeys: string[] | undefined,
       @Fields() fields: ResolveTree,
@@ -66,7 +68,7 @@ export function createMetaResolver<MetaModelType, MetaAddModelType>(
     ) {
       const ds = this.getDataSource(dataSources);
       if (ds.getMetas) {
-        return ds.getMetas(rootId, metaKeys, Object.keys(fields.fieldsByTypeName.Meta));
+        return ds.getMetas(modelId, metaKeys, this.getFieldNames(fields.fieldsByTypeName.Meta));
       } else {
         return [];
       }
@@ -91,16 +93,36 @@ export function createMetaResolver<MetaModelType, MetaAddModelType>(
 
     @Mutation((returns) => Boolean, {
       name: `update${rootTypeClass.name}Meta`,
-      description: `删除 ${name || rootTypeClass.name} 元数据`,
+      description: `修改 ${name || rootTypeClass.name} 元数据`,
     })
     updateMeta(
       @Arg('id', (type) => ID, { description: `${name || rootTypeClass.name} 元数据Id` }) id: number,
-      @Arg('model', (type) => MetaUpdateModel) model: MetaUpdateModel,
+      @Arg('metaValue') metaValue: string,
       @Ctx('dataSources') dataSources: DataSources,
     ) {
       const ds = this.getDataSource(dataSources);
       if (ds && ds.updateMeta) {
-        return ds.updateMeta(id, model);
+        return ds.updateMeta(id, metaValue);
+      } else {
+        return false;
+      }
+    }
+
+    @Mutation((returns) => Boolean, {
+      name: `update${rootTypeClass.name}MetaByKey`,
+      description: `修改 ${name || rootTypeClass.name} 元数据`,
+    })
+    updateMetaByKey(
+      @Arg(`${lowerFirst(rootTypeClass.name)}Id`, (type) => ID, { description: `${rootTypeClass.name} Id` })
+      modelId: string,
+      @Arg('metaKey', (type) => String, { description: 'Meta key' }) metaKey: string,
+      @Arg('metaValue') metaValue: string,
+      @Ctx('dataSources')
+      dataSources: DataSources,
+    ) {
+      const ds = this.getDataSource(dataSources);
+      if (ds && ds.updateMetaByKey) {
+        return ds.updateMetaByKey(modelId, metaKey, metaValue);
       } else {
         return false;
       }

@@ -1,7 +1,13 @@
 import { MetaDataSource } from './meta';
 
 // Types
-import { TermQueryArgs, TermAddModel, TermRelationshipAddModel, TermMetaAddModel } from '@/model/term';
+import {
+  TermQueryArgs,
+  TermAddModel,
+  TermRelationshipQueryArgs,
+  TermRelationshipAddModel,
+  TermMetaAddModel,
+} from '@/model/term';
 import Term, { TermCreationAttributes } from './entities/terms';
 import TermMeta, { TermMetaCreationAttributes } from './entities/termMeta';
 import TermTaxonomy, { TermTaxonomyCreationAttributes } from './entities/termTaxonomy';
@@ -20,48 +26,108 @@ export default class TermDataSource extends MetaDataSource<TermMeta, TermMetaAdd
   }
 
   /**
-   * 获取协议列表（包含 taxonomy）
+   * 获取协议列表(级联查询)
+   * 包含 taxonomy, Term.id => termId,TermTaxonomy.id => taxonomyId;
+   * Term.group, TermTaxonomy.id, TermTaxonomy.taxonomy 会强制查询，可用于级联条件调用;
    * @param query 过滤的字段
    * @param fields 返回的字段
    */
-  async getList(
+  getList(
     query: TermQueryArgs,
     fields: string[],
-  ): Promise<Array<Term & Omit<TermTaxonomy, 'id' | 'termId' | 'parentId'>>> {
-    const { group, ...rest } = query;
-    return await this.models.Terms.findAll({
-      attributes: this.filterFields(fields, this.models.Terms),
+  ): Promise<Array<Omit<Term, 'id'> & Omit<TermTaxonomy, 'id'> & { taxonomyId: number }>> {
+    fields = fields.filter((field) => field !== 'id'); // 排除 id, 在下面独自处理添加(两个表共有字段)
+
+    return this.models.TermTaxonomy.findAll({
+      attributes: this.filterFields(fields, this.models.TermTaxonomy).concat(['id', 'taxonomy']), // id, taxonomy 必须，用于级联子查询
       include: [
         {
-          association: Term.belongsTo(TermTaxonomy, { foreignKey: 'id', targetKey: 'termId' }),
-          as: 'TermTaxonomy',
-          attributes: this.filterFields(fields, this.models.TermTaxonomy).filter(
-            (key) => !['id', 'termId', 'parentId'].includes(key),
-          ), // 排除 id
+          model: this.models.Terms,
+          // association: this.models.TermTaxonomy.hasOne(this.models.Terms, {
+          //   foreignKey: 'id',
+          //   sourceKey: 'termId',
+          //   // as: 'Term',
+          // }),
+          attributes: this.filterFields(fields, this.models.Terms).concat(['group']), // group 必须，用于级联子查询
           where: {
-            ...rest,
+            ...(query.group ? { group: query.group } : {}),
           },
         },
       ],
       where: {
-        group,
+        parentId: query.parentId,
+        taxonomy: query.taxonomy,
       },
-    }).then((values) => {
-      return values.map((term) => {
-        const { TermTaxonomy = {}, ...rest } = term.toJSON() as any;
+    }).then((values) =>
+      values.map((term) => {
+        const { Term, id: taxonomyId, ...rest } = term.toJSON() as any;
+        return {
+          taxonomyId,
+          ...rest,
+          ...Term,
+        };
+      }),
+    );
+  }
+
+  /**
+   * 获取协议关系列表
+   * @param objectId 对象ID
+   * @param fields 返回的字段
+   */
+  getRelationships(
+    query: TermRelationshipQueryArgs,
+    fields: string[],
+  ): Promise<Array<Omit<Term, 'id'> & Omit<TermTaxonomy, 'id'> & TermRelationship>> {
+    fields = fields.filter((field) => field !== 'id'); // 排除 id, 在下面独自处理添加(两个表共有字段)
+
+    return this.models.TermTaxonomy.findAll({
+      attributes: this.filterFields(fields, this.models.TermTaxonomy),
+      include: [
+        {
+          model: this.models.Terms,
+          // association: this.models.TermTaxonomy.hasOne(this.models.Terms, {
+          //   foreignKey: 'id',
+          //   sourceKey: 'termId',
+          //   // as: 'Term',
+          // }),
+          attributes: this.filterFields(fields, this.models.Terms),
+          required: true,
+        },
+        {
+          association: this.models.TermTaxonomy.belongsTo(this.models.TermRelationships, {
+            foreignKey: 'id',
+            targetKey: 'taxonomyId',
+            // as: 'TermRelationship',
+          }),
+          attributes: this.filterFields(fields, this.models.TermRelationships),
+          where: {
+            objectId: query.objectId,
+          },
+        },
+      ],
+      where: {
+        taxonomy: query.taxonomy,
+      },
+    }).then((values) =>
+      values.map((term) => {
+        const { Term, TermRelationship, ...rest } = term.toJSON() as any;
         return {
           ...rest,
-          ...TermTaxonomy,
-        } as Term & Omit<TermTaxonomy, 'id' | 'termId' | 'parentId'>;
-      });
-    });
+          ...Term,
+          ...TermRelationship,
+        };
+      }),
+    );
   }
 
   /**
    * 新建协议
    * @param model 新建协议实体
    */
-  async create(model: TermAddModel) {
+  async create(
+    model: TermAddModel,
+  ): Promise<Array<Omit<Term, 'id'> & Omit<TermTaxonomy, 'id'> & { taxonomyId: number }>> {
     const t = await this.sequelize.transaction();
     const { name, slug, taxonomy, group, metas } = model;
     try {
@@ -88,13 +154,30 @@ export default class TermDataSource extends MetaDataSource<TermMeta, TermMetaAdd
         description: '',
       };
 
-      await this.models.TermTaxonomy.create(termTaxonomyCreationModle, { transaction: t });
+      const termTaxonomy = await this.models.TermTaxonomy.create(termTaxonomyCreationModle, { transaction: t });
 
-      t.commit();
-      return term;
+      // 如提供，则会自动绑定关系
+      if (model.objectId) {
+        await this.createRelationship({
+          objectId: model.objectId,
+          taxonomyId: termTaxonomy.id,
+        });
+      }
+
+      await t.commit();
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: termId, ...termRest } = term.toJSON() as any;
+      const { id: taxonomyId, ...taxonomyRest } = termTaxonomy.toJSON() as any;
+
+      return {
+        taxonomyId,
+        ...termRest,
+        ...taxonomyRest,
+      };
     } catch (err) {
-      t.rollback();
-      return null;
+      await t.rollback();
+      throw err;
     }
   }
 
@@ -112,8 +195,40 @@ export default class TermDataSource extends MetaDataSource<TermMeta, TermMetaAdd
       })) > 0;
 
     if (!isExists) {
+      // 数量 +1
+      await this.models.TermTaxonomy.increment('count', {
+        where: {
+          id: model.taxonomyId,
+        },
+      });
       return await this.models.TermRelationships.create(model);
     }
     return null;
+  }
+
+  /**
+   * 删除协议关系
+   * @param objectId
+   * @param taxonomyId
+   */
+  async deleteRelationship(objectId: number, taxonomyId: number): Promise<boolean> {
+    const count = await this.models.TermRelationships.destroy({
+      where: {
+        objectId,
+        taxonomyId,
+      },
+    });
+
+    if (count > 0) {
+      // 数量 -1
+      await this.models.TermTaxonomy.increment('count', {
+        where: {
+          id: taxonomyId,
+        },
+        by: 0 - count,
+      });
+      return true;
+    }
+    return false;
   }
 }

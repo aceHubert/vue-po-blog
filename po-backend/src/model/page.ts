@@ -1,6 +1,6 @@
 import { Field, ObjectType, ArgsType, InputType, ID } from 'type-graphql';
+import { PostStatus } from '@/dataSources';
 import { PagedQueryArgs, PagedResponse } from './general';
-import { PostStatus } from './enums';
 import Meta, { MetaAddModel } from './meta';
 
 // Types
@@ -27,8 +27,17 @@ export default class Page {
  */
 @ArgsType()
 export class PagedPageQueryArgs extends PagedQueryArgs {
-  @Field((type) => PostStatus, { nullable: true, description: '文章状态' })
+  @Field({ nullable: true, description: '搜索关键字（根据标题模糊查询）' })
+  keyword?: string;
+
+  @Field({ nullable: true, description: '文章作者' })
+  author?: number;
+
+  @Field((type) => PostStatus, { nullable: true, description: '页面状态' })
   status?: PostStatus;
+
+  @Field({ nullable: true, description: '日期，格式：yyyy-MM' })
+  date?: string;
 }
 
 @ObjectType({ description: '页面分页模型' })
@@ -59,9 +68,6 @@ export class PageAddModel implements PostCreationAttributes {
   @Field({ description: '内容' })
   public content!: string;
 
-  @Field((type) => PostStatus, { nullable: true, description: '状态' })
-  public status?: PostStatus;
-
   @Field((type) => [MetaAddModel], { nullable: true, description: '页面元数据' })
   public metas?: MetaAddModel[];
 }
@@ -73,4 +79,7 @@ export class PageUpdateModel {
 
   @Field({ description: '内容' })
   content!: string;
+
+  @Field((type) => PostStatus, { nullable: true, description: '状态' })
+  status?: PostStatus;
 }

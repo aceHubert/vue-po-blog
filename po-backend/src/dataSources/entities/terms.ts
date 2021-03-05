@@ -17,7 +17,7 @@ export default class Terms extends Model<TermAttributes, TermCreationAttributes>
   public group!: number;
 }
 
-export const init: TableInitFn = function init(sequelize, { prefix }) {
+export const init: TableInitFunc = function init(sequelize, { prefix }) {
   Terms.init(
     {
       id: {
@@ -54,4 +54,24 @@ export const init: TableInitFn = function init(sequelize, { prefix }) {
       comment: '协议表',
     },
   );
+};
+
+// 关联
+export const associate: TableAssociateFunc = function associate(models) {
+  // Terms.id <--> TermMeta.termId
+  models.Terms.hasMany(models.TermMeta, {
+    foreignKey: 'termId',
+    sourceKey: 'id',
+    as: 'TermMetas',
+    constraints: false,
+  });
+  models.TermMeta.belongsTo(models.Terms, { foreignKey: 'termId', targetKey: 'id', constraints: false });
+
+  // Terms.id <--> TermTaxonomy.termId
+  models.Terms.hasOne(models.TermTaxonomy, {
+    foreignKey: 'termId',
+    sourceKey: 'id',
+    constraints: false,
+  });
+  models.TermTaxonomy.belongsTo(models.Terms, { foreignKey: 'termId', targetKey: 'id', constraints: false });
 };
