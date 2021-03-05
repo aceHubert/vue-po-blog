@@ -33,6 +33,7 @@ class ReadConfigs {
           DB_USER: '',
           DB_PASSWORD: '',
           DB_HOST: '127.0.0.1',
+          DB_PORT: undefined,
           DB_DIALECT: 'mysql',
           DB_CHARSET: 'utf8',
           DB_COLLATE: '',

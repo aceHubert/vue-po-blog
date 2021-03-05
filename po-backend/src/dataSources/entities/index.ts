@@ -6,6 +6,7 @@ import { configs } from '@/utils/getConfig';
 let sequelize: Sequelize;
 const sequelizeOpts: Options = {
   host: configs.get('DB_HOST'),
+  port: configs.get('DB_PORT'),
   dialect: configs.get('DB_DIALECT'),
   define: {
     freezeTableName: true,

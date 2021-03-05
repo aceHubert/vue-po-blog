@@ -2,6 +2,7 @@
  * 默认根据子类名查找实体及字段 Id
  * 如子类名为 PostDataSource, 则会查找 PostMeta 模型 及 postId 字段
  * 如需要指定模型及字段名，可在子类中进行修改
+ * metaKey 不可以同时存在带有前缀的参数，如：po_locale 和 locale, 根据metaKey 修改的时候会被同时修改
  */
 import { SequelizeDataSource } from './sequelizeDataSource';
 import { lowerFirst } from 'lodash';
@@ -35,9 +36,9 @@ export abstract class MetaDataSource<
 
   /**
    * 获取元数据
-   * 同时也会匹配 metaKey 加上 table 前缀的参数
+   * 如果 metaKeys 为空或长度为0，则会返回所有非 private 的数据
    * @param modelId 实体 Id
-   * @param metaKeys 过滤的字段
+   * @param metaKeys 过滤的字段(不需要添加 table 前缀，会自动匹配到带有前缀的数据)
    * @param fields 返回字段
    */
   getMetas(modelId: number, metaKeys: string[] | undefined, fields: string[]): Promise<MetaModelType[]> {
@@ -45,8 +46,8 @@ export abstract class MetaDataSource<
       ?.findAll({
         attributes: this.filterFields(fields, this.metaModel),
         where: {
-          [this.metaModelIdFieldName]: modelId,
           private: 'no',
+          [this.metaModelIdFieldName]: modelId,
           ...(metaKeys && metaKeys.length
             ? {
                 metaKey: {
@@ -76,8 +77,8 @@ export abstract class MetaDataSource<
   /**
    * 判断元数据是否在在
    * 同时也会匹配 metaKey 加上 table 前缀的参数
-   * @param modelId  Model Id
-   * @param metaKey  Meta key
+   * @param modelId  model Id
+   * @param metaKey  meta key
    */
   async isMetaExists(modelId: number, metaKey: string): Promise<boolean> {
     return (
@@ -93,7 +94,7 @@ export abstract class MetaDataSource<
   }
 
   /**
-   * 创建元数据（例如PostMeta 下 同一 postId 下有相同的 metaKey, 则直接返回数据。）
+   * 创建元数据
    * @param model 元数据实体
    */
   async createMeta(model: MetaAddModelType): Promise<MetaModelType | false> {
@@ -123,8 +124,7 @@ export abstract class MetaDataSource<
   }
 
   /**
-   * 根据实体ID与key 修改元数据
-   * metaKey 必须要写全（如带有table前缀），或使用 id 修改
+   * 根据实体 id 与 metaKey 修改元数据
    * @param modelId 实体 Id
    * @param metaKey meta key
    * @param metaValue meta value
@@ -138,7 +138,9 @@ export abstract class MetaDataSource<
         {
           where: {
             [this.metaModelIdFieldName]: modelId,
-            metaKey,
+            metaKey: {
+              [this.Op.or]: [metaKey, `${this.tablePrefix}${metaKey}`],
+            },
           },
         },
       )
