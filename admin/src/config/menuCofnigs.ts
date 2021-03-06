@@ -1,7 +1,7 @@
 /**
  * 默认左侧菜单配置
  */
-import { dashboard, page, article, theme, plugin, setting } from '@/assets/icons';
+import { dashboard, article, theme, plugin, setting } from '@/assets/icons';
 
 // Types
 import { Menu } from 'types/functions';
@@ -55,21 +55,21 @@ export function getDefaultMenus(): Menu[] {
     //     },
     //   ],
     // },
-    {
-      name: 'pages',
-      title: 'menu.page.root',
-      icon: page,
-      children: [
-        {
-          name: 'pages',
-          title: 'menu.page.pages',
-        },
-        {
-          name: 'pages-create',
-          title: 'menu.page.create',
-        },
-      ],
-    },
+    // {
+    //   name: 'pages',
+    //   title: 'menu.page.root',
+    //   icon: page,
+    //   children: [
+    //     {
+    //       name: 'pages',
+    //       title: 'menu.page.pages',
+    //     },
+    //     {
+    //       name: 'pages-create',
+    //       title: 'menu.page.create',
+    //     },
+    //   ],
+    // },
     {
       name: 'themes',
       title: 'menu.theme.root',

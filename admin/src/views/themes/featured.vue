@@ -25,12 +25,17 @@
                   <span>{{ item.updateTime | timeFromNow }}</span>
                   <span v-if="item.status"> 已安装 </span>
                   <span v-else>
-                    <a-popconfirm title="确认安装此主题吗?" @confirm="downloadPlugin(item.pluginId)" okText="安装" cancelText="取消">
+                    <a-popconfirm
+                      title="确认安装此主题吗?"
+                      @confirm="downloadPlugin(item.pluginId)"
+                      okText="安装"
+                      cancelText="取消"
+                    >
                       安装
                     </a-popconfirm>
                   </span>
                   <div class="avatarList">
-                    <a-tooltip v-if="item.userName !== ''">
+                    <a-tooltip>
                       <template slot="title">{{ item.userName }}</template>
                       <a-avatar :src="item.avatar" />
                     </a-tooltip>
@@ -63,6 +68,7 @@ export default {
     return {
       visible: false,
       rows: [],
+      installeds: [],
       loading: false,
     };
   },
@@ -70,6 +76,7 @@ export default {
     Ellipsis,
   },
   created() {
+    this.getInstalledPluginList();
     this.getList();
   },
   methods: {
@@ -82,8 +89,17 @@ export default {
     getList(keyword) {
       this.loading = true;
       pluginApi.getList({ pluginType: 1, keyword: keyword }).then((res) => {
-        console.log(res);
-        this.rows = res.rows;
+        const { rows } = res;
+
+        rows.forEach((item, index, arr) => {
+          if (this.installeds.indexOf(item.pluginId) !== -1) {
+            item['status'] = true;
+          } else {
+            item['status'] = false;
+          }
+        });
+
+        this.rows = rows;
         this.loading = false;
       });
     },
@@ -101,6 +117,12 @@ export default {
     },
     onSearch(keyword) {
       this.getList(keyword);
+    },
+    getInstalledPluginList() {
+      pluginApi.getPluginIdList().then((rows) => {
+        this.installeds = rows
+        this.loading = false;
+      });
     },
   },
 };
