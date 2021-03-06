@@ -25,7 +25,9 @@
                   <span>{{ item.updateTime | timeFromNow }}</span>
                   <span v-if="item.status"> 已安装 </span>
                   <span v-else>
-                    <a-popconfirm title="确认安装此主题吗?" @confirm="confirm(item)"> 安装 </a-popconfirm>
+                    <a-popconfirm title="确认安装此主题吗?" @confirm="downloadPlugin(item.pluginId)" okText="安装" cancelText="取消">
+                      安装
+                    </a-popconfirm>
                   </span>
                   <div class="avatarList">
                     <a-tooltip v-if="item.userName !== ''">

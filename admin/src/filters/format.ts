@@ -13,7 +13,7 @@ export const dateFormat = function (value: moment.MomentInput, pattern = 'YYYY-M
   return value ? moment(value).format(pattern) : '';
 };
 
-
 export const timeFromNow = function (value: moment.MomentInput, pattern = 'YYYY-MM-DD HH:mm:ss') {
+  moment.locale('zh-cn')
   return value ? moment(value).fromNow() : '';
 };

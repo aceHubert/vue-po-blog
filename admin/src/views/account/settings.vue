@@ -16,6 +16,9 @@
             <a-menu-item key="/account/settings/password">
               <NuxtLink :to="'/account/settings/password'"> 修改密码 </NuxtLink>
             </a-menu-item>
+            <a-menu-item key="/account/settings/theme-color">
+              <NuxtLink :to="'/account/settings/theme-color'"> 主题颜色 </NuxtLink>
+            </a-menu-item>
           </a-menu>
         </div>
         <div class="account-settings-info-right">

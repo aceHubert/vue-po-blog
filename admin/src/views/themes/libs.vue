@@ -20,14 +20,16 @@
               </template>
             </a-card-meta>
             <div class="cardItemContent">
-              <span>{{ item.updateTime | timeFromNow }}</span>
+              <span>{{ item.updateAt | timeFromNow }}</span>
               <span v-if="item.status === 'ENABLE'"> 已启用 </span>
               <span v-else>
-                <a-popconfirm title="确认启用此主题吗?" @confirm="confirm(item)"> 启用 </a-popconfirm>
+                <a-popconfirm title="确认启用此主题吗?" @confirm="confirm(item)" okText="启用" cancelText="取消">
+                  启用
+                </a-popconfirm>
               </span>
               <div class="avatarList">
-                <a-tooltip v-if="item.userName !== ''">
-                  <template slot="title">{{ item.userName }}</template>
+                <a-tooltip v-if="item.provider !== ''">
+                  <template slot="title">{{ item.provider }}</template>
                   <a-avatar :src="item.avatar" />
                 </a-tooltip>
               </div>
@@ -82,11 +84,11 @@ export default {
     },
     downloadPlugin(pluginId) {
       this.loading = true;
-      pluginApi.downloadPlugin(pluginId).then((res) => {
+      pluginApi.startPlugin(pluginId).then((res) => {
         const { success } = res;
         if (success === 1) {
           this.$notification.success({
-            message: '主题安装成功',
+            message: '主题启用成功',
           });
         }
         this.loading = false;

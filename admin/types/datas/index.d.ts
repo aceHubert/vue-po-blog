@@ -6,3 +6,4 @@ export * from './page';
 export * from './site';
 export * from './auth';
 export * from './dashboard';
+export * from './options';
