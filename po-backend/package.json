@@ -1,5 +1,5 @@
 {
-  "name": "@po/backend",
+  "name": "po-backend",
   "version": "0.0.1",
   "description": "Po blog Nodejs后端系统",
   "author": "Hubert<yi.xiang@live.cn>",

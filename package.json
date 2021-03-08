@@ -71,8 +71,14 @@
       "packages/*",
       "po-themes/*",
       "po-plugins/*",
+      "po-core",
       "po-admin",
       "po-backend"
+    ],
+    "nohoist": [
+      "po-core/**/*",
+      "po-admin/**/*",
+      "po-backend/**/*"
     ]
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@po/admin",
+  "name": "po-admin",
   "version": "0.0.1",
   "description": "Po blog 后台管理系统",
   "author": "Hubert<yi.xiang@live.cn>",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@ant-design-vue/pro-layout": "^1.0.1",
-    "@vue-async/module-loader": "^1.1.0",
+    "@vue-async/module-loader": "^2.0.0",
     "@vue-async/utils": "^1.1.0",
     "ant-design-vue": "^1.7.2",
     "apollo-cache-inmemory": "^1.6.6",
