@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "jsx": "preserve",
+    "jsxFactory": "VueTsxSupport",
+    "types": ["@types/node", "@nuxt/types"],
+    "paths": {
+      "~/*": ["src/*"],
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src", "types"],
+  "exclude": ["node_modules"]
+}

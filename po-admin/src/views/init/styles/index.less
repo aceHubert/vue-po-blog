@@ -1,0 +1,36 @@
+.wrapper {
+  min-height: 0;
+  position: relative;
+}
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 110px 0 144px;
+  position: relative;
+}
+
+.top {
+  text-align: center;
+
+  &__title {
+    font-size: 2rem;
+    font-weight: bold;
+
+    :global(.is-mobile) & {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.form {
+  margin: 0 auto !important;
+  padding: 30px 16px 0 !important;
+  width: 368px;
+  max-width: 100%;
+
+  :global(.is-mobile) & {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+}

@@ -68,6 +68,7 @@ module.exports = {
     'operator-linebreak': 'off',
     'no-underscore-dangle': 'off',
     'no-param-reassign': 'off',
+    'no-prototype-builtins': 'off',
     'prefer-destructuring': 'off',
     // printWidth is 120 in prettier
     'max-len': ['error', { code: 120, tabWidth: 2 }],
@@ -94,6 +95,7 @@ module.exports = {
         'plugin:prettier/recommended', // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors. Make sure this is always the last configuration in the end of extends array.
       ],
       rules: {
+        'no-dupe-class-members': 'off',
         // defined on the @typescript-eslint/no-unused-vars
         'no-unused-vars': 'off',
         '@typescript-eslint/no-explicit-any': ['off'],

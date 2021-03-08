@@ -1,0 +1,26 @@
+.column-login-name {
+  .login-name {
+    padding-right: 30px;
+    position: relative;
+
+    i {
+      font-size: 16px;
+      position: absolute;
+      right: 0;
+
+      :global(.is-desktop) &,
+      :global(.is-tablet) & {
+        display: none;
+      }
+    }
+  }
+
+  .content {
+    margin-bottom: 1em;
+    font-size: 0.75rem;
+
+    p {
+      margin-bottom: 5px;
+    }
+  }
+}
