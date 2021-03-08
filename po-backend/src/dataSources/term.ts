@@ -89,13 +89,11 @@ export default class TermDataSource extends MetaDataSource<TermMeta, TermMetaAdd
       include: [
         {
           model: this.models.Terms,
-          as: 'Term',
           attributes: this.filterFields(fields, this.models.Terms),
           required: true,
         },
         {
           model: this.models.TermRelationships,
-          as: 'TermRelationship',
           attributes: this.filterFields(fields, this.models.TermRelationships),
           where: {
             objectId: query.objectId,
@@ -107,11 +105,11 @@ export default class TermDataSource extends MetaDataSource<TermMeta, TermMetaAdd
       },
     }).then((values) =>
       values.map((term) => {
-        const { Term, TermRelationship, ...rest } = term.toJSON() as any;
+        const { Terms, TermRelationships, ...rest } = term.toJSON() as any;
         return {
           ...rest,
-          ...Term,
-          ...TermRelationship,
+          ...Terms,
+          ...TermRelationships,
         };
       }),
     );
