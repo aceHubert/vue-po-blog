@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Arg, Args, Ctx, ID, Authorized } from 'type-graphql';
+import { Resolver, FieldResolver, Query, Mutation, Root, Arg, Args, Ctx, ID, Authorized } from 'type-graphql';
 import { UserRole, UserStatus } from '@/dataSources';
 import { createMetaResolver } from './meta';
 
@@ -43,6 +43,11 @@ export default class UserResolver extends createMetaResolver(User, UserMeta, Use
       args,
       this.getFieldNames(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.UserWithRole),
     );
+  }
+
+  @FieldResolver((type) => Boolean, { description: '是否是超级管理员' })
+  isSuperAdmin(@Root('loginName') loginName: string, @Ctx('dataSources') { user }: DataSources) {
+    return user.isSupurAdmin(loginName);
   }
 
   @Query((returns) => [UserStatusCount], { description: '获取用户状态分组数量' })
@@ -100,8 +105,8 @@ export default class UserResolver extends createMetaResolver(User, UserMeta, Use
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '删除（永久）用户' })
-  deleteUser(
+  @Mutation((returns) => Boolean, { description: '删除用户（永久）' })
+  removeUser(
     @Arg('id', (type) => ID, { description: 'User Id' }) id: number,
     @Ctx('dataSources') { user }: DataSources,
   ) {

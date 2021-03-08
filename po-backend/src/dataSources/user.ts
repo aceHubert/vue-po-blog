@@ -1,9 +1,10 @@
+import { ForbiddenError } from '@/utils/errors';
 import { UserRoleCapabilities, UserRoleWithNone, UserStatus } from './helper/enums';
 import { MetaDataSource } from './meta';
 
 // Types
 import { WhereOptions } from 'sequelize';
-import User, {
+import {
   PagedUserQueryArgs,
   UserWithRole,
   PagedUser,
@@ -13,9 +14,26 @@ import User, {
 } from '@/model/user';
 import UserMeta from './entities/userMeta';
 import { ValidationError } from 'apollo-server-express';
-import { UserAttributes } from './entities/users';
+import User, { UserAttributes } from './entities/users';
 
 export default class UserDataSource extends MetaDataSource<UserMeta, UserMetaAddModel> {
+  /**
+   * 是否是超级管理员
+   * @param loginNameOrId 登录名或Id
+   * @returns boolean
+   */
+  isSupurAdmin(loginNameOrId: number | string) {
+    if (typeof loginNameOrId === 'number') {
+      return this.models.Users.count({
+        where: {
+          loginName: 'admin',
+        },
+      }).then((count) => count > 0);
+    } else {
+      return Promise.resolve(loginNameOrId === 'admin');
+    }
+  }
+
   /**
    * 根据 Id 获取用户
    * 通过 id 获取用户必须要有EditUsers权限
@@ -34,9 +52,15 @@ export default class UserDataSource extends MetaDataSource<UserMeta, UserMetaAdd
     } else {
       id = this.content.user!.id;
     }
+
+    // 如果要查是否是超级管理员，必须查询 loginName 字段
+    if (fields.includes('isSuperAdmin') && !fields.includes('loginName')) {
+      fields.push('loginName');
+    }
+
     return this.models.Users.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Users),
-    });
+    }).then((user) => (user as unknown) as User);
   }
 
   /**
@@ -74,6 +98,11 @@ export default class UserDataSource extends MetaDataSource<UserMeta, UserMetaAdd
       where['$UserMetas.meta_value$' as keyof UserAttributes] = {
         [this.Op.not]: null,
       };
+    }
+
+    // 如果要查是否是超级管理员，必须查询 loginName 字段
+    if (fields.includes('isSuperAdmin') && !fields.includes('loginName')) {
+      fields.push('loginName');
     }
 
     return this.models.Users.findAndCountAll({
@@ -316,6 +345,7 @@ export default class UserDataSource extends MetaDataSource<UserMeta, UserMetaAdd
 
   /**
    * 删除用户
+   * Super Admin 无法删除，抛出 ForbiddenError 错误
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -325,6 +355,10 @@ export default class UserDataSource extends MetaDataSource<UserMeta, UserMetaAdd
   async delete(id: number) {
     this.isAuthorized();
     this.hasCapability(UserRoleCapabilities.DeleteUsers);
+
+    if (await this.isSupurAdmin(id)) {
+      throw new ForbiddenError('Can not delete "Super Admin"!');
+    }
 
     const t = await this.sequelize.transaction();
     try {

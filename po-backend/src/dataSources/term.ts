@@ -38,17 +38,20 @@ export default class TermDataSource extends MetaDataSource<TermMeta, TermMetaAdd
   ): Promise<Array<Omit<Term, 'id'> & Omit<TermTaxonomy, 'id'> & { taxonomyId: number }>> {
     fields = fields.filter((field) => field !== 'id'); // 排除 id, 在下面独自处理添加(两个表共有字段)
 
+    // 如果是级联查询下级，必须要把query中搜索条件的字段查询出来
+    const hasChildrenField = fields.includes('children');
+
     return this.models.TermTaxonomy.findAll({
-      attributes: this.filterFields(fields, this.models.TermTaxonomy).concat(['id', 'taxonomy']), // id, taxonomy 必须，用于级联子查询
+      attributes: this.filterFields(fields, this.models.TermTaxonomy).concat(
+        ['id'],
+        hasChildrenField ? ['taxonomy'] : [], // id, taxonomy 必须，用于级联子查询
+      ),
       include: [
         {
           model: this.models.Terms,
-          // association: this.models.TermTaxonomy.hasOne(this.models.Terms, {
-          //   foreignKey: 'id',
-          //   sourceKey: 'termId',
-          //   // as: 'Term',
-          // }),
-          attributes: this.filterFields(fields, this.models.Terms).concat(['group']), // group 必须，用于级联子查询
+          attributes: this.filterFields(fields, this.models.Terms).concat(
+            hasChildrenField ? ['group'] : [], // group 必须，用于级联子查询
+          ),
           where: {
             ...(query.group ? { group: query.group } : {}),
           },
@@ -86,20 +89,13 @@ export default class TermDataSource extends MetaDataSource<TermMeta, TermMetaAdd
       include: [
         {
           model: this.models.Terms,
-          // association: this.models.TermTaxonomy.hasOne(this.models.Terms, {
-          //   foreignKey: 'id',
-          //   sourceKey: 'termId',
-          //   // as: 'Term',
-          // }),
+          as: 'Term',
           attributes: this.filterFields(fields, this.models.Terms),
           required: true,
         },
         {
-          association: this.models.TermTaxonomy.belongsTo(this.models.TermRelationships, {
-            foreignKey: 'id',
-            targetKey: 'taxonomyId',
-            // as: 'TermRelationship',
-          }),
+          model: this.models.TermRelationships,
+          as: 'TermRelationship',
           attributes: this.filterFields(fields, this.models.TermRelationships),
           where: {
             objectId: query.objectId,

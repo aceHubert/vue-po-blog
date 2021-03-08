@@ -10,6 +10,7 @@ import dbModels, { sequelize } from './entities';
 // Types
 import { DataSourceConfig } from 'apollo-datasource';
 import { KeyValueCache } from 'apollo-server-caching';
+import { ProjectionAlias } from 'sequelize';
 
 export class SequelizeDataSource extends DataSource {
   private readonly __AUTOLOAD_OPTIONS_CACHEKEY__ = '__AUTOLOAD_OPTIONS__';
@@ -80,7 +81,7 @@ export class SequelizeDataSource extends DataSource {
    * @param fields 字段名
    * @param rawAttributes ORM 实体对象属性
    */
-  protected filterFields(fields: string[], model: ModelCtor<Model<any, any>>) {
+  protected filterFields(fields: string[], model: ModelCtor<Model<any, any>>): (string | ProjectionAlias)[] {
     const columns = Object.keys(model.rawAttributes);
     return fields.filter((field) => columns.includes(field));
   }

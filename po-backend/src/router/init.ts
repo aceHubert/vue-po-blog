@@ -56,7 +56,7 @@ export default function initRouter(cache: KeyValueCache) {
     try {
       const result = await initHelper.initDB({
         alter: true,
-        match: /_dev$/,
+        // match: /_dev$/,
         when: () => initHelper.haveTables().then((haveTables) => !haveTables),
       });
 
