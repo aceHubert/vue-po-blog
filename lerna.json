@@ -1,5 +1,5 @@
 {
-  "packages": ["packages/devtools"],
+  "packages": ["packages/*", "po-themes/*", "po-plugins/*", "po-admin", "po-backend"],
   "npmClient": "yarn",
   "useWorkspaces": true,
   "command": {

@@ -1,6 +1,0 @@
-{
-  "frontend": {
-    "baseUrl": "http://localhost:5010"
-  },
-  "backend": {}
-}

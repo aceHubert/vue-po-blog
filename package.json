@@ -68,9 +68,11 @@
   },
   "workspaces": {
     "packages": [
-      "packages/devtools",
+      "packages/*",
       "po-themes/*",
-      "po-plugins/*"
+      "po-plugins/*",
+      "po-admin",
+      "po-backend"
     ]
   }
 }
