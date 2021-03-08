@@ -10,8 +10,7 @@ import { onError } from 'apollo-link-error';
 import { setContext } from 'apollo-link-context';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import gql from 'graphql-tag';
-import userStore from '@/store/modules/user';
-import appStore from '@/store/modules/app';
+import { appStore, userStore } from '@/store/modules';
 import settingsFuncs from './settings';
 
 /**

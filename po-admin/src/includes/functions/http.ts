@@ -1,6 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import appStore from '@/store/modules/app';
-import userStore from '@/store/modules/user';
+import { appStore, userStore } from '@/store/modules';
 import { isAbsoluteUrl } from '@/utils/path';
 import settingsFuncs from './settings';
 import hook from './hooks';

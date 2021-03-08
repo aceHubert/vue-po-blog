@@ -1,7 +1,6 @@
 import { Vue, Component, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
-import appStore from '@/store/modules/app';
-import { localeFuncs } from '@/includes/functions';
+import { appStore } from '@/store/modules';
 import classes from './styles/index.less?module';
 
 // Types
@@ -41,7 +40,7 @@ export default class Init extends Vue {
   }
 
   get localeOptions() {
-    return localeFuncs.getSupportLanguages().map((lang) => ({
+    return appStore.supportLanguages.map((lang) => ({
       key: lang.locale,
       value: lang.locale,
       title: lang.name,
@@ -57,7 +56,7 @@ export default class Init extends Vue {
   mounted() {
     // 设置默认初始值
     this.form.setFieldsValue({
-      locale: localeFuncs.getDefaultLocale(),
+      locale: appStore.locale,
       title: this.$tv('init.titleInitValue', 'This is a simple title'),
       siteUrl: window.location.origin,
     });

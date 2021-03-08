@@ -1,6 +1,6 @@
 import { Vue, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { camelCase, lowerFirst } from 'lodash-es';
-// import { modifiers as m } from 'vue-tsx-support';
+import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
 import { UserRole } from '@/includes/datas/enums';
@@ -126,7 +126,7 @@ export default class UserIndex extends Vue {
     return [
       {
         value: BlukActions.Delete,
-        label: this.$tv('post.search.bulkDeleteAction', 'Delete') as string,
+        label: this.$tv('user.search.bulkDeleteAction', 'Delete') as string,
       },
     ];
   }
@@ -145,6 +145,7 @@ export default class UserIndex extends Vue {
                 mobile
                 email
                 status
+                isSuperAdmin
                 role
                 createTime: createdAt
                 metas {
@@ -190,6 +191,28 @@ export default class UserIndex extends Vue {
     this.table.refresh();
   }
 
+  // 刷新角色数量
+  refreshRoleCounts() {
+    return this.graphqlClient
+      .query<{ roleCounts: Array<{ role: UserRole; count: number }> }>({
+        query: gql`
+          query getRoleCounts {
+            roleCounts: userCountByRole {
+              role
+              count
+            }
+          }
+        `,
+      })
+      .then(({ data }) => {
+        this.roleCounts = data.roleCounts;
+      })
+      .catch((err) => {
+        const { statusCode, message } = formatError(err);
+        this.$message.error(this.$tv(`error.${statusCode}`, message) as string);
+      });
+  }
+
   // keyword 的搜索按纽
   handleSearch(query: { keyword?: string; role?: UserRole | 'None' }) {
     Object.assign(this.searchQuery, query);
@@ -199,13 +222,35 @@ export default class UserIndex extends Vue {
   // 批量操作
   handleBlukApply(action: BlukActions) {
     if (!this.selectedRowKeys.length) {
-      this.$message.warn({ content: this.$tv('post.bulkRowReqrired', 'Please choose a row!') as string });
+      this.$message.warn({ content: this.$tv('user.bulkRowReqrired', 'Please choose a row!') as string });
       return;
     }
 
     if (action === BlukActions.Delete) {
       // todo
     }
+  }
+
+  // 删除
+  handleDelete(id: string) {
+    return this.graphqlClient
+      .mutate<{ result: boolean }, { id: string }>({
+        mutation: gql`
+          mutation deleteUser($id: ID!) {
+            result: removeUser(id: $id)
+          }
+        `,
+        variables: {
+          id,
+        },
+      })
+      .then(() => {
+        this.refreshRoleCounts();
+        this.refreshTable();
+      })
+      .catch(() => {
+        this.$message.error(this.$tv('post.delete.errorTips', 'Delete failed!') as string);
+      });
   }
 
   handleSelectChange(selectedRowKeys: Array<string | number>) {
@@ -222,7 +267,32 @@ export default class UserIndex extends Vue {
       );
     };
 
-    const renderActions = (_record: User) => <div class={classes.actions}></div>;
+    const renderActions = (record: User) => (
+      <div class={classes.actions}>
+        <nuxt-link
+          to={{ name: 'users-edit', params: { id: String(record.id) } }}
+          title={this.$tv('user.btnTips.edit', 'Edit') as string}
+        >
+          {this.$tv('user.btnText.edit', 'Edit')}
+        </nuxt-link>
+
+        {!record.isSuperAdmin
+          ? [
+              <a-divider type="vertical" />,
+              <a-popconfirm
+                title={this.$tv('user.btnTips.deletePopContent', 'Do you really want to delete this user?')}
+                okText={this.$tv('user.btnText.deletePopOkBtn', 'Ok')}
+                cancelText={this.$tv('user.btnText.deletePopCancelBtn', 'No')}
+                onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
+              >
+                <a href="#none" title={this.$tv('user.btnTips.delete', 'Delete this user permanently') as string}>
+                  {this.$tv('user.btnText.delete', 'Delete')}
+                </a>
+              </a-popconfirm>,
+            ]
+          : null}
+      </div>
+    );
 
     // $scopedSolts 不支持多参数类型定义
     const scopedSolts = () => {
@@ -285,7 +355,7 @@ export default class UserIndex extends Vue {
     return (
       <a-card class="post-index" bordered={false}>
         <SearchForm
-          keywordPlaceholder={this.$tv('post.search.keywordPlaceholder', 'Search Post') as string}
+          keywordPlaceholder={this.$tv('user.search.keywordPlaceholder', 'Search Post') as string}
           statusName="role"
           itemCount={this.itemCount}
           statusOptions={this.roleOptions}

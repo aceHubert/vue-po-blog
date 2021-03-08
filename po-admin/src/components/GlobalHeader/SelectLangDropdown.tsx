@@ -2,7 +2,7 @@ import { Vue, Component, Prop, Emit } from 'nuxt-property-decorator';
 
 // Types
 import * as tsx from 'vue-tsx-support';
-import { LangConfig } from 'types/functions/locale';
+import { LangConfig } from 'types/locale';
 
 @Component({
   name: 'SelectLangDropdown',

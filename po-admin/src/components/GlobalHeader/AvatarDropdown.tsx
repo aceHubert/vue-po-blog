@@ -36,6 +36,8 @@ export default class AvatarDropdown extends Vue {
     this.$confirm({
       title: this.$tv('avatarDropdown.dialog.logout.title', 'Message'),
       content: this.$tv('avatarDropdown.dialog.logout.content', 'Do you really log-out?'),
+      okText: this.$tv('avatarDropdown.dialog.logout.okText', 'Yes') as string,
+      cancelText: this.$tv('avatarDropdown.dialog.logout.cancelText', 'No') as string,
       onOk: () => {
         this.handleAction(Actions.Logout);
       },

@@ -2,12 +2,13 @@ import { PagerQuery, PagerResponse } from './pager';
 import { UserStatus, UserRole } from 'src/includes/datas/enums';
 
 export type User = {
-  id: number;
+  id: string;
   loginName: string;
   displayName: string;
   mobile?: string;
   email: string;
   status: UserStatus;
+  isSuperAdmin: boolean;
   role: UserRole;
   createTime: Date;
 } & {
@@ -24,7 +25,7 @@ export type UserPagerQuery = PagerQuery<{
 }>;
 
 export type UserPagerResponse = PagerResponse<{
-  id: number;
+  id: string;
   loginName: string;
   displayName: string;
   mobile?: string;

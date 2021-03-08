@@ -1,5 +1,5 @@
 import { Vue, Component } from 'nuxt-property-decorator';
-import appStore from '@/store/modules/app';
+import { appStore } from '@/store/modules';
 import { Layout, Theme, ContentWidth } from '@/config/proLayoutConfigs';
 
 @Component

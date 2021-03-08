@@ -3,9 +3,12 @@
  */
 import LogoSvg from '@/assets/images/logo.svg?inline';
 
+// save to cookie
 export const ACCESS_TOKEN = 'po_access_token';
 export const REFRESH_TOKEN = 'po_refresh_token';
+export const LOCALE = 'po_locale';
 
+// save to localStorage
 export const SET_LAYOUT = 'LAYOUT';
 export const SET_THEME = 'THEME';
 export const SET_PRIMARY_COLOR = 'PRIMARY_COLOR';
@@ -50,7 +53,7 @@ export default {
    * multiTab - 多 tab 页模式： boolean
    */
   settings: {
-    title: 'CRM',
+    title: 'Polumemo Admin',
     logo: LogoSvg,
     layout: Layout.sideMenu,
     theme: Theme.Dark,
@@ -178,4 +181,24 @@ export default {
       },
     },
   ],
+
+  // locale
+  locale: {
+    default: 'en-US',
+    supportLanguages: [
+      {
+        name: 'English',
+        shortName: 'EN',
+        icon: '🇺🇸',
+        locale: 'en-US',
+        alternate: 'en',
+      },
+      {
+        name: '简体中文',
+        shortName: '中',
+        icon: '🇨🇳',
+        locale: 'zh-CN',
+      },
+    ],
+  },
 };

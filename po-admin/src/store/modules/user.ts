@@ -36,7 +36,7 @@ export type RefreshTokenResponse = {
 
 @Module({ store, name: 'user', namespaced: true, dynamic: true, stateFactory: true })
 class UserStore extends VuexModule {
-  id: number | null = null;
+  id: string | null = null; // 用户Id， graphql ID 是序列化成string
   name = 'User';
   info: Dictionary<any> = {}; // 用户基本信息及 metas
   accessToken: string | null = null;
@@ -67,7 +67,7 @@ class UserStore extends VuexModule {
         const payload = jwt.decode(token, { json: true });
 
         const { id, loginName, role, ...rest } = payload as Dictionary<any>;
-        this.id = id;
+        this.id = String(id);
         this.name = loginName;
         this.info = Object.assign({}, this.info, rest);
         this.role = role;
@@ -108,10 +108,12 @@ class UserStore extends VuexModule {
         if (model.success) {
           Cookie.set(ACCESS_TOKEN, model.accessToken, {
             path: '/',
+            httpOnly: false,
             expires: moment().add(model.expiresIn, 'seconds').toDate(),
           });
           Cookie.set(REFRESH_TOKEN, model.refreshToken, {
             path: '/',
+            httpOnly: false,
           });
           return model.accessToken;
         } else {
@@ -141,6 +143,7 @@ class UserStore extends VuexModule {
         if (model.success) {
           Cookie.set(ACCESS_TOKEN, model.accessToken, {
             path: '/',
+            httpOnly: false,
             expires: moment().add(model.expiresIn, 'seconds').toDate(),
           });
           return model.accessToken;
@@ -157,13 +160,13 @@ class UserStore extends VuexModule {
    * @param metaKeys 需要获取的meta keys
    */
   @VuexAction({ rawError: true, commit: 'setInfo' })
-  getUserMetas(metaKeys: string[]) {
+  getUserMetas(metaKeys?: string[]) {
     if (!this.accessToken) return Promise.reject();
 
     return graphqlClient
-      .query<{ result: Array<{ metaKey: string; metaValue: string }> }, { userId: number; metaKeys: string[] }>({
+      .query<{ result: Array<{ metaKey: string; metaValue: string }> }, { userId: string; metaKeys?: string[] }>({
         query: gql`
-          query getUserMetas($userId: ID!, $metaKeys: [String!]!) {
+          query getUserMetas($userId: ID!, $metaKeys: [String!]) {
             result: userMetas(userId: $userId, metaKeys: $metaKeys) {
               metaKey
               metaValue
@@ -193,7 +196,7 @@ class UserStore extends VuexModule {
     if (!this.accessToken) return Promise.reject();
 
     return graphqlClient
-      .mutate<{ result: boolean }, { userId: number; metaKey: string; metaValue: string }>({
+      .mutate<{ result: boolean }, { userId: string; metaKey: string; metaValue: string }>({
         mutation: gql`
           mutation updateUserMetaByKey($userId: ID!, $metaKey: String!, $metaValue: String!) {
             retult: updateUserMetaByKey(userId: $userId, metaKey: $metaKey, metaValue: $metaValue)

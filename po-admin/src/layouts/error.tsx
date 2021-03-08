@@ -26,7 +26,10 @@ export default class ErrorLayout extends mixins(appMixin, deviceMixin) {
   }
 
   get message() {
-    return this.error.message || (this.$tv(`error.${String(this.statusCode)}`, 'An error occurred') as string);
+    return (
+      (this.error.message && (this.$tv(this.error.message, this.error.message) as string)) ||
+      (this.$tv(`error.${String(this.statusCode)}`, 'An error occurred') as string)
+    );
   }
 
   render() {

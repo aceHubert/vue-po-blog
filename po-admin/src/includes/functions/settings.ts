@@ -33,16 +33,6 @@ const settingsFunctions: SettingsFunctions = {
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 初始化程序地址
-   */
-  // getInitPath() {
-  //   return this.getBaseUrl() + this.getBasePath() + 'init';
-  // },
-
-  /**
-   * @author Hubert
-   * @since 2020-09-04
-   * @version 0.0.1
    * API 地址，[baseUrl]/api
    */
   getApiPath() {

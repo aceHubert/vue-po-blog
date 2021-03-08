@@ -118,9 +118,8 @@ module.exports = (configContext) => {
 
     plugins: [
       { src: 'plugins/vue-antd' },
-      { src: 'plugins/i18n' },
-      { src: 'plugins/vue-mavon-editor', ssr: false },
       { src: 'plugins/vue-ls', ssr: false },
+      { src: 'plugins/vue-mavon-editor', ssr: false },
       { src: 'plugins/bootstrap' },
     ],
     router: {

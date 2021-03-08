@@ -2,7 +2,7 @@ import '@nuxt/types';
 import './vue';
 import './vuex';
 import './nuxt';
-import './i18n';
+import './locale';
 
 export * from './datas';
 export * from './functions';

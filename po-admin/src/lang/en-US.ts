@@ -78,7 +78,8 @@ const locale = {
 
   // 错误消息
   error: {
-    404: 'Page not found!',
+    401: 'Sorry, you can not visit this page!',
+    404: 'Page Not Found!',
     500: 'System error, please try again later!',
 
     // backend 返回错误

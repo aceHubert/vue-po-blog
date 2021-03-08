@@ -1,12 +1,15 @@
-import { Vue, Component, Prop } from 'nuxt-property-decorator';
+import { Vue, Component } from 'nuxt-property-decorator';
 
 {
   /* <router>
 {
   alias:[
     '/404',
-    '/page-not-found'
-  ]
+    '/page-not-found',
+    '/401',
+    '/unauthorized'
+  ],
+  props:true,
 }
 </router> */
 }
@@ -16,17 +19,16 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator';
   layout: 'blank',
 })
 export default class ErrorPage extends Vue {
-  @Prop(Number) statusCode!: number;
-  @Prop(String) message!: string;
-
   mounted() {
-    let statusCode = this.statusCode || 500;
-    if (this.$route.path === '/404' || this.$route.path === '/page-not-found') {
+    let statusCode = 500;
+    if (this.$route.path === '/401' || this.$route.path === '/unauthorized') {
+      statusCode = 401;
+    } else if (this.$route.path === '/404' || this.$route.path === '/page-not-found') {
       statusCode = 404;
     }
     this.$nuxt.error({
       statusCode,
-      message: this.message || (this.$tv(`error.${statusCode}`, 'An error occurred') as string),
+      message: `error.${(this.$route.query.code as string) || statusCode}`,
     });
   }
 

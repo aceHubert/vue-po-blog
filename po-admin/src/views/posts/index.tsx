@@ -5,7 +5,7 @@ import { trailingSlash } from '@/utils/path';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
 import { PostCommentStatus, PostStatus } from '@/includes/datas/enums';
-
+import { userStore } from '@/store/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
@@ -15,7 +15,7 @@ import { DataSource } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
 import { Term } from 'types/datas/term';
 
-type QueryParams = Omit<PostPagerQuery, keyof PagerQuery<{}>> & { categoryId: number };
+type QueryParams = Omit<PostPagerQuery, keyof PagerQuery<{}>> & { categoryId: string };
 
 enum BlukActions {
   Edit = 'edit',
@@ -93,12 +93,12 @@ export default class PostIndex extends Vue {
 
   data() {
     const query = this.$route.query as Dictionary<string | null>;
-    let categoryId = 0;
+    let categoryId = '';
     let date = '';
     let author = null;
     try {
       author = query.author ? parseInt(query.author) : null;
-      categoryId = query.cid ? parseInt(query.cid) : 0;
+      categoryId = query.cid ? query.cid : '';
       // yyyyMM
       date = query.d && query.d.length === 6 ? query.d : '';
     } catch {
@@ -155,11 +155,11 @@ export default class PostIndex extends Vue {
   }
 
   // a-tree-select treeData 级联异步加载, 添加 All 选项
-  get categoryOptions(): Array<{ key: number; title: string; value: number; isLeaf?: boolean }> {
+  get categoryOptions(): Array<{ key: string; title: string; value: string; isLeaf?: boolean }> {
     return [
       {
-        key: 0,
-        value: 0,
+        key: '',
+        value: '',
         title: this.$tv('post.search.allCategories', 'All Categories') as string,
         isLeaf: true,
       },
@@ -322,7 +322,7 @@ export default class PostIndex extends Vue {
     this.table.refresh();
   }
 
-  getPreviewUrl(id: number) {
+  getPreviewUrl(id: string) {
     if (process.client) {
       return `${trailingSlash(this.$userOptions['home'].trim())}post/${id}`;
     }
@@ -392,9 +392,9 @@ export default class PostIndex extends Vue {
   }
 
   // 修改状态
-  handleModifyStatus(id: number, status: PostStatus) {
+  handleModifyStatus(id: string, status: PostStatus) {
     return this.graphqlClient
-      .mutate<{ result: boolean }, { id: number; status: PostStatus }>({
+      .mutate<{ result: boolean }, { id: string; status: PostStatus }>({
         mutation: gql`
           mutation updatePostStatus($id: ID!, $status: POST_STATUS!) {
             result: updatePostOrPageStatus(id: $id, status: $status)
@@ -415,9 +415,9 @@ export default class PostIndex extends Vue {
   }
 
   // 重置
-  handleRestore(id: number) {
+  handleRestore(id: string) {
     return this.graphqlClient
-      .mutate<{ result: boolean }, { id: number }>({
+      .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
           mutation restorePost($id: ID!) {
             result: restorePostOrPage(id: $id)
@@ -437,9 +437,9 @@ export default class PostIndex extends Vue {
   }
 
   // 删除
-  handleDelete(id: number) {
+  handleDelete(id: string) {
     return this.graphqlClient
-      .mutate<{ result: boolean }, { id: number }>({
+      .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
           mutation deletePost($id: ID!) {
             result: removePostOrPage(id: $id)
@@ -557,7 +557,15 @@ export default class PostIndex extends Vue {
               <div class={[classes.content]} v-show={record.expand}>
                 <p>
                   <span>{getTitle('author') || 'Author'}: </span>
-                  {record.author.displayName}
+                  <nuxt-link
+                    to={{
+                      name: 'users-profile',
+                      query: record.author.id === userStore.id ? {} : { id: String(record.author.id) },
+                    }}
+                    title={this.$tv('post.btnTips.edit', 'Edit') as string}
+                  >
+                    {record.author.displayName}
+                  </nuxt-link>
                 </p>
                 <p>
                   <span>{getTitle('commentCount') || 'Comment Count'}: </span>
@@ -572,7 +580,17 @@ export default class PostIndex extends Vue {
             {renderActions(record)}
           </div>
         ),
-        author: (text: Post['author']) => text.displayName || '-',
+        author: (text: Post['author'], record: Post) => (
+          <nuxt-link
+            to={{
+              name: 'users-profile',
+              query: record.author.id === userStore.id ? {} : { id: String(record.author.id) },
+            }}
+            title={this.$tv('post.btnTips.edit', 'Edit') as string}
+          >
+            {text.displayName}
+          </nuxt-link>
+        ),
         commentCount: (text: string, record: Post) => (record.commentStatus === PostCommentStatus.Enable ? text : '-'),
         createTime: (text: string) => $filters.dateFormat(text),
       } as any;

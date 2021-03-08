@@ -4,22 +4,15 @@
 
 // functions
 import hook from './functions/hooks';
-import localeFunctions from './functions/locale';
 import settingsFunctions from './functions/settings';
 
 // Types
 import { VueExtraPrototypes } from 'types/vue';
 
-const { getDefaultLocale, getSupportLanguages, addSupportLanguages, setDefaultLocale, setLocale } = localeFunctions;
 const { getBaseUrl, getGraphqlPath, getGraphqlWsPath, getApiPath } = settingsFunctions;
 
 const prototypes: VueExtraPrototypes = {
   hook,
-  getDefaultLocale,
-  getSupportLanguages,
-  addSupportLanguages,
-  setDefaultLocale,
-  setLocale,
   getBaseUrl,
   getGraphqlPath,
   getGraphqlWsPath,

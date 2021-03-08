@@ -1,6 +1,6 @@
 export type Term = {
-  taxonomyId: number;
-  termId: number;
+  taxonomyId: string;
+  termId: string;
   name: string;
   slug: string;
   description: string;
@@ -10,8 +10,8 @@ export type Term = {
 };
 
 export type TermRelationship = {
-  objectId: number;
-  taxonomyId: number;
+  objectId: string;
+  taxonomyId: string;
   order: number;
 };
 
@@ -19,12 +19,12 @@ export type TermCreationModel = {
   name: string;
   slug: string;
   taxonomy: string;
-  objectId?: number;
+  objectId?: string;
 };
 
 export type TermRelationshipCreationModel = {
-  objectId: number;
-  taxonomyId: number;
+  objectId: string;
+  taxonomyId: string;
   order?: number;
 };
 

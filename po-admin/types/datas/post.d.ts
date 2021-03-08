@@ -2,9 +2,9 @@ import { PagerQuery, PagerResponse } from './pager';
 import { PostStatus, PostCommentStatus } from 'src/includes/datas/enums';
 
 export type Post = {
-  id: number;
+  id: string;
   title: string;
-  author: { id: number; displayName: string };
+  author: { id: string; displayName: string };
   excerpt: string;
   content: string;
   status: PostStatus;
@@ -32,7 +32,7 @@ export type PostPagerQuery = PagerQuery<{
   keywords?: string;
   author?: number;
   status?: PostStatus;
-  categoryIds?: number[];
+  categoryIds?: string[];
   date?: string; // yyyyMM
 }>;
 

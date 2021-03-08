@@ -27,6 +27,8 @@ const components = {
       logout: {
         title: '@:common.dialog.title.tip',
         content: '确认退出吗？',
+        okText: '@:common.btnText.ok',
+        cancelText: '@:common.btnText.no',
       },
     },
   },
@@ -116,6 +118,17 @@ const locale = {
     create: '@:breadcrumb.new',
     edit: '编辑',
     update: '@:breadcrumb.edit',
+  },
+
+  // 登录
+  login: {
+    title: '欢迎登录Plumemo管理平台',
+    description: '一个简单的前后端分离博客系统',
+    usernamePlaceholder: '用户名/邮箱',
+    usernameRequired: '请输入用户名！',
+    passwordPlaceholder: '密码',
+    passwordRequired: '请输入密码',
+    btnLogin: '登录',
   },
 
   // 文章
@@ -211,6 +224,17 @@ const locale = {
       role: '角色',
       createTime: '创建时间',
     },
+    btnText: {
+      edit: '@:common.btnText.edit',
+      delete: '删除',
+      deletePopOkBtn: '@:common.btnText.ok',
+      deletePopCancelBtn: '@:common.btnText.no',
+    },
+    btnTips: {
+      edit: '@:user.btnText.edit',
+      delete: '@:user.btnText.delete',
+      deletePopContent: '确定永久删除此用户吗？',
+    },
   },
 
   // 常规
@@ -233,6 +257,7 @@ const locale = {
     },
     btnText: {
       ok: '是',
+      yes: '@:common.btnText.ok',
       no: '否',
       cancel: '取消',
       confirm: '确认',
@@ -252,11 +277,13 @@ const locale = {
 
   // 错误消息
   error: {
-    404: '页面未找到',
-    500: '系统错误，请稍后重试',
+    401: '抱歉，您不能访问此页面。',
+    404: '页面未找到！',
+    500: '系统错误，请稍后重试！',
+    description: '在页面渲染时发生错误，请在开发者工具中查询详细信息！',
 
     // plugins error
-    modulesLoadError: '模块加载失败',
+    loadModuleFailed: '模块加载失败',
   },
 };
 

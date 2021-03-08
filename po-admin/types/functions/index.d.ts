@@ -1,4 +1,3 @@
-export * from './hook';
 export { HttpInstance, HttpInterceptorManager } from './http';
-export * from './locale';
+export * from './hook';
 export * from './settings';

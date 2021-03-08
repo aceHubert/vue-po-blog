@@ -3,8 +3,7 @@ import { mixins, Component, Watch } from 'nuxt-property-decorator';
 import ProLayout from '@ant-design-vue/pro-layout';
 import { appMixin, deviceMixin } from '@/mixins';
 import { RightContent, Breadcrumb, GlobalFooter } from '@/components';
-import { localeFuncs } from '@/includes/functions';
-import userStore from '@/store/modules/user';
+import { appStore, userStore } from '@/store/modules';
 import { getDefaultMenus } from '@/config/menuCofnigs';
 import config, { ContentWidth, Layout } from '@/config/proLayoutConfigs';
 import classes from './styles/default.less?module';
@@ -43,7 +42,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
   }
 
   get supportLanguages() {
-    return localeFuncs.getSupportLanguages();
+    return appStore.supportLanguages;
   }
 
   //pro-layout 配置

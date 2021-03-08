@@ -1,6 +1,6 @@
 import { Vue, Component, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
-import userStore from '@/store/modules/user';
+import { appStore, userStore } from '@/store/modules';
 import { isAbsoluteUrl } from '@/utils/path';
 import classes from './styles/login.less?module';
 
@@ -63,12 +63,28 @@ export default class Login extends Vue {
       userStore
         .login(loginParams)
         .then(() => {
-          const returnUrl = this.$route.query && (this.$route.query.returnUrl as string | null);
-          if (returnUrl && isAbsoluteUrl(returnUrl)) {
-            window.location.href = returnUrl;
-          } else {
-            this.$router.push({ path: returnUrl || '/' });
-          }
+          // 登录后要重新设置站点的个人配置
+          return userStore
+            .getUserMetas()
+            .then(() => {
+              let siteLocale = this.$userOptions.locale;
+              if (userStore.info.locale) {
+                siteLocale = userStore.info.locale;
+              }
+
+              appStore.setLocale(siteLocale);
+
+              // 跳转
+              const returnUrl = this.$route.query && (this.$route.query.returnUrl as string | null);
+              if (returnUrl && isAbsoluteUrl(returnUrl)) {
+                window.location.href = returnUrl;
+              } else {
+                this.$router.push({ path: returnUrl || '/' });
+              }
+            })
+            .catch(() => {
+              // ate by dog
+            });
         })
         .catch((err) => {
           if (this.isMobile) {

@@ -7,7 +7,7 @@ import { kebabCase } from 'lodash-es';
 import { trailingSlash } from '@/utils/path';
 
 // Types
-import { LocaleConfig, LangConfig } from 'types/functions/locale';
+import { LangConfig } from 'types/locale';
 
 /**
  * layouts
@@ -53,31 +53,30 @@ export function root(routes: RouteConfig[]) {
 }
 
 /**
- * 子模块路由处理方式一
- * 添加多语言到 params
+ * 语言匹配规则
  */
-export function genLocaleConfig(localeConfig: LocaleConfig) {
+export function genLocaleConfig(localeConfig: { locale: string; supportLanguages: LangConfig[] }) {
   // Matches allowed languages
   const localePattern = localeConfig.supportLanguages
     .map((lang: LangConfig) => lang.alternate || lang.locale)
     .join('|');
   const localeRegexp = new RegExp('^(' + localePattern + ')$');
+
+  // Matches any language identifier
+  const genericLocaleRegexp = /[a-z]{2,3}|[a-z]{2,3}-[a-zA-Z]{4}|[a-z]{2,3}-[A-Z]{2,3}/;
+
+  // 如果在前端则从navigator.languages中匹配到合适的语言
+  const preferredLocale =
+    typeof document === 'undefined'
+      ? localeConfig.locale
+      : navigator.languages.find((l: string) => l.match(localeRegexp)) || localeConfig.locale;
+
   // 判断是否在支持的语言中在在
   const hasLocale = function (locale: string) {
     return localeConfig.supportLanguages.some(
       (lang: LangConfig) => lang.alternate === locale || lang.locale === locale,
     );
   };
-
-  // Matches any language identifier
-  const genericLocaleRegexp = /[a-z]{2,3}|[a-z]{2,3}-[a-zA-Z]{4}|[a-z]{2,3}-[A-Z]{2,3}/;
-
-  const preferredLocale =
-    typeof document === 'undefined'
-      ? localeConfig.default
-      : navigator.languages.find((l: string) => l.match(localeRegexp)) || localeConfig.default;
-
-  localeConfig.supportLanguages.find((lang: LangConfig) => lang.alternate || lang.locale) || {};
 
   return {
     localePattern,
@@ -88,13 +87,17 @@ export function genLocaleConfig(localeConfig: LocaleConfig) {
   };
 }
 
+function redirect(redirect: (to: Route) => string) {
+  return { path: '*', redirect };
+}
+
 /**
  * 多语言路由配置
  * @param children
  * @param locale
  */
-export function localeRoot(children: RouteConfig[], locale: LocaleConfig) {
-  const { localePattern, genericLocaleRegexp, preferredLocale } = genLocaleConfig(locale);
+export function localeRoot(children: RouteConfig[], localeConfig: { locale: string; supportLanguages: LangConfig[] }) {
+  const { localePattern, genericLocaleRegexp, preferredLocale } = genLocaleConfig(localeConfig);
 
   // Reomve start slash
   (function removeStartSlash(items: RouteConfig[]) {
@@ -116,10 +119,6 @@ export function localeRoot(children: RouteConfig[], locale: LocaleConfig) {
     },
     redirect((to: Route) => trailingSlash(`/${preferredLocale}${to.path}`)),
   ];
-}
-
-export function redirect(redirect: (to: Route) => string) {
-  return { path: '*', redirect };
 }
 
 // 合并路由（将新路由配置合并到老路由配置中）

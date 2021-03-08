@@ -21,11 +21,11 @@ import { PostCreationModel, PostUpdateModel, Post } from 'types/datas/post';
       .query<
         {
           tags: Term[];
-          myTags: Array<{ taxonomyId: number }>;
+          myTags: Array<{ taxonomyId: string }>;
           categories: Term[];
           myCategories: Array<{ taxonomyId: number }>;
         },
-        { objectId: number }
+        { objectId: string }
       >({
         query: gql`
           query getTerms($objectId: ID!) {
@@ -76,16 +76,18 @@ export default class PostEditForm extends Vue {
       onStatusChange: (status: PostStatus) => void;
     }>;
 
-  @Prop(Boolean) fromCreate?: boolean;
-  @Prop({ type: Object, validator: (val) => !!val.id }) editModel!: Post;
+  // 新建
+  // 在新建的时候是先生成了一条 autoDraft 的数据，用于区分是新建还是修改流程
+  @Prop({ type: Boolean, default: false }) fromCreate?: boolean;
+  @Prop({ type: Object, required: true, validator: (val) => !!val.id }) editModel!: Post;
 
   // form
   form!: WrappedFormUtils;
   rules!: Dictionary<any>;
 
-  allTags!: Array<{ label: string; value: number }>;
-  selectedTags!: number[];
-  allCategories!: Array<{ title: string; key: number; selectable: false }>;
+  allTags!: Array<{ label: string; value: string }>;
+  selectedTags!: string[];
+  allCategories!: Array<{ title: string; key: string; selectable: false }>;
   checkedCagegoryKeys!: number[];
   status!: PostStatus;
   content!: string;
@@ -186,7 +188,7 @@ export default class PostEditForm extends Vue {
   }
 
   // 添加关系，tag/category 可以共用
-  addRelationship(taxonomyId: number) {
+  addRelationship(taxonomyId: string) {
     return graphqlClient.mutate<{ result: TermRelationship }, { model: TermRelationshipCreationModel }>({
       mutation: gql`
         mutation addTermRelationship($model: TermRelationshipAddModel!) {
@@ -206,9 +208,9 @@ export default class PostEditForm extends Vue {
   }
 
   // 移除关系，tag/category 可以共用
-  removeRelationship(taxonomyId: number) {
+  removeRelationship(taxonomyId: string) {
     return graphqlClient
-      .mutate<{ result: boolean }, { objectId: number; taxonomyId: number }>({
+      .mutate<{ result: boolean }, { objectId: string; taxonomyId: string }>({
         mutation: gql`
           mutation removeTermRelationship($objectId: ID!, $taxonomyId: ID!) {
             result: removeTermRelationship(objectId: $objectId, taxonomyId: $taxonomyId)
@@ -237,7 +239,7 @@ export default class PostEditForm extends Vue {
         };
 
         graphqlClient
-          .mutate<{ result: boolean }, { id: number; model: PostUpdateModel }>({
+          .mutate<{ result: boolean }, { id: string; model: PostUpdateModel }>({
             mutation: gql`
               mutation updatePost($id: ID!, $model: PostUpdateModel!) {
                 result: updatePost(id: $id, model: $model)
@@ -268,7 +270,7 @@ export default class PostEditForm extends Vue {
   // no catch will be triggered
   updatePostStatus(status: PostStatus) {
     return graphqlClient
-      .mutate<{ result: boolean }, { id: number; status: PostStatus }>({
+      .mutate<{ result: boolean }, { id: string; status: PostStatus }>({
         mutation: gql`
           mutation updatePostStatus($id: ID!, $status: POST_STATUS_WITHOUT_AUTO_DRAFT!) {
             result: updatePostOrPageStatus(id: $id, status: $status)
@@ -310,7 +312,7 @@ export default class PostEditForm extends Vue {
     this.thumbnailList = fileList;
   }
 
-  handleTagSelect(value: number) {
+  handleTagSelect(value: string) {
     let promisify = Promise.resolve(value);
 
     // 如果是手动输入的tag, 先添加得到返回的key
@@ -327,8 +329,8 @@ export default class PostEditForm extends Vue {
           `,
           variables: {
             model: {
-              name: String(value),
-              slug: String(value),
+              name: value,
+              slug: value,
               taxonomy: TermTaxonomy.Tag,
               objectId: this.editModel.id,
             },
@@ -352,7 +354,7 @@ export default class PostEditForm extends Vue {
       });
   }
 
-  handleTagDeselect(value: number) {
+  handleTagDeselect(value: string) {
     this.removeRelationship(value)
       .then(() => {
         this.selectedTags = this.selectedTags.filter((key) => key !== value);
@@ -408,7 +410,7 @@ export default class PostEditForm extends Vue {
   handleAllowCommentsChange() {
     this.allowCommentsChanging = true;
     graphqlClient
-      .mutate<{ result: boolean }, { id: number; status: PostCommentStatus }>({
+      .mutate<{ result: boolean }, { id: string; status: PostCommentStatus }>({
         mutation: gql`
           mutation updatePostCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
             result: updatePostCommentStatus(id: $id, status: $status)

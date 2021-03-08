@@ -1,3 +1,6 @@
+/**
+ * 加载远程模块
+ */
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import ModuleLoader from '@vue-async/module-loader';
@@ -26,7 +29,7 @@ Vue.use(ModuleLoader);
 
 export async function LoadModules(...params: Parameters<Plugin>) {
   const cxt = params[0];
-  const { app, $i18n } = cxt;
+  const { app } = cxt;
   /**
    * 添加路由
    * 放在模块入口文件 options 中，而不入在 Context 中，因为 Context 会传递到子模块中
@@ -58,10 +61,7 @@ export async function LoadModules(...params: Parameters<Plugin>) {
       module.args = _moduleArgs;
     });
   } catch (err) {
-    cxt.redirect({
-      name: '500',
-      params: { message: $i18n.tv('error.modulesLoadError', `Module load error:${err.message}`) as string },
-    });
+    cxt.redirect('/error', { code: 'loadModuleFailed' });
   }
 
   const moduleLoader = new ModuleLoader({

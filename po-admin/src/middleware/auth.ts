@@ -1,4 +1,4 @@
-import userStore from '@/store/modules/user';
+import { userStore } from '@/store/modules';
 
 // Types
 import { Context } from '@nuxt/types';
@@ -6,6 +6,7 @@ import { Context } from '@nuxt/types';
 // 匿名允许路由名
 const isAnonymousRoute = (route: Context['route']) => {
   return (
+    route.name === 'error' ||
     route.name === 'init' ||
     route.name?.startsWith('account-') || // login/logout/register/lost-password
     (route.meta && route.meta!.anonymous)
@@ -25,7 +26,7 @@ export default async ({ route, redirect }: Context) => {
     }
 
     if (!userStore.role) {
-      redirect('/error');
+      redirect('/unauthorized');
     }
   }
 };

@@ -1,14 +1,10 @@
 import { AxiosStatic } from 'axios';
 import { ApolloClient } from 'apollo-client';
 import { IVueI18n } from 'vue-i18n';
-import { HookFunction, HttpInstance, LocaleFunctions, SettingsFunctions } from './functions';
+import { HookFunction, HttpInstance, SettingsFunctions } from './functions';
 
 export interface VueExtraPrototypes
-  extends Pick<
-      LocaleFunctions,
-      'getDefaultLocale' | 'getSupportLanguages' | 'addSupportLanguages' | 'setDefaultLocale' | 'setLocale'
-    >,
-    Pick<SettingsFunctions, 'getBaseUrl' | 'getGraphqlPath' | 'getGraphqlWsPath' | 'getApiPath'> {
+  extends Pick<SettingsFunctions, 'getBaseUrl' | 'getGraphqlPath' | 'getGraphqlWsPath' | 'getApiPath'> {
   hook: HookFunction;
 }
 

@@ -1,7 +1,11 @@
+/**
+ * 多语言设置
+ */
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { hasOwn } from '@vue-async/utils';
-import { hook, globalLocale, localeFuncs } from '@/includes/functions';
+import { appStore } from '@/store/modules';
+import { hook } from '@/includes/functions';
 
 // Locales
 import enUS from '@/lang/en-US';
@@ -10,7 +14,7 @@ import { genLocaleConfig } from '@/utils/router';
 // Types
 import { Route } from 'vue-router';
 import { Plugin } from '@nuxt/types';
-import { LangConfig } from 'types/functions';
+import { LangConfig } from 'types/locale';
 
 Vue.use(VueI18n);
 
@@ -44,25 +48,30 @@ Object.defineProperties(Vue.prototype, {
   },
 });
 
-const plugin: Plugin = async (cxt) => {
+export async function Locale(...params: Parameters<Plugin>) {
+  const cxt = params[0];
   const { app } = cxt;
 
-  let defaultLocale = localeFuncs.getDefaultLocale();
+  let defaultLocale = appStore.locale;
   const fallbackLocale = 'en-US';
   const messages: Dictionary<any> = {
-    'en-US': enUS, // fallback locale
+    [fallbackLocale]: enUS, // fallback locale
   };
+
+  // hooks
+  await hook('locale:messages').exec(messages, fallbackLocale);
+  await hook('locale:set-support-languages').exec((languages: LangConfig[]) => appStore.addSupportLanguages(languages));
+
+  // 从 router
   const hasDocument = typeof document !== 'undefined';
-  const { hasLocale, preferredLocale } = genLocaleConfig(globalLocale);
+  const { hasLocale, preferredLocale } = genLocaleConfig({
+    locale: defaultLocale,
+    supportLanguages: appStore.supportLanguages,
+  });
 
   if (!defaultLocale || !hasLocale(defaultLocale)) {
     defaultLocale = preferredLocale;
   }
-
-  //对内置语言文件修改（fallbackLocale）
-  await hook('i18n_message_update').exec(messages[fallbackLocale], fallbackLocale);
-  // 自定义多语言消息(同步)
-  await hook('i18n-messages').exec(messages);
 
   const i18n = new VueI18n({
     locale: defaultLocale,
@@ -105,7 +114,7 @@ const plugin: Plugin = async (cxt) => {
   function loadLanguageAsync(locale: string): Promise<string> {
     if (!hasOwn(i18n.messages, locale)) {
       const { locale: newLocale } =
-        localeFuncs.getSupportLanguages().find((l: LangConfig) => locale === l.alternate || locale === l.locale) || {};
+        appStore.supportLanguages.find((l: LangConfig) => locale === l.alternate || locale === l.locale) || {};
 
       if (newLocale) {
         return import(/* webpackChunkName: "locale-[request]" */ `@/lang/${newLocale}`)
@@ -113,7 +122,7 @@ const plugin: Plugin = async (cxt) => {
             const { default: message, dateTimeFormat, numberFormat } = msgs;
 
             //对内置语言文件修改（fallback其它的）
-            return hook('i18n_message_update')
+            return hook('locale:message')
               .exec(message, newLocale)
               .then(() => {
                 i18n.setLocaleMessage(newLocale, message);
@@ -128,10 +137,10 @@ const plugin: Plugin = async (cxt) => {
             // lang目录下没有配置该语言
             if (err.code === 'MODULE_NOT_FOUND') {
               // 自定义多语言消息(异步)
-              return hook('i18n-messages-async')
-                .filter(newLocale, i18n)
-                .then((locale) => {
-                  return setLocale(locale);
+              return hook('locale:message-not-found')
+                .exec((message: VueI18n.LocaleMessageObject) => i18n.setLocaleMessage(newLocale, message), newLocale)
+                .then(() => {
+                  return setLocale(newLocale);
                 });
             }
             // 否则直接忽略并切换到新语言，让 i18n 处理 fallback 。
@@ -168,6 +177,4 @@ const plugin: Plugin = async (cxt) => {
 
   cxt.app.i18n = i18n;
   cxt.$i18n = i18n as any; // 添加 i18n 到 Context, todo: type error
-};
-
-export default plugin;
+}

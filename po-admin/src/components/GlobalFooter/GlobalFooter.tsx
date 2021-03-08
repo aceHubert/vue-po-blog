@@ -13,7 +13,6 @@ export default class GlobalFooter extends Vue {
             <a-icon type="github" />
             GitHub
           </a>
-          <a href="https://www.byteblogs.com/">byteblogs</a>
         </div>
         <div class={classes.copyright}>
           Copyright

@@ -2,7 +2,7 @@ import { PagerQuery, PagerResponse } from './pager';
 import { PageStatus } from 'src/includes/datas/enums';
 
 export type Page = {
-  id: number;
+  id: string;
   title: string;
   content: string;
   status: number;

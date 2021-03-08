@@ -5,7 +5,7 @@ import SelectLangDropdown from './SelectLangDropdown';
 // Types
 import * as tsx from 'vue-tsx-support';
 import { User, Actions } from './AvatarDropdown';
-import { LangConfig } from 'types/functions/locale';
+import { LangConfig } from 'types/locale';
 
 @Component({
   name: 'RightContent',
