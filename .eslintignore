@@ -2,6 +2,7 @@
 /docs/.next
 /coverage
 /tmp
+/po-config.sample.json
 build
 dist
 node_modules
