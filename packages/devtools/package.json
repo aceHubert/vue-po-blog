@@ -44,7 +44,7 @@
     "execa": "^4.0.3",
     "express": "^4.17.1",
     "lodash.camelcase": "^4.3.0",
-    "nuxt": "^2.14.6",
+    "nuxt": "^2.14.4",
     "vue-i18n": "^8.21.0",
     "vue-property-decorator": "^8.4.2",
     "vuex-module-decorators": "^0.17.0",

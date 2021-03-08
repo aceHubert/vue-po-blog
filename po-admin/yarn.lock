@@ -16,7 +16,7 @@
     vue-container-query "^0.1.0"
     vue-copy-to-clipboard "^1.0.3"
 
-"@ant-design/colors@^3.1.0", "@ant-design/colors@^3.2.1":
+"@ant-design/colors@^3.1.0":
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/@ant-design/colors/-/colors-3.2.2.tgz#5ad43d619e911f3488ebac303d606e66a8423903"
   integrity sha512-YKgNbG2dlzqMhA9NtI3/pbY16m3Yl/EeWBRa+lB1X1YaYxHrxNexiQYCLTWO/uDvAjLFMEDU+zR901waBtMtjQ==
@@ -1638,10 +1638,10 @@
   resolved "https://registry.yarnpkg.com/@types/zen-observable/-/zen-observable-0.8.2.tgz#808c9fa7e4517274ed555fa158f2de4b4f468e71"
   integrity sha512-HrCIVMLjE1MOozVoD86622S7aunluLb2PJdPfb3nYiEtohm8mIB/vyv0Fd37AdeMFrTUQXEunw78YloMA3Qilg==
 
-"@vue-async/module-loader@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@vue-async/module-loader/-/module-loader-1.1.0.tgz#3c0af5e93310741cbfb21c13811115a20a9188f4"
-  integrity sha512-aOJoplJD9otW4X20q/1N8o7HjsplgXbKs9e5Xq+Fp9abQ7e3A2s1oqwwuRg/Sd5EyXtQ9OkgIVflDPC5iDTtNg==
+"@vue-async/module-loader@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@vue-async/module-loader/-/module-loader-2.0.0.tgz#8b324b9089e8d5640f86d25686e1fa72a8fa6e82"
+  integrity sha512-Q2k8sO1L3WmWh28sWJTuupeVCJaBUw1Yy6loxK4Z4m4dteP8Su9c5MZq13hdh9KacCERoCdD1/StXT7V8fygpw==
   dependencies:
     "@vue-async/utils" "^1.1.0"
 
