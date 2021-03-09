@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import path from 'path';
 import fs from 'fs';
-import { error as globalError } from '@vue-async/utils';
+import warning from 'warning';
 
 class ReadConfigs {
   protected configs: Config | null = null;
@@ -17,7 +17,7 @@ class ReadConfigs {
         fs.accessSync(this.configPath, fs.constants.R_OK);
         return require(this.configPath);
       } catch (err) {
-        globalError(
+        warning(
           process.env.NODE_ENV === 'production',
           `Error to read config files from ${this.configPath}, Error:${err.message}`,
         );

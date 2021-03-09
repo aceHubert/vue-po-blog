@@ -1,5 +1,5 @@
 import { IsNotEmpty, MinLength, IsLocale, IsUrl, IsEmail } from 'class-validator';
-import { error as globalError } from '@vue-async/utils';
+import warning from 'warning';
 import { configs } from '@/utils/getConfig';
 import dbModels, { sequelize } from '../entities';
 import { PostCommentStatus, UserRole } from './enums';
@@ -97,7 +97,7 @@ export default class InitHelper {
     try {
       await sequelize.authenticate();
     } catch (err) {
-      globalError(process.env.NODE_ENV === 'production', 'Unable to connect to the database');
+      warning(process.env.NODE_ENV === 'production', 'Unable to connect to the database');
       return err;
     }
 
@@ -113,7 +113,7 @@ export default class InitHelper {
       }
       return false;
     } catch (err) {
-      globalError(process.env.NODE_ENV === 'production', 'Unable to sync to the database, Error:' + err.message);
+      warning(process.env.NODE_ENV === 'production', 'Unable to sync to the database, Error:' + err.message);
       throw err;
     }
   }
@@ -273,7 +273,7 @@ export default class InitHelper {
       return true;
     } catch (err) {
       await t.rollback();
-      globalError(process.env.NODE_ENV === 'production', 'An error occurred during init datas, Error:' + err.message);
+      warning(process.env.NODE_ENV === 'production', 'An error occurred during init datas, Error:' + err.message);
       return false;
     }
   }
