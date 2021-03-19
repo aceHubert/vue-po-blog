@@ -84,7 +84,7 @@ instance.interceptors.response.use(
               });
           } else if (statusCode === 500) {
             // 需要初始化
-            if (err.response.data && err.response.data.initRequired) {
+            if (err.response.data?.dbInitRequired) {
               appStore.goToInitPage();
             }
           }

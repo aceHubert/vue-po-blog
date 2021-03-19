@@ -103,7 +103,7 @@ class UserStore extends VuexModule {
     const Cookie = process.client ? cookie.clientCookie : cookie.serverCookie(req, res);
 
     return httpClient
-      .post<LoginResponse>('/auth/login', { loginName: loginQuery.username, loginPwd: loginQuery.password })
+      .post<LoginResponse>('/auth/login', { username: loginQuery.username, password: loginQuery.password })
       .then((model) => {
         if (model.success) {
           Cookie.set(ACCESS_TOKEN, model.accessToken, {
@@ -138,7 +138,7 @@ class UserStore extends VuexModule {
     }
 
     return httpClient
-      .get<RefreshTokenResponse>('/auth/refresh', { params: { refreshtoken } })
+      .post<RefreshTokenResponse>('/auth/refresh', null, { params: { refreshtoken } })
       .then((model) => {
         if (model.success) {
           Cookie.set(ACCESS_TOKEN, model.accessToken, {
