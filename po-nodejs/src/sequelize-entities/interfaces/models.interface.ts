@@ -1,0 +1,32 @@
+import { ModelCtor } from 'sequelize';
+import Opitons from '@/sequelize-entities/entities/options.entity';
+import Users from '@/sequelize-entities/entities/users.entity';
+import UserMeta from '@/sequelize-entities/entities/user-meta.entity';
+import Posts from '@/sequelize-entities/entities/posts.entity';
+import PostMeta from '@/sequelize-entities/entities/post-meta.entity';
+import Comments from '@/sequelize-entities/entities/comments.entity';
+import CommentMeta from '@/sequelize-entities/entities/comment-meta.entity';
+import Medias from '@/sequelize-entities/entities/medias.entity';
+import MediaMeta from '@/sequelize-entities/entities/media-meta.entity';
+import Links from '@/sequelize-entities/entities/links.entity';
+import Terms from '@/sequelize-entities/entities/terms.entity';
+import TermMeta from '@/sequelize-entities/entities/term-meta.entity';
+import TermTaxonomy from '@/sequelize-entities/entities/term-taxonomy.entity';
+import TermRelationships from '@/sequelize-entities/entities/term-relationships.entity';
+
+export type Models = {
+  Options: ModelCtor<Opitons>;
+  Users: ModelCtor<Users>;
+  UserMeta: ModelCtor<UserMeta>;
+  Posts: ModelCtor<Posts>;
+  PostMeta: ModelCtor<PostMeta>;
+  Comments: ModelCtor<Comments>;
+  CommentMeta: ModelCtor<CommentMeta>;
+  Medias: ModelCtor<Medias>;
+  MediaMeta: ModelCtor<MediaMeta>;
+  Links: ModelCtor<Links>;
+  Terms: ModelCtor<Terms>;
+  TermMeta: ModelCtor<TermMeta>;
+  TermTaxonomy: ModelCtor<TermTaxonomy>;
+  TermRelationships: ModelCtor<TermRelationships>;
+};
