@@ -10,12 +10,12 @@ import { User } from '@/users/models/user.model';
 import { PagedCommentArgs, PagedCommentChildrenArgs } from './dto/paged-comment.args';
 import { NewCommentInput } from './dto/new-comment.input';
 import { NewCommentMetaInput } from './dto/new-comment-meta.input';
-// import { UpdateCommentInput } from './dto/update-comment.input';
+import { UpdateCommentInput } from './dto/update-comment.input';
 import { Comment, PagedComment, CommentMeta } from './models/comment.model';
 
 @Resolver(() => Comment)
 export class CommentResolver extends createMetaResolver(Comment, CommentMeta, NewCommentMetaInput, CommentDataSource, {
-  name: '文章评论',
+  description: '文章评论',
 }) {
   constructor(
     protected readonly moduleRef: ModuleRef,
@@ -52,12 +52,8 @@ export class CommentResolver extends createMetaResolver(Comment, CommentMeta, Ne
     @Root() { id: parentId }: { id: number },
     @Fields() fields: ResolveTree,
   ) {
-    const fixArgs: Omit<PagedCommentArgs, 'postId'> = {
-      ...args,
-      parentId,
-    };
     return this.commentDataSource.getPaged(
-      fixArgs,
+      { ...args, parentId },
       this.getFieldNames(fields.fieldsByTypeName.PagedComment.rows.fieldsByTypeName.Comment),
     );
   }
@@ -78,5 +74,18 @@ export class CommentResolver extends createMetaResolver(Comment, CommentMeta, Ne
   })
   addComment(@Args('model', { type: () => NewCommentInput }) model: NewCommentInput) {
     return this.commentDataSource.create(model);
+  }
+
+  @Mutation((returns) => Boolean, { description: '修改评论' })
+  modifyComment(
+    @Args('id', { type: () => ID, description: 'Comment id' }) id: number,
+    @Args('model', { type: () => UpdateCommentInput }) model: UpdateCommentInput,
+  ) {
+    return this.commentDataSource.update(id, model);
+  }
+
+  @Mutation((returns) => Boolean, { description: '删除评论' })
+  removeComment(@Args('id', { type: () => ID, description: 'Comment id' }) id: number) {
+    return this.commentDataSource.delete(id);
   }
 }

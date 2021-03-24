@@ -1,11 +1,8 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { OptionAutoload } from '@/common/helpers/enums';
 
-// Types
-import { OptionCreationAttributes } from '@/orm-entities/interfaces/options.interface';
-
 @InputType({ description: '配置新建模型' })
-export class NewOptionInput implements OptionCreationAttributes {
+export class NewOptionInput {
   @Field({ description: 'Name' })
   optionName!: string;
 

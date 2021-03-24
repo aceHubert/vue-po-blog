@@ -1,11 +1,8 @@
 import { Field, InputType, ID } from '@nestjs/graphql';
 import { NewMetaInput } from '@/common/models/meta.model';
 
-// Types
-import { MediaCreationAttributes } from '@/orm-entities/interfaces/medias.interface';
-
 @InputType({ description: '媒体新建模型' })
-export class NewMediaInput implements MediaCreationAttributes {
+export class NewMediaInput {
   @Field({ description: '文件名' })
   fileName!: string;
 

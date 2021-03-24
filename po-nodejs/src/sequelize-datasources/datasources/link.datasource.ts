@@ -3,11 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseDataSource } from './base.datasource';
 
 // Types
-import { PagedLinkArgs } from '@/links/dto/paged-link.args';
-import { NewLinkInput } from '@/links/dto/new-link.input';
-import { UpdateLinkInput } from '@/links/dto/update-link.input';
-import { PagedLink } from '@/links/models/link.model';
-import Link from '@/sequelize-entities/entities/links.entity';
+import { LinkModel, PagedLinkModel, PagedLinkArgs, NewLinkInput, UpdateLinkInput } from '../interfaces/link.interface';
 
 @Injectable()
 export class LinkDataSource extends BaseDataSource {
@@ -15,13 +11,13 @@ export class LinkDataSource extends BaseDataSource {
     super(moduleRef);
   }
 
-  get(id: number, fields: string[]): Promise<Link | null> {
+  get(id: number, fields: string[]): Promise<LinkModel | null> {
     return this.models.Links.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Links),
-    });
+    }).then((link) => link?.toJSON() as LinkModel);
   }
 
-  getPaged({ offset, limit, ...query }: PagedLinkArgs, fields: string[]): Promise<PagedLink> {
+  getPaged({ offset, limit, ...query }: PagedLinkArgs, fields: string[]): Promise<PagedLinkModel> {
     const { name, ...restQuery } = query;
     return this.models.Links.findAndCountAll({
       attributes: this.filterFields(fields, this.models.Links),
@@ -39,7 +35,7 @@ export class LinkDataSource extends BaseDataSource {
       limit,
       order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
-      rows,
+      rows: (rows as unknown) as PagedLinkModel['rows'],
       total,
     }));
   }
@@ -48,8 +44,9 @@ export class LinkDataSource extends BaseDataSource {
    * 添加链接
    * @param model 添加实体模型
    */
-  create(model: NewLinkInput): Promise<Link | null> {
-    return this.models.Links.create(model);
+  async create(model: NewLinkInput): Promise<LinkModel | null> {
+    const link = await this.models.Links.create(model);
+    return link.toJSON() as LinkModel;
   }
 
   /**

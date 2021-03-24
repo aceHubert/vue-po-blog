@@ -9,6 +9,9 @@ export class NewTermInput {
   @Field({ description: '类别' })
   taxonomy!: string;
 
+  @Field({ description: '类别说明' })
+  description!: string;
+
   @Field({ nullable: true, description: '别名' })
   slug?: string;
 
@@ -19,5 +22,5 @@ export class NewTermInput {
   objectId?: number;
 
   @Field((type) => [NewMetaInput!], { nullable: true, description: '协议元数据' })
-  public metas?: NewMetaInput[];
+  metas?: NewMetaInput[];
 }

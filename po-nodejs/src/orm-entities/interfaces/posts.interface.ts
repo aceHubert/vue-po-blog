@@ -26,9 +26,10 @@ export interface PostAttributes {
   parent: number;
   commentStatus: PostCommentStatus;
   commentCount: number;
+  updatedAt: Date;
+  createdAt: Date;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostCreationAttributes
   extends Optional<
     PostAttributes,

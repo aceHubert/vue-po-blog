@@ -1,12 +1,9 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { Length, MinLength, IsEmail } from 'class-validator';
+import { Length, MinLength, IsEmail, IsUrl } from 'class-validator';
 import { UserStatus, UserRole } from '@/common/helpers/enums';
 
-// Types
-import { UserCreationAttributes } from '@/orm-entities/interfaces/users.interface';
-
 @InputType({ description: '用户新建模型' })
-export class NewUserInput implements UserCreationAttributes {
+export class NewUserInput {
   @Field({ description: '登录名' })
   loginName!: string;
 
@@ -29,6 +26,8 @@ export class NewUserInput implements UserCreationAttributes {
   email!: string;
 
   @Field({ description: '客户端 URL' })
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  @IsUrl({ require_tld: false }, { message: 'Url 格式错误' })
   url!: string;
 
   @Field(() => UserStatus, { defaultValue: UserStatus.Enable, description: '状态' })

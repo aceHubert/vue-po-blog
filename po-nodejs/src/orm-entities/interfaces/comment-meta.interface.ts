@@ -5,8 +5,8 @@ export interface CommentMetaAttributes {
   commentId: number;
   metaKey: string;
   metaValue: string;
+  description?: string;
   private: 'yes' | 'no';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CommentMetaCreationAttributes extends Optional<CommentMetaAttributes, 'id' | 'private'> {}

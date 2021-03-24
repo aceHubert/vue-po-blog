@@ -9,5 +9,4 @@ export interface TermTaxonomyAttributes {
   count: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TermTaxonomyCreationAttributes extends Optional<TermTaxonomyAttributes, 'id' | 'parentId' | 'count'> {}

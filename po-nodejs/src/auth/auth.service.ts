@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { isPlainObject } from 'lodash';
-import { Injectable, UnauthorizedException, CACHE_MANAGER, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@/config/config.service';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
@@ -10,6 +10,8 @@ import { TokenResponse, RefreshTokenResponse } from './interfaces/token-response
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger('AuthService');
+
   constructor(
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
     private readonly config: ConfigService,
@@ -65,7 +67,9 @@ export class AuthService {
     if (!screct) {
       screct = await this.userDataSource.getTokenScrect(userId);
       // 保存到缓存
-      await this.cache.set(cacheKey, screct!, { ttl: this.jwtTokenExpiresInSeconds });
+      await this.cache.set(cacheKey, screct, { ttl: this.jwtTokenExpiresInSeconds }, (err) => {
+        err && this.logger.error(`Set cache error, ${err.message}`);
+      });
     }
     return screct!;
   }
@@ -92,9 +96,11 @@ export class AuthService {
    * @param userId User id
    */
   async updateScrect(userId: number): Promise<string> {
-    const screct = this.userDataSource.updateTokenScrect(userId);
+    const screct = await this.userDataSource.updateTokenScrect(userId);
     // 修改到缓存
-    await this.cache.set(this.getScrectCacheKey(userId), screct, { ttl: this.jwtTokenExpiresInSeconds });
+    await this.cache.set(this.getScrectCacheKey(userId), screct, { ttl: this.jwtTokenExpiresInSeconds }, (err) => {
+      err && this.logger.error(`Set cache error, ${err.message}`);
+    });
     return screct;
   }
 
@@ -223,7 +229,7 @@ export class AuthService {
     let payload = await this.verifyRefreshToken(token);
     if (payload && isPlainObject(payload) && payload.id) {
       // 角色(刷新时重新获取，以免在中途被修改)
-      const role = await this.userDataSource.getUserRole(payload.id);
+      const role = await this.userDataSource.getRole(payload.id);
 
       payload = {
         id: payload.id,

@@ -5,8 +5,8 @@ export interface TermMetaAttributes {
   termId: number;
   metaKey: string;
   metaValue: string;
+  description?: string;
   private: 'yes' | 'no';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TermMetaCreationAttributes extends Optional<TermMetaAttributes, 'id' | 'private'> {}

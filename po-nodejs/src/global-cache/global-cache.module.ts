@@ -1,6 +1,7 @@
-import { Module, CacheModule } from '@nestjs/common';
+import { Module, CacheModule, Global } from '@nestjs/common';
 import { ConfigService } from '@/config/config.service';
 
+@Global()
 @Module({
   imports: [
     CacheModule.registerAsync({
@@ -14,4 +15,4 @@ import { ConfigService } from '@/config/config.service';
   ],
   exports: [CacheModule],
 })
-export class CustomCacheModule {}
+export class GlobalCacheModule {}

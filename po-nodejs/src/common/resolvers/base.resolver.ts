@@ -1,7 +1,7 @@
 // Types
 import { ResolveTree } from '../decorators/field.decorator';
 
-export class BaseResolver {
+export abstract class BaseResolver {
   /**
    * 获取字段名
    * @param root

@@ -1,12 +1,10 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
+import { ValidationError } from '@/common/utils/errors.utils';
 import { BaseDataSource } from './base.datasource';
 
 // Types
-import { OptionArgs } from '@/options/dto/option.args';
-import { NewOptionInput } from '@/options/dto/new-option.input';
-import { UpdateOptionInput } from '@/options/dto/update-option.input';
-import Option from '@/sequelize-entities/entities/options.entity';
+import { OptionModel, OptionArgs, NewOptionInput, UpdateOptionInput } from '../interfaces/option.interface';
 
 @Injectable()
 export class OptionDataSource extends BaseDataSource {
@@ -20,19 +18,19 @@ export class OptionDataSource extends BaseDataSource {
    * @param id Option id
    * @param fields 返回的字段
    */
-  get(id: number, fields: string[]): Promise<Option | null> {
+  get(id: number, fields: string[]): Promise<OptionModel | null> {
     return this.models.Options.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Options),
     }).then((option) => {
       if (option) {
-        const { optionName, ...rest } = option.toJSON() as Option;
+        const { optionName, ...rest } = option.toJSON() as any;
         return {
           ...rest,
           optionName:
             optionName && optionName.startsWith(this.tablePrefix)
               ? optionName.substr(this.tablePrefix.length)
               : optionName,
-        } as Option;
+        } as OptionModel;
       }
       return null;
     });
@@ -44,7 +42,7 @@ export class OptionDataSource extends BaseDataSource {
    * @param query 搜索条件
    * @param fields 返回的字段
    */
-  getList(query: OptionArgs, fields: string[]): Promise<Option[]> {
+  getList(query: OptionArgs, fields: string[]): Promise<OptionModel[]> {
     return this.models.Options.findAll({
       attributes: this.filterFields(fields, this.models.Options),
       where: {
@@ -52,14 +50,14 @@ export class OptionDataSource extends BaseDataSource {
       },
     }).then((options) =>
       options.map((option) => {
-        const { optionName, ...rest } = option.toJSON() as Option;
+        const { optionName, ...rest } = option.toJSON() as any;
         return {
           ...rest,
           optionName:
             optionName && optionName.startsWith(this.tablePrefix)
               ? optionName.substr(this.tablePrefix.length)
               : optionName,
-        } as Option;
+        } as OptionModel;
       }),
     );
   }
@@ -69,7 +67,7 @@ export class OptionDataSource extends BaseDataSource {
    * 反回第一个匹配name,或加上table 前缀后的name的值
    * @param optionName optionName
    */
-  getOptionValue(optionName: string): Promise<Option['optionValue'] | null> {
+  getOptionValue(optionName: string): Promise<OptionModel['optionValue'] | null> {
     return this.models.Options.findOne({
       attributes: ['optionValue'],
       where: {
@@ -80,7 +78,7 @@ export class OptionDataSource extends BaseDataSource {
           },
         },
       },
-    }).then((option: Option | null) => (option ? option.optionValue : null));
+    }).then((option) => option?.optionValue as string);
   }
 
   /**
@@ -106,13 +104,16 @@ export class OptionDataSource extends BaseDataSource {
    * 新建 Options
    * @param model 新建模型
    */
-  async create(model: NewOptionInput): Promise<Option | false> {
+  async create(model: NewOptionInput): Promise<OptionModel | false> {
     const isExists = await this.isExists(model.optionName);
 
-    if (!isExists) {
-      return await this.models.Options.create(model);
+    if (isExists) {
+      throw new ValidationError(`The option name "${model.optionName}" has existed!`);
     }
-    return false;
+
+    const option = await this.models.Options.create(model);
+    super.resetOptions();
+    return option.toJSON() as OptionModel;
   }
 
   /**
@@ -120,19 +121,23 @@ export class OptionDataSource extends BaseDataSource {
    * @param id Options id
    * @param model 修改实体模型
    */
-  update(id: number, model: UpdateOptionInput): Promise<boolean> {
-    return this.models.Options.update(model, {
+  async update(id: number, model: UpdateOptionInput): Promise<boolean> {
+    const result = await this.models.Options.update(model, {
       where: { id },
     }).then(([count]) => count > 0);
+    super.resetOptions();
+    return result;
   }
 
   /**
    * 删除 Options
    * @param id Option Id
    */
-  delete(id: number): Promise<boolean> {
-    return this.models.Options.destroy({
+  async delete(id: number): Promise<boolean> {
+    const result = await this.models.Options.destroy({
       where: { id },
     }).then((count) => count > 0);
+    super.resetOptions();
+    return result;
   }
 }

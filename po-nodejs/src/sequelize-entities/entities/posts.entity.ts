@@ -11,7 +11,10 @@ import {
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 
-export default class Posts extends Model<PostAttributes, PostCreationAttributes> {
+export default class Posts extends Model<
+  Omit<PostAttributes, 'updatedAt' | 'createdAt'>,
+  Omit<PostCreationAttributes, 'updatedAt' | 'createdAt'>
+> {
   public id!: number;
   public title!: string;
   public name!: string;

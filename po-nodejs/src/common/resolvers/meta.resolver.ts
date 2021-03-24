@@ -9,56 +9,74 @@ import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { BaseResolver } from './base.resolver';
 
 // Types
-import { IMetaDataSource } from '@/sequelize-datasources/interfaces';
-import { Meta } from '../models/meta.model';
+import { MetaDataSource } from '@/sequelize-datasources/interfaces';
+import { Meta, NewMetaInput } from '../models/meta.model';
 
 export type Options = {
-  /** 模块名称， 默认值为  rootModel.name */
-  name?: string;
+  /**
+   * Query/Mutation命名(以大写命名)， 默认值为:  resolverType.name
+   * 例如设置为Post,则会命名为 postMetas, addPostMeta, modifyPostMeta, removePostMeta 的Query和Mutation方法
+   */
+  resolverName?: string;
+  /**
+   * resolverName 描述， 默认值为: resolverName 或  resolverType.name
+   */
+  description?: string;
 };
 
 export function createMetaResolver<
-  MetaModelType,
+  MetaReturnType,
   NewMetaInputType,
-  MetaDataSourceType extends IMetaDataSource<MetaModelType, NewMetaInputType>
+  MetaDataSourceType extends MetaDataSource<MetaReturnType, NewMetaInputType>
 >(
-  rootModel: Type,
-  metaModel: Type<MetaModelType>,
-  newMetaInput: Type<NewMetaInputType>,
-  metaDataSource: Type<MetaDataSourceType>,
-  { name }: Options = {},
+  resolverType: Function,
+  metaReturnType: Type<MetaReturnType>,
+  newMetaInputType: Type<NewMetaInputType>,
+  metaDataSourceTypeOrToken: Type<MetaDataSourceType> | string | symbol,
+  { resolverName, description }: Options = {},
 ) {
-  @Resolver(() => rootModel, { isAbstract: true })
+  @Resolver(() => resolverType, { isAbstract: true })
   abstract class MetaResolver extends BaseResolver implements OnModuleInit {
-    private metaDataSource!: IMetaDataSource<MetaModelType, NewMetaInputType>;
+    private metaDataSource!: MetaDataSource<MetaReturnType, NewMetaInputType>;
 
     constructor(protected readonly moduleRef: ModuleRef) {
       super();
     }
 
     onModuleInit() {
-      this.metaDataSource = this.moduleRef.get(metaDataSource, { strict: false });
+      this.metaDataSource = this.moduleRef.get(metaDataSourceTypeOrToken, { strict: false });
     }
 
-    @Query((returns) => [metaModel!], {
-      name: `${lowerFirst(rootModel.name)}Metas`,
-      description: `获取 ${name || rootModel.name} 元数据`,
+    /**
+     * 获取元数据集合
+     *
+     */
+    @Query((returns) => [metaReturnType!], {
+      name: `${lowerFirst(resolverName || resolverType.name)}Metas`,
+      description: `获取 ${description || resolverName || resolverType.name} 元数据`,
     })
     getMetas(
-      @Args(`${lowerFirst(rootModel.name)}Id`, { type: () => ID, description: `${rootModel.name} Id` })
+      @Args(`${lowerFirst(resolverName || resolverType.name)}Id`, {
+        type: () => ID,
+        description: `${description || resolverName || resolverType.name} Id`,
+      })
       modelId: number,
-      @Args('metaKeys', { type: () => [String!], nullable: true, description: 'Meta keys' })
+      @Args('metaKeys', {
+        type: () => [String!],
+        nullable: true,
+        description: 'meta keys(如果为null 或集合长度为0时，返回所有 metas)',
+      })
       metaKeys: string[] | undefined,
       @Fields() fields: ResolveTree,
     ) {
       return this.metaDataSource.getMetas(
         modelId,
         metaKeys,
-        this.getFieldNames(fields.fieldsByTypeName[metaModel.name]),
+        this.getFieldNames(fields.fieldsByTypeName[metaReturnType.name]),
       );
     }
 
-    @ResolveField((returns) => [Meta], { description: `${name || rootModel.name} 元数据` })
+    @ResolveField((returns) => [Meta], { description: `${description || resolverName || resolverType.name} 元数据` })
     metas(
       @Root() { id: modelId }: { id: number },
       @Args('metaKeys', { type: () => [String!], nullable: true, description: 'Meta keys' })
@@ -68,32 +86,48 @@ export function createMetaResolver<
       return this.metaDataSource.getMetas(modelId, metaKeys, this.getFieldNames(fields.fieldsByTypeName.Meta));
     }
 
-    @Mutation((returns) => metaModel, {
+    @Mutation((returns) => metaReturnType, {
       nullable: true,
-      name: `add${rootModel.name}Meta`,
-      description: `添加 ${name || rootModel.name} 元数据`,
+      name: `add${resolverName || resolverType.name}Meta`,
+      description: `添加 ${description || resolverName || resolverType.name} 元数据`,
     })
-    addMeta(@Args('model', { type: () => newMetaInput }) model: NewMetaInputType) {
+    addMeta(@Args('model', { type: () => newMetaInputType }) model: NewMetaInputType) {
       return this.metaDataSource.createMeta(model);
     }
 
-    @Mutation((returns) => Boolean, {
-      name: `update${rootModel.name}Meta`,
-      description: `修改 ${name || rootModel.name} 元数据`,
+    @Mutation((returns) => [metaReturnType!], {
+      name: `add${resolverName || resolverType.name}Metas`,
+      description: `批量添加 ${description || resolverName || resolverType.name} 元数据`,
     })
-    updateMeta(
-      @Args('id', { type: () => ID, description: `${name || rootModel.name} 元数据Id` }) id: number,
+    addMetas(
+      @Args('id', { type: () => ID, description: `${description || resolverName || resolverType.name} Meta Id` })
+      id: number,
+      @Args('models', { type: () => [NewMetaInput!] }) models: NewMetaInput[],
+    ) {
+      return this.metaDataSource.blukCreateMeta(id, models);
+    }
+
+    @Mutation((returns) => Boolean, {
+      name: `modify${resolverName || resolverType.name}Meta`,
+      description: `修改 ${description || resolverName || resolverType.name} 元数据`,
+    })
+    modifyMeta(
+      @Args('id', { type: () => ID, description: `${description || resolverName || resolverType.name} Meta Id` })
+      id: number,
       @Args('metaValue') metaValue: string,
     ) {
       return this.metaDataSource.updateMeta(id, metaValue);
     }
 
     @Mutation((returns) => Boolean, {
-      name: `update${rootModel.name}MetaByKey`,
-      description: `修改 ${name || rootModel.name} 元数据`,
+      name: `modify${resolverName || resolverType.name}MetaByKey`,
+      description: `修改 ${description || resolverName || resolverType.name} 元数据`,
     })
-    updateMetaByKey(
-      @Args(`${lowerFirst(rootModel.name)}Id`, { type: () => ID, description: `${rootModel.name} Id` })
+    modifyMetaByKey(
+      @Args(`${lowerFirst(resolverName || resolverType.name)}Id`, {
+        type: () => ID,
+        description: `${description || resolverName || resolverType.name} Id`,
+      })
       modelId: number,
       @Args('metaKey', { description: 'Meta key' }) metaKey: string,
       @Args('metaValue', { description: 'Meta value' }) metaValue: string,
@@ -102,10 +136,13 @@ export function createMetaResolver<
     }
 
     @Mutation((returns) => Boolean, {
-      name: `remove${rootModel.name}Meta`,
-      description: `删除 ${name || rootModel.name} 元数据`,
+      name: `remove${resolverName || resolverType.name}Meta`,
+      description: `删除 ${description || resolverName || resolverType.name} 元数据`,
     })
-    removeMeta(@Args('id', { type: () => ID, description: `${name || rootModel.name} 元数据Id` }) id: number) {
+    removeMeta(
+      @Args('id', { type: () => ID, description: `${description || resolverName || resolverType.name} Meta Id` })
+      id: number,
+    ) {
       return this.metaDataSource.deleteMeta(id);
     }
   }

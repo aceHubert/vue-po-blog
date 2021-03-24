@@ -12,14 +12,14 @@ import { Media, PagedMedia, MediaMeta } from './models/media.model';
 
 @Resolver(() => Media)
 export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMediaMetaInput, MediaDataSource, {
-  name: '媒体',
+  description: '媒体',
 }) {
   constructor(protected readonly moduleRef: ModuleRef, private readonly mediaDataSource: MediaDataSource) {
     super(moduleRef);
   }
 
   @Query((returns) => Media, { nullable: true, description: '获取媒体' })
-  media(@Args('id', { type: () => ID! }) id: number, @Fields() fields: ResolveTree) {
+  media(@Args('id', { type: () => ID!, description: 'Media id' }) id: number, @Fields() fields: ResolveTree) {
     return this.mediaDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.Media));
   }
 
@@ -34,5 +34,10 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
   @Mutation((returns) => Media, { nullable: true, description: '添加媒体' })
   addMedia(@Args('model', { type: () => NewMediaInput }) model: NewMediaInput) {
     return this.mediaDataSource.create(model);
+  }
+
+  @Mutation((returns) => Boolean, { description: '删除媒体' })
+  removeMedia(@Args('id', { type: () => ID!, description: 'Media id' }) id: number) {
+    return this.mediaDataSource.delete(id);
   }
 }

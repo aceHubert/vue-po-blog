@@ -10,5 +10,4 @@ export interface OptionAttributes {
   autoload: OptionAutoload;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OptionCreationAttributes extends Optional<OptionAttributes, 'id' | 'autoload'> {}

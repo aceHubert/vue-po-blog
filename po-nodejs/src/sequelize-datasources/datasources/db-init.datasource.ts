@@ -1,6 +1,5 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import warning from 'warning';
 import { PostCommentStatus, UserRole } from '@/common/helpers/enums';
 import { UserRoles } from '@/common/helpers/user-roles';
 import { InitOptionKeys, InitOptionTablePrefixKeys } from '@/common/helpers/init-option-keys';
@@ -8,7 +7,7 @@ import { BaseDataSource } from './base.datasource';
 
 // Types
 import { Sequelize, SyncOptions } from 'sequelize';
-import { InitArgs } from '../interfaces';
+import { InitArgs } from '../interfaces/init-args.interface';
 
 @Injectable()
 export class DbInitDataSource extends BaseDataSource {
@@ -31,7 +30,7 @@ export class DbInitDataSource extends BaseDataSource {
     try {
       await this.sequelize.authenticate();
     } catch (err) {
-      warning(process.env.NODE_ENV === 'production', 'Unable to connect to the database');
+      this.logger.error(`Unable to connect to the database, Error: ${err.message}`);
       throw err;
     }
 
@@ -47,7 +46,7 @@ export class DbInitDataSource extends BaseDataSource {
       }
       return false;
     } catch (err) {
-      warning(process.env.NODE_ENV === 'production', 'Unable to sync to the database, Error:' + err.message);
+      this.logger.error(`Unable to sync to the database, Error: ${err.message}`);
       throw err;
     }
   }
@@ -60,7 +59,8 @@ export class DbInitDataSource extends BaseDataSource {
    * @access None
    */
   haveTables(): Promise<boolean> {
-    if (this.getConfig('DB_DIALECT') === 'mysql') {
+    const dialect = this.getConfig('DB_DIALECT');
+    if (dialect === 'mysql') {
       return this.sequelize
         .query(
           'select count(1) as tableCount from `INFORMATION_SCHEMA`.`TABLES` where `TABLE_SCHEMA`= (select database())',
@@ -71,6 +71,7 @@ export class DbInitDataSource extends BaseDataSource {
         });
     } else {
       // todo: 其它数据库
+      this.logger.warn(`${dialect} is not supported!`);
       return Promise.resolve(false);
     }
   }
@@ -207,7 +208,7 @@ export class DbInitDataSource extends BaseDataSource {
       return true;
     } catch (err) {
       await t.rollback();
-      warning(process.env.NODE_ENV === 'production', 'An error occurred during init datas, Error:' + err.message);
+      this.logger.error(`An error occurred during init datas, Error: ${err.message}`);
       return false;
     }
   }

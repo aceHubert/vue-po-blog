@@ -1,19 +1,21 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
+import { ValidationError } from '@/common/utils/errors.utils';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
-import { PagedCommentArgs } from '@/comments/dto/paged-comment.args';
-import { NewCommentInput } from '@/comments/dto/new-comment.input';
-import { NewCommentMetaInput } from '@/comments/dto/new-comment-meta.input';
-import { UpdateCommentInput } from '@/comments/dto/update-comment.input';
-import { PagedComment } from '@/comments/models/comment.model';
-import { CommentCreationAttributes, CommentMetaCreationAttributes } from '@/orm-entities/interfaces';
-import Comment from '@/sequelize-entities/entities/comments.entity';
-import CommentMeta from '@/sequelize-entities/entities/comment-meta.entity';
+import {
+  CommentModel,
+  CommentMetaModel,
+  PagedCommentArgs,
+  PagedCommentModel,
+  NewCommentInput,
+  NewCommentMetaInput,
+  UpdateCommentInput,
+} from '../interfaces/comment.interface';
 
 @Injectable()
-export class CommentDataSource extends MetaDataSource<CommentMeta, NewCommentMetaInput> {
+export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewCommentMetaInput> {
   constructor(protected readonly moduleRef: ModuleRef) {
     super(moduleRef);
   }
@@ -23,10 +25,15 @@ export class CommentDataSource extends MetaDataSource<CommentMeta, NewCommentMet
    * @param id 评论 Id
    * @param fields 返回的字段
    */
-  get(id: number, fields: string[]): Promise<Comment | null> {
+  get(id: number, fields: string[]): Promise<CommentModel | null> {
+    // 主键(meta 查询)
+    if (!fields.includes('id')) {
+      fields.push('id');
+    }
+
     return this.models.Comments.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Comments),
-    });
+    }).then((comment) => comment?.toJSON() as CommentModel);
   }
 
   /**
@@ -34,10 +41,7 @@ export class CommentDataSource extends MetaDataSource<CommentMeta, NewCommentMet
    * @param query 分页 Query 参数
    * @param fields 返回的字段
    */
-  getPaged(
-    { offset, limit, ...query }: PagedCommentArgs | Omit<PagedCommentArgs, 'postId'>,
-    fields: string[],
-  ): Promise<PagedComment> {
+  getPaged({ offset, limit, ...query }: PagedCommentArgs, fields: string[]): Promise<PagedCommentModel> {
     return this.models.Comments.findAndCountAll({
       attributes: this.filterFields(fields, this.models.Comments),
       where: {
@@ -47,7 +51,7 @@ export class CommentDataSource extends MetaDataSource<CommentMeta, NewCommentMet
       limit,
       order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
-      rows,
+      rows: rows as PagedCommentModel['rows'],
       total,
     }));
   }
@@ -57,29 +61,44 @@ export class CommentDataSource extends MetaDataSource<CommentMeta, NewCommentMet
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewCommentInput): Promise<Comment> {
+  async create(model: NewCommentInput): Promise<CommentModel> {
     const { metas, ...rest } = model;
-    const creationModel: CommentCreationAttributes = {
-      ...rest,
-    };
 
-    const comment = await this.models.Comments.create(creationModel);
+    const t = await this.sequelize.transaction();
+    try {
+      const comment = await this.models.Comments.create(rest, { transaction: t });
 
-    if (metas && metas.length) {
-      const metaCreationModels: CommentMetaCreationAttributes[] = metas.map((meta) => {
-        return {
-          ...meta,
-          commentId: comment.id,
-        };
-      });
-      this.models.CommentMeta.bulkCreate(metaCreationModels);
+      if (metas && metas.length) {
+        const falseOrMetaKeys = await this.isMetaExists(
+          comment.id,
+          metas.map((meta) => meta.metaKey),
+        );
+        if (falseOrMetaKeys) {
+          throw new ValidationError(`The meta keys (${falseOrMetaKeys.join(',')}) have existed!`);
+        } else {
+          this.models.CommentMeta.bulkCreate(
+            metas.map((meta) => {
+              return {
+                ...meta,
+                commentId: comment.id,
+              };
+            }),
+            { transaction: t },
+          );
+        }
+      }
+
+      await t.commit();
+
+      return comment.toJSON() as CommentModel;
+    } catch (err) {
+      await t.rollback();
+      throw err;
     }
-
-    return comment;
   }
 
   /**
-   * 修改链接
+   * 修改评论
    * @param id Link Id
    * @param model 修改实体模型
    */
@@ -87,5 +106,36 @@ export class CommentDataSource extends MetaDataSource<CommentMeta, NewCommentMet
     return this.models.Comments.update(model, {
       where: { id },
     }).then(([count]) => count > 0);
+  }
+
+  /**
+   * 删除评论
+   * @param id comment id
+   */
+  async delete(id: number): Promise<boolean> {
+    const t = await this.sequelize.transaction();
+    try {
+      await this.models.CommentMeta.destroy({
+        where: {
+          commentId: id,
+        },
+        transaction: t,
+      });
+
+      await this.models.Comments.destroy({
+        where: {
+          id,
+        },
+        transaction: t,
+      });
+
+      await t.commit();
+
+      return true;
+    } catch (err) {
+      this.logger.error(`An error occurred during deleting comment (id:${id}), Error: ${err.message}`);
+      await t.rollback();
+      return false;
+    }
   }
 }

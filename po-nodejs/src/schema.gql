@@ -2,20 +2,49 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-"""元数据实体模型"""
-type Meta {
+"""用户模型"""
+type User implements BaseUser {
   """Id"""
   id: ID!
 
-  """元数据 Key"""
-  metaKey: String!
+  """登录名"""
+  loginName: String!
 
-  """元数据 Value"""
-  metaValue: String!
+  """昵称"""
+  niceName: String!
+
+  """前台显示名称"""
+  displayName: String!
+
+  """手机号码"""
+  mobile: String
+
+  """电子邮箱"""
+  email: String!
+
+  """注册时客户端的 URL"""
+  url: String!
+
+  """用户状态"""
+  status: USER_STATUS!
+
+  """修改时间"""
+  updatedAt: DateTime!
+
+  """创建时间"""
+  createdAt: DateTime!
+
+  """用户 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+
+  """是否是超级管理员"""
+  isSuperAdmin: Boolean!
 }
 
-"""用户模型"""
-type User {
+interface BaseUser {
   """Id"""
   id: ID!
 
@@ -67,8 +96,23 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-"""用户模型(包含角色)"""
-type UserWithRole {
+"""元数据实体模型"""
+type Meta {
+  """Id"""
+  id: ID!
+
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+}
+
+"""用户模型（包含角色）"""
+type UserWithRole implements BaseUser {
   """Id"""
   id: ID!
 
@@ -108,18 +152,17 @@ type UserWithRole {
   """是否是超级管理员"""
   isSuperAdmin: Boolean!
 
-  """用户角色(包含 None)"""
-  role: USER_ROLE_WITH_NONE
+  """用户角色"""
+  role: USER_ROLE
 }
 
-"""UserRoleWithNone"""
-enum USER_ROLE_WITH_NONE {
+"""UserRole"""
+enum USER_ROLE {
   Administrator
   Editor
   Author
   Contributor
   Subscriber
-  None
 }
 
 """用户分页模型"""
@@ -146,6 +189,16 @@ type UserRoleCount {
   role: USER_ROLE_WITH_NONE!
 }
 
+"""UserRoleWithNone"""
+enum USER_ROLE_WITH_NONE {
+  Administrator
+  Editor
+  Author
+  Contributor
+  Subscriber
+  None
+}
+
 """用户元数据模型"""
 type UserMeta {
   """Id"""
@@ -156,6 +209,9 @@ type UserMeta {
 
   """元数据 Value"""
   metaValue: String!
+
+  """描述"""
+  description: String
 
   """User Id"""
   userId: ID!
@@ -242,6 +298,9 @@ type CommentMeta {
 
   """元数据 Value"""
   metaValue: String!
+
+  """描述"""
+  description: String
 
   """Comment Id"""
   commentId: ID!
@@ -347,6 +406,9 @@ type MediaMeta {
   """元数据 Value"""
   metaValue: String!
 
+  """描述"""
+  description: String
+
   """Media Id"""
   mediaId: ID!
 }
@@ -393,7 +455,7 @@ type Page {
   ): [Meta!]!
 
   """作者"""
-  author: User!
+  author: Author!
 }
 
 """PostStatus"""
@@ -408,21 +470,6 @@ enum POST_STATUS {
 type PagedPage {
   rows: [Page!]!
   total: Int!
-}
-
-"""页面元数据模型"""
-type PageMeta {
-  """Id"""
-  id: ID!
-
-  """元数据 Key"""
-  metaKey: String!
-
-  """元数据 Value"""
-  metaValue: String!
-
-  """Page Id"""
-  pageId: ID!
 }
 
 """文章模型"""
@@ -461,13 +508,22 @@ type Post {
   ): [Meta!]!
 
   """作者"""
-  author: User!
+  author: Author!
 }
 
 """PostCommentStatus"""
 enum POST_COMMENT_STATUS {
   Disabled
   Enable
+}
+
+"""作者"""
+type Author {
+  """Id"""
+  id: ID!
+
+  """前台显示名称"""
+  displayName: String!
 }
 
 """文章分页模型"""
@@ -523,6 +579,9 @@ type PostMeta {
   """元数据 Value"""
   metaValue: String!
 
+  """描述"""
+  description: String
+
   """Post Id"""
   postId: ID!
 }
@@ -532,6 +591,9 @@ type TermTaxonomy {
   """Taxonomy Id"""
   taxonomyId: ID!
 
+  """类别"""
+  taxonomy: String!
+
   """类别说明"""
   description: String!
 
@@ -539,7 +601,7 @@ type TermTaxonomy {
   count: Int!
 
   """Term Id"""
-  termId: ID!
+  id: ID!
 
   """Name"""
   name: String!
@@ -565,6 +627,9 @@ type TermTaxonomyRelationship {
   """Taxonomy Id"""
   taxonomyId: ID!
 
+  """类别"""
+  taxonomy: String!
+
   """类别说明"""
   description: String!
 
@@ -572,7 +637,7 @@ type TermTaxonomyRelationship {
   count: Int!
 
   """Term Id"""
-  termId: ID!
+  id: ID!
 
   """Name"""
   name: String!
@@ -619,6 +684,9 @@ type TermMeta {
   """元数据 Value"""
   metaValue: String!
 
+  """描述"""
+  description: String
+
   """Term Id"""
   termId: ID!
 }
@@ -626,10 +694,10 @@ type TermMeta {
 type Query {
   """获取 文章评论 元数据"""
   commentMetas(
-    """Meta keys"""
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
     metaKeys: [String!]
 
-    """Comment Id"""
+    """文章评论 Id"""
     commentId: ID!
   ): [CommentMeta!]!
 
@@ -652,7 +720,10 @@ type Query {
   ): PagedComment!
 
   """获取链接"""
-  link(id: ID!): Link
+  link(
+    """Link id"""
+    id: ID!
+  ): Link
 
   """获取链接分页列表"""
   links(
@@ -668,15 +739,18 @@ type Query {
 
   """获取 媒体 元数据"""
   mediaMetas(
-    """Meta keys"""
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
     metaKeys: [String!]
 
-    """Media Id"""
+    """媒体 Id"""
     mediaId: ID!
   ): [MediaMeta!]!
 
   """获取媒体"""
-  media(id: ID!): Media
+  media(
+    """Media id"""
+    id: ID!
+  ): Media
 
   """获取媒体分页列表"""
   medias(
@@ -707,12 +781,12 @@ type Query {
 
   """获取 页面 元数据"""
   pageMetas(
-    """Meta keys"""
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
     metaKeys: [String!]
 
-    """Page Id"""
+    """页面 Id"""
     pageId: ID!
-  ): [PageMeta!]!
+  ): [PostMeta!]!
 
   """获取页面"""
   page(
@@ -764,10 +838,10 @@ type Query {
 
   """获取 文章 元数据"""
   postMetas(
-    """Meta keys"""
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
     metaKeys: [String!]
 
-    """Post Id"""
+    """文章 Id"""
     postId: ID!
   ): [PostMeta!]!
 
@@ -823,12 +897,12 @@ type Query {
   postCountByYear: [PostYearCount!]!
 
   """获取 协议 元数据"""
-  termTaxonomyMetas(
-    """Meta keys"""
+  termMetas(
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
     metaKeys: [String!]
 
-    """TermTaxonomy Id"""
-    termTaxonomyId: ID!
+    """协议 Id"""
+    termId: ID!
   ): [TermMeta!]!
 
   """获取协议"""
@@ -860,14 +934,14 @@ type Query {
 
   """获取 用户 元数据"""
   userMetas(
-    """Meta keys"""
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
     metaKeys: [String!]
 
-    """User Id"""
+    """用户 Id"""
     userId: ID!
   ): [UserMeta!]!
 
-  """获取用户"""
+  """获取当前用户"""
   user: User
 
   """获取用户(必须有编辑用户权限)"""
@@ -911,102 +985,163 @@ type Mutation {
   """添加 文章评论 元数据"""
   addCommentMeta(model: NewCommentMetaInput!): CommentMeta
 
+  """批量添加 文章评论 元数据"""
+  addCommentMetas(
+    models: [NewMetaInput!]!
+
+    """文章评论 Meta Id"""
+    id: ID!
+  ): [CommentMeta!]!
+
   """修改 文章评论 元数据"""
-  updateCommentMeta(
+  modifyCommentMeta(
     metaValue: String!
 
-    """文章评论 元数据Id"""
+    """文章评论 Meta Id"""
     id: ID!
   ): Boolean!
 
   """修改 文章评论 元数据"""
-  updateCommentMetaByKey(
+  modifyCommentMetaByKey(
     """Meta value"""
     metaValue: String!
 
     """Meta key"""
     metaKey: String!
 
-    """Comment Id"""
+    """文章评论 Id"""
     commentId: ID!
   ): Boolean!
 
   """删除 文章评论 元数据"""
   removeCommentMeta(
-    """文章评论 元数据Id"""
+    """文章评论 Meta Id"""
     id: ID!
   ): Boolean!
 
   """添加评论"""
   addComment(model: NewCommentInput!): Comment
 
+  """修改评论"""
+  modifyComment(
+    model: UpdateCommentInput!
+
+    """Comment id"""
+    id: ID!
+  ): Boolean!
+
+  """删除评论"""
+  removeComment(
+    """Comment id"""
+    id: ID!
+  ): Boolean!
+
   """添加链接"""
   addLink(model: NewLinkInput!): Link
+
+  """修改链接"""
+  modifyLink(
+    model: UpdateLinkInput!
+
+    """Link id"""
+    id: ID!
+  ): Boolean!
+
+  """删除链接"""
+  removeLink(
+    """Link id"""
+    id: ID!
+  ): Boolean!
 
   """添加 媒体 元数据"""
   addMediaMeta(model: NewMediaMetaInput!): MediaMeta
 
+  """批量添加 媒体 元数据"""
+  addMediaMetas(
+    models: [NewMetaInput!]!
+
+    """媒体 Meta Id"""
+    id: ID!
+  ): [MediaMeta!]!
+
   """修改 媒体 元数据"""
-  updateMediaMeta(
+  modifyMediaMeta(
     metaValue: String!
 
-    """媒体 元数据Id"""
+    """媒体 Meta Id"""
     id: ID!
   ): Boolean!
 
   """修改 媒体 元数据"""
-  updateMediaMetaByKey(
+  modifyMediaMetaByKey(
     """Meta value"""
     metaValue: String!
 
     """Meta key"""
     metaKey: String!
 
-    """Media Id"""
+    """媒体 Id"""
     mediaId: ID!
   ): Boolean!
 
   """删除 媒体 元数据"""
   removeMediaMeta(
-    """媒体 元数据Id"""
+    """媒体 Meta Id"""
     id: ID!
   ): Boolean!
 
   """添加媒体"""
   addMedia(model: NewMediaInput!): Media
 
+  """删除媒体"""
+  removeMedia(
+    """Media id"""
+    id: ID!
+  ): Boolean!
+
   """添加配置项"""
   addOption(model: NewOptionInput!): Option!
 
   """修改配置项"""
-  updateOptions(model: UpdateOptionInput!, id: ID!): Boolean!
+  modifyOption(model: UpdateOptionInput!, id: ID!): Boolean!
+
+  """删除配置项"""
+  removeOption(id: ID!): Boolean!
 
   """添加 页面 元数据"""
-  addPageMeta(model: NewPageMetaInput!): PageMeta
+  addPageMeta(model: NewPostMetaInput!): PostMeta
+
+  """批量添加 页面 元数据"""
+  addPageMetas(
+    models: [NewMetaInput!]!
+
+    """页面 Meta Id"""
+    id: ID!
+  ): [PostMeta!]!
 
   """修改 页面 元数据"""
-  updatePageMeta(
+  modifyPageMeta(
     metaValue: String!
 
-    """页面 元数据Id"""
+    """页面 Meta Id"""
     id: ID!
   ): Boolean!
 
   """修改 页面 元数据"""
-  updatePageMetaByKey(
+  modifyPageMetaByKey(
     """Meta value"""
     metaValue: String!
 
     """Meta key"""
     metaKey: String!
 
-    """Page Id"""
+    """页面 Id"""
     pageId: ID!
   ): Boolean!
 
   """删除 页面 元数据"""
   removePageMeta(
-    """页面 元数据Id"""
+    """页面 Meta Id"""
     id: ID!
   ): Boolean!
 
@@ -1014,7 +1149,7 @@ type Mutation {
   addPage(model: NewPageInput!): Page
 
   """修改页面（Trash 状态下不支持修改）"""
-  updatePage(
+  modifyPage(
     model: UpdatePageInput!
 
     """Page id"""
@@ -1024,29 +1159,37 @@ type Mutation {
   """添加 文章 元数据"""
   addPostMeta(model: NewPostMetaInput!): PostMeta
 
+  """批量添加 文章 元数据"""
+  addPostMetas(
+    models: [NewMetaInput!]!
+
+    """文章 Meta Id"""
+    id: ID!
+  ): [PostMeta!]!
+
   """修改 文章 元数据"""
-  updatePostMeta(
+  modifyPostMeta(
     metaValue: String!
 
-    """文章 元数据Id"""
+    """文章 Meta Id"""
     id: ID!
   ): Boolean!
 
   """修改 文章 元数据"""
-  updatePostMetaByKey(
+  modifyPostMetaByKey(
     """Meta value"""
     metaValue: String!
 
     """Meta key"""
     metaKey: String!
 
-    """Post Id"""
+    """文章 Id"""
     postId: ID!
   ): Boolean!
 
   """删除 文章 元数据"""
   removePostMeta(
-    """文章 元数据Id"""
+    """文章 Meta Id"""
     id: ID!
   ): Boolean!
 
@@ -1054,7 +1197,7 @@ type Mutation {
   addPost(model: NewPostInput!): Post
 
   """修改文章（Trash 状态下不支持修改）"""
-  updatePost(
+  modifyPost(
     model: UpdatePostInput!
 
     """Post id"""
@@ -1062,7 +1205,7 @@ type Mutation {
   ): Boolean!
 
   """修改文章评论状态"""
-  updatePostCommentStatus(
+  modifyPostCommentStatus(
     """评论状态"""
     status: POST_COMMENT_STATUS!
 
@@ -1071,7 +1214,7 @@ type Mutation {
   ): Boolean!
 
   """修改文章或页面状态（Trash 状态下不支持修改）"""
-  updatePostOrPageStatus(
+  modifyPostOrPageStatus(
     """状态"""
     status: POST_STATUS!
 
@@ -1107,31 +1250,39 @@ type Mutation {
   ): Boolean!
 
   """添加 协议 元数据"""
-  addTermTaxonomyMeta(model: NewTermMetaInput!): TermMeta
+  addTermMeta(model: NewTermMetaInput!): TermMeta
+
+  """批量添加 协议 元数据"""
+  addTermMetas(
+    models: [NewMetaInput!]!
+
+    """协议 Meta Id"""
+    id: ID!
+  ): [TermMeta!]!
 
   """修改 协议 元数据"""
-  updateTermTaxonomyMeta(
+  modifyTermMeta(
     metaValue: String!
 
-    """协议 元数据Id"""
+    """协议 Meta Id"""
     id: ID!
   ): Boolean!
 
   """修改 协议 元数据"""
-  updateTermTaxonomyMetaByKey(
+  modifyTermMetaByKey(
     """Meta value"""
     metaValue: String!
 
     """Meta key"""
     metaKey: String!
 
-    """TermTaxonomy Id"""
-    termTaxonomyId: ID!
+    """协议 Id"""
+    termId: ID!
   ): Boolean!
 
   """删除 协议 元数据"""
-  removeTermTaxonomyMeta(
-    """协议 元数据Id"""
+  removeTermMeta(
+    """协议 Meta Id"""
     id: ID!
   ): Boolean!
 
@@ -1141,6 +1292,14 @@ type Mutation {
   """新建协议关系"""
   addTermRelationship(model: NewTermRelationshipInput!): TermRelationship
 
+  """修改协议"""
+  modifyTerm(
+    model: UpdateTermInput!
+
+    """Term id"""
+    id: ID!
+  ): Boolean!
+
   """移除协议关系"""
   removeTermRelationship(
     """类别 id"""
@@ -1148,34 +1307,48 @@ type Mutation {
 
     """关联对象 id"""
     objectId: ID!
-  ): Boolean
+  ): Boolean!
+
+  """移除协议(包括相关联协议关系)"""
+  removeTerm(
+    """Term id"""
+    id: ID!
+  ): Boolean!
 
   """添加 用户 元数据"""
   addUserMeta(model: NewUserMetaInput!): UserMeta
 
+  """批量添加 用户 元数据"""
+  addUserMetas(
+    models: [NewMetaInput!]!
+
+    """用户 Meta Id"""
+    id: ID!
+  ): [UserMeta!]!
+
   """修改 用户 元数据"""
-  updateUserMeta(
+  modifyUserMeta(
     metaValue: String!
 
-    """用户 元数据Id"""
+    """用户 Meta Id"""
     id: ID!
   ): Boolean!
 
   """修改 用户 元数据"""
-  updateUserMetaByKey(
+  modifyUserMetaByKey(
     """Meta value"""
     metaValue: String!
 
     """Meta key"""
     metaKey: String!
 
-    """User Id"""
+    """用户 Id"""
     userId: ID!
   ): Boolean!
 
   """删除 用户 元数据"""
   removeUserMeta(
-    """用户 元数据Id"""
+    """用户 Meta Id"""
     id: ID!
   ): Boolean!
 
@@ -1183,7 +1356,7 @@ type Mutation {
   addUser(model: NewUserInput!): User
 
   """修改用户"""
-  updateUser(
+  modifyUser(
     model: UpdateUserInput!
 
     """User Id"""
@@ -1191,7 +1364,7 @@ type Mutation {
   ): Boolean!
 
   """修改用户状态"""
-  updateUserStatus(
+  modifyUserStatus(
     status: USER_STATUS!
 
     """User Id"""
@@ -1213,8 +1386,23 @@ input NewCommentMetaInput {
   """元数据 Value"""
   metaValue: String!
 
+  """描述"""
+  description: String
+
   """Comment Id"""
   commentId: ID!
+}
+
+"""元数据新建实体模型"""
+input NewMetaInput {
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
 }
 
 """评论新建模型"""
@@ -1250,13 +1438,10 @@ input NewCommentInput {
   metas: [NewMetaInput!]
 }
 
-"""元数据新建实体模型"""
-input NewMetaInput {
-  """元数据 Key"""
-  metaKey: String!
-
-  """元数据 Value"""
-  metaValue: String!
+"""评论新建模型"""
+input UpdateCommentInput {
+  """内容"""
+  content: String!
 }
 
 """链接新建模型"""
@@ -1291,6 +1476,38 @@ input NewLinkInput {
   rss: String
 }
 
+"""链接修改模型"""
+input UpdateLinkInput {
+  """Url"""
+  url: String
+
+  """名称"""
+  name: String
+
+  """图片"""
+  image: String
+
+  """
+  打开方式: "_blank","_self"
+  """
+  target: LINK_TARGET
+
+  """描述"""
+  description: String
+
+  """是否显示"""
+  visible: LINK_VISIBLE
+
+  """User Id"""
+  userId: ID
+
+  """rel"""
+  rel: String
+
+  """rss"""
+  rss: String
+}
+
 """媒体元数据新建模型"""
 input NewMediaMetaInput {
   """元数据 Key"""
@@ -1298,6 +1515,9 @@ input NewMediaMetaInput {
 
   """元数据 Value"""
   metaValue: String!
+
+  """描述"""
+  description: String
 
   """Media Id"""
   mediaId: ID!
@@ -1348,16 +1568,19 @@ input UpdateOptionInput {
   autoload: OPTION_AUTOLOAD
 }
 
-"""页面元数据新建模型"""
-input NewPageMetaInput {
+"""文章元数据新建模型"""
+input NewPostMetaInput {
   """元数据 Key"""
   metaKey: String!
 
   """元数据 Value"""
   metaValue: String!
 
-  """Page Id"""
-  pageId: ID!
+  """描述"""
+  description: String
+
+  """Post Id"""
+  postId: ID!
 }
 
 """页面新建模型"""
@@ -1385,18 +1608,6 @@ input UpdatePageInput {
 
   """状态"""
   status: POST_STATUS
-}
-
-"""文章元数据新建模型"""
-input NewPostMetaInput {
-  """元数据 Key"""
-  metaKey: String!
-
-  """元数据 Value"""
-  metaValue: String!
-
-  """Post Id"""
-  postId: ID!
 }
 
 """文章新建模型"""
@@ -1446,6 +1657,9 @@ input NewTermMetaInput {
   """元数据 Value"""
   metaValue: String!
 
+  """描述"""
+  description: String
+
   """Term Id"""
   termId: ID!
 }
@@ -1457,6 +1671,9 @@ input NewTermInput {
 
   """类别"""
   taxonomy: String!
+
+  """类别说明"""
+  description: String!
 
   """别名"""
   slug: String
@@ -1483,6 +1700,18 @@ input NewTermRelationshipInput {
   order: Int
 }
 
+"""协议修改模型"""
+input UpdateTermInput {
+  """Name"""
+  name: String
+
+  """别名"""
+  slug: String
+
+  """分组"""
+  group: Int
+}
+
 """用户元数据新建模型"""
 input NewUserMetaInput {
   """元数据 Key"""
@@ -1490,6 +1719,9 @@ input NewUserMetaInput {
 
   """元数据 Value"""
   metaValue: String!
+
+  """描述"""
+  description: String
 
   """User Id"""
   userId: ID!
@@ -1525,26 +1757,17 @@ input NewUserInput {
   role: USER_ROLE = Subscriber
 }
 
-"""UserRole"""
-enum USER_ROLE {
-  Administrator
-  Editor
-  Author
-  Contributor
-  Subscriber
-}
-
 """用户修改模型"""
 input UpdateUserInput {
-  """昵称"""
+  """昵称，不填则使用登录名"""
   niceName: String
 
-  """前台显示名称"""
+  """前台显示名称，不填则使用登录名"""
   displayName: String
 
   """手机号码"""
   mobile: String
 
   """Email"""
-  email: String
+  email: String!
 }

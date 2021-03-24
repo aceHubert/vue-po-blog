@@ -13,8 +13,9 @@ export interface UserAttributes {
   email: string;
   url: string;
   status: UserStatus;
+  updatedAt: Date;
+  createdAt: Date;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserCreationAttributes
   extends Optional<UserAttributes, 'id' | 'niceName' | 'displayName' | 'mobile' | 'status'> {}

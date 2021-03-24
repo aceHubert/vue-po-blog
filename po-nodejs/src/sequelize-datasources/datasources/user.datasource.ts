@@ -1,24 +1,28 @@
 import md5 from 'md5';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ForbiddenError } from '@/common/utils/errors.utils';
-import { UserRole, UserRoleCapability, UserRoleWithNone, UserStatus } from '@/common/helpers/enums';
+import { ForbiddenError, ValidationError } from '@/common/utils/errors.utils';
+import { UserRole, UserRoleCapability, UserStatus } from '@/common/helpers/enums';
 import { uuid } from '@/common/utils/uuid.utils';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
 import { WhereOptions } from 'sequelize';
-import { ValidationError } from 'apollo-server-express';
-import { PagedUserArgs } from '@/users/dto/paged-user.args';
-import { NewUserInput } from '@/users/dto/new-user.input';
-import { NewUserMetaInput } from '@/users/dto/new-user-meta.input';
-import { UpdateUserInput } from '@/users/dto/update-user.input';
-import { UserWithRole, PagedUser } from '@/users/models/user.model';
-import User from '@/sequelize-entities/entities/users.entity';
-import UserMeta from '@/sequelize-entities/entities/user-meta.entity';
+
+import {
+  UserModel,
+  UserSimpleModel,
+  UserWithRoleModel,
+  UserMetaModel,
+  PagedUserArgs,
+  PagedUserModel,
+  NewUserInput,
+  NewUserMetaInput,
+  UpdateUserInput,
+} from '../interfaces/user.interface';
 
 @Injectable()
-export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
+export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInput> {
   constructor(protected readonly moduleRef: ModuleRef) {
     super(moduleRef);
   }
@@ -28,6 +32,8 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
    * @param loginNameOrId 登录名或User Id
    * @returns boolean
    */
+  isSupurAdmin(loginNameOrId: string): boolean;
+  isSupurAdmin(loginNameOrId: number): Promise<boolean>;
   isSupurAdmin(loginNameOrId: number | string) {
     if (typeof loginNameOrId === 'number') {
       return this.models.Users.count({
@@ -36,25 +42,32 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
         },
       }).then((count) => count > 0);
     } else {
-      return Promise.resolve(loginNameOrId === 'admin');
+      return loginNameOrId === 'admin';
     }
   }
 
   /**
-   * 根据 Id 获取用户
-   * 通过 id 获取用户必须要有EditUsers权限
+   * 根据 Id 获取用户（不包含登录密码）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [EditUsers]
-   * @param id User Id
+   * @access capabilities: [EditUsers(optional)]
+   * @param id User Id（null 则查询请求用户，否则需要 EditUsers 权限）
    * @param fields 返回的字段
    */
-  async get(id: number | null, fields: string[], requestUser: JwtPayload): Promise<User | null> {
+  async get(id: number | null, fields: string[], requestUser: JwtPayload): Promise<UserModel | null> {
     if (id) {
       await this.hasCapability(UserRoleCapability.EditUsers, requestUser);
     } else {
       id = requestUser.id;
+    }
+
+    // 排除登录密码
+    fields = fields.filter((field) => field !== 'loginPwd');
+
+    // 主键
+    if (!fields.includes('id')) {
+      fields.push('id');
     }
 
     // 如果要查是否是超级管理员，必须查询 loginName 字段
@@ -64,7 +77,25 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
 
     return this.models.Users.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Users),
-    });
+    }).then((user) => user?.toJSON() as UserModel);
+  }
+
+  /**
+   * 根据 Id 获取用户（不包含敏感字段）
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access none
+   * @param id User Id（null返回请求用户的实体）
+   * @param fields 返回的字段
+   */
+  async getSimpleInfo(id: number, fields: string[]): Promise<UserSimpleModel | null> {
+    // 过滤掉敏感字段
+    fields = fields.filter((field) => ['id', 'niceName', 'displayName'].includes(field));
+
+    return this.models.Users.findByPk(id, {
+      attributes: this.filterFields(fields, this.models.Users),
+    }).then((user) => user?.toJSON() as UserSimpleModel);
   }
 
   /**
@@ -72,12 +103,16 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [ListUsers]
+   * @access capabilities: [ListUsers]
    * @param query 分页 Query 参数
    * @param fields 返回的字段
    */
-  async getPaged({ offset, limit, ...query }: PagedUserArgs, fields: string[], user: JwtPayload): Promise<PagedUser> {
-    await this.hasCapability(UserRoleCapability.ListUsers, user);
+  async getPaged(
+    { offset, limit, ...query }: PagedUserArgs,
+    fields: string[],
+    requestUser: JwtPayload,
+  ): Promise<PagedUserModel> {
+    await this.hasCapability(UserRoleCapability.ListUsers, requestUser);
 
     const where: WhereOptions = {};
     if (query.keyword) {
@@ -90,15 +125,15 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
     }
 
     if (query.role) {
-      if (query.role === UserRoleWithNone.None) {
-        where['$UserMetas.meta_value$'] = {
+      if (query.role === 'none') {
+        where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = {
           [this.Op.is]: null,
         };
       } else {
         where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = query.role;
       }
     } else {
-      where['$UserMetas.meta_value$'] = {
+      where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = {
         [this.Op.not]: null,
       };
     }
@@ -131,9 +166,9 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
       rows: rows.map((row) => {
         const { UserMetas, ...rest } = row.toJSON() as any;
         return {
-          role: UserMetas.length ? UserMetas[0].metaValue : UserRoleWithNone.None,
+          role: UserMetas.length ? UserMetas[0].metaValue : null,
           ...rest,
-        } as UserWithRole;
+        } as UserWithRoleModel;
       }),
       total,
     }));
@@ -164,10 +199,7 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
   getCountByRole() {
     return this.models.Users.count({
       attributes: [
-        [
-          this.Sequelize.fn('ifnull', this.col('metaValue', this.models.UserMeta, 'UserMetas'), UserRoleWithNone.None),
-          'role',
-        ],
+        [this.Sequelize.fn('ifnull', this.col('metaValue', this.models.UserMeta, 'UserMetas'), 'none'), 'role'],
       ],
       include: [
         {
@@ -244,11 +276,11 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [CreateUsers]
+   * @access capabilities: [CreateUsers]
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewUserInput, requestUser: JwtPayload): Promise<User> {
+  async create(model: NewUserInput, requestUser: JwtPayload): Promise<UserModel> {
     await this.hasCapability(UserRoleCapability.CreateUsers, requestUser);
 
     const isExists =
@@ -263,28 +295,61 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
       })) > 0;
 
     if (isExists) {
-      throw new ValidationError('login name, mobile, email are rqiured to be unique!');
+      throw new ValidationError('The loginName, mobile, email are rqiured to be unique!');
     }
 
     const { loginName, loginPwd, niceName, displayName, role, ...rest } = model;
 
-    const user = await this.models.Users.create({
-      ...rest,
-      loginName,
-      loginPwd,
-      niceName: niceName || loginName,
-      displayName: displayName || loginName,
-    });
+    const t = await this.sequelize.transaction();
+    try {
+      const user = await this.models.Users.create(
+        {
+          ...rest,
+          loginName,
+          loginPwd,
+          niceName: niceName || loginName,
+          displayName: displayName || loginName,
+        },
+        { transaction: t },
+      );
 
-    await this.models.UserMeta.bulkCreate([
-      {
-        userId: user.id,
-        metaKey: `${this.tablePrefix}role`,
-        metaValue: role,
-      },
-    ]);
+      let metaCreationModels: NewUserMetaInput[] = [];
+      // 添加元数据
+      if (model.metas) {
+        const falseOrMetaKeys = await this.isMetaExists(
+          user.id,
+          model.metas.map((meta) => meta.metaKey),
+        );
+        if (falseOrMetaKeys) {
+          throw new ValidationError(`The meta keys (${falseOrMetaKeys.join(',')}) have existed!`);
+        } else {
+          metaCreationModels = model.metas.map((meta) => ({
+            ...meta,
+            userId: user.id,
+          }));
+        }
+      }
+      // 添加角色
+      if (role) {
+        metaCreationModels.push({
+          userId: user.id,
+          metaKey: `${this.tablePrefix}role`,
+          metaValue: role,
+        });
+      }
 
-    return user;
+      await this.models.UserMeta.bulkCreate(metaCreationModels, { transaction: t });
+
+      await t.commit();
+
+      // 排除登录密码
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { loginPwd: pwd, ...restUser } = user.toJSON() as any;
+      return restUser as UserModel;
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
   }
 
   /**
@@ -293,7 +358,7 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [EditUsers]
+   * @access capabilities: [EditUsers]
    * @param id User Id
    * @param model 修改实体模型
    */
@@ -311,7 +376,7 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
       })) > 0;
 
     if (isExists) {
-      throw new ValidationError('mobile, email are rqiured to be unique!');
+      throw new ValidationError('The mobile, email are rqiured to be unique!');
     }
 
     return await this.models.Users.update(model, {
@@ -326,7 +391,7 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [EditUsers]
+   * @access capabilities: [EditUsers]
    * @param id User Id
    * @param status 状态
    */
@@ -349,7 +414,7 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [DeleteUsers]
+   * @access capabilities: [DeleteUsers]
    * @param id User Id
    */
   async delete(id: number, requestUser: JwtPayload): Promise<boolean> {
@@ -372,7 +437,8 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
 
       await t.commit();
       return true;
-    } catch {
+    } catch (err) {
+      this.logger.error(`An error occurred during deleting user (id:${id}), Error: ${err.message}`);
       await t.rollback();
       return false;
     }
@@ -450,7 +516,7 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
    * 获取用户角色
    * @param userId User id
    */
-  async getUserRole(userId: number): Promise<UserRole | null> {
+  async getRole(userId: number): Promise<UserRole | null> {
     // 角色
     const role = await this.models.UserMeta.findOne({
       attributes: ['metaValue'],
@@ -484,7 +550,7 @@ export class UserDataSource extends MetaDataSource<UserMeta, NewUserMetaInput> {
 
     if (user) {
       // 角色
-      const role = await this.getUserRole(user.id);
+      const role = await this.getRole(user.id);
 
       return {
         ...user.toJSON(),

@@ -11,31 +11,62 @@ import { NewUserInput } from './dto/new-user.input';
 import { NewUserMetaInput } from './dto/new-user-meta.input';
 import { PagedUserArgs } from './dto/paged-user.args';
 import { UpdateUserInput } from './dto/update-user.input';
-import { User, PagedUser, UserMeta, UserStatusCount, UserRoleCount } from './models/user.model';
+import { BaseUser, User, PagedUser, UserMeta, UserStatusCount, UserRoleCount } from './models/user.model';
 
-@Resolver(() => User)
-export class UserResolver extends createMetaResolver(User, UserMeta, NewUserMetaInput, UserDataSource, {
-  name: '用户',
+@Resolver(() => BaseUser)
+export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUserMetaInput, UserDataSource, {
+  resolverName: 'User',
+  description: '用户',
 }) {
   constructor(protected readonly moduleRef: ModuleRef, private readonly userDataSource: UserDataSource) {
     super(moduleRef);
   }
 
   @Authorized()
-  @Query((returns) => User, { nullable: true, description: '获取用户' })
-  user(@Fields() fields: ResolveTree, @Context('user') requestUser: JwtPayload) {
+  @Query((returns) => User, { nullable: true, description: '获取当前用户' })
+  user(@Fields() fields: ResolveTree, @Context('user') requestUser: JwtPayload): Promise<User | null> {
     return this.userDataSource.get(null, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
+    // const fieldNames = this.getFieldNames(fields.fieldsByTypeName.User);
+    // const user = await this.userDataSource.get(null, fieldNames, requestUser);
+    // if (user) {
+    //   if (fieldNames.includes('role')) {
+    //     const role = await this.userDataSource.getRole(user.id);
+    //     return { role: role as UserRole, ...user };
+    //   } else {
+    //     return { role: null, ...user };
+    //   }
+    // }
+    // return null;
   }
 
   @Authorized()
   @Query((returns) => User, { nullable: true, description: '获取用户(必须有编辑用户权限)' })
-  userById(@Args('id') id: number, @Fields() fields: ResolveTree, @Context('user') requestUser: JwtPayload) {
+  userById(
+    @Args('id') id: number,
+    @Fields() fields: ResolveTree,
+    @Context('user') requestUser: JwtPayload,
+  ): Promise<User | null> {
     return this.userDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
+    // const fieldNames = this.getFieldNames(fields.fieldsByTypeName.User);
+    // const user = await this.userDataSource.get(id, fieldNames, requestUser);
+    // if (user) {
+    //   if (fieldNames.includes('role')) {
+    //     const role = await this.userDataSource.getRole(user.id);
+    //     return { role: role as UserRole, ...user };
+    //   } else {
+    //     return { role: null, ...user };
+    //   }
+    // }
+    // return null;
   }
 
   @Authorized()
   @Query((returns) => PagedUser, { description: '获取用户分页列表' })
-  users(@Args() args: PagedUserArgs, @Fields() fields: ResolveTree, @Context('user') requestUser: JwtPayload) {
+  users(
+    @Args() args: PagedUserArgs,
+    @Fields() fields: ResolveTree,
+    @Context('user') requestUser: JwtPayload,
+  ): Promise<PagedUser> {
     return this.userDataSource.getPaged(
       args,
       this.getFieldNames(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.UserWithRole),
@@ -45,8 +76,8 @@ export class UserResolver extends createMetaResolver(User, UserMeta, NewUserMeta
 
   @Authorized()
   @ResolveField((type) => Boolean, { description: '是否是超级管理员' })
-  isSuperAdmin(@Root() root: User) {
-    return this.userDataSource.isSupurAdmin(root.loginName);
+  isSuperAdmin(@Root() { loginName }: User) {
+    return this.userDataSource.isSupurAdmin(loginName);
   }
 
   @Authorized()
@@ -87,7 +118,7 @@ export class UserResolver extends createMetaResolver(User, UserMeta, NewUserMeta
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改用户' })
-  updateUser(
+  modifyUser(
     @Args('id', { type: () => ID, description: 'User Id' }) id: number,
     @Args('model', { type: () => UpdateUserInput }) model: UpdateUserInput,
     @Context('user') requestUser: JwtPayload,
@@ -97,7 +128,7 @@ export class UserResolver extends createMetaResolver(User, UserMeta, NewUserMeta
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改用户状态' })
-  updateUserStatus(
+  modifyUserStatus(
     @Args('id', { type: () => ID, description: 'User Id' }) id: number,
     @Args('status', { type: () => UserStatus }) status: UserStatus,
     @Context('user') requestUser: JwtPayload,

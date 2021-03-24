@@ -5,8 +5,8 @@ export interface PostMetaAttributes {
   postId: number;
   metaKey: string;
   metaValue: string;
+  description?: string;
   private: 'yes' | 'no';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostMetaCreationAttributes extends Optional<PostMetaAttributes, 'id' | 'private'> {}

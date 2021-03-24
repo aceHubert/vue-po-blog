@@ -1,4 +1,4 @@
-import { ModuleMetadata } from '@nestjs/common';
+import { ModuleMetadata, Type } from '@nestjs/common';
 import { Dialect } from 'sequelize';
 
 export interface EntityModuleOptions {
@@ -13,7 +13,13 @@ export interface EntityModuleOptions {
   tablePrefix?: string;
 }
 
+export interface EntityOptionsFactory {
+  createEntityOptions(): Promise<EntityModuleOptions> | EntityModuleOptions;
+}
+
 export interface EntityModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
-  useFactory: (...args: any[]) => Promise<EntityModuleOptions> | EntityModuleOptions;
+  useExisting?: Type<EntityOptionsFactory>;
+  useClass?: Type<EntityOptionsFactory>;
+  useFactory?: (...args: any[]) => Promise<EntityModuleOptions> | EntityModuleOptions;
   inject?: any[];
 }

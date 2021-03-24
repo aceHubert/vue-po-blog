@@ -1,11 +1,8 @@
 import { Field, InputType, ID } from '@nestjs/graphql';
 import { LinkTarget, LinkVisible } from '@/common/helpers/enums';
 
-// Types
-import { LinkCreationAttributes } from '@/orm-entities/interfaces/links.interface';
-
 @InputType({ description: '链接新建模型' })
-export class NewLinkInput implements LinkCreationAttributes {
+export class NewLinkInput {
   @Field({ description: 'Url' })
   url!: string;
 

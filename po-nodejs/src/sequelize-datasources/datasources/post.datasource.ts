@@ -8,21 +8,21 @@ import { MetaDataSource } from './meta.datasource';
 
 // Types
 import { Transaction, WhereOptions } from 'sequelize';
-import { PagedPostArgs } from '@/posts/dto/paged-post.args';
-import { NewPostInput } from '@/posts/dto/new-post.input';
-import { NewPostMetaInput } from '@/posts/dto/new-post-meta.input';
-import { UpdatePostInput } from '@/posts/dto/update-post.input';
-import { PagedPost } from '@/posts/models/post.model';
-import { PagedPageArgs } from '@/pages/dto/paged-page.args';
-import { NewPageInput } from '@/pages/dto/new-page.input';
-import { NewPageMetaInput } from '@/pages/dto/new-page-meta.input';
-import { UpdatePageInput } from '@/pages/dto/update-page.input';
-import { PostAttributes, PostCreationAttributes, PostMetaCreationAttributes } from '@/orm-entities/interfaces';
-import Post from '@/sequelize-entities/entities/posts.entity';
-import PostMeta from '@/sequelize-entities/entities/post-meta.entity';
+import {
+  PostModel,
+  PostMetaModel,
+  PagedPostModel,
+  PagedPostArgs,
+  PagedPageArgs,
+  NewPostInput,
+  NewPageInput,
+  NewPostMetaInput,
+  UpdatePostInput,
+  UpdatePageInput,
+} from '../interfaces/post.interface';
 
 @Injectable()
-export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | NewPageMetaInput> {
+export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInput> {
   constructor(protected readonly moduleRef: ModuleRef) {
     super(moduleRef);
   }
@@ -54,7 +54,7 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * 是否有修改权限，没有则会直接抛出异常(author, status is required)
    * @param post Post instance
    */
-  private async hasEditCapability(post: Post, requestUser: JwtPayload) {
+  private async hasEditCapability(post: PostModel, requestUser: JwtPayload) {
     // 是否有编辑权限
     await this.hasCapability(
       post.type === PostType.Post ? UserRoleCapability.EditPosts : UserRoleCapability.EditPages,
@@ -124,26 +124,27 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
       },
     });
 
-    const storePosts: PostMetaCreationAttributes[] = [];
-    posts.forEach((post) => {
-      storePosts.push(
-        {
-          postId: post.id,
-          metaKey: 'trash_meta_status',
-          metaValue: post.status,
-        },
-        {
-          postId: post.id,
-          metaKey: 'trash_meta_time',
-          metaValue: String(Date.now()),
-        },
-      );
-    });
-
-    return await this.models.PostMeta.bulkCreate(storePosts, {
-      updateOnDuplicate: ['postId', 'metaKey'], // mssql not support
-      transaction: t,
-    });
+    return await this.models.PostMeta.bulkCreate(
+      Array.prototype.concat.apply(
+        null,
+        posts.map((post) => [
+          {
+            postId: post.id,
+            metaKey: 'trash_meta_status',
+            metaValue: post.status,
+          },
+          {
+            postId: post.id,
+            metaKey: 'trash_meta_time',
+            metaValue: String(Date.now()),
+          },
+        ]),
+      ),
+      {
+        updateOnDuplicate: ['postId', 'metaKey'], // mssql not support
+        transaction: t,
+      },
+    );
   }
 
   /**
@@ -170,14 +171,19 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * @param type 类型
    * @param fields 返回字段
    */
-  get(id: number, type: PostType, fields: string[]): Promise<Post | null> {
+  get(id: number, type: PostType, fields: string[]): Promise<PostModel | null> {
+    // 主键(meta 查询)
+    if (!fields.includes('id')) {
+      fields.push('id');
+    }
+
     return this.models.Posts.findOne({
       attributes: this.filterFields(fields, this.models.Posts),
       where: {
         id,
         type,
       },
-    });
+    }).then((post) => post?.toJSON() as PostModel);
   }
 
   /**
@@ -191,8 +197,14 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * @param type 类型
    * @param fields 返回字段
    */
-  getPaged(query: PagedPostArgs | PagedPageArgs, type: PostType, fields: string[]): Promise<PagedPost> {
-    const where: WhereOptions<PostAttributes> = {
+  getPaged(query: PagedPostArgs, type: PostType.Post, fields: string[]): Promise<PagedPostModel>;
+  getPaged(query: PagedPageArgs, type: PostType.Page, fields: string[]): Promise<PagedPostModel>;
+  getPaged(
+    { offset, limit, ...query }: PagedPostArgs | PagedPageArgs,
+    type: PostType,
+    fields: string[],
+  ): Promise<PagedPostModel> {
+    const where: WhereOptions = {
       type,
     };
     if (query.keyword) {
@@ -239,11 +251,11 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
       where: {
         ...where,
       },
-      offset: query.offset,
-      limit: query.limit,
+      offset,
+      limit,
       order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
-      rows: rows as PagedPost['rows'],
+      rows: rows as PagedPostModel['rows'],
       total,
     }));
   }
@@ -334,6 +346,14 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
     });
   }
 
+  /**
+   * 按年分组获取数量
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access None
+   * @param type 类型
+   */
   getCountByYear(type: PostType) {
     return this.models.Posts.count({
       attributes: [[this.Sequelize.fn('DATE_FORMAT', this.col('createdAt', this.models.Posts), '%Y'), 'year']],
@@ -353,13 +373,13 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [CreatePages]
+   * @access capabilities: [CreatePages]
    * @param model 添加实体模型
    * @param type 类型
    */
-  async create(model: NewPostInput | NewPageInput, type: PostType, requestUser: JwtPayload): Promise<Post> {
+  async create(model: NewPostInput | NewPageInput, type: PostType, requestUser: JwtPayload): Promise<PostModel> {
     const { name, title, metas, ...rest } = model;
-    const creationModel: PostCreationAttributes = {
+    const creationModel: NewPostInput = {
       ...rest,
       title,
       name: await this.fixName(name || title),
@@ -380,20 +400,39 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
         creationModel.commentStatus = PostCommentStatus.Disabled;
       }
     }
-    const post = await this.models.Posts.create(creationModel);
 
-    if (metas && metas.length) {
-      const metaCreationModels: PostMetaCreationAttributes[] = metas.map((meta) => {
-        return {
-          ...meta,
-          postId: post.id,
-        };
-      });
-      this.models.PostMeta.bulkCreate(metaCreationModels);
+    const t = await this.sequelize.transaction();
+    try {
+      const post = await this.models.Posts.create(creationModel, { transaction: t });
+
+      if (metas && metas.length) {
+        const falseOrMetaKeys = await this.isMetaExists(
+          post.id,
+          metas.map((meta) => meta.metaKey),
+        );
+        if (falseOrMetaKeys) {
+          throw new ValidationError(`The meta keys (${falseOrMetaKeys.join(',')}) have existed!`);
+        } else {
+          this.models.PostMeta.bulkCreate(
+            metas.map((meta) => {
+              return {
+                ...meta,
+                postId: post.id,
+              };
+            }),
+            { transaction: t },
+          );
+        }
+      }
+
+      await t.commit();
+
+      // 返回将 auto draft 变更为draft
+      return { ...post.toJSON(), status: PostStatus.Draft } as PostModel;
+    } catch (err) {
+      await t.rollback();
+      throw err;
     }
-
-    // 返回将 auto draft 变更为draft
-    return { ...post.toJSON(), status: PostStatus.Draft } as Post;
   }
 
   /**
@@ -403,7 +442,7 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
    * @param id Post id
    * @param model 修改实体模型
    */
@@ -426,15 +465,10 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
           await this.storeTrashStatus(post.id, post.status, t);
         }
 
-        await this.models.Posts.update(
-          {
-            ...model,
-            name: post.name || (await this.fixName(post.title)),
-          },
-          {
-            where: { id },
-          },
-        );
+        await this.models.Posts.update(model, {
+          where: { id },
+          transaction: t,
+        });
 
         await t.commit();
         return true;
@@ -451,7 +485,7 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
    * @param id Post id
    * @param name 唯一标识
    */
@@ -475,7 +509,7 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
    * @param id Post id
    * @param status 状态
    */
@@ -578,7 +612,7 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
    * @param id Post id
    */
   async restore(id: number, requestUser: JwtPayload): Promise<boolean> {
@@ -667,7 +701,7 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
    * @param id Post id
    * @param status 状态
    */
@@ -689,7 +723,7 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized, capabilities: [DeletePots/DeletePages, DeleteOthersPosts/DeleteOthersPages, DeletePublishedPosts/DeletePublishedPages, DeletePrivatePosts/DeletePrivatePages]
+   * @access capabilities: [DeletePots/DeletePages, DeleteOthersPosts/DeleteOthersPages, DeletePublishedPosts/DeletePublishedPages, DeletePrivatePosts/DeletePrivatePages]
    * @param id Post id
    */
   async delete(id: number, requestUser: JwtPayload): Promise<boolean> {
@@ -753,7 +787,8 @@ export class PostDataSource extends MetaDataSource<PostMeta, NewPostMetaInput | 
 
         await t.commit();
         return true;
-      } catch {
+      } catch (err) {
+        this.logger.error(`An error occurred during deleting post/page(id:${id}), Error: ${err.message}`);
         await t.rollback();
         return false;
       }

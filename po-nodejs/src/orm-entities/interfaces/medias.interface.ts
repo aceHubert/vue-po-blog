@@ -8,7 +8,7 @@ export interface MediaAttributes {
   mimeType: string;
   path: string;
   userId: number;
+  createdAt: Date;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MediaCreationAttributes extends Optional<MediaAttributes, 'id' | 'userId'> {}

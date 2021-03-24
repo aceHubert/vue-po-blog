@@ -6,8 +6,8 @@ export class TermTaxonomy {
   @Field(() => ID, { description: 'Taxonomy Id' })
   taxonomyId!: number;
 
-  // @Field({ description: '类别' })
-  // taxonomy!: string;
+  @Field({ description: '类别' })
+  taxonomy!: string;
 
   @Field({ description: '类别说明' })
   description!: string;
@@ -15,11 +15,8 @@ export class TermTaxonomy {
   @Field((type) => Int, { description: '关联对象类别数量' })
   count!: number;
 
-  // @Field((type) => ID, { description: '父 Taxonomy Id' })
-  // parentId!: number;
-
   @Field(() => ID, { description: 'Term Id' })
-  termId!: number;
+  id!: number;
 
   @Field({ description: 'Name' })
   name!: string;

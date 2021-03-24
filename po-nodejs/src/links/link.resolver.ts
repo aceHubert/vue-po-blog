@@ -8,7 +8,7 @@ import { LinkDataSource, UserDataSource } from '@/sequelize-datasources/datasour
 import { User } from '@/users/models/user.model';
 import { PagedLinkArgs } from './dto/paged-link.args';
 import { NewLinkInput } from './dto/new-link.input';
-// import { UpdateLinkInput } from './dto/update-link.input';
+import { UpdateLinkInput } from './dto/update-link.input';
 import { Link, PagedLink } from './models/link.model';
 
 @Resolver(() => Link)
@@ -18,7 +18,7 @@ export class LinkResolver extends BaseResolver {
   }
 
   @Query((returns) => Link, { nullable: true, description: '获取链接' })
-  link(@Args('id', { type: () => ID! }) id: number, @Fields() fields: ResolveTree) {
+  link(@Args('id', { type: () => ID!, description: 'Link id' }) id: number, @Fields() fields: ResolveTree) {
     return this.linkDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.Link));
   }
 
@@ -43,5 +43,18 @@ export class LinkResolver extends BaseResolver {
   @Mutation((returns) => Link, { nullable: true, description: '添加链接' })
   addLink(@Args('model', { type: () => NewLinkInput }) model: NewLinkInput) {
     return this.linkDataSource.create(model);
+  }
+
+  @Mutation((returns) => Boolean, { description: '修改链接' })
+  modifyLink(
+    @Args('id', { type: () => ID!, description: 'Link id' }) id: number,
+    @Args('model', { type: () => UpdateLinkInput }) model: UpdateLinkInput,
+  ) {
+    return this.linkDataSource.update(id, model);
+  }
+
+  @Mutation((returns) => Boolean, { description: '删除链接' })
+  removeLink(@Args('id', { type: () => ID!, description: 'Link id' }) id: number) {
+    return this.linkDataSource.delete(id);
   }
 }

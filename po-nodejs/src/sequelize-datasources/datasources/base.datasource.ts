@@ -1,8 +1,7 @@
 import { ModuleRef } from '@nestjs/core';
-import { OnModuleInit, CACHE_MANAGER } from '@nestjs/common';
-import { Sequelize, ModelCtor, Model, Op } from 'sequelize';
+import { OnModuleInit, Logger } from '@nestjs/common';
+import { Sequelize, ModelDefined, ModelType, Op } from 'sequelize';
 import { kebabCase, isUndefined } from 'lodash';
-import { Cache } from 'cache-manager';
 import { ForbiddenError } from '@/common/utils/errors.utils';
 import { UserRoleCapability, OptionAutoload } from '@/common/helpers/enums';
 
@@ -15,19 +14,17 @@ import { Config } from '@/config/interfaces';
 import { UserRoles } from '@/common/helpers/user-roles';
 
 export abstract class BaseDataSource implements OnModuleInit {
-  private readonly __AUTOLOAD_OPTIONS_CACHEKEY__ = '__AUTOLOAD_OPTIONS__';
   private __AUTOLOAD_OPTIONS__: Dictionary<string> | null = null;
   private __USER_ROLES__: UserRoles | null = null;
+  protected readonly logger = new Logger('DataSource');
   protected entity!: EntityService;
   protected config!: ConfigService;
-  protected cache!: Cache;
 
   constructor(protected readonly moduleRef: ModuleRef) {}
 
   async onModuleInit() {
     this.entity = this.moduleRef.get(EntityService, { strict: false });
     this.config = this.moduleRef.get(ConfigService, { strict: false });
-    this.cache = this.moduleRef.get<string, Cache>(CACHE_MANAGER, { strict: false });
   }
 
   protected get Sequelize() {
@@ -52,28 +49,19 @@ export abstract class BaseDataSource implements OnModuleInit {
       return Promise.resolve(this.__AUTOLOAD_OPTIONS__);
     } else {
       return (async () => {
-        // 从缓存读取
-        const autoloadOptionsStr = await this.cache.get<string>(this.__AUTOLOAD_OPTIONS_CACHEKEY__);
-        let autoloadOptions: Dictionary<string> = {};
-        if (autoloadOptionsStr) {
-          autoloadOptions = JSON.parse(autoloadOptionsStr) as Dictionary<string>;
-        } else {
-          // 赋默认值，initialize 会多次执行
-          autoloadOptions = await this.models.Options.findAll({
-            attributes: ['optionName', 'optionValue'],
-            where: {
-              autoload: OptionAutoload.Yes,
-            },
-          }).then((options) =>
-            options.reduce((prev, curr) => {
-              prev[curr.optionName] = curr.optionValue;
-              return prev;
-            }, {} as Dictionary<string>),
-          );
-          // 添加至缓存30分钟
-          Object.keys(autoloadOptions).length > 0 &&
-            (await this.cache.set(this.__AUTOLOAD_OPTIONS_CACHEKEY__, JSON.stringify(autoloadOptions), { ttl: 18000 }));
-        }
+        // 赋默认值，initialize 会多次执行
+        const autoloadOptions: Dictionary<string> = await this.models.Options.findAll({
+          attributes: ['optionName', 'optionValue'],
+          where: {
+            autoload: OptionAutoload.Yes,
+          },
+        }).then((options) =>
+          options.reduce((prev, curr) => {
+            prev[curr.optionName] = curr.optionValue;
+            return prev;
+          }, {} as Dictionary<string>),
+        );
+
         this.__AUTOLOAD_OPTIONS__ = autoloadOptions;
         return autoloadOptions;
       })();
@@ -101,6 +89,14 @@ export abstract class BaseDataSource implements OnModuleInit {
   }
 
   /**
+   * 修改 Options 时重置，下次重新加载
+   */
+  protected resetOptions() {
+    this.__AUTOLOAD_OPTIONS__ = null;
+    this.__USER_ROLES__ == null;
+  }
+
+  /**
    * 获取配置
    */
   protected getConfig(key: keyof Config) {
@@ -112,9 +108,22 @@ export abstract class BaseDataSource implements OnModuleInit {
    * @param fields 字段名
    * @param rawAttributes ORM 实体对象属性
    */
-  protected filterFields(fields: string[], model: ModelCtor<Model<any, any>>): (string | ProjectionAlias)[] {
+  protected filterFields(fields: string[], model: ModelType): (string | ProjectionAlias)[] {
     const columns = Object.keys(model.rawAttributes);
     return fields.filter((field) => columns.includes(field));
+  }
+
+  /**
+   * 获取 Sequelize mapping 到数据库的字段名
+   * @param fieldName 实体模型字段名
+   * @param model 实体模型
+   */
+  protected field<TAttributes extends {} = any>(
+    fieldName: keyof TAttributes | 'createdAt' | 'updatedAt',
+    model: ModelDefined<TAttributes, any>,
+  ) {
+    const field = model.rawAttributes[fieldName as string];
+    return field && field.field ? field.field : fieldName;
   }
 
   /**
@@ -126,23 +135,10 @@ export abstract class BaseDataSource implements OnModuleInit {
    */
   protected col<TAttributes extends {} = any>(
     fieldName: keyof TAttributes | 'createdAt' | 'updatedAt',
-    model: ModelCtor<Model<TAttributes>>,
+    model: ModelDefined<TAttributes, any>,
     modelName?: string,
   ) {
     return this.Sequelize.col(`${modelName || model.name}.${this.field(fieldName, model)}`);
-  }
-
-  /**
-   * 获取 Sequelize mapping 到数据库的字段名
-   * @param fieldName 实体模型字段名
-   * @param model 实体模型
-   */
-  protected field<TAttributes extends {} = any>(
-    fieldName: keyof TAttributes | 'createdAt' | 'updatedAt',
-    model: ModelCtor<Model<TAttributes>>,
-  ) {
-    const field = model.rawAttributes[fieldName as string];
-    return field && field.field ? field.field : fieldName;
   }
 
   /**

@@ -6,5 +6,4 @@ export interface TermRelationshipAttributes {
   order: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TermRelationshipCreationAttributes extends Optional<TermRelationshipAttributes, 'order'> {}

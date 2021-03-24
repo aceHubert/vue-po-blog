@@ -9,7 +9,7 @@ declare global {
     createdAt: Date;
   };
 
-  export type ContextType = Context<{
+  export type GqlContext = Context<{
     user: JwtPayload | null;
   }>;
 
@@ -37,7 +37,6 @@ declare global {
 
   // express-jwt
   namespace Express {
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface User extends JwtPayload {}
   }
 }

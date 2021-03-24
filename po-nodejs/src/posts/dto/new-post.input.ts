@@ -2,11 +2,8 @@ import { Field, InputType } from '@nestjs/graphql';
 import { PostCommentStatus } from '@/common/helpers/enums';
 import { NewMetaInput } from '@/common/models/meta.model';
 
-// Types
-import { PostCreationAttributes } from '@/orm-entities/interfaces';
-
 @InputType({ description: '文章新建模型' })
-export class NewPostInput implements PostCreationAttributes {
+export class NewPostInput {
   @Field({ description: '标题' })
   title!: string;
 

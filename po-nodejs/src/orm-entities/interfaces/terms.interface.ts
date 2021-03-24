@@ -7,5 +7,4 @@ export interface TermAttributes {
   group: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TermCreationAttributes extends Optional<TermAttributes, 'id' | 'group'> {}

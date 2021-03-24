@@ -36,11 +36,16 @@ export class OptionResolver extends BaseResolver {
   }
 
   @Mutation((returns) => Boolean, { description: '修改配置项' })
-  updateOptions(
+  modifyOption(
     @Args('id', { type: () => ID }) id: number,
     @Args('model', { type: () => UpdateOptionInput })
     model: UpdateOptionInput,
   ) {
     return this.optionDataSource.update(id, model);
+  }
+
+  @Mutation((returns) => Boolean, { description: '删除配置项' })
+  removeOption(@Args('id', { type: () => ID }) id: number) {
+    return this.optionDataSource.delete(id);
   }
 }

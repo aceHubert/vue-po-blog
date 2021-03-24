@@ -5,8 +5,8 @@ export interface MediaMetaAttributes {
   mediaId: number;
   metaKey: string;
   metaValue: string;
+  description?: string;
   private: 'yes' | 'no';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MediaMetaCreationAttributes extends Optional<MediaMetaAttributes, 'id' | 'private'> {}

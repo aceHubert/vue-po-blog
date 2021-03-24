@@ -5,8 +5,8 @@ export interface UserMetaAttributes {
   userId: number;
   metaKey: string;
   metaValue: string;
+  description?: string;
   private: 'yes' | 'no';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserMetaCreationAttributes extends Optional<UserMetaAttributes, 'id' | 'private'> {}

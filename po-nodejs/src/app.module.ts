@@ -1,15 +1,14 @@
 import path from 'path';
+import { upperCase } from 'lodash';
 import { Module } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@/config/config.module';
-import { CustomCacheModule } from '@/custom-cache/custom-cache.module';
+import { GlobalCacheModule } from '@/global-cache/global-cache.module';
 import { DataSourceModule } from '@/sequelize-datasources/datasource.module';
 import { AuthModule } from '@/auth/auth.module';
 import { DbInitModule } from '@/db-init/db-init.module';
 
 // graphql
-import { GraphQLModule } from '@nestjs/graphql';
-import { enumsRegister } from '@/common/helpers/enums-register';
+import { GraphQLModule, registerEnumType } from '@nestjs/graphql';
 import { CommentModule } from '@/comments/comment.module';
 import { LinkModule } from '@/links/link.module';
 import { MediaModule } from '@/medias/media.module';
@@ -19,22 +18,22 @@ import { PostModule } from '@/posts/post.module';
 import { TermModule } from '@/terms/term.module';
 import { UserModule } from '@/users/user.module';
 
+// 注册 graphql 枚举类型
+import * as Enums from '@/common/helpers/enums';
+Object.keys(Enums).map((key) => {
+  registerEnumType((Enums as any)[key], {
+    name: upperCase(key).replace(/ /g, '_'),
+    description: key,
+  });
+});
+
 // middleware
 import { graphqlErrorInterceptorMiddleware } from '~/common/middlewares/graphql-error-interceptor.middleware';
-
-// filters
-import { HttpExceptionFilter } from '@/common/filters/http-exception.filter';
-
-// guard
-import { AuthorizedGuard } from '@/common/guards/authorized.guard';
-
-// 注册枚举
-enumsRegister();
 
 @Module({
   imports: [
     ConfigModule.register({ file: 'po-config.json' }),
-    CustomCacheModule,
+    GlobalCacheModule,
     DataSourceModule,
     AuthModule,
     DbInitModule,
@@ -68,16 +67,6 @@ enumsRegister();
         }
       },
     }),
-  ],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: AuthorizedGuard,
-    },
   ],
 })
 export class AppModule {}

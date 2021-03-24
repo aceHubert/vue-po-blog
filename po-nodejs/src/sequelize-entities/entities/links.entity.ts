@@ -8,7 +8,10 @@ import {
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 
-export default class Links extends Model<LinkAttributes, LinkCreationAttributes> {
+export default class Links extends Model<
+  Omit<LinkAttributes, 'updatedAt' | 'createdAt'>,
+  Omit<LinkCreationAttributes, 'updatedAt' | 'createdAt'>
+> {
   public id!: number;
   public url!: string;
   public name!: string;

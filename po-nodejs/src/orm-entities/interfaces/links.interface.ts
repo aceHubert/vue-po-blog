@@ -12,9 +12,10 @@ export interface LinkAttributes {
   userId: number;
   rel: string;
   rss: string;
+  updatedAt: Date;
+  createdAt: Date;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LinkCreationAttributes extends Optional<LinkAttributes, 'id' | 'visible' | 'userId' | 'rel' | 'rss'> {}
 
 export { LinkTarget, LinkVisible };

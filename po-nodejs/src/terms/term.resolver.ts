@@ -10,11 +10,13 @@ import { TermRelationshipArgs } from './dto/term-relationship.args';
 import { NewTermInput } from './dto/new-term.input';
 import { NewTermMetaInput } from './dto/new-term-meta.input';
 import { NewTermRelationshipInput } from './dto/new-term-relationship.input';
+import { UpdateTermInput } from './dto/update-term.input';
 import { TermTaxonomy, TermRelationship, TermTaxonomyRelationship, TermMeta } from './models/term.model';
 
 @Resolver(() => TermTaxonomy)
 export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, NewTermMetaInput, TermDataSource, {
-  name: '协议',
+  resolverName: 'Term',
+  description: '协议',
 }) {
   constructor(protected readonly moduleRef: ModuleRef, private readonly termDataSource: TermDataSource) {
     super(moduleRef);
@@ -43,7 +45,7 @@ export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, New
 
   @Query((returns) => [TermTaxonomyRelationship], { description: '获取协议关系列表' })
   termRelationships(@Args() args: TermRelationshipArgs, @Fields() fields: ResolveTree) {
-    return this.termDataSource.getRelationships(
+    return this.termDataSource.getTermRelationships(
       args,
       this.getFieldNames(fields.fieldsByTypeName.TermTaxonomyRelationship),
     );
@@ -59,11 +61,24 @@ export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, New
     return this.termDataSource.createRelationship(model);
   }
 
-  @Mutation((returns) => Boolean, { nullable: true, description: '移除协议关系' })
+  @Mutation((returns) => Boolean, { description: '修改协议' })
+  modifyTerm(
+    @Args('id', { type: () => ID, description: 'Term id' }) id: number,
+    @Args('model', { type: () => UpdateTermInput }) model: UpdateTermInput,
+  ) {
+    return this.termDataSource.update(id, model);
+  }
+
+  @Mutation((returns) => Boolean, { description: '移除协议关系' })
   removeTermRelationship(
     @Args('objectId', { type: () => ID, description: '关联对象 id' }) objectId: number,
     @Args('taxonomyId', { type: () => ID, description: '类别 id' }) taxonomyId: number,
   ) {
     return this.termDataSource.deleteRelationship(objectId, taxonomyId);
+  }
+
+  @Mutation((returns) => Boolean, { description: '移除协议(包括相关联协议关系)' })
+  removeTerm(@Args('id', { type: () => ID, description: 'Term id' }) id: number) {
+    return this.termDataSource.delete(id);
   }
 }

@@ -1,18 +1,20 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
+import { ValidationError } from '@/common/utils/errors.utils';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
-import { PagedMediaArgs } from '@/medias/dto/paged-media.args';
-import { NewMediaInput } from '@/medias/dto/new-mdeia.input';
-import { NewMediaMetaInput } from '@/medias/dto/new-media-meta.input';
-import { PagedMedia } from '@/medias/models/media.model';
-import { MediaCreationAttributes, MediaMetaCreationAttributes } from '@/orm-entities/interfaces';
-import Media from '@/sequelize-entities/entities/medias.entity';
-import MediaMeta from '@/sequelize-entities/entities/media-meta.entity';
+import {
+  MediaModel,
+  MediaMetaModel,
+  PagedMediaArgs,
+  PagedMediaModel,
+  NewMediaInput,
+  NewMediaMetaInput,
+} from '../interfaces/media.interface';
 
 @Injectable()
-export class MediaDataSource extends MetaDataSource<MediaMeta, NewMediaMetaInput> {
+export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMetaInput> {
   constructor(protected readonly moduleRef: ModuleRef) {
     super(moduleRef);
   }
@@ -22,10 +24,15 @@ export class MediaDataSource extends MetaDataSource<MediaMeta, NewMediaMetaInput
    * @param id Media Id
    * @param fields 返回的字段
    */
-  get(id: number, fields: string[]): Promise<Media | null> {
+  get(id: number, fields: string[]): Promise<MediaModel | null> {
+    // 主键(meta 查询)
+    if (!fields.includes('id')) {
+      fields.push('id');
+    }
+
     return this.models.Medias.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Medias),
-    });
+    }).then((media) => media?.toJSON() as MediaModel);
   }
 
   /**
@@ -33,7 +40,7 @@ export class MediaDataSource extends MetaDataSource<MediaMeta, NewMediaMetaInput
    * @param param 查询条件
    * @param fields 返回的字段
    */
-  getPaged({ offset, limit, ...query }: PagedMediaArgs, fields: string[]): Promise<PagedMedia> {
+  getPaged({ offset, limit, ...query }: PagedMediaArgs, fields: string[]): Promise<PagedMediaModel> {
     return this.models.Medias.findAndCountAll({
       attributes: this.filterFields(fields, this.models.Medias),
       where: {
@@ -43,7 +50,7 @@ export class MediaDataSource extends MetaDataSource<MediaMeta, NewMediaMetaInput
       limit,
       order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
-      rows,
+      rows: rows as PagedMediaModel['rows'],
       total,
     }));
   }
@@ -67,39 +74,77 @@ export class MediaDataSource extends MetaDataSource<MediaMeta, NewMediaMetaInput
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewMediaInput): Promise<Media | null> {
+  async create(model: NewMediaInput): Promise<MediaModel> {
     const isExists = await this.isExists(model.fileName);
 
-    if (!isExists) {
-      const { metas, ...rest } = model;
-      const creationModel: MediaCreationAttributes = {
-        ...rest,
-      };
+    if (isExists) {
+      throw new ValidationError(`The media filename "${model.fileName}" has existed!`);
+    }
 
-      const media = await this.models.Medias.create(creationModel);
+    const { metas, ...rest } = model;
+    const t = await this.sequelize.transaction();
+    try {
+      const media = await this.models.Medias.create(rest, { transaction: t });
 
       if (metas && metas.length) {
-        const metaCreationModels: MediaMetaCreationAttributes[] = metas.map((meta) => {
-          return {
-            ...meta,
-            mediaId: media.id,
-          };
-        });
-        this.models.MediaMeta.bulkCreate(metaCreationModels);
+        const falseOrMetaKeys = await this.isMetaExists(
+          media.id,
+          metas.map((meta) => meta.metaKey),
+        );
+        if (falseOrMetaKeys) {
+          throw new ValidationError(`The meta keys (${falseOrMetaKeys.join(',')}) have existed!`);
+        } else {
+          this.models.MediaMeta.bulkCreate(
+            metas.map((meta) => {
+              return {
+                ...meta,
+                mediaId: media.id,
+              };
+            }),
+            {
+              transaction: t,
+            },
+          );
+        }
       }
 
-      return media;
+      await t.commit();
+
+      return media.toJSON() as MediaModel;
+    } catch (err) {
+      await t.rollback();
+      throw err;
     }
-    return null;
   }
 
   /**
    * 根据 Id 删除
    * @param id Media Id
    */
-  delete(id: number): Promise<boolean> {
-    return this.models.Medias.destroy({
-      where: { id },
-    }).then((count) => count > 0);
+  async delete(id: number): Promise<boolean> {
+    const t = await this.sequelize.transaction();
+    try {
+      await this.models.MediaMeta.destroy({
+        where: {
+          mediaId: id,
+        },
+        transaction: t,
+      });
+
+      await this.models.Medias.destroy({
+        where: {
+          id,
+        },
+        transaction: t,
+      });
+
+      await t.commit();
+
+      return true;
+    } catch (err) {
+      this.logger.error(`An error occurred during deleting media (id:${id}), Error: ${err.message}`);
+      await t.rollback();
+      return false;
+    }
   }
 }

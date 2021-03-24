@@ -1,10 +1,10 @@
-import { Field, ObjectType, ID, createUnionType } from '@nestjs/graphql';
-import { UserStatus, UserRoleWithNone } from '@/common/helpers/enums';
+import { Field, ObjectType, InterfaceType, ID, createUnionType } from '@nestjs/graphql';
+import { UserStatus, UserRole, UserRoleWithNone } from '@/common/helpers/enums';
 import { PagedResponse, Count } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
 
-@ObjectType({ description: '用户模型' })
-export class User {
+@InterfaceType()
+export abstract class BaseUser {
   @Field((type) => ID, { description: 'Id' })
   id!: number;
 
@@ -36,10 +36,35 @@ export class User {
   createdAt!: Date;
 }
 
-@ObjectType({ description: '用户模型(包含角色)' })
-export class UserWithRole extends User {
-  @Field((type) => UserRoleWithNone, { nullable: true, description: '用户角色(包含 None)' })
-  role!: UserRoleWithNone;
+@ObjectType({ implements: BaseUser, description: '用户模型' })
+export class User implements BaseUser {
+  id!: number;
+  loginName!: string;
+  niceName!: string;
+  displayName!: string;
+  mobile!: string | null;
+  email!: string;
+  url!: string;
+  status!: UserStatus;
+  updatedAt!: Date;
+  createdAt!: Date;
+}
+
+@ObjectType({ implements: BaseUser, description: '用户模型（包含角色）' })
+export class UserWithRole implements BaseUser {
+  id!: number;
+  loginName!: string;
+  niceName!: string;
+  displayName!: string;
+  mobile!: string | null;
+  email!: string;
+  url!: string;
+  status!: UserStatus;
+  updatedAt!: Date;
+  createdAt!: Date;
+
+  @Field((type) => UserRole, { nullable: true, description: '用户角色' })
+  role!: UserRole | null;
 }
 
 @ObjectType({ description: '用户分页模型' })
@@ -56,7 +81,7 @@ export class UserStatusCount extends Count {
 @ObjectType({ description: `用户按角色分组数量模型` })
 export class UserRoleCount extends Count {
   @Field((type) => UserRoleWithNone, { description: '角色' })
-  role!: UserRoleWithNone;
+  role!: UserRole | 'none';
 }
 
 @ObjectType({ description: '用户元数据模型' })

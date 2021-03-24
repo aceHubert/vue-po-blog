@@ -4,7 +4,12 @@ import { UserAttributes, UserCreationAttributes, UserStatus } from '@/orm-entiti
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 
-export default class Users extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+export default class Users
+  extends Model<
+    Omit<UserAttributes, 'updatedAt' | 'createdAt'>,
+    Omit<UserCreationAttributes, 'updatedAt' | 'createdAt'>
+  >
+  implements UserAttributes {
   public static readonly associations = {};
 
   public id!: number;

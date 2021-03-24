@@ -7,17 +7,17 @@ import { Authorized } from '~/common/decorators/authorized.decorator';
 import { PostDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
-import { User } from '@/users/models/user.model';
 import { PagedPageArgs } from './dto/paged-page.args';
 import { NewPageInput } from './dto/new-page.input';
-import { NewPageMetaInput } from './dto/new-page-meta.input';
+import { NewPostMetaInput } from '@/posts/dto/new-post-meta.input';
 import { UpdatePageInput } from './dto/update-page.input';
-import { Page, PagedPage, PageMeta } from './models/page.model';
+import { Page, PagedPage } from './models/page.model';
+import { Author, PostMeta } from '@/posts/models/post.model';
 import { PostStatusCount, PostDayCount, PostMonthCount, PostYearCount } from '../posts/models/post.model';
 
 @Resolver(() => Page)
-export class PageResolver extends createMetaResolver(Page, PageMeta, NewPageMetaInput, PostDataSource, {
-  name: '页面',
+export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMetaInput, PostDataSource, {
+  description: '页面',
 }) {
   constructor(
     protected readonly moduleRef: ModuleRef,
@@ -69,14 +69,9 @@ export class PageResolver extends createMetaResolver(Page, PageMeta, NewPageMeta
     return this.postDataSource.getCountByYear(PostType.Page);
   }
 
-  @Authorized()
-  @ResolveField((returns) => User, { description: '作者' })
-  author(
-    @Root() { author: authorId }: { author: number },
-    @Fields() fields: ResolveTree,
-    @Context('user') requestUser: JwtPayload,
-  ) {
-    return this.userDataSource.get(authorId, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
+  @ResolveField((returns) => Author, { description: '作者' })
+  author(@Root() { author: authorId }: { author: number }, @Fields() fields: ResolveTree) {
+    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.Author));
   }
 
   @Authorized()
@@ -87,7 +82,7 @@ export class PageResolver extends createMetaResolver(Page, PageMeta, NewPageMeta
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改页面（Trash 状态下不支持修改）' })
-  updatePage(
+  modifyPage(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Args('model', { type: () => UpdatePageInput }) model: UpdatePageInput,
     @Context('user') requestUser: JwtPayload,

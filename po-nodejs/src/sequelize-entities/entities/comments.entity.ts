@@ -7,7 +7,10 @@ import {
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 
-export default class Comments extends Model<CommentAttributes, CommentCreationAttributes> {
+export default class Comments extends Model<
+  Omit<CommentAttributes, 'updatedAt' | 'createdAt'>,
+  Omit<CommentCreationAttributes, 'updatedAt' | 'createdAt'>
+> {
   public id!: number;
   public postId!: number;
   public author!: string;

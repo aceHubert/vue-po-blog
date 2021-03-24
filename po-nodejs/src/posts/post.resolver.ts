@@ -7,13 +7,13 @@ import { Authorized } from '~/common/decorators/authorized.decorator';
 import { PostDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Typs
-import { User } from '@/users/models/user.model';
 import { PagedPostArgs } from './dto/paged-post.args';
 import { NewPostInput } from './dto/new-post.input';
 import { NewPostMetaInput } from './dto/new-post-meta.input';
 import { UpdatePostInput } from './dto/update-post.input';
 import {
   Post,
+  Author,
   PagedPost,
   PostStatusCount,
   PostMeta,
@@ -24,7 +24,7 @@ import {
 
 @Resolver(() => Post)
 export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMetaInput, PostDataSource, {
-  name: '文章',
+  description: '文章',
 }) {
   constructor(
     protected readonly moduleRef: ModuleRef,
@@ -76,14 +76,9 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     return this.postDataSource.getCountByYear(PostType.Post);
   }
 
-  @Authorized()
-  @ResolveField((returns) => User, { description: '作者' })
-  author(
-    @Root() { author: authorId }: { author: number },
-    @Fields() fields: ResolveTree,
-    @Context('user') requestUser: JwtPayload,
-  ) {
-    return this.userDataSource.get(authorId, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
+  @ResolveField((returns) => Author, { description: '作者' })
+  author(@Root() { author: authorId }: { author: number }, @Fields() fields: ResolveTree) {
+    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.Author));
   }
 
   @Authorized()
@@ -94,7 +89,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改文章（Trash 状态下不支持修改）' })
-  updatePost(
+  modifyPost(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Args('model', { type: () => UpdatePostInput }) model: UpdatePostInput,
     @Context('user') requestUser: JwtPayload,
@@ -104,7 +99,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改文章评论状态' })
-  updatePostCommentStatus(
+  modifyPostCommentStatus(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Args('status', { type: () => PostCommentStatus, description: '评论状态' }) status: PostCommentStatus,
     @Context('user') requestUser: JwtPayload,
@@ -114,7 +109,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
 
   // Page 状共用以下方法
   @Mutation((returns) => Boolean, { description: '修改文章或页面状态（Trash 状态下不支持修改）' })
-  updatePostOrPageStatus(
+  modifyPostOrPageStatus(
     @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
     @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
     @Context('user') requestUser: JwtPayload,

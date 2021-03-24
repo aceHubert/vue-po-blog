@@ -1,11 +1,8 @@
 import { Field, InputType, ID } from '@nestjs/graphql';
 import { NewMetaInput } from '@/common/models/meta.model';
 
-// Types
-import { CommentCreationAttributes } from '@/orm-entities/interfaces/comments.interface';
-
 @InputType({ description: '评论新建模型' })
-export class NewCommentInput implements CommentCreationAttributes {
+export class NewCommentInput {
   @Field(() => ID, { description: '文章 Id' })
   postId!: number;
 

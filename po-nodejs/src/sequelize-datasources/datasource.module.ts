@@ -1,7 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { EntityModule } from '@/sequelize-entities/entity.module';
 import { ConfigService } from '@/config/config.service';
-import { CustomCacheModule } from '@/custom-cache/custom-cache.module';
 import * as DataSources from './datasources';
 
 const providers = Object.values(DataSources);
@@ -23,7 +22,6 @@ const providers = Object.values(DataSources);
       }),
       inject: [ConfigService],
     }),
-    CustomCacheModule,
   ],
   providers: providers,
   exports: providers,

@@ -3,7 +3,10 @@ import { MediaAttributes, MediaCreationAttributes } from '@/orm-entities/interfa
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 
-export default class Medias extends Model<MediaAttributes, MediaCreationAttributes> {
+export default class Medias extends Model<
+  Omit<MediaAttributes, 'createdAt'>,
+  Omit<MediaCreationAttributes, 'createdAt'>
+> {
   public id!: number;
   public fileName!: string;
   public originalFileName!: string;
