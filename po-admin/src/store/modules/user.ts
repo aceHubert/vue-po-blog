@@ -148,6 +148,8 @@ class UserStore extends VuexModule {
           });
           return model.accessToken;
         } else {
+          // 清除 refresh token from cookie
+          Cookie.set(REFRESH_TOKEN, '', { path: '/', expires: new Date(0) });
           throw new Error(model.message);
         }
       });
@@ -237,7 +239,7 @@ class UserStore extends VuexModule {
         return null;
       })
       .finally(() => {
-        // 清除cookie
+        // 清除 tokens from cookie
         Cookie.set(ACCESS_TOKEN, '', { path: '/', expires: new Date(0) });
         Cookie.set(REFRESH_TOKEN, '', { path: '/', expires: new Date(0) });
         // 清除 client store
