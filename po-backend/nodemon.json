@@ -1,6 +1,0 @@
-{
-  "watch": ["src/**/*.ts", "yarn.lock"],
-  "ignore": ["node_modules", "src/**/*.spec.ts"],
-  "exec": "ts-node -r tsconfig-paths/register --files src/index.ts",
-  "ext": ".ts,.js"
-}

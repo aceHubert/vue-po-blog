@@ -25,7 +25,7 @@ import { Context } from '@nuxt/types';
 import { LangConfig } from 'types/locale';
 
 export type CheckResponse = {
-  initRequired: boolean;
+  dbInitRequired: boolean;
 };
 
 @Module({ store, name: 'app', namespaced: true, dynamic: true, stateFactory: true })
@@ -153,9 +153,9 @@ class AppStore extends VuexModule {
    */
   @VuexAction({ rawError: true })
   checkDB() {
-    return httpClient.get<CheckResponse>('/init/check').then((model) => {
+    return httpClient.get<CheckResponse>('/db-init/check').then((model) => {
       if (model.success) {
-        return model.initRequired;
+        return model.dbInitRequired;
       } else {
         // 不会返回 false
         return false;
@@ -170,7 +170,7 @@ class AppStore extends VuexModule {
    */
   @VuexAction({ rawError: true })
   initDB(params: InitParams) {
-    return httpClient.post('/init/start', params).then((model) => {
+    return httpClient.post('/db-init/start', params).then((model) => {
       if (model.success) {
         return true;
       } else {

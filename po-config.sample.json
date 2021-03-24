@@ -1,7 +1,9 @@
 {
   "frontend": {
-    /** backend request base url*/
-    "baseUrl": ""
+    /** back-end request base url*/
+    "base_url": "http://localhost:5010/",
+    /** font-end server port */
+    "port": 5009
   },
   "backend": {
     /** The name of the database */
@@ -20,8 +22,8 @@
     "DB_DIALECT": "mysql",
     /** The Database Collate type. Don't change this if in doubt. */
     "DB_COLLATE": "",
-    /** db connection variable, falas | string*/
-    "use_db_variable": false,
+    /** back-end server port */
+    "port": 5010,
     /** table prefix */
     "table_prefix": "po_",
     /** jwt screct */
@@ -35,6 +37,10 @@
     "jwt_algorithm": "HS256",
     /** jwt expiresIn https://github.com/vercel/ms */
     "jwt_expiresIn": "30m",
-    "jwt_refresh_token_expiresIn": "15d"
+    "jwt_refresh_token_expiresIn": "15d",
+    /** Cache TTL */
+    "cache_ttl": 5,
+    /** Cache Max */
+    "cache_max": 1000
   }
 }

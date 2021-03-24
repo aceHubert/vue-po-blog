@@ -1,0 +1,1773 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""用户模型"""
+type User implements BaseUser {
+  """Id"""
+  id: ID!
+
+  """登录名"""
+  loginName: String!
+
+  """昵称"""
+  niceName: String!
+
+  """前台显示名称"""
+  displayName: String!
+
+  """手机号码"""
+  mobile: String
+
+  """电子邮箱"""
+  email: String!
+
+  """注册时客户端的 URL"""
+  url: String!
+
+  """用户状态"""
+  status: USER_STATUS!
+
+  """修改时间"""
+  updatedAt: DateTime!
+
+  """创建时间"""
+  createdAt: DateTime!
+
+  """用户 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+
+  """是否是超级管理员"""
+  isSuperAdmin: Boolean!
+}
+
+interface BaseUser {
+  """Id"""
+  id: ID!
+
+  """登录名"""
+  loginName: String!
+
+  """昵称"""
+  niceName: String!
+
+  """前台显示名称"""
+  displayName: String!
+
+  """手机号码"""
+  mobile: String
+
+  """电子邮箱"""
+  email: String!
+
+  """注册时客户端的 URL"""
+  url: String!
+
+  """用户状态"""
+  status: USER_STATUS!
+
+  """修改时间"""
+  updatedAt: DateTime!
+
+  """创建时间"""
+  createdAt: DateTime!
+
+  """用户 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+
+  """是否是超级管理员"""
+  isSuperAdmin: Boolean!
+}
+
+"""UserStatus"""
+enum USER_STATUS {
+  Disabled
+  Enable
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""元数据实体模型"""
+type Meta {
+  """Id"""
+  id: ID!
+
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+}
+
+"""用户模型（包含角色）"""
+type UserWithRole implements BaseUser {
+  """Id"""
+  id: ID!
+
+  """登录名"""
+  loginName: String!
+
+  """昵称"""
+  niceName: String!
+
+  """前台显示名称"""
+  displayName: String!
+
+  """手机号码"""
+  mobile: String
+
+  """电子邮箱"""
+  email: String!
+
+  """注册时客户端的 URL"""
+  url: String!
+
+  """用户状态"""
+  status: USER_STATUS!
+
+  """修改时间"""
+  updatedAt: DateTime!
+
+  """创建时间"""
+  createdAt: DateTime!
+
+  """用户 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+
+  """是否是超级管理员"""
+  isSuperAdmin: Boolean!
+
+  """用户角色"""
+  role: USER_ROLE
+}
+
+"""UserRole"""
+enum USER_ROLE {
+  Administrator
+  Editor
+  Author
+  Contributor
+  Subscriber
+}
+
+"""用户分页模型"""
+type PagedUser {
+  rows: [UserWithRole!]!
+  total: Int!
+}
+
+"""用户按状态分组数量模型"""
+type UserStatusCount {
+  """分组数量"""
+  count: Int!
+
+  """状态"""
+  status: USER_STATUS!
+}
+
+"""用户按角色分组数量模型"""
+type UserRoleCount {
+  """分组数量"""
+  count: Int!
+
+  """角色"""
+  role: USER_ROLE_WITH_NONE!
+}
+
+"""UserRoleWithNone"""
+enum USER_ROLE_WITH_NONE {
+  Administrator
+  Editor
+  Author
+  Contributor
+  Subscriber
+  None
+}
+
+"""用户元数据模型"""
+type UserMeta {
+  """Id"""
+  id: ID!
+
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """User Id"""
+  userId: ID!
+}
+
+"""评论模型"""
+type Comment {
+  """Id"""
+  id: ID!
+
+  """文章 Id"""
+  postId: ID!
+
+  """评论人"""
+  author: String!
+
+  """评论人 Email"""
+  authorEmail: String
+
+  """评论人客户端 Url"""
+  authorUrl: String
+
+  """评论人客户端 IP"""
+  authorIP: String
+
+  """评论内容"""
+  content: String!
+
+  """审核是否通过"""
+  approved: Boolean!
+
+  """是否重新编译"""
+  edited: Boolean!
+
+  """扩展字段：类型"""
+  type: COMMENT_TYPE!
+
+  """浏览器 UserAgent"""
+  agent: String
+
+  """修改时间"""
+  updatedAt: DateTime!
+
+  """创建时间"""
+  createdAt: DateTime!
+
+  """文章评论 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+
+  """回复的评论（分页）"""
+  children(
+    """分页偏移量"""
+    offset: Int = 0
+
+    """页大小"""
+    limit: Int = 10
+  ): PagedComment!
+
+  """评论用户"""
+  user: User
+}
+
+"""CommentType"""
+enum COMMENT_TYPE {
+  Comment
+}
+
+"""评论分页模型"""
+type PagedComment {
+  rows: [Comment!]!
+  total: Int!
+}
+
+"""评论元数据模型"""
+type CommentMeta {
+  """Id"""
+  id: ID!
+
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """Comment Id"""
+  commentId: ID!
+}
+
+"""链接模型"""
+type Link {
+  """Id"""
+  id: ID!
+
+  """Url"""
+  url: String!
+
+  """名称"""
+  name: String!
+
+  """图片"""
+  image: String!
+
+  """
+  打开方式: "_blank","_self"
+  """
+  target: LINK_TARGET!
+
+  """描述"""
+  description: String!
+
+  """是否显示"""
+  visible: LINK_VISIBLE!
+
+  """rel"""
+  rel: String
+
+  """rss"""
+  rss: String
+
+  """创建用户"""
+  user: User
+}
+
+"""LinkTarget"""
+enum LINK_TARGET {
+  Blank
+  Self
+}
+
+"""LinkVisible"""
+enum LINK_VISIBLE {
+  Yes
+  No
+}
+
+"""链接分页模型"""
+type PagedLink {
+  rows: [Link!]!
+  total: Int!
+}
+
+"""媒体模型"""
+type Media {
+  """Id"""
+  id: ID!
+
+  """文件名"""
+  fileName: String!
+
+  """原始文件名"""
+  originalFileName: String!
+
+  """文件后缀"""
+  extention: String!
+
+  """媒体类型"""
+  mimeType: String!
+
+  """相对路径"""
+  path: String!
+
+  """创建时间"""
+  createdAt: DateTime!
+
+  """媒体 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+}
+
+"""媒体分页模型"""
+type PagedMedia {
+  rows: [Media!]!
+  total: Int!
+}
+
+"""媒体元数据模型"""
+type MediaMeta {
+  """Id"""
+  id: ID!
+
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """Media Id"""
+  mediaId: ID!
+}
+
+"""配置项"""
+type Option {
+  """Id"""
+  id: ID!
+
+  """Name"""
+  optionName: String!
+
+  """Value"""
+  optionValue: String!
+
+  """程序启动自动加载项"""
+  autoload: OPTION_AUTOLOAD!
+}
+
+"""OptionAutoload"""
+enum OPTION_AUTOLOAD {
+  Yes
+  No
+}
+
+"""页面模型"""
+type Page {
+  """Id"""
+  id: ID!
+
+  """标题"""
+  title: String!
+
+  """内容"""
+  content: String!
+
+  """状态"""
+  status: POST_STATUS!
+
+  """页面 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+
+  """作者"""
+  author: Author!
+}
+
+"""PostStatus"""
+enum POST_STATUS {
+  Draft
+  Publish
+  Private
+  Trash
+}
+
+"""页面分页模型"""
+type PagedPage {
+  rows: [Page!]!
+  total: Int!
+}
+
+"""文章模型"""
+type Post {
+  """Id"""
+  id: ID!
+
+  """标题"""
+  title: String!
+
+  """内容"""
+  content: String!
+
+  """摘要"""
+  excerpt: String
+
+  """状态"""
+  status: POST_STATUS!
+
+  """评论状态"""
+  commentStatus: POST_COMMENT_STATUS!
+
+  """评论数量"""
+  commentCount: Int!
+
+  """修改时间"""
+  updatedAt: DateTime!
+
+  """创建时间"""
+  createdAt: DateTime!
+
+  """文章 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+
+  """作者"""
+  author: Author!
+}
+
+"""PostCommentStatus"""
+enum POST_COMMENT_STATUS {
+  Disabled
+  Enable
+}
+
+"""作者"""
+type Author {
+  """Id"""
+  id: ID!
+
+  """前台显示名称"""
+  displayName: String!
+}
+
+"""文章分页模型"""
+type PagedPost {
+  rows: [Post!]!
+  total: Int!
+}
+
+"""文章按状态分组数量模型"""
+type PostStatusCount {
+  """分组数量"""
+  count: Int!
+
+  """文章状态"""
+  status: POST_STATUS!
+}
+
+"""文章按天分组数量模型"""
+type PostDayCount {
+  """分组数量"""
+  count: Int!
+
+  """日期，格式：yyyyMMdd"""
+  day: String!
+}
+
+"""文章按月分组数量模型"""
+type PostMonthCount {
+  """分组数量"""
+  count: Int!
+
+  """日期，格式：yyyyMM"""
+  month: String!
+}
+
+"""文章按年分组数量模型"""
+type PostYearCount {
+  """分组数量"""
+  count: Int!
+
+  """日期，格式：yyyy"""
+  year: String!
+}
+
+"""文章元数据模型"""
+type PostMeta {
+  """Id"""
+  id: ID!
+
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """Post Id"""
+  postId: ID!
+}
+
+"""协议模型"""
+type TermTaxonomy {
+  """Taxonomy Id"""
+  taxonomyId: ID!
+
+  """类别"""
+  taxonomy: String!
+
+  """类别说明"""
+  description: String!
+
+  """关联对象类别数量"""
+  count: Int!
+
+  """Term Id"""
+  id: ID!
+
+  """Name"""
+  name: String!
+
+  """别名"""
+  slug: String!
+
+  """分组"""
+  group: Int!
+
+  """协议 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+
+  """获取协议列表级联子项"""
+  children: [TermTaxonomy!]!
+}
+
+"""协议关系模型(包含TermTaxonomy)"""
+type TermTaxonomyRelationship {
+  """Taxonomy Id"""
+  taxonomyId: ID!
+
+  """类别"""
+  taxonomy: String!
+
+  """类别说明"""
+  description: String!
+
+  """关联对象类别数量"""
+  count: Int!
+
+  """Term Id"""
+  id: ID!
+
+  """Name"""
+  name: String!
+
+  """别名"""
+  slug: String!
+
+  """分组"""
+  group: Int!
+
+  """协议 元数据"""
+  metas(
+    """Meta keys"""
+    metaKeys: [String!]
+  ): [Meta!]!
+
+  """获取协议列表级联子项"""
+  children: [TermTaxonomy!]!
+
+  """排序"""
+  order: Int!
+}
+
+"""协议关系模型"""
+type TermRelationship {
+  """Post/Link等对象 Id"""
+  objectId: ID!
+
+  """Taxonomy Id"""
+  taxonomyId: ID!
+
+  """排序"""
+  order: Int!
+}
+
+"""协议元数据模型"""
+type TermMeta {
+  """Id"""
+  id: ID!
+
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """Term Id"""
+  termId: ID!
+}
+
+type Query {
+  """获取 文章评论 元数据"""
+  commentMetas(
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
+    metaKeys: [String!]
+
+    """文章评论 Id"""
+    commentId: ID!
+  ): [CommentMeta!]!
+
+  """获取评论"""
+  comment(id: ID!): Comment
+
+  """获取评论分页列表"""
+  comments(
+    """分页偏移量"""
+    offset: Int = 0
+
+    """页大小"""
+    limit: Int = 10
+
+    """文章 Id"""
+    postId: ID!
+
+    """父 Id"""
+    parentId: ID = 0
+  ): PagedComment!
+
+  """获取链接"""
+  link(
+    """Link id"""
+    id: ID!
+  ): Link
+
+  """获取链接分页列表"""
+  links(
+    """分页偏移量"""
+    offset: Int = 0
+
+    """页大小"""
+    limit: Int = 10
+
+    """根据名称模糊搜索"""
+    name: String
+  ): PagedLink!
+
+  """获取 媒体 元数据"""
+  mediaMetas(
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
+    metaKeys: [String!]
+
+    """媒体 Id"""
+    mediaId: ID!
+  ): [MediaMeta!]!
+
+  """获取媒体"""
+  media(
+    """Media id"""
+    id: ID!
+  ): Media
+
+  """获取媒体分页列表"""
+  medias(
+    """分页偏移量"""
+    offset: Int = 0
+
+    """页大小"""
+    limit: Int = 10
+
+    """文件后缀"""
+    extention: String
+
+    """媒体类型"""
+    mimeType: String
+  ): PagedMedia!
+
+  """获取配置项"""
+  option(id: ID!): Option
+
+  """获取配置项的 Value 值"""
+  optionValue(name: String!): String
+
+  """获取配置项"""
+  options(
+    """程序启动自动加载项"""
+    autoload: OPTION_AUTOLOAD
+  ): [Option!]!
+
+  """获取 页面 元数据"""
+  pageMetas(
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
+    metaKeys: [String!]
+
+    """页面 Id"""
+    pageId: ID!
+  ): [PostMeta!]!
+
+  """获取页面"""
+  page(
+    """Page id"""
+    id: ID!
+  ): Page
+
+  """获取分页页面列表"""
+  pages(
+    """分页偏移量"""
+    offset: Int = 0
+
+    """页大小"""
+    limit: Int = 10
+
+    """搜索关键字（根据标题模糊查询）"""
+    keyword: String
+
+    """文章作者"""
+    author: Float
+
+    """页面状态"""
+    status: POST_STATUS
+
+    """日期，格式：yyyy-MM"""
+    date: String
+  ): PagedPage!
+
+  """获取文章按状态分组数量"""
+  pageCountByStatus: [PostStatusCount!]!
+
+  """获取文章按天分组数量"""
+  pageCountByDay(
+    """月份，格式：yyyyMM"""
+    month: String!
+  ): [PostDayCount!]!
+
+  """获取文章按月分组数量"""
+  pageCountByMonth(
+    """从当前日期向前推多少个月，如果year有值则忽略，默认：12"""
+    months: Int
+
+    """年份，格式：yyyy"""
+    year: String
+  ): [PostMonthCount!]!
+
+  """获取文章按年分组数量"""
+  pageCountByYear: [PostYearCount!]!
+
+  """获取 文章 元数据"""
+  postMetas(
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
+    metaKeys: [String!]
+
+    """文章 Id"""
+    postId: ID!
+  ): [PostMeta!]!
+
+  """获取文章"""
+  post(
+    """Post id"""
+    id: ID!
+  ): Post
+
+  """获取分页文章列表"""
+  posts(
+    """分页偏移量"""
+    offset: Int = 0
+
+    """页大小"""
+    limit: Int = 10
+
+    """搜索关键字（根据标题模糊查询）"""
+    keyword: String
+
+    """文章作者"""
+    author: Float
+
+    """文章状态(如果为空，则搜索状态为非 Trash 的文章)"""
+    status: POST_STATUS
+
+    """类别 Id"""
+    categoryIds: [ID!]
+
+    """日期，格式：yyyy(年)、yyyyMM(月)、yyyyMMdd(日)"""
+    date: String
+  ): PagedPost!
+
+  """获取文章按状态分组数量"""
+  postCountByStatus: [PostStatusCount!]!
+
+  """获取文章按天分组数量"""
+  postCountByDay(
+    """月份，格式：yyyyMM"""
+    month: String!
+  ): [PostDayCount!]!
+
+  """获取文章按月分组数量"""
+  postCountByMonth(
+    """从当前日期向前推多少个月(如果year有值则忽略)，默认：12"""
+    months: Int
+
+    """年份，格式：yyyy"""
+    year: String
+  ): [PostMonthCount!]!
+
+  """获取文章按年分组数量"""
+  postCountByYear: [PostYearCount!]!
+
+  """获取 协议 元数据"""
+  termMetas(
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
+    metaKeys: [String!]
+
+    """协议 Id"""
+    termId: ID!
+  ): [TermMeta!]!
+
+  """获取协议"""
+  term(
+    """Term id"""
+    id: ID!
+  ): TermTaxonomy
+
+  """获取协议列表"""
+  terms(
+    """类别"""
+    taxonomy: String!
+
+    """父 Id"""
+    parentId: ID = 0
+
+    """分组"""
+    group: Int
+  ): [TermTaxonomy!]!
+
+  """获取协议关系列表"""
+  termRelationships(
+    """Post/Link等对象 ID"""
+    objectId: ID!
+
+    """类别"""
+    taxonomy: String!
+  ): [TermTaxonomyRelationship!]!
+
+  """获取 用户 元数据"""
+  userMetas(
+    """meta keys(如果为null 或集合长度为0时，返回所有 metas)"""
+    metaKeys: [String!]
+
+    """用户 Id"""
+    userId: ID!
+  ): [UserMeta!]!
+
+  """获取当前用户"""
+  user: User
+
+  """获取用户(必须有编辑用户权限)"""
+  userById(id: Float!): User
+
+  """获取用户分页列表"""
+  users(
+    """分页偏移量"""
+    offset: Int = 0
+
+    """页大小"""
+    limit: Int = 10
+
+    """搜索关键字（根据登录名模糊查询）"""
+    keyword: String
+
+    """用户状态"""
+    status: USER_STATUS
+
+    """用户角色（如果为空，则查询有角色（即非 None 的）的用户）"""
+    role: USER_ROLE_WITH_NONE
+  ): PagedUser!
+
+  """获取用户状态分组数量"""
+  userCountByStatus: [UserStatusCount!]!
+
+  """获取用户角色分组数量"""
+  userCountByRole: [UserRoleCount!]!
+
+  """判断登录名是否存在"""
+  isLoginNameExists(loginName: String!): Boolean!
+
+  """判断手机号码是否存在"""
+  isMobileExists(mobile: String!): Boolean!
+
+  """判断email是否存在"""
+  isEmailExists(email: String!): Boolean!
+}
+
+type Mutation {
+  """添加 文章评论 元数据"""
+  addCommentMeta(model: NewCommentMetaInput!): CommentMeta
+
+  """批量添加 文章评论 元数据"""
+  addCommentMetas(
+    models: [NewMetaInput!]!
+
+    """文章评论 Meta Id"""
+    id: ID!
+  ): [CommentMeta!]!
+
+  """修改 文章评论 元数据"""
+  modifyCommentMeta(
+    metaValue: String!
+
+    """文章评论 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """修改 文章评论 元数据"""
+  modifyCommentMetaByKey(
+    """Meta value"""
+    metaValue: String!
+
+    """Meta key"""
+    metaKey: String!
+
+    """文章评论 Id"""
+    commentId: ID!
+  ): Boolean!
+
+  """删除 文章评论 元数据"""
+  removeCommentMeta(
+    """文章评论 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """添加评论"""
+  addComment(model: NewCommentInput!): Comment
+
+  """修改评论"""
+  modifyComment(
+    model: UpdateCommentInput!
+
+    """Comment id"""
+    id: ID!
+  ): Boolean!
+
+  """删除评论"""
+  removeComment(
+    """Comment id"""
+    id: ID!
+  ): Boolean!
+
+  """添加链接"""
+  addLink(model: NewLinkInput!): Link
+
+  """修改链接"""
+  modifyLink(
+    model: UpdateLinkInput!
+
+    """Link id"""
+    id: ID!
+  ): Boolean!
+
+  """删除链接"""
+  removeLink(
+    """Link id"""
+    id: ID!
+  ): Boolean!
+
+  """添加 媒体 元数据"""
+  addMediaMeta(model: NewMediaMetaInput!): MediaMeta
+
+  """批量添加 媒体 元数据"""
+  addMediaMetas(
+    models: [NewMetaInput!]!
+
+    """媒体 Meta Id"""
+    id: ID!
+  ): [MediaMeta!]!
+
+  """修改 媒体 元数据"""
+  modifyMediaMeta(
+    metaValue: String!
+
+    """媒体 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """修改 媒体 元数据"""
+  modifyMediaMetaByKey(
+    """Meta value"""
+    metaValue: String!
+
+    """Meta key"""
+    metaKey: String!
+
+    """媒体 Id"""
+    mediaId: ID!
+  ): Boolean!
+
+  """删除 媒体 元数据"""
+  removeMediaMeta(
+    """媒体 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """添加媒体"""
+  addMedia(model: NewMediaInput!): Media
+
+  """删除媒体"""
+  removeMedia(
+    """Media id"""
+    id: ID!
+  ): Boolean!
+
+  """添加配置项"""
+  addOption(model: NewOptionInput!): Option!
+
+  """修改配置项"""
+  modifyOption(model: UpdateOptionInput!, id: ID!): Boolean!
+
+  """删除配置项"""
+  removeOption(id: ID!): Boolean!
+
+  """添加 页面 元数据"""
+  addPageMeta(model: NewPostMetaInput!): PostMeta
+
+  """批量添加 页面 元数据"""
+  addPageMetas(
+    models: [NewMetaInput!]!
+
+    """页面 Meta Id"""
+    id: ID!
+  ): [PostMeta!]!
+
+  """修改 页面 元数据"""
+  modifyPageMeta(
+    metaValue: String!
+
+    """页面 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """修改 页面 元数据"""
+  modifyPageMetaByKey(
+    """Meta value"""
+    metaValue: String!
+
+    """Meta key"""
+    metaKey: String!
+
+    """页面 Id"""
+    pageId: ID!
+  ): Boolean!
+
+  """删除 页面 元数据"""
+  removePageMeta(
+    """页面 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """添加页面（不可添加为 Trash 状态，否则无法直接修改）"""
+  addPage(model: NewPageInput!): Page
+
+  """修改页面（Trash 状态下不支持修改）"""
+  modifyPage(
+    model: UpdatePageInput!
+
+    """Page id"""
+    id: ID!
+  ): Boolean!
+
+  """添加 文章 元数据"""
+  addPostMeta(model: NewPostMetaInput!): PostMeta
+
+  """批量添加 文章 元数据"""
+  addPostMetas(
+    models: [NewMetaInput!]!
+
+    """文章 Meta Id"""
+    id: ID!
+  ): [PostMeta!]!
+
+  """修改 文章 元数据"""
+  modifyPostMeta(
+    metaValue: String!
+
+    """文章 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """修改 文章 元数据"""
+  modifyPostMetaByKey(
+    """Meta value"""
+    metaValue: String!
+
+    """Meta key"""
+    metaKey: String!
+
+    """文章 Id"""
+    postId: ID!
+  ): Boolean!
+
+  """删除 文章 元数据"""
+  removePostMeta(
+    """文章 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """添加文章（不可添加为 Trash 状态，否则无法直接修改）"""
+  addPost(model: NewPostInput!): Post
+
+  """修改文章（Trash 状态下不支持修改）"""
+  modifyPost(
+    model: UpdatePostInput!
+
+    """Post id"""
+    id: ID!
+  ): Boolean!
+
+  """修改文章评论状态"""
+  modifyPostCommentStatus(
+    """评论状态"""
+    status: POST_COMMENT_STATUS!
+
+    """Post id"""
+    id: ID!
+  ): Boolean!
+
+  """修改文章或页面状态（Trash 状态下不支持修改）"""
+  modifyPostOrPageStatus(
+    """状态"""
+    status: POST_STATUS!
+
+    """Post/Page id"""
+    id: ID!
+  ): Boolean!
+
+  """批量修改文章或页面状态（Trash 状态下不支持修改）"""
+  blukUpdatePostOrPageStatus(
+    """状态"""
+    status: POST_STATUS!
+
+    """Post/Page ids"""
+    ids: [ID!]!
+  ): Boolean!
+
+  """重置文章或页面成移入到 Trash 之前状态（历史状态不存在或数据结构异常，会造成重置不成功）"""
+  restorePostOrPage(
+    """Post/Page id"""
+    id: ID!
+  ): Boolean!
+
+  """批量重置文章或页面成移入到 Trash 之前状态"""
+  blukRestorePostOrPage(
+    """Post/Page ids"""
+    ids: [ID!]!
+  ): Boolean!
+
+  """删除文章或页面（非 Trash 状态下无法删除）"""
+  removePostOrPage(
+    """Post/Page id"""
+    id: ID!
+  ): Boolean!
+
+  """添加 协议 元数据"""
+  addTermMeta(model: NewTermMetaInput!): TermMeta
+
+  """批量添加 协议 元数据"""
+  addTermMetas(
+    models: [NewMetaInput!]!
+
+    """协议 Meta Id"""
+    id: ID!
+  ): [TermMeta!]!
+
+  """修改 协议 元数据"""
+  modifyTermMeta(
+    metaValue: String!
+
+    """协议 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """修改 协议 元数据"""
+  modifyTermMetaByKey(
+    """Meta value"""
+    metaValue: String!
+
+    """Meta key"""
+    metaKey: String!
+
+    """协议 Id"""
+    termId: ID!
+  ): Boolean!
+
+  """删除 协议 元数据"""
+  removeTermMeta(
+    """协议 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """新建协议"""
+  addTerm(model: NewTermInput!): TermTaxonomy
+
+  """新建协议关系"""
+  addTermRelationship(model: NewTermRelationshipInput!): TermRelationship
+
+  """修改协议"""
+  modifyTerm(
+    model: UpdateTermInput!
+
+    """Term id"""
+    id: ID!
+  ): Boolean!
+
+  """移除协议关系"""
+  removeTermRelationship(
+    """类别 id"""
+    taxonomyId: ID!
+
+    """关联对象 id"""
+    objectId: ID!
+  ): Boolean!
+
+  """移除协议(包括相关联协议关系)"""
+  removeTerm(
+    """Term id"""
+    id: ID!
+  ): Boolean!
+
+  """添加 用户 元数据"""
+  addUserMeta(model: NewUserMetaInput!): UserMeta
+
+  """批量添加 用户 元数据"""
+  addUserMetas(
+    models: [NewMetaInput!]!
+
+    """用户 Meta Id"""
+    id: ID!
+  ): [UserMeta!]!
+
+  """修改 用户 元数据"""
+  modifyUserMeta(
+    metaValue: String!
+
+    """用户 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """修改 用户 元数据"""
+  modifyUserMetaByKey(
+    """Meta value"""
+    metaValue: String!
+
+    """Meta key"""
+    metaKey: String!
+
+    """用户 Id"""
+    userId: ID!
+  ): Boolean!
+
+  """删除 用户 元数据"""
+  removeUserMeta(
+    """用户 Meta Id"""
+    id: ID!
+  ): Boolean!
+
+  """添加用户（如果登录名已在在，则返回 null；使用 "isLoginNameExists" 查询判断）"""
+  addUser(model: NewUserInput!): User
+
+  """修改用户"""
+  modifyUser(
+    model: UpdateUserInput!
+
+    """User Id"""
+    id: ID!
+  ): Boolean!
+
+  """修改用户状态"""
+  modifyUserStatus(
+    status: USER_STATUS!
+
+    """User Id"""
+    id: ID!
+  ): Boolean!
+
+  """删除用户（永久）"""
+  removeUser(
+    """User Id"""
+    id: ID!
+  ): Boolean!
+}
+
+"""评论元数据新建模型"""
+input NewCommentMetaInput {
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """Comment Id"""
+  commentId: ID!
+}
+
+"""元数据新建实体模型"""
+input NewMetaInput {
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+}
+
+"""评论新建模型"""
+input NewCommentInput {
+  """文章 Id"""
+  postId: ID!
+
+  """评论人"""
+  author: String!
+
+  """评论人 Email"""
+  authorEmail: String
+
+  """评论人客户端 Url"""
+  authorUrl: String
+
+  """评论人客户端 IP"""
+  authorIP: String
+
+  """内容"""
+  content: String!
+
+  """浏览器 UserAgent"""
+  agent: String
+
+  """父 Id"""
+  parentId: ID
+
+  """登录用户 Id"""
+  userId: ID
+
+  """文章元数据"""
+  metas: [NewMetaInput!]
+}
+
+"""评论新建模型"""
+input UpdateCommentInput {
+  """内容"""
+  content: String!
+}
+
+"""链接新建模型"""
+input NewLinkInput {
+  """Url"""
+  url: String!
+
+  """名称"""
+  name: String!
+
+  """图片"""
+  image: String!
+
+  """
+  打开方式: "_blank","_self"
+  """
+  target: LINK_TARGET!
+
+  """描述"""
+  description: String!
+
+  """是否显示"""
+  visible: LINK_VISIBLE
+
+  """User Id"""
+  userId: ID
+
+  """rel"""
+  rel: String
+
+  """rss"""
+  rss: String
+}
+
+"""链接修改模型"""
+input UpdateLinkInput {
+  """Url"""
+  url: String
+
+  """名称"""
+  name: String
+
+  """图片"""
+  image: String
+
+  """
+  打开方式: "_blank","_self"
+  """
+  target: LINK_TARGET
+
+  """描述"""
+  description: String
+
+  """是否显示"""
+  visible: LINK_VISIBLE
+
+  """User Id"""
+  userId: ID
+
+  """rel"""
+  rel: String
+
+  """rss"""
+  rss: String
+}
+
+"""媒体元数据新建模型"""
+input NewMediaMetaInput {
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """Media Id"""
+  mediaId: ID!
+}
+
+"""媒体新建模型"""
+input NewMediaInput {
+  """文件名"""
+  fileName: String!
+
+  """原始文件名"""
+  originalFileName: String!
+
+  """文件后缀"""
+  extention: String!
+
+  """媒体类型"""
+  mimeType: String!
+
+  """相对路径"""
+  path: String!
+
+  """User Id"""
+  userId: ID
+
+  """媒体元数据"""
+  metas: [NewMetaInput!]
+}
+
+"""配置新建模型"""
+input NewOptionInput {
+  """Name"""
+  optionName: String!
+
+  """Value"""
+  optionValue: String!
+
+  """程序启动自动加载项"""
+  autoload: OPTION_AUTOLOAD = No
+}
+
+"""配置修改模型"""
+input UpdateOptionInput {
+  """Value"""
+  optionValue: String
+
+  """程序启动自动加载项"""
+  autoload: OPTION_AUTOLOAD
+}
+
+"""文章元数据新建模型"""
+input NewPostMetaInput {
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """Post Id"""
+  postId: ID!
+}
+
+"""页面新建模型"""
+input NewPageInput {
+  """标题"""
+  title: String!
+
+  """唯一标识，用于 Url 显示"""
+  name: String
+
+  """内容"""
+  content: String!
+
+  """页面元数据"""
+  metas: [NewMetaInput!]
+}
+
+"""页面修改模型"""
+input UpdatePageInput {
+  """标题"""
+  title: String!
+
+  """内容"""
+  content: String!
+
+  """状态"""
+  status: POST_STATUS
+}
+
+"""文章新建模型"""
+input NewPostInput {
+  """标题"""
+  title: String!
+
+  """唯一标识，用于 Url 显示"""
+  name: String
+
+  """内容"""
+  content: String!
+
+  """摘要"""
+  excerpt: String
+
+  """评论状态"""
+  commentStatus: POST_COMMENT_STATUS
+
+  """文章元数据"""
+  metas: [NewMetaInput!]
+}
+
+"""文章修改模型"""
+input UpdatePostInput {
+  """标题"""
+  title: String!
+
+  """内容"""
+  content: String!
+
+  """摘要"""
+  excerpt: String
+
+  """状态"""
+  status: POST_STATUS
+
+  """评论状态"""
+  commentStatus: POST_COMMENT_STATUS
+}
+
+"""协议元数据新建模型"""
+input NewTermMetaInput {
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """Term Id"""
+  termId: ID!
+}
+
+"""协议新建模型"""
+input NewTermInput {
+  """Name"""
+  name: String!
+
+  """类别"""
+  taxonomy: String!
+
+  """类别说明"""
+  description: String!
+
+  """别名"""
+  slug: String
+
+  """分组"""
+  group: Int
+
+  """如果提供，则自动绑定关系"""
+  objectId: ID
+
+  """协议元数据"""
+  metas: [NewMetaInput!]
+}
+
+"""协议关系新建模型"""
+input NewTermRelationshipInput {
+  """Post/Link等对象 Id"""
+  objectId: ID!
+
+  """分类 Id"""
+  taxonomyId: ID!
+
+  """排序"""
+  order: Int
+}
+
+"""协议修改模型"""
+input UpdateTermInput {
+  """Name"""
+  name: String
+
+  """别名"""
+  slug: String
+
+  """分组"""
+  group: Int
+}
+
+"""用户元数据新建模型"""
+input NewUserMetaInput {
+  """元数据 Key"""
+  metaKey: String!
+
+  """元数据 Value"""
+  metaValue: String!
+
+  """描述"""
+  description: String
+
+  """User Id"""
+  userId: ID!
+}
+
+"""用户新建模型"""
+input NewUserInput {
+  """登录名"""
+  loginName: String!
+
+  """登录密码"""
+  loginPwd: String!
+
+  """昵称，不填则使用登录名"""
+  niceName: String
+
+  """前台显示名称，不填则使用登录名"""
+  displayName: String
+
+  """手机号码"""
+  mobile: String
+
+  """Email"""
+  email: String!
+
+  """客户端 URL"""
+  url: String!
+
+  """状态"""
+  status: USER_STATUS = Enable
+
+  """角色"""
+  role: USER_ROLE = Subscriber
+}
+
+"""用户修改模型"""
+input UpdateUserInput {
+  """昵称，不填则使用登录名"""
+  niceName: String
+
+  """前台显示名称，不填则使用登录名"""
+  displayName: String
+
+  """手机号码"""
+  mobile: String
+
+  """Email"""
+  email: String!
+}

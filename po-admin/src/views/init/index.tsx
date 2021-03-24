@@ -77,7 +77,7 @@ export default class Init extends Vue {
         .initDB(initParams)
         .then((result) => {
           if (result) {
-            this.$router.replace({ path: '/' });
+            this.$router.replace({ path: '/logout' });
           }
         })
         .catch((err) => {
