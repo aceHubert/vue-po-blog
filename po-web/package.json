@@ -1,5 +1,5 @@
 {
-  "name": "po-core",
+  "name": "po-web",
   "version": "0.0.1",
   "description": "Po blog 前端核心系统",
   "author": "Hubert<yi.xiang@live.cn>",
@@ -23,7 +23,7 @@
   "repository": {
     "type": "git",
     "url": "git@github.com:aceHubert/vue-po-blog.git",
-    "directory": "core"
+    "directory": "po-web"
   },
   "bugs": {
     "url": "https://github.com/aceHubert/vue-plumemo-blog/issues"
