@@ -106,6 +106,12 @@ module.exports = {
         '@typescript-eslint/no-this-alias': ['error', { allowedNames: ['vm'] }],
         '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
         '@typescript-eslint/no-empty-function': 'off',
+        '@typescript-eslint/no-empty-interface': [
+          'error',
+          {
+            allowSingleExtends: true,
+          },
+        ],
         '@typescript-eslint/no-unused-vars': [
           'error',
           {

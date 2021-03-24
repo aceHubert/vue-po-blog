@@ -16,7 +16,7 @@ export type Response<T> =
   | ResponseError;
 
 // response from service
-export type PagerResponse<T> =
+export type PagedResponse<T> =
   | {
       success: true;
       rows: Array<T>;
@@ -29,8 +29,8 @@ export interface HttpInterceptorManager<V> extends AxiosInterceptorManager<V> {
 }
 
 export interface HttpInstance {
-  <T = any, R = Response<T> | PagerResponse<T>>(config: AxiosRequestConfig): Promise<R>;
-  <T = any, R = Response<T> | PagerResponse<T>>(url: string, config?: AxiosRequestConfig): Promise<R>;
+  <T = any, R = Response<T> | PagedResponse<T>>(config: AxiosRequestConfig): Promise<R>;
+  <T = any, R = Response<T> | PagedResponse<T>>(url: string, config?: AxiosRequestConfig): Promise<R>;
 
   defaults: AxiosRequestConfig;
   interceptors: {
@@ -39,9 +39,9 @@ export interface HttpInstance {
   };
 
   getUri(config?: AxiosRequestConfig): string;
-  request<T = any, R = Response<T> | PagerResponse<T>>(config: AxiosRequestConfig): Promise<R>;
+  request<T = any, R = Response<T> | PagedResponse<T>>(config: AxiosRequestConfig): Promise<R>;
   get<T = any, R = Response<T>>(url: string, config?: AxiosRequestConfig): Promise<R>;
-  getList<T = any, R = PagerResponse<T>>(url: string, config?: AxiosRequestConfig): Promise<R>;
+  getList<T = any, R = PagedResponse<T>>(url: string, config?: AxiosRequestConfig): Promise<R>;
   delete<T = any, R = Response<T>>(url: string, config?: AxiosRequestConfig): Promise<R>;
   head<T = any, R = Response<T>>(url: string, config?: AxiosRequestConfig): Promise<R>;
   options<T = any, R = Response<T>>(url: string, config?: AxiosRequestConfig): Promise<R>;

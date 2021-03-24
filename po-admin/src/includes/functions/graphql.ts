@@ -17,10 +17,17 @@ import settingsFuncs from './settings';
  * 是否是 Server error
  * 如果是 ApolloError，则会判断err.networkError
  */
-function isServerError(err: Error): err is ServerError | ServerParseError {
+function isServerError(err: Error): err is ServerError {
   return isApolloError(err)
-    ? !!(err.networkError && err.networkError.hasOwnProperty('statusCode'))
-    : err.hasOwnProperty('statusCode');
+    ? !!(err.networkError && err.networkError.hasOwnProperty('statusCode')) && err.networkError.hasOwnProperty('result')
+    : err.hasOwnProperty('statusCode') && err.hasOwnProperty('result');
+}
+
+function isServerParseError(err: Error): err is ServerParseError {
+  return isApolloError(err)
+    ? !!(err.networkError && err.networkError.hasOwnProperty('statusCode')) &&
+        err.networkError.hasOwnProperty('bodyText')
+    : err.hasOwnProperty('statusCode') && err.hasOwnProperty('bodyText');
 }
 
 /**
@@ -89,18 +96,19 @@ const authLink = setContext((operation, { headers, ...context }) => {
 });
 
 // error handle
-const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) => {
   if (graphQLErrors) {
     // 需要初始化数据库
-    if (graphQLErrors.some((err) => err.extensions && err.extensions.code === 'DB_INIT_ERROR')) {
+    if (graphQLErrors.some((err) => err.extensions?.dbInitRequired)) {
       appStore.goToInitPage();
       return;
     }
   }
 
   if (networkError) {
-    if (isServerError(networkError)) {
+    if (isServerError(networkError) || isServerParseError(networkError)) {
       const statusCode = networkError.statusCode;
+
       if (statusCode === 401) {
         // 401 后通过 refresh token 重新获取 access token,如果再不成功则退出重新登录
         return promiseToObservable<string>(userStore.refreshToken(), () => {
@@ -115,6 +123,11 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
           });
           return forward(operation);
         });
+      } else if (statusCode === 500) {
+        // 需要初始化
+        if (isServerError(networkError) && networkError.result.dbInitRequired) {
+          appStore.goToInitPage();
+        }
       }
     }
   }
@@ -146,6 +159,6 @@ const client = new ApolloClient({
   connectToDevTools: process.env.NODE_ENV === 'development',
 });
 
-export { gql, formatError };
+export { gql, formatError, isServerError, isServerParseError };
 
 export default client;

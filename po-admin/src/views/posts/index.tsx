@@ -324,7 +324,7 @@ export default class PostIndex extends Vue {
 
   getPreviewUrl(id: string) {
     if (process.client) {
-      return `${trailingSlash(this.$userOptions['home'].trim())}post/${id}`;
+      return `${trailingSlash(this.$userOptions['home'])}post/${id}`;
     }
     return '#none';
   }
