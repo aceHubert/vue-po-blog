@@ -1,5 +1,5 @@
 {
-  "name": "po-backend",
+  "name": "po-nodejs",
   "version": "0.0.1",
   "description": "Po blog Nodejs后端系统",
   "author": "Hubert<yi.xiang@live.cn>",
@@ -16,7 +16,7 @@
   "repository": {
     "type": "git",
     "url": "git@github.com:aceHubert/vue-po-blog.git",
-    "directory": "po-backend"
+    "directory": "po-nodejs"
   },
   "bugs": {
     "url": "https://github.com/aceHubert/vue-po-blog/issues"
