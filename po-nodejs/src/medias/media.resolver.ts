@@ -19,25 +19,28 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
   }
 
   @Query((returns) => Media, { nullable: true, description: '获取媒体' })
-  media(@Args('id', { type: () => ID!, description: 'Media id' }) id: number, @Fields() fields: ResolveTree) {
+  media(
+    @Args('id', { type: () => ID!, description: 'Media id' }) id: number,
+    @Fields() fields: ResolveTree,
+  ): Promise<Media | null> {
     return this.mediaDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.Media));
   }
 
   @Query((returns) => PagedMedia, { description: '获取媒体分页列表' })
-  medias(@Args() args: PagedMediaArgs, @Fields() fields: ResolveTree) {
+  medias(@Args() args: PagedMediaArgs, @Fields() fields: ResolveTree): Promise<PagedMedia> {
     return this.mediaDataSource.getPaged(
       args,
       this.getFieldNames(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.User),
     );
   }
 
-  @Mutation((returns) => Media, { nullable: true, description: '添加媒体' })
-  addMedia(@Args('model', { type: () => NewMediaInput }) model: NewMediaInput) {
+  @Mutation((returns) => Media, { description: '添加媒体' })
+  addMedia(@Args('model', { type: () => NewMediaInput }) model: NewMediaInput): Promise<Media> {
     return this.mediaDataSource.create(model);
   }
 
   @Mutation((returns) => Boolean, { description: '删除媒体' })
-  removeMedia(@Args('id', { type: () => ID!, description: 'Media id' }) id: number) {
+  removeMedia(@Args('id', { type: () => ID!, description: 'Media id' }) id: number): Promise<boolean> {
     return this.mediaDataSource.delete(id);
   }
 }

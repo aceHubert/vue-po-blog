@@ -10,11 +10,8 @@ export abstract class Meta {
   @Field({ description: '元数据 Key' })
   metaKey!: string;
 
-  @Field({ description: '元数据 Value' })
-  metaValue!: string;
-
-  @Field({ nullable: true, description: '描述' })
-  description?: string;
+  @Field((type) => String, { nullable: true, description: '元数据 Value' })
+  metaValue!: string | null;
 }
 
 /**
@@ -25,9 +22,6 @@ export class NewMetaInput {
   @Field({ description: '元数据 Key' })
   metaKey!: string;
 
-  @Field({ description: '元数据 Value' })
-  metaValue!: string;
-
-  @Field({ nullable: true, description: '描述' })
-  description?: string;
+  @Field((type) => String, { nullable: true, description: '元数据 Value' })
+  metaValue!: string | null;
 }

@@ -44,7 +44,7 @@ export class LinkDataSource extends BaseDataSource {
    * 添加链接
    * @param model 添加实体模型
    */
-  async create(model: NewLinkInput): Promise<LinkModel | null> {
+  async create(model: NewLinkInput): Promise<LinkModel> {
     const link = await this.models.Links.create(model);
     return link.toJSON() as LinkModel;
   }

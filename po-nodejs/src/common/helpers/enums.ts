@@ -25,16 +25,6 @@ export enum UserRole {
   Subscriber = 'subscriber',
 }
 
-// todo: enum union type
-export enum UserRoleWithNone {
-  Administrator = 'administrator',
-  Editor = 'editor',
-  Author = 'author',
-  Contributor = 'contributor',
-  Subscriber = 'subscriber',
-  None = 'none',
-}
-
 /**
  * 角色权限
  */

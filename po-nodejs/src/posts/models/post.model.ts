@@ -33,15 +33,6 @@ export class Post {
   createdAt!: Date;
 }
 
-@ObjectType({ description: '作者' })
-export class Author {
-  @Field((type) => ID, { description: 'Id' })
-  id!: number;
-
-  @Field({ description: '前台显示名称' })
-  displayName!: string;
-}
-
 @ObjectType({ description: '文章分页模型' })
 export class PagedPost extends PagedResponse(Post) {
   // other fields

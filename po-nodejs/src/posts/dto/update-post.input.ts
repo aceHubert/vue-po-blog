@@ -1,20 +1,11 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { PostStatus, PostCommentStatus } from '@/common/helpers/enums';
+import { Field, InputType, PartialType, PickType } from '@nestjs/graphql';
+import { PostStatus } from '@/common/helpers/enums';
+import { NewPostInput } from './new-post.input';
 
 @InputType({ description: '文章修改模型' })
-export class UpdatePostInput {
-  @Field({ description: '标题' })
-  title!: string;
-
-  @Field({ description: '内容' })
-  content!: string;
-
-  @Field({ nullable: true, description: '摘要' })
-  excerpt?: string;
-
+export class UpdatePostInput extends PartialType(
+  PickType(NewPostInput, ['title', 'content', 'excerpt', 'commentStatus'] as const),
+) {
   @Field((type) => PostStatus, { nullable: true, description: '状态' })
   status?: PostStatus;
-
-  @Field((type) => PostCommentStatus, { nullable: true, description: '评论状态' })
-  commentStatus?: PostCommentStatus;
 }

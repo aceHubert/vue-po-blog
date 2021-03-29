@@ -1,7 +1,6 @@
-import { Body, Controller, Query, Post, UseGuards, Scope } from '@nestjs/common';
+import { Body, Controller, Query, Post, Scope } from '@nestjs/common';
 import { Authorized } from '@/common/decorators/authorized.decorator';
 import { User } from '@/common/decorators/user.decorator';
-import { AuthorizedGuard } from '@/common/guards/authorized.guard';
 import { AuthService } from './auth.service';
 
 // Types
@@ -10,7 +9,6 @@ import { UpdatePwdDto } from './dto/update-pwd.dto';
 import { TokenResponse, RefreshTokenResponse } from './interfaces/token-response.interface';
 
 @Controller({ path: 'api/auth', scope: Scope.REQUEST })
-@UseGuards(AuthorizedGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

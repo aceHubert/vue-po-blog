@@ -4,8 +4,7 @@ export interface UserMetaAttributes {
   id: number;
   userId: number;
   metaKey: string;
-  metaValue: string;
-  description?: string;
+  metaValue: string | null;
   private: 'yes' | 'no';
 }
 

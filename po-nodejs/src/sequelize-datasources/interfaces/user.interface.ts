@@ -11,13 +11,13 @@ export interface UserModel extends Omit<UserAttributes, 'loginPwd'> {}
 /**
  * 用户基本信息（不包含敏感信息字段）
  */
-export interface UserSimpleModel extends Pick<UserAttributes, 'id' | 'niceName' | 'displayName'> {}
+export interface UserSimpleModel extends Pick<UserAttributes, 'id' | 'displayName' | 'email'> {}
 
 /**
  * 用户实体（包含角色）
  */
 export interface UserWithRoleModel extends UserModel {
-  role: UserRole | null;
+  userRole?: UserRole;
 }
 
 /**
@@ -37,7 +37,7 @@ export interface PagedUserArgs extends PagedArgs {
    * 如果为none, 则表示在没有角色的用户下筛选；
    * 如果没有值，则表示在有角色的用户下筛选；
    */
-  role?: UserRole | 'none';
+  userRole?: UserRole | 'none';
 }
 
 /**
@@ -48,8 +48,14 @@ export interface PagedUserModel extends Paged<UserWithRoleModel> {}
 /**
  * 添加新用户实体
  */
-export interface NewUserInput extends Omit<UserCreationAttributes, 'id' | 'createdAt' | 'updatedAt'> {
-  role?: UserRole;
+export interface NewUserInput
+  extends Pick<UserCreationAttributes, 'loginName' | 'loginPwd' | 'email' | 'mobile' | 'url'> {
+  firstName?: string;
+  lastName?: string;
+  avator?: string;
+  description?: string;
+  userRole: UserRole;
+  locale?: string;
   /**
    * metaKey 不可以重复
    */
@@ -66,9 +72,14 @@ export interface NewUserMetaInput extends NewMetaInput {
 /**
  * 修改用户模块
  */
-export interface UpdateUserInput {
-  niceName?: string;
-  displayName?: string;
-  mobile?: string;
-  email: string;
+export interface UpdateUserInput
+  extends Partial<
+    Pick<NewUserInput, 'loginPwd' | 'email' | 'mobile' | 'firstName' | 'lastName' | 'url' | 'avator' | 'description'>
+  > {
+  displayName: string;
+  status?: UserStatus;
+  nickName?: string;
+  adminColor?: string;
+  userRole?: UserRole | 'none';
+  locale?: string | null;
 }

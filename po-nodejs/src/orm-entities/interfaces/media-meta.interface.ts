@@ -4,8 +4,7 @@ export interface MediaMetaAttributes {
   id: number;
   mediaId: number;
   metaKey: string;
-  metaValue: string;
-  description?: string;
+  metaValue: string | null;
   private: 'yes' | 'no';
 }
 

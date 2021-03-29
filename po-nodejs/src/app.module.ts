@@ -20,11 +20,17 @@ import { UserModule } from '@/users/user.module';
 
 // 注册 graphql 枚举类型
 import * as Enums from '@/common/helpers/enums';
+import { UserRoleWithNone } from '@/users/dto/update-user.input';
 Object.keys(Enums).map((key) => {
   registerEnumType((Enums as any)[key], {
     name: upperCase(key).replace(/ /g, '_'),
     description: key,
   });
+});
+
+registerEnumType(UserRoleWithNone, {
+  name: upperCase('UserRoleWithNone').replace(/ /g, '_'),
+  description: 'UserRole(includes "none")',
 });
 
 // middleware

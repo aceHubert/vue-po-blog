@@ -61,7 +61,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
   }
 
   /**
-   * 获取协议列表(级联查询)
+   * 获取协议列表
    * 包含 taxonomy, Term.id => termId,TermTaxonomy.id => taxonomyId;
    * Term.group, TermTaxonomy.id, TermTaxonomy.taxonomy 会强制查询，可用于级联条件调用;
    * @param query 过滤的字段
@@ -73,19 +73,12 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
       fields.push('id');
     }
 
-    // 如果是级联查询下级，必须要把query中搜索条件的字段查询出来
-    const hasChildrenField = fields.includes('children');
-
     return this.models.TermTaxonomy.findAll({
-      attributes: this.filterFields(fields, this.models.TermTaxonomy).concat(
-        hasChildrenField ? ['taxonomy'] : [], // id, taxonomy 必须，用于级联子查询
-      ),
+      attributes: this.filterFields(fields, this.models.TermTaxonomy),
       include: [
         {
           model: this.models.Terms,
-          attributes: this.filterFields(fields, this.models.Terms).concat(
-            hasChildrenField ? ['group'] : [], // group 必须，用于级联子查询
-          ),
+          attributes: this.filterFields(fields, this.models.Terms),
           where: {
             ...(query.group ? { group: query.group } : {}),
           },
@@ -154,7 +147,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * 新建协议
    * @param model 新建协议实体
    */
-  async create(model: NewTermInput): Promise<Array<TermTaxonomyModel>> {
+  async create(model: NewTermInput): Promise<TermTaxonomyModel> {
     const t = await this.sequelize.transaction();
     const { name, slug, group, taxonomy, description, parentId, metas } = model;
     try {
@@ -212,7 +205,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
         taxonomyId,
         ...restTaxonomy,
         ...term.toJSON(),
-      };
+      } as TermTaxonomyModel;
     } catch (err) {
       await t.rollback();
       throw err;
