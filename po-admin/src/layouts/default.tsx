@@ -145,10 +145,10 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
   // },
 
   handleAction(key: Actions) {
-    if (key === Actions.Center) {
-      this.$router.push({ name: 'account-user' });
+    if (key === Actions.Profile) {
+      this.$router.push({ name: 'users-profile' });
     } else if (key === Actions.Settings) {
-      this.$router.push({ name: 'account-settings' });
+      this.$router.push({ name: 'settings-general' });
     } else if (key === Actions.Logout) {
       this.$router.replace('/logout');
     }
@@ -182,6 +182,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
             isMobile={this.isMobile}
             user={this.currentUser}
             theme={this.settings.theme}
+            showLocale={false}
             locale={this.$i18n.locale}
             support-languages={this.supportLanguages}
             onLocaleChange={this.handleLocaleChange.bind(this)}

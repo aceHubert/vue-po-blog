@@ -8,6 +8,7 @@ export type Table = (options: {
   columns: Array<
     Omit<Column, keyof AntdComponent> & {
       hideInMobile?: true;
+      hideInTablet?: true;
     }
   >;
 };

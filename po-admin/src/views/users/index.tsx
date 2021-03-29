@@ -4,15 +4,16 @@ import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
 import { UserRole } from '@/includes/datas/enums';
-
+import { userStore } from '@/store/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
-import { PagerQuery, User, UserPagerQuery, UserPagerResponse } from 'types/datas';
+import { PagerQuery, UserWithRole, UserMetas, UserPagerQuery, UserPagerResponse } from 'types/datas';
 import { DataSource } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
-import { Table } from 'types/constants';
+
+// import { Table } from 'types/constants';
 
 type QueryParams = Omit<UserPagerQuery, keyof PagerQuery<{}>>;
 
@@ -32,13 +33,25 @@ enum BlukActions {
 </router> */
 }
 
+const UserRoleOrder = Object.keys(UserRole)
+  .concat('None')
+  .reduce((prev, value, index) => {
+    prev[value] = index;
+    return prev;
+  }, {} as Dictionary<number>);
+
 @Component<UserIndex>({
   name: 'UserIndex',
-  asyncData: async ({ error, $i18n, graphqlClient, hook }) => {
+  head() {
+    return {
+      title: this.$tv('pageTitle.user.index', 'Users') as string,
+    };
+  },
+  asyncData: async ({ error, $i18n, graphqlClient }) => {
     try {
-      const columns = await hook('user:columns').filter(
-        table({ i18nRender: (key, fallback) => $i18n.tv(key, fallback) }).columns,
-      );
+      // const columns = await hook('user:columns').filter(
+      //   table({ i18nRender: (key, fallback) => $i18n.tv(key, fallback) }).columns,
+      // );
       // 获取分类
       const { data } = await graphqlClient.query<{
         roleCounts: Array<{ role: UserRole | 'None'; count: number }>;
@@ -46,14 +59,13 @@ enum BlukActions {
         query: gql`
           query getFilters {
             roleCounts: userCountByRole {
-              role
+              userRole
               count
             }
           }
         `,
       });
       return {
-        columns,
         roleCounts: data.roleCounts,
       };
     } catch (err) {
@@ -67,19 +79,20 @@ enum BlukActions {
 })
 export default class UserIndex extends Vue {
   @InjectReactive({ from: 'isMobile' }) isMobile!: boolean;
+  @InjectReactive({ from: 'isTablet' }) isTablet!: boolean;
   @Ref('table') table!: AsyncTable;
 
   // type 定义
-  columns!: ReturnType<Table>['columns'];
+  // columns!: ReturnType<Table>['columns'];
   selectedRowKeys!: string[];
-  roleCounts!: Array<{ role: UserRole | 'None'; count: number }>;
+  roleCounts!: Array<{ userRole: UserRole | 'None'; count: number }>;
   itemCount!: number;
   searchQuery!: QueryParams;
   blukApplying!: boolean;
 
   data() {
     return {
-      columns: [],
+      // columns: [],
       selectedRowKeys: [],
       searchQuery: {},
       roleCounts: [],
@@ -89,14 +102,16 @@ export default class UserIndex extends Vue {
   }
 
   // 所有列配置。 动态计算，title 配置有多语言
-  // get columns() {
-  //   return table({ i18nRender: (key, fallback) => this.$tv(key, fallback) }).columns;
-  // }
+  get columns() {
+    return table({ i18nRender: (key, fallback) => this.$tv(key, fallback) }).columns;
+  }
 
   // 动态计算，当是手机端时只显示第一列
   get fixedColumns() {
     if (this.isMobile) {
       return this.columns.filter((column) => column.hideInMobile !== true);
+    } else if (this.isTablet) {
+      return this.columns.filter((column) => column.hideInTablet !== true);
     }
     return this.columns;
   }
@@ -109,15 +124,21 @@ export default class UserIndex extends Vue {
         label: this.$tv('user.role.all', 'All') as string,
         // 总数不记录 None 状态
         count: this.roleCounts.reduce((prev, curr) => {
-          return prev + (curr.role === 'None' ? 0 : curr.count);
+          return prev + (curr.userRole === 'None' ? 0 : curr.count);
         }, 0),
         keepStatusShown: true,
       },
-      ...this.roleCounts.map(({ role, count }) => ({
-        value: role,
-        label: this.$tv(`user.role.${role === 'None' ? 'noneFullName' : lowerFirst(role)}`, role) as string,
-        count,
-      })),
+      ...this.roleCounts
+        .map(({ userRole, count }) => ({
+          value: userRole,
+          label: this.$tv(
+            `user.role.${userRole === 'None' ? 'noneFullName' : lowerFirst(userRole)}`,
+            userRole,
+          ) as string,
+          count,
+          order: UserRoleOrder[userRole],
+        }))
+        .sort((curr, next) => (curr.order > next.order ? 1 : -1)),
     ];
   }
 
@@ -136,19 +157,19 @@ export default class UserIndex extends Vue {
     return this.graphqlClient
       .query<{ users: UserPagerResponse }, UserPagerQuery>({
         query: gql`
-          query getUsers($keyword: String, $role: USER_ROLE_WITH_NONE, $limit: Int, $offset: Int) {
-            users(keyword: $keyword, role: $role, limit: $limit, offset: $offset) {
+          query getUsers($keyword: String, $userRole: USER_ROLE_WITH_NONE, $limit: Int, $offset: Int) {
+            users(keyword: $keyword, userRole: $userRole, limit: $limit, offset: $offset) {
               rows {
                 id
-                loginName
+                username: loginName
                 displayName
                 mobile
                 email
                 status
                 isSuperAdmin
-                role
+                userRole
                 createTime: createdAt
-                metas {
+                metas(metaKeys: ["nick_name", "first_name", "last_name"]) {
                   key: metaKey
                   value: metaValue
                 }
@@ -194,11 +215,11 @@ export default class UserIndex extends Vue {
   // 刷新角色数量
   refreshRoleCounts() {
     return this.graphqlClient
-      .query<{ roleCounts: Array<{ role: UserRole; count: number }> }>({
+      .query<{ roleCounts: Array<{ userRole: UserRole; count: number }> }>({
         query: gql`
           query getRoleCounts {
             roleCounts: userCountByRole {
-              role
+              userRole
               count
             }
           }
@@ -267,10 +288,14 @@ export default class UserIndex extends Vue {
       );
     };
 
-    const renderActions = (record: User) => (
+    const renderActions = (record: UserWithRole) => (
       <div class={classes.actions}>
         <nuxt-link
-          to={{ name: 'users-edit', params: { id: String(record.id) } }}
+          to={
+            userStore.id === record.id
+              ? { name: 'users-profile' }
+              : { name: 'users-edit', params: { id: String(record.id) } }
+          }
           title={this.$tv('user.btnTips.edit', 'Edit') as string}
         >
           {this.$tv('user.btnText.edit', 'Edit')}
@@ -297,9 +322,12 @@ export default class UserIndex extends Vue {
     // $scopedSolts 不支持多参数类型定义
     const scopedSolts = () => {
       return {
-        loginName: (text: User['loginName'], record: User & { expand?: boolean }) => (
-          <div class={[classes.columnLoginName]}>
-            <p class={[classes.loginName]}>
+        username: (
+          text: UserWithRole['username'],
+          record: UserWithRole & Partial<UserMetas> & { expand?: boolean },
+        ) => (
+          <div class={[classes.columnUsername]}>
+            <p class={[classes.username]}>
               <span class="text-ellipsis" style="max-width:180px;display:inline-block;">
                 {text}
               </span>
@@ -329,8 +357,8 @@ export default class UserIndex extends Vue {
                   <a href={`mailto:${record.email}`}>{record.email}</a>
                 </p>
                 <p>
-                  <span>{getTitle('role', 'Role')}: </span>
-                  {this.$tv(`user.role.${lowerFirst(record.role)}`, record.role)}
+                  <span>{getTitle('userRole', 'Role')}: </span>
+                  {this.$tv(`user.role.${lowerFirst(record.userRole || 'none')}`, record.userRole || 'none')}
                 </p>
                 <p>
                   <span>{getTitle('createTime', 'CreateTime')}: </span>
@@ -341,13 +369,14 @@ export default class UserIndex extends Vue {
             {renderActions(record)}
           </div>
         ),
-        name: (text: string, record: User) =>
+        name: (text: string, record: UserWithRole & Partial<UserMetas>) =>
           record.firstName || record.lastName
             ? `${record.firstName} ${record.lastName}`
             : record.nickName || record.displayName,
-        mobile: (text: User['mobile']) => text || '-',
-        email: (text: User['email']) => <a href={`mailto:${text}`}>{text}</a>,
-        role: (text: User['role']) => this.$tv(`user.role.${lowerFirst(text)}`, text),
+        mobile: (text: UserWithRole['mobile']) => text || '-',
+        email: (text: UserWithRole['email']) => <a href={`mailto:${text}`}>{text}</a>,
+        userRole: (text: UserWithRole['userRole']) =>
+          this.$tv(`user.role.${lowerFirst(text || 'none')}`, text || 'none'),
         createTime: (text: string) => $filters.dateFormat(text),
       } as any;
     };
@@ -356,7 +385,7 @@ export default class UserIndex extends Vue {
       <a-card class="post-index" bordered={false}>
         <SearchForm
           keywordPlaceholder={this.$tv('user.search.keywordPlaceholder', 'Search Post') as string}
-          statusName="role"
+          statusName="userRole"
           itemCount={this.itemCount}
           statusOptions={this.roleOptions}
           blukAcitonOptions={this.blukActionOptions}

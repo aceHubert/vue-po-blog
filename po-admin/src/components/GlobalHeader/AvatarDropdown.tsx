@@ -10,7 +10,7 @@ export type User = {
 };
 
 export enum Actions {
-  Center = 'center',
+  Profile = 'profile',
   Settings = 'settings',
   Logout = 'logout',
 }
@@ -56,9 +56,9 @@ export default class AvatarDropdown extends Vue {
           <a-menu class="ant-pro-drop-down menu" selected-keys={[]}>
             {this.showMenu
               ? [
-                  <a-menu-item key="center" onClick={() => this.handleAction(Actions.Center)}>
+                  <a-menu-item key="profile" onClick={() => this.handleAction(Actions.Profile)}>
                     <a-icon type="user" />
-                    {this.$tv('avatarDropdown.user.center', 'User Center')}
+                    {this.$tv('avatarDropdown.user.profile', 'Profile')}
                   </a-menu-item>,
                   <a-menu-item key="settings" onClick={() => this.handleAction(Actions.Settings)}>
                     <a-icon type="setting" />
