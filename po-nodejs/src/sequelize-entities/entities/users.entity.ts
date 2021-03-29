@@ -22,7 +22,7 @@ export default class Users
   public displayName!: string;
   public mobile!: string | null;
   public email!: string;
-  public url!: string;
+  public url!: string | null;
   public status!: UserStatus;
 
   // timestamps!

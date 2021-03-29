@@ -8,6 +8,7 @@ export default function (Vue: VueConstructor, opts: ModuleOptions) {
     columns.push({
       title: 'Description',
       dataIndex: 'description',
+      hideInMobile: true,
     });
     return columns;
   });

@@ -1,5 +1,5 @@
 import { ModuleRef } from '@nestjs/core';
-import { Resolver, ResolveField, Query, Mutation, Root, Args, ID, Int, Context } from '@nestjs/graphql';
+import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int, Context } from '@nestjs/graphql';
 import { PostType, PostStatus, PostCommentStatus } from '@/common/helpers/enums';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
@@ -7,13 +7,13 @@ import { Authorized } from '~/common/decorators/authorized.decorator';
 import { PostDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Typs
+import { SimpleUser } from '@/users/models/user.model';
 import { PagedPostArgs } from './dto/paged-post.args';
 import { NewPostInput } from './dto/new-post.input';
 import { NewPostMetaInput } from './dto/new-post-meta.input';
 import { UpdatePostInput } from './dto/update-post.input';
 import {
   Post,
-  Author,
   PagedPost,
   PostStatusCount,
   PostMeta,
@@ -35,7 +35,10 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   }
 
   @Query((returns) => Post, { nullable: true, description: '获取文章' })
-  post(@Args('id', { type: () => ID, description: 'Post id' }) id: number, @Fields() fields: ResolveTree) {
+  post(
+    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
+    @Fields() fields: ResolveTree,
+  ): Promise<Post | null> {
     return this.postDataSource.get(id, PostType.Post, this.getFieldNames(fields.fieldsByTypeName.Post));
   }
 
@@ -76,14 +79,20 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     return this.postDataSource.getCountByYear(PostType.Post);
   }
 
-  @ResolveField((returns) => Author, { description: '作者' })
-  author(@Root() { author: authorId }: { author: number }, @Fields() fields: ResolveTree) {
-    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.Author));
+  @ResolveField((returns) => SimpleUser, { nullable: true, description: '作者' })
+  author(
+    @Parent() { author: authorId }: { author: number },
+    @Fields() fields: ResolveTree,
+  ): Promise<SimpleUser | null> {
+    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
   }
 
   @Authorized()
-  @Mutation((returns) => Post, { nullable: true, description: '添加文章（不可添加为 Trash 状态，否则无法直接修改）' })
-  addPost(@Args('model', { type: () => NewPostInput }) model: NewPostInput, @Context('user') requestUser: JwtPayload) {
+  @Mutation((returns) => Post, { description: '添加文章' })
+  addPost(
+    @Args('model', { type: () => NewPostInput }) model: NewPostInput,
+    @Context('user') requestUser: JwtPayload,
+  ): Promise<Post> {
     return this.postDataSource.create(model, PostType.Post, requestUser);
   }
 
@@ -93,7 +102,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Args('model', { type: () => UpdatePostInput }) model: UpdatePostInput,
     @Context('user') requestUser: JwtPayload,
-  ) {
+  ): Promise<boolean> {
     return this.postDataSource.update(id, model, requestUser);
   }
 
@@ -103,7 +112,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Args('status', { type: () => PostCommentStatus, description: '评论状态' }) status: PostCommentStatus,
     @Context('user') requestUser: JwtPayload,
-  ) {
+  ): Promise<boolean> {
     return this.postDataSource.updateCommentStatus(id, status, requestUser);
   }
 
@@ -113,7 +122,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
     @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
     @Context('user') requestUser: JwtPayload,
-  ) {
+  ): Promise<boolean> {
     return this.postDataSource.updateStatus(id, status, requestUser);
   }
 
@@ -122,7 +131,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   blukUpdatePostOrPageStatus(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
     @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
-  ) {
+  ): Promise<boolean> {
     return this.postDataSource.blukUpdateStatus(ids, status);
   }
 
@@ -133,7 +142,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   restorePostOrPage(
     @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
     @Context('user') requestUser: JwtPayload,
-  ) {
+  ): Promise<boolean> {
     return this.postDataSource.restore(id, requestUser);
   }
 
@@ -141,7 +150,9 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Mutation((returns) => Boolean, {
     description: '批量重置文章或页面成移入到 Trash 之前状态',
   })
-  blukRestorePostOrPage(@Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[]) {
+  blukRestorePostOrPage(
+    @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
+  ): Promise<boolean> {
     return this.postDataSource.blukRestore(ids);
   }
 
@@ -150,7 +161,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   removePostOrPage(
     @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
     @Context('user') requestUser: JwtPayload,
-  ) {
+  ): Promise<boolean> {
     return this.postDataSource.delete(id, requestUser);
   }
 }

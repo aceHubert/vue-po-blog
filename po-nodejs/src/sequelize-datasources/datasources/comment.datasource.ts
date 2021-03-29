@@ -1,6 +1,5 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError } from '@/common/utils/errors.utils';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
@@ -69,23 +68,15 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
       const comment = await this.models.Comments.create(rest, { transaction: t });
 
       if (metas && metas.length) {
-        const falseOrMetaKeys = await this.isMetaExists(
-          comment.id,
-          metas.map((meta) => meta.metaKey),
+        this.models.CommentMeta.bulkCreate(
+          metas.map((meta) => {
+            return {
+              ...meta,
+              commentId: comment.id,
+            };
+          }),
+          { transaction: t },
         );
-        if (falseOrMetaKeys) {
-          throw new ValidationError(`The meta keys (${falseOrMetaKeys.join(',')}) have existed!`);
-        } else {
-          this.models.CommentMeta.bulkCreate(
-            metas.map((meta) => {
-              return {
-                ...meta,
-                commentId: comment.id,
-              };
-            }),
-            { transaction: t },
-          );
-        }
       }
 
       await t.commit();

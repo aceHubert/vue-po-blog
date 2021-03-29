@@ -15,9 +15,9 @@ export default class RightContent extends Vue {
     tsx.MakeOptional<
       tsx.PickProps<
         RightContent,
-        'prefixCls' | 'isMobile' | 'topMenu' | 'user' | 'theme' | 'locale' | 'supportLanguages'
+        'prefixCls' | 'isMobile' | 'topMenu' | 'user' | 'theme' | 'showLocale' | 'locale' | 'supportLanguages'
       >,
-      'prefixCls' | 'isMobile' | 'supportLanguages'
+      'prefixCls' | 'isMobile' | 'showLocale' | 'supportLanguages'
     >
   > &
     tsx.DeclareOnEvents<{
@@ -30,6 +30,7 @@ export default class RightContent extends Vue {
   @Prop({ type: Boolean, required: true }) topMenu!: boolean;
   @Prop({ type: String, required: true }) theme!: string;
   @Prop(Object) user?: User;
+  @Prop({ type: Boolean, default: true }) showLocale!: boolean;
   @Prop(String) locale?: string;
   @Prop({ type: Array, default: () => [] }) supportLanguages!: LangConfig[];
 
@@ -54,7 +55,7 @@ export default class RightContent extends Vue {
     return (
       <div class={this.wrpCls}>
         <AvatarDropdown class={this.prefixCls} user={this.user} onAction={this.handleAction.bind(this)} />
-        {this.supportLanguages!.length ? (
+        {this.showLocale && this.supportLanguages!.length ? (
           <SelectLangDropdown
             class={this.prefixCls}
             locale={this.locale}

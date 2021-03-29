@@ -1,5 +1,5 @@
 import { ModuleRef } from '@nestjs/core';
-import { Resolver, ResolveField, Query, Mutation, Root, Args, ID, Int, Context } from '@nestjs/graphql';
+import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int, Context } from '@nestjs/graphql';
 import { PostType } from '@/common/helpers/enums';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
@@ -7,12 +7,13 @@ import { Authorized } from '~/common/decorators/authorized.decorator';
 import { PostDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
+import { SimpleUser } from '@/users/models/user.model';
 import { PagedPageArgs } from './dto/paged-page.args';
 import { NewPageInput } from './dto/new-page.input';
 import { NewPostMetaInput } from '@/posts/dto/new-post-meta.input';
 import { UpdatePageInput } from './dto/update-page.input';
 import { Page, PagedPage } from './models/page.model';
-import { Author, PostMeta } from '@/posts/models/post.model';
+import { PostMeta } from '@/posts/models/post.model';
 import { PostStatusCount, PostDayCount, PostMonthCount, PostYearCount } from '../posts/models/post.model';
 
 @Resolver(() => Page)
@@ -28,7 +29,10 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
   }
 
   @Query((returns) => Page, { nullable: true, description: '获取页面' })
-  page(@Args('id', { type: () => ID, description: 'Page id' }) id: number, @Fields() fields: ResolveTree) {
+  page(
+    @Args('id', { type: () => ID, description: 'Page id' }) id: number,
+    @Fields() fields: ResolveTree,
+  ): Promise<Page | null> {
     return this.postDataSource.get(id, PostType.Page, this.getFieldNames(fields.fieldsByTypeName.Page));
   }
 
@@ -69,14 +73,20 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
     return this.postDataSource.getCountByYear(PostType.Page);
   }
 
-  @ResolveField((returns) => Author, { description: '作者' })
-  author(@Root() { author: authorId }: { author: number }, @Fields() fields: ResolveTree) {
-    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.Author));
+  @ResolveField((returns) => SimpleUser, { nullable: true, description: '作者' })
+  author(
+    @Parent() { author: authorId }: { author: number },
+    @Fields() fields: ResolveTree,
+  ): Promise<SimpleUser | null> {
+    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
   }
 
   @Authorized()
-  @Mutation((returns) => Page, { nullable: true, description: '添加页面（不可添加为 Trash 状态，否则无法直接修改）' })
-  addPage(@Args('model', { type: () => NewPageInput }) model: NewPageInput, @Context('user') requestUser: JwtPayload) {
+  @Mutation((returns) => Page, { description: '添加页面' })
+  addPage(
+    @Args('model', { type: () => NewPageInput }) model: NewPageInput,
+    @Context('user') requestUser: JwtPayload,
+  ): Promise<Page> {
     return this.postDataSource.create(model, PostType.Page, requestUser);
   }
 
@@ -86,7 +96,7 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Args('model', { type: () => UpdatePageInput }) model: UpdatePageInput,
     @Context('user') requestUser: JwtPayload,
-  ) {
+  ): Promise<boolean> {
     return this.postDataSource.update(id, model, requestUser);
   }
 

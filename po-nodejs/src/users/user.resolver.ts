@@ -1,9 +1,10 @@
 import { ModuleRef } from '@nestjs/core';
-import { Resolver, ResolveField, Query, Mutation, Root, Args, ID, Context } from '@nestjs/graphql';
+import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Context } from '@nestjs/graphql';
 import { UserStatus } from '@/common/helpers/enums';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
+import { IsEmailPipe } from '@/common/pipes/is-email.pipe';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
@@ -26,38 +27,16 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   @Query((returns) => User, { nullable: true, description: '获取当前用户' })
   user(@Fields() fields: ResolveTree, @Context('user') requestUser: JwtPayload): Promise<User | null> {
     return this.userDataSource.get(null, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
-    // const fieldNames = this.getFieldNames(fields.fieldsByTypeName.User);
-    // const user = await this.userDataSource.get(null, fieldNames, requestUser);
-    // if (user) {
-    //   if (fieldNames.includes('role')) {
-    //     const role = await this.userDataSource.getRole(user.id);
-    //     return { role: role as UserRole, ...user };
-    //   } else {
-    //     return { role: null, ...user };
-    //   }
-    // }
-    // return null;
   }
 
   @Authorized()
   @Query((returns) => User, { nullable: true, description: '获取用户(必须有编辑用户权限)' })
   userById(
-    @Args('id') id: number,
+    @Args('id', { type: () => ID }) id: number,
     @Fields() fields: ResolveTree,
     @Context('user') requestUser: JwtPayload,
   ): Promise<User | null> {
     return this.userDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
-    // const fieldNames = this.getFieldNames(fields.fieldsByTypeName.User);
-    // const user = await this.userDataSource.get(id, fieldNames, requestUser);
-    // if (user) {
-    //   if (fieldNames.includes('role')) {
-    //     const role = await this.userDataSource.getRole(user.id);
-    //     return { role: role as UserRole, ...user };
-    //   } else {
-    //     return { role: null, ...user };
-    //   }
-    // }
-    // return null;
   }
 
   @Authorized()
@@ -76,7 +55,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
 
   @Authorized()
   @ResolveField((type) => Boolean, { description: '是否是超级管理员' })
-  isSuperAdmin(@Root() { loginName }: User) {
+  isSuperAdmin(@Parent() { loginName }: User): boolean {
     return this.userDataSource.isSupurAdmin(loginName);
   }
 
@@ -93,27 +72,32 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   }
 
   @Query((returns) => Boolean, { description: '判断登录名是否存在' })
-  isLoginNameExists(@Args('loginName', { type: () => String }) loginName: string) {
+  isLoginNameExists(@Args('loginName', { type: () => String }) loginName: string): Promise<boolean> {
     return this.userDataSource.isLoginNameExists(loginName);
   }
 
   @Query((returns) => Boolean, { description: '判断手机号码是否存在' })
-  isMobileExists(@Args('mobile', { type: () => String }) mobile: string) {
+  isMobileExists(@Args('mobile', { type: () => String }) mobile: string): Promise<boolean> {
     return this.userDataSource.isMobileExists(mobile);
   }
 
   @Query((returns) => Boolean, { description: '判断email是否存在' })
-  isEmailExists(@Args('email', { type: () => String }) email: string) {
+  isEmailExists(@Args('email', { type: () => String }, new IsEmailPipe()) email: string): Promise<boolean> {
     return this.userDataSource.isEmailExists(email);
   }
 
   @Authorized()
-  @Mutation((returns) => User, {
-    nullable: true,
-    description: '添加用户（如果登录名已在在，则返回 null；使用 "isLoginNameExists" 查询判断）',
-  })
-  addUser(@Args('model', { type: () => NewUserInput }) model: NewUserInput, @Context('user') requestUser: JwtPayload) {
-    return this.userDataSource.create(model, requestUser);
+  @Mutation((returns) => User, { description: '添加用户' })
+  async addUser(
+    @Args('model', { type: () => NewUserInput }) model: NewUserInput,
+    @Context('user') requestUser: JwtPayload,
+  ): Promise<User> {
+    const { sendUserNotification, ...newUser } = model;
+    const user = await this.userDataSource.create(newUser, requestUser);
+    if (sendUserNotification) {
+      // todo: send email
+    }
+    return user;
   }
 
   @Authorized()
@@ -122,7 +106,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
     @Args('id', { type: () => ID, description: 'User Id' }) id: number,
     @Args('model', { type: () => UpdateUserInput }) model: UpdateUserInput,
     @Context('user') requestUser: JwtPayload,
-  ) {
+  ): Promise<boolean> {
     return this.userDataSource.update(id, model, requestUser);
   }
 
@@ -132,7 +116,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
     @Args('id', { type: () => ID, description: 'User Id' }) id: number,
     @Args('status', { type: () => UserStatus }) status: UserStatus,
     @Context('user') requestUser: JwtPayload,
-  ) {
+  ): Promise<boolean> {
     return this.userDataSource.updateStatus(id, status, requestUser);
   }
 
@@ -141,7 +125,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   removeUser(
     @Args('id', { type: () => ID, description: 'User Id' }) id: number,
     @Context('user') requestUser: JwtPayload,
-  ) {
+  ): Promise<boolean> {
     return this.userDataSource.delete(id, requestUser);
   }
 }

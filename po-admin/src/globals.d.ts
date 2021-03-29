@@ -11,11 +11,17 @@ declare global {
   };
 }
 
-declare module 'axios/index' {
+declare module 'axios' {
   interface AxiosRequestConfig {
     retry?: number;
     retryDelay?: number;
     __retryCount?: number;
+  }
+}
+
+declare module 'vue/types/vue' {
+  interface Vue {
+    $__recomputables?: Dictionary<{ backdoor: number }>;
   }
 }
 

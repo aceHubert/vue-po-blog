@@ -87,25 +87,17 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       const media = await this.models.Medias.create(rest, { transaction: t });
 
       if (metas && metas.length) {
-        const falseOrMetaKeys = await this.isMetaExists(
-          media.id,
-          metas.map((meta) => meta.metaKey),
+        this.models.MediaMeta.bulkCreate(
+          metas.map((meta) => {
+            return {
+              ...meta,
+              mediaId: media.id,
+            };
+          }),
+          {
+            transaction: t,
+          },
         );
-        if (falseOrMetaKeys) {
-          throw new ValidationError(`The meta keys (${falseOrMetaKeys.join(',')}) have existed!`);
-        } else {
-          this.models.MediaMeta.bulkCreate(
-            metas.map((meta) => {
-              return {
-                ...meta,
-                mediaId: media.id,
-              };
-            }),
-            {
-              transaction: t,
-            },
-          );
-        }
       }
 
       await t.commit();

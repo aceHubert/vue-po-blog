@@ -11,11 +11,11 @@ export interface UserAttributes {
   displayName: string;
   mobile: string | null;
   email: string;
-  url: string;
+  url: string | null;
   status: UserStatus;
   updatedAt: Date;
   createdAt: Date;
 }
 
 export interface UserCreationAttributes
-  extends Optional<UserAttributes, 'id' | 'niceName' | 'displayName' | 'mobile' | 'status'> {}
+  extends Optional<UserAttributes, 'id' | 'niceName' | 'displayName' | 'mobile' | 'url' | 'status'> {}

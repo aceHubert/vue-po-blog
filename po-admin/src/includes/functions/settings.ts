@@ -4,7 +4,7 @@ import { trailingSlash } from '@/utils/path';
 import { SettingsFunctions, SiteSettings } from 'types/functions/settings';
 
 export const globalSettings: SiteSettings = {
-  baseUrl: process.env.baseUrl!, // api请求的域名，api在不同域名或ssr情况下是必须的
+  baseUrl: '/', // api请求的域名
   basePath: 'admin/', // 与vue-router 配置的 base 保持一致
 };
 

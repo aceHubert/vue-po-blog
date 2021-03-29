@@ -20,10 +20,10 @@ export interface PostAttributes {
   name: string;
   author: number;
   content: string;
-  excerpt: string;
+  excerpt?: string;
   type: PostType | PostOperateType;
   status: PostStatus | PostOperateStatus;
-  parent: number;
+  parent?: number;
   commentStatus: PostCommentStatus;
   commentCount: number;
   updatedAt: Date;
@@ -33,5 +33,5 @@ export interface PostAttributes {
 export interface PostCreationAttributes
   extends Optional<
     PostAttributes,
-    'id' | 'name' | 'author' | 'excerpt' | 'type' | 'parent' | 'status' | 'commentStatus' | 'commentCount'
+    'id' | 'name' | 'excerpt' | 'type' | 'parent' | 'status' | 'commentStatus' | 'commentCount'
   > {}

@@ -3,7 +3,7 @@
  */
 import { ModuleRef } from '@nestjs/core';
 import { Type, OnModuleInit } from '@nestjs/common';
-import { Resolver, ResolveField, Query, Mutation, Root, Args, ID } from '@nestjs/graphql';
+import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
 import { lowerFirst } from 'lodash';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { BaseResolver } from './base.resolver';
@@ -78,7 +78,7 @@ export function createMetaResolver<
 
     @ResolveField((returns) => [Meta], { description: `${description || resolverName || resolverType.name} 元数据` })
     metas(
-      @Root() { id: modelId }: { id: number },
+      @Parent() { id: modelId }: { id: number },
       @Args('metaKeys', { type: () => [String!], nullable: true, description: 'Meta keys' })
       metaKeys: string[] | undefined,
       @Fields() fields: ResolveTree,

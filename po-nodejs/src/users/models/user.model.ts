@@ -1,7 +1,8 @@
 import { Field, ObjectType, InterfaceType, ID, createUnionType } from '@nestjs/graphql';
-import { UserStatus, UserRole, UserRoleWithNone } from '@/common/helpers/enums';
+import { UserStatus, UserRole } from '@/common/helpers/enums';
 import { PagedResponse, Count } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
+import { UserRoleWithNone } from '../dto/update-user.input';
 
 @InterfaceType()
 export abstract class BaseUser {
@@ -11,10 +12,7 @@ export abstract class BaseUser {
   @Field({ description: '登录名' })
   loginName!: string;
 
-  @Field({ description: '昵称' })
-  niceName!: string;
-
-  @Field({ description: '前台显示名称' })
+  @Field({ description: '显示名称' })
   displayName!: string;
 
   @Field((type) => String, { nullable: true, description: '手机号码' })
@@ -23,8 +21,8 @@ export abstract class BaseUser {
   @Field({ description: '电子邮箱' })
   email!: string;
 
-  @Field({ description: '注册时客户端的 URL' })
-  url!: string;
+  @Field((type) => String, { nullable: true, description: '客户端的 URL' })
+  url!: string | null;
 
   @Field((type) => UserStatus, { description: '用户状态' })
   status!: UserStatus;
@@ -40,11 +38,10 @@ export abstract class BaseUser {
 export class User implements BaseUser {
   id!: number;
   loginName!: string;
-  niceName!: string;
   displayName!: string;
   mobile!: string | null;
   email!: string;
-  url!: string;
+  url!: string | null;
   status!: UserStatus;
   updatedAt!: Date;
   createdAt!: Date;
@@ -54,17 +51,28 @@ export class User implements BaseUser {
 export class UserWithRole implements BaseUser {
   id!: number;
   loginName!: string;
-  niceName!: string;
   displayName!: string;
   mobile!: string | null;
   email!: string;
-  url!: string;
+  url!: string | null;
   status!: UserStatus;
   updatedAt!: Date;
   createdAt!: Date;
 
   @Field((type) => UserRole, { nullable: true, description: '用户角色' })
-  role!: UserRole | null;
+  userRole?: UserRole;
+}
+
+@ObjectType({ description: '基本用户信息' })
+export class SimpleUser {
+  @Field((type) => ID, { description: 'Id' })
+  id!: number;
+
+  @Field({ description: '显示名称' })
+  displayName!: string;
+
+  @Field({ description: '电子邮箱' })
+  email!: string;
 }
 
 @ObjectType({ description: '用户分页模型' })
@@ -81,7 +89,7 @@ export class UserStatusCount extends Count {
 @ObjectType({ description: `用户按角色分组数量模型` })
 export class UserRoleCount extends Count {
   @Field((type) => UserRoleWithNone, { description: '角色' })
-  role!: UserRole | 'none';
+  userRole!: UserRole | 'none';
 }
 
 @ObjectType({ description: '用户元数据模型' })

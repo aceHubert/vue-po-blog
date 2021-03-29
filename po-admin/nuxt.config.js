@@ -43,16 +43,12 @@ module.exports = (configContext) => {
       host, // default: localhost,
       https,
     },
-    env: {
-      // set envs
-      baseUrl, // fallback baseUrl
-    },
     publicRuntimeConfig: Object.assign(
       {},
       configs.frontend,
       configContext.dev ? { baseUrl } : {}, // 在dev模式下启用代理解决跨域问题
     ),
-    privateRuntimeConfig: configs.backend || {},
+    privateRuntimeConfig: configs.backend,
     ssr: true,
     srcDir: 'src/',
     dir: {

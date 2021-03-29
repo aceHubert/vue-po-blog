@@ -6,7 +6,9 @@ import { MetaModel, NewMetaInput } from './meta.interface';
 /**
  * 文章实体
  */
-export interface PostModel extends PostAttributes {}
+export interface PostModel extends Omit<PostAttributes, 'status'> {
+  status: PostStatus;
+}
 
 export interface PostMetaModel extends MetaModel {
   postId: number;
@@ -29,7 +31,8 @@ export interface PagedPageArgs extends PagedArgs {
 
 export interface PagedPostModel extends Paged<PostModel> {}
 
-export interface NewPostInput extends Omit<PostCreationAttributes, 'id' | 'commentCount' | 'createdAt' | 'updatedAt'> {
+export interface NewPostInput
+  extends Omit<PostCreationAttributes, 'id' | 'author' | 'commentCount' | 'createdAt' | 'updatedAt'> {
   /**
    * metaKey 不可以重复
    */
@@ -39,7 +42,7 @@ export interface NewPostInput extends Omit<PostCreationAttributes, 'id' | 'comme
 export interface NewPageInput
   extends Omit<
     PostCreationAttributes,
-    'id' | 'excerpt' | 'commentStatus' | 'commentCount' | 'createdAt' | 'updatedAt'
+    'id' | 'author' | 'excerpt' | 'commentStatus' | 'commentCount' | 'createdAt' | 'updatedAt'
   > {
   /**
    * metaKey 不可以重复

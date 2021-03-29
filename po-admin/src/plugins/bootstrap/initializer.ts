@@ -133,6 +133,7 @@ export async function Initializer(...params: Parameters<Plugin>) {
    * 修改全局配置
    */
   globalSettings.baseUrl = $config['baseUrl'] || '';
+  globalSettings.basePath = app.router!.options.base || '';
 
   // 不在项目初始货页面时，才能读取数据库
   if (route.name !== 'init') {

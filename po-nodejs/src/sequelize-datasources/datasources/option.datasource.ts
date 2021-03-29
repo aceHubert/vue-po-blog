@@ -104,7 +104,7 @@ export class OptionDataSource extends BaseDataSource {
    * 新建 Options
    * @param model 新建模型
    */
-  async create(model: NewOptionInput): Promise<OptionModel | false> {
+  async create(model: NewOptionInput): Promise<OptionModel> {
     const isExists = await this.isExists(model.optionName);
 
     if (isExists) {

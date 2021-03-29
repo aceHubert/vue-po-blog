@@ -2,7 +2,8 @@ import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { PostCommentStatus, UserRole } from '@/common/helpers/enums';
 import { UserRoles } from '@/common/helpers/user-roles';
-import { InitOptionKeys, InitOptionTablePrefixKeys } from '@/common/helpers/init-option-keys';
+import { OptionKeys, OptionTablePrefixKeys } from '@/common/helpers/option-keys';
+import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
 import { BaseDataSource } from './base.datasource';
 
 // Types
@@ -106,33 +107,43 @@ export class DbInitDataSource extends BaseDataSource {
         [
           {
             userId: user.id,
-            metaKey: `nickName`,
+            metaKey: UserMetaKeys.NickName,
             metaValue: name,
           },
           {
             userId: user.id,
-            metaKey: `first_name`,
+            metaKey: UserMetaKeys.FirstName,
             metaValue: '',
           },
           {
             userId: user.id,
-            metaKey: `last_name`,
+            metaKey: UserMetaKeys.LastName,
             metaValue: '',
           },
           {
             userId: user.id,
-            metaKey: `description`,
+            metaKey: UserMetaKeys.Avator,
             metaValue: '',
           },
           {
             userId: user.id,
-            metaKey: `${this.tablePrefix}role`,
+            metaKey: UserMetaKeys.Description,
+            metaValue: '',
+          },
+          {
+            userId: user.id,
+            metaKey: `${this.tablePrefix}${UserMetaTablePrefixKeys.UserRole}`,
             metaValue: UserRole.Administrator,
           },
           {
             userId: user.id,
-            metaKey: 'locale',
-            metaValue: initArgs.locale,
+            metaKey: UserMetaKeys.Locale,
+            metaValue: '',
+          },
+          {
+            userId: user.id,
+            metaKey: UserMetaKeys.AdminColor,
+            metaValue: 'default',
           },
         ],
         {
@@ -163,39 +174,39 @@ export class DbInitDataSource extends BaseDataSource {
       // 初始化配置参数
       await this.models.Options.bulkCreate(
         [
-          { optionName: InitOptionKeys.SiteUrl, optionValue: initArgs.siteUrl },
-          { optionName: InitOptionKeys.Home, optionValue: initArgs.siteUrl },
-          { optionName: InitOptionKeys.BlogName, optionValue: initArgs.title },
-          { optionName: InitOptionKeys.BlogDescription, optionValue: 'A simple and light blog system' },
-          { optionName: InitOptionKeys.AdminEmail, optionValue: initArgs.email },
-          { optionName: InitOptionKeys.UsersCanRegister, optionValue: '0' },
-          { optionName: InitOptionKeys.MailServerUrl, optionValue: 'mail.example.com' },
-          { optionName: InitOptionKeys.MailServerLogin, optionValue: 'user@example.com' },
-          { optionName: InitOptionKeys.MailServerPass, optionValue: 'password' },
-          { optionName: InitOptionKeys.MailServerPort, optionValue: '110' },
-          { optionName: InitOptionKeys.StartOfWeek, optionValue: '1' },
-          { optionName: InitOptionKeys.DateFormat, optionValue: 'MMM D,YYYY' },
-          { optionName: InitOptionKeys.TimeFormat, optionValue: 'h:mm a' },
-          { optionName: InitOptionKeys.TimezoneString, optionValue: '' },
-          { optionName: InitOptionKeys.PermalinkStructure, optionValue: '' },
-          { optionName: InitOptionKeys.DefaultCategory, optionValue: String(defaultCategoryTaxonomy.id) },
-          { optionName: InitOptionKeys.DefaultCommentStatus, optionValue: PostCommentStatus.Enable },
-          { optionName: InitOptionKeys.ShowOnFront, optionValue: 'post' },
-          { optionName: InitOptionKeys.PageForPosts, optionValue: '0' },
-          { optionName: InitOptionKeys.PageOnFront, optionValue: '0' },
-          { optionName: InitOptionKeys.PageComments, optionValue: '0' },
-          { optionName: InitOptionKeys.PostsPerPage, optionValue: '10' },
-          { optionName: InitOptionKeys.CommentsPerPage, optionValue: '10' },
-          { optionName: InitOptionKeys.CommentsOrder, optionValue: 'asc' },
-          { optionName: InitOptionKeys.CommentsNested, optionValue: '1' },
-          { optionName: InitOptionKeys.CommentsNestedDepth, optionValue: '5' },
-          { optionName: InitOptionKeys.CurrentTheme, optionValue: 'beautify_theme' },
-          { optionName: InitOptionKeys.ActivePlugins, optionValue: '{}' },
-          { optionName: InitOptionKeys.DefaultRole, optionValue: UserRole.Subscriber },
+          { optionName: OptionKeys.SiteUrl, optionValue: initArgs.siteUrl },
+          { optionName: OptionKeys.Home, optionValue: initArgs.siteUrl },
+          { optionName: OptionKeys.BlogName, optionValue: initArgs.title },
+          { optionName: OptionKeys.BlogDescription, optionValue: 'A simple and light blog system' },
+          { optionName: OptionKeys.AdminEmail, optionValue: initArgs.email },
+          { optionName: OptionKeys.UsersCanRegister, optionValue: 'off' },
+          { optionName: OptionKeys.MailServerUrl, optionValue: 'mail.example.com' },
+          { optionName: OptionKeys.MailServerLogin, optionValue: 'user@example.com' },
+          { optionName: OptionKeys.MailServerPass, optionValue: 'password' },
+          { optionName: OptionKeys.MailServerPort, optionValue: '110' },
+          { optionName: OptionKeys.StartOfWeek, optionValue: '1' },
+          { optionName: OptionKeys.DateFormat, optionValue: 'MMM D,YYYY' },
+          { optionName: OptionKeys.TimeFormat, optionValue: 'h:mm a' },
+          { optionName: OptionKeys.TimezoneString, optionValue: '' },
+          { optionName: OptionKeys.PermalinkStructure, optionValue: '' },
+          { optionName: OptionKeys.DefaultCategory, optionValue: String(defaultCategoryTaxonomy.id) },
+          { optionName: OptionKeys.DefaultCommentStatus, optionValue: PostCommentStatus.Enable },
+          { optionName: OptionKeys.ShowOnFront, optionValue: 'post' },
+          { optionName: OptionKeys.PageForPosts, optionValue: '0' },
+          { optionName: OptionKeys.PageOnFront, optionValue: '0' },
+          { optionName: OptionKeys.PageComments, optionValue: 'off' },
+          { optionName: OptionKeys.PostsPerPage, optionValue: '10' },
+          { optionName: OptionKeys.CommentsPerPage, optionValue: '10' },
+          { optionName: OptionKeys.CommentsOrder, optionValue: 'asc' },
+          { optionName: OptionKeys.CommentsNested, optionValue: 'on' },
+          { optionName: OptionKeys.CommentsNestedDepth, optionValue: '5' },
+          { optionName: OptionKeys.CurrentTheme, optionValue: 'beautify_theme' },
+          { optionName: OptionKeys.ActivePlugins, optionValue: '{}' },
+          { optionName: OptionKeys.DefaultRole, optionValue: UserRole.Subscriber },
           // 带数据库前缀属性
-          { optionName: `${this.tablePrefix}${InitOptionTablePrefixKeys.Locale}`, optionValue: initArgs.locale },
+          { optionName: `${this.tablePrefix}${OptionTablePrefixKeys.Locale}`, optionValue: initArgs.locale },
           {
-            optionName: `${this.tablePrefix}${InitOptionTablePrefixKeys.UserRoles}`,
+            optionName: `${this.tablePrefix}${OptionTablePrefixKeys.UserRoles}`,
             optionValue: JSON.stringify(UserRoles),
           },
         ],

@@ -29,14 +29,8 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         allowNull: false,
         comment: '元数据Key',
       },
-      description: {
-        type: new DataTypes.STRING(255),
-        allowNull: true,
-        comment: '描述',
-      },
       metaValue: {
         type: new DataTypes.TEXT('long'),
-        allowNull: false,
         comment: '元数据Value',
       },
       private: {

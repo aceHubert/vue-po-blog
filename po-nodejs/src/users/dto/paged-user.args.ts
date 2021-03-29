@@ -1,6 +1,7 @@
 import { Field, ArgsType } from '@nestjs/graphql';
 import { PagedArgs } from '@/common/models/general.model';
-import { UserStatus, UserRole, UserRoleWithNone } from '@/common/helpers/enums';
+import { UserStatus, UserRole } from '@/common/helpers/enums';
+import { UserRoleWithNone } from './update-user.input';
 
 // Types
 import { PagedUserArgs as IPagedUserArgs } from '@/sequelize-datasources/interfaces';
@@ -20,5 +21,5 @@ export class PagedUserArgs extends PagedArgs implements IPagedUserArgs {
     nullable: true,
     description: '用户角色（如果为空，则查询有角色（即非 None 的）的用户）',
   })
-  role?: UserRole | 'none';
+  userRole?: UserRole | 'none';
 }

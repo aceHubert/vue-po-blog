@@ -1,8 +1,10 @@
 import md5 from 'md5';
+import { isUndefined } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ForbiddenError, ValidationError } from '@/common/utils/errors.utils';
 import { UserRole, UserRoleCapability, UserStatus } from '@/common/helpers/enums';
+import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
 import { uuid } from '@/common/utils/uuid.utils';
 import { MetaDataSource } from './meta.datasource';
 
@@ -81,7 +83,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 根据 Id 获取用户（不包含敏感字段）
+   * 根据 Id 获取用户
+   * 实段：id, displayName, email
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -91,7 +94,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async getSimpleInfo(id: number, fields: string[]): Promise<UserSimpleModel | null> {
     // 过滤掉敏感字段
-    fields = fields.filter((field) => ['id', 'niceName', 'displayName'].includes(field));
+    fields = fields.filter((field) => ['id', 'displayName', 'email'].includes(field));
 
     return this.models.Users.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Users),
@@ -124,13 +127,13 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       where['status'] = query.status;
     }
 
-    if (query.role) {
-      if (query.role === 'none') {
+    if (query.userRole) {
+      if (query.userRole === 'none') {
         where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = {
           [this.Op.is]: null,
         };
       } else {
-        where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = query.role;
+        where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = query.userRole;
       }
     } else {
       where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = {
@@ -150,7 +153,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           model: this.models.UserMeta,
           as: 'UserMetas',
           where: {
-            metaKey: `${this.tablePrefix}role`,
+            metaKey: `${this.tablePrefix}${UserMetaTablePrefixKeys.UserRole}`,
           },
           required: false,
           duplicating: false,
@@ -166,7 +169,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       rows: rows.map((row) => {
         const { UserMetas, ...rest } = row.toJSON() as any;
         return {
-          role: UserMetas.length ? UserMetas[0].metaValue : null,
+          userRole: UserMetas.length ? UserMetas[0].metaValue : null,
           ...rest,
         } as UserWithRoleModel;
       }),
@@ -199,20 +202,20 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   getCountByRole() {
     return this.models.Users.count({
       attributes: [
-        [this.Sequelize.fn('ifnull', this.col('metaValue', this.models.UserMeta, 'UserMetas'), 'none'), 'role'],
+        [this.Sequelize.fn('ifnull', this.col('metaValue', this.models.UserMeta, 'UserMetas'), 'none'), 'userRole'],
       ],
       include: [
         {
           model: this.models.UserMeta,
           as: 'UserMetas',
           where: {
-            metaKey: `${this.tablePrefix}role`,
+            metaKey: `${this.tablePrefix}${UserMetaTablePrefixKeys.UserRole}`,
           },
           required: false,
           duplicating: false,
         },
       ],
-      group: 'role',
+      group: 'userRole',
     });
   }
 
@@ -283,22 +286,25 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async create(model: NewUserInput, requestUser: JwtPayload): Promise<UserModel> {
     await this.hasCapability(UserRoleCapability.CreateUsers, requestUser);
 
-    const isExists =
+    let isExists =
       (await this.models.Users.count({
         where: {
           [this.Op.or]: {
             loginName: model.loginName,
-            mobile: model.mobile,
             email: model.email,
           },
         },
       })) > 0;
 
+    if (model.mobile && !isExists) {
+      isExists = await this.isMobileExists(model.mobile);
+    }
+
     if (isExists) {
       throw new ValidationError('The loginName, mobile, email are rqiured to be unique!');
     }
 
-    const { loginName, loginPwd, niceName, displayName, role, ...rest } = model;
+    const { loginName, loginPwd, firstName, lastName, avator, description, userRole, locale, ...rest } = model;
 
     const t = await this.sequelize.transaction();
     try {
@@ -307,35 +313,62 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           ...rest,
           loginName,
           loginPwd,
-          niceName: niceName || loginName,
-          displayName: displayName || loginName,
+          niceName: loginName,
+          displayName: loginName,
         },
         { transaction: t },
       );
 
-      let metaCreationModels: NewUserMetaInput[] = [];
+      let metaCreationModels: NewUserMetaInput[] = [
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.NickName,
+          metaValue: loginName,
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.FirstName,
+          metaValue: firstName || null,
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.LastName,
+          metaValue: lastName || null,
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.Avator,
+          metaValue: avator || null,
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.Description,
+          metaValue: description || null,
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.Locale,
+          metaValue: locale || null,
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.AdminColor,
+          metaValue: 'default',
+        },
+        {
+          userId: user.id,
+          metaKey: `${this.tablePrefix}${UserMetaTablePrefixKeys.UserRole}`,
+          metaValue: userRole,
+        },
+      ];
       // 添加元数据
       if (model.metas) {
-        const falseOrMetaKeys = await this.isMetaExists(
-          user.id,
-          model.metas.map((meta) => meta.metaKey),
-        );
-        if (falseOrMetaKeys) {
-          throw new ValidationError(`The meta keys (${falseOrMetaKeys.join(',')}) have existed!`);
-        } else {
-          metaCreationModels = model.metas.map((meta) => ({
+        metaCreationModels = metaCreationModels.concat(
+          model.metas.map((meta) => ({
             ...meta,
             userId: user.id,
-          }));
-        }
-      }
-      // 添加角色
-      if (role) {
-        metaCreationModels.push({
-          userId: user.id,
-          metaKey: `${this.tablePrefix}role`,
-          metaValue: role,
-        });
+          })),
+        );
       }
 
       await this.models.UserMeta.bulkCreate(metaCreationModels, { transaction: t });
@@ -354,36 +387,148 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
   /**
    * 修改用户
-   * mobile, emaile 要求必须是唯一，否则会抛出 ValidationError
+   * mobile, email 要求必须是唯一，否则会抛出 ValidationError
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [EditUsers]
+   * @access capabilities: [EditUsers(非修改自己信息)]
    * @param id User Id
    * @param model 修改实体模型
    */
   async update(id: number, model: UpdateUserInput, requestUser: JwtPayload): Promise<boolean> {
-    await this.hasCapability(UserRoleCapability.EditUsers, requestUser);
-
-    const isExists =
-      (await this.models.Users.count({
-        where: {
-          [this.Op.or]: {
-            mobile: model.mobile,
-            email: model.email,
-          },
-        },
-      })) > 0;
-
-    if (isExists) {
-      throw new ValidationError('The mobile, email are rqiured to be unique!');
+    // 非修改自己信息
+    if (id !== requestUser.id) {
+      await this.hasCapability(UserRoleCapability.EditUsers, requestUser);
     }
 
-    return await this.models.Users.update(model, {
-      where: {
-        id,
-      },
-    }).then(([count]) => count > 0);
+    const user = await this.models.Users.findByPk(id);
+    if (user) {
+      let isExists = false;
+      if (model.email && model.email !== user.email) {
+        isExists = await this.isEmailExists(model.email);
+      }
+      if (!isExists && model.mobile && model.mobile !== user.mobile) {
+        isExists == (await this.isMobileExists(model.mobile));
+      }
+      if (isExists) {
+        throw new ValidationError('The mobile, email are rqiured to be unique!');
+      }
+
+      const { nickName, firstName, lastName, avator, description, adminColor, userRole, locale, ...updateUser } = model;
+      const t = await this.sequelize.transaction();
+      try {
+        await this.models.Users.update(updateUser, {
+          where: { id },
+          transaction: t,
+        });
+
+        if (!isUndefined(userRole)) {
+          await this.models.UserMeta.update(
+            { metaValue: userRole === 'none' ? null : userRole },
+            {
+              where: {
+                userId: id,
+                metaKey: `${this.tablePrefix}${UserMetaTablePrefixKeys.UserRole}`,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        if (!isUndefined(locale)) {
+          await this.models.UserMeta.update(
+            { metaValue: locale || null }, // "" => null
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.Locale,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        if (!isUndefined(description)) {
+          await this.models.UserMeta.update(
+            { metaValue: description },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.Description,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(adminColor)) {
+          await this.models.UserMeta.update(
+            { metaValue: adminColor },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.AdminColor,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(nickName)) {
+          await this.models.UserMeta.update(
+            { metaValue: nickName },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.NickName,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(firstName)) {
+          await this.models.UserMeta.update(
+            { metaValue: firstName },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.FirstName,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(lastName)) {
+          await this.models.UserMeta.update(
+            { metaValue: lastName },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.LastName,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(avator)) {
+          await this.models.UserMeta.update(
+            { metaValue: avator },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.Avator,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        await t.commit();
+        return true;
+      } catch (err) {
+        await t.rollback();
+        throw err;
+      }
+    }
+    return false;
   }
 
   /**
@@ -522,7 +667,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       attributes: ['metaValue'],
       where: {
         userId,
-        metaKey: `${this.tablePrefix}role`,
+        metaKey: `${this.tablePrefix}${UserMetaTablePrefixKeys.UserRole}`,
       },
     });
     return role?.metaValue as UserRole;

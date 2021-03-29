@@ -24,8 +24,9 @@ Vue.use(VueI18n);
  */
 Object.defineProperties(VueI18n.prototype, {
   tv: {
-    value: function (key: string, fallbackStr: string, locale?: string) {
-      return (this.t && this.te ? (this.te(key, locale) ? this.t(key, locale) : fallbackStr) : fallbackStr) || key;
+    value: function (this: VueI18n, key: VueI18n.Path, fallbackStr: string, ...values: any) {
+      const locale = typeof values[0] == 'string' ? values[0] : undefined;
+      return (this.te(key, locale) ? this.t(key, ...values) : fallbackStr) || key;
     },
     writable: false,
     enumerable: true,
@@ -34,13 +35,14 @@ Object.defineProperties(VueI18n.prototype, {
 });
 
 /**
- * 扩展方法添加到 Vue 实例中
+ * 扩展VueI18n.tv方法添加到 Vue 实例中
  */
 Object.defineProperties(Vue.prototype, {
   $tv: {
-    value: function (key: VueI18n.Path, fallbackStr: string, locale?: VueI18n.Locale): VueI18n.TranslateResult {
+    value: function (this: Vue, key: VueI18n.Path, fallbackStr: string, ...values: any): VueI18n.TranslateResult {
+      arguments.length;
       const i18n = this.$i18n;
-      return i18n.tv(key, fallbackStr, locale);
+      return i18n.tv(key, fallbackStr, ...values);
     },
     writable: false,
     enumerable: true,

@@ -1,13 +1,14 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError } from '@/common/utils/errors.utils';
-import { PostOperateStatus } from '@/orm-entities/interfaces';
 import { PostStatus, PostType, PostCommentStatus, UserRoleCapability } from '@/common/helpers/enums';
-import { InitOptionKeys } from '@/common/helpers/init-option-keys';
+import { OptionKeys } from '@/common/helpers/option-keys';
+import { PostMetaKeys } from '@/common/helpers/post-meta-keys';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
 import { Transaction, WhereOptions } from 'sequelize';
+import { PostAttributes, PostCreationAttributes, PostOperateStatus } from '@/orm-entities/interfaces';
 import {
   PostModel,
   PostMetaModel,
@@ -52,9 +53,17 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 是否有修改权限，没有则会直接抛出异常(author, status is required)
-   * @param post Post instance
+   * @param post Post
    */
-  private async hasEditCapability(post: PostModel, requestUser: JwtPayload) {
+  private async hasEditCapability(post: PostAttributes, requestUser: JwtPayload) {
+    if (post.status === PostOperateStatus.Inherit) {
+      const parentPost = await this.models.Posts.findByPk(post.parent);
+      // 理论上不会为null, 防止意义和ts类型检测
+      if (parentPost) {
+        post = parentPost;
+      }
+    }
+
     // 是否有编辑权限
     await this.hasCapability(
       post.type === PostType.Post ? UserRoleCapability.EditPosts : UserRoleCapability.EditPages,
@@ -96,12 +105,12 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       [
         {
           postId,
-          metaKey: 'trash_meta_status',
+          metaKey: PostMetaKeys.TrashMetaStatus,
           metaValue: prevStatus,
         },
         {
           postId,
-          metaKey: 'trash_meta_time',
+          metaKey: PostMetaKeys.TrashMetaTime,
           metaValue: String(Date.now()),
         },
       ],
@@ -126,16 +135,16 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
     return await this.models.PostMeta.bulkCreate(
       Array.prototype.concat.apply(
-        null,
+        [],
         posts.map((post) => [
           {
             postId: post.id,
-            metaKey: 'trash_meta_status',
+            metaKey: PostMetaKeys.TrashMetaStatus,
             metaValue: post.status,
           },
           {
             postId: post.id,
-            metaKey: 'trash_meta_time',
+            metaKey: PostMetaKeys.TrashMetaTime,
             metaValue: String(Date.now()),
           },
         ]),
@@ -155,7 +164,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     return await this.models.PostMeta.destroy({
       where: {
         postId,
-        metaKey: ['trash_meta_status', 'trash_meta_time'],
+        metaKey: [PostMetaKeys.TrashMetaStatus, PostMetaKeys.TrashMetaTime],
       },
       transaction: t,
     });
@@ -379,7 +388,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    */
   async create(model: NewPostInput | NewPageInput, type: PostType, requestUser: JwtPayload): Promise<PostModel> {
     const { name, title, metas, ...rest } = model;
-    const creationModel: NewPostInput = {
+    const creationModel: Omit<PostCreationAttributes, 'updatedAt' | 'createdAt'> = {
       ...rest,
       title,
       name: await this.fixName(name || title),
@@ -388,13 +397,14 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       status: PostOperateStatus.AutoDraft, // 默认为 auto draft
     };
 
-    const defaultCommentStatus = await this.getOption<PostCommentStatus>(InitOptionKeys.DefaultCommentStatus);
+    const defaultCommentStatus = await this.getOption<PostCommentStatus>(OptionKeys.DefaultCommentStatus);
 
     if (type === PostType.Post) {
       creationModel.commentStatus = (model as NewPostInput).commentStatus || defaultCommentStatus;
     } else if (type === PostType.Page) {
-      const pageComments = await this.getOption<'0' | '1'>(InitOptionKeys.PageComments);
-      if (pageComments === '1') {
+      const pageComments = await this.getOption<'off' | 'on'>(OptionKeys.PageComments);
+      // 如果 PageComments 开启，则状态根据 Option.DefaultCommentStatus 状态
+      if (pageComments === 'on') {
         creationModel.commentStatus = defaultCommentStatus;
       } else {
         creationModel.commentStatus = PostCommentStatus.Disabled;
@@ -406,23 +416,15 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       const post = await this.models.Posts.create(creationModel, { transaction: t });
 
       if (metas && metas.length) {
-        const falseOrMetaKeys = await this.isMetaExists(
-          post.id,
-          metas.map((meta) => meta.metaKey),
+        this.models.PostMeta.bulkCreate(
+          metas.map((meta) => {
+            return {
+              ...meta,
+              postId: post.id,
+            };
+          }),
+          { transaction: t },
         );
-        if (falseOrMetaKeys) {
-          throw new ValidationError(`The meta keys (${falseOrMetaKeys.join(',')}) have existed!`);
-        } else {
-          this.models.PostMeta.bulkCreate(
-            metas.map((meta) => {
-              return {
-                ...meta,
-                postId: post.id,
-              };
-            }),
-            { transaction: t },
-          );
-        }
       }
 
       await t.commit();

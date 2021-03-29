@@ -5,12 +5,12 @@ import { Table } from 'types/constants';
 const table: Table = ({ i18nRender }) => ({
   columns: [
     {
-      title: i18nRender('user.column.loginName', 'LoginName'),
+      title: i18nRender('user.column.username', 'Username'),
       align: 'left',
-      dataIndex: 'loginName',
+      dataIndex: 'username',
       width: '300px',
       ellipsis: true,
-      scopedSlots: { customRender: 'loginName' },
+      scopedSlots: { customRender: 'username' },
     },
     {
       title: i18nRender('user.column.name', 'Name'),
@@ -18,6 +18,7 @@ const table: Table = ({ i18nRender }) => ({
       dataIndex: 'name',
       ellipsis: true,
       hideInMobile: true,
+      hideInTablet: true,
       scopedSlots: { customRender: 'name' },
     },
     {
@@ -25,6 +26,7 @@ const table: Table = ({ i18nRender }) => ({
       align: 'center',
       dataIndex: 'mobile',
       hideInMobile: true,
+      hideInTablet: true,
       scopedSlots: { customRender: 'mobile' },
     },
     {
@@ -32,20 +34,22 @@ const table: Table = ({ i18nRender }) => ({
       align: 'center',
       dataIndex: 'email',
       hideInMobile: true,
+      hideInTablet: true,
       scopedSlots: { customRender: 'email' },
     },
     {
       title: i18nRender('user.column.role', 'Role'),
       align: 'center',
-      dataIndex: 'role',
+      dataIndex: 'userRole',
+      width: '120px',
       hideInMobile: true,
-      scopedSlots: { customRender: 'role' },
+      scopedSlots: { customRender: 'userRole' },
     },
     {
       title: i18nRender('user.column.createTime', 'CreateTime'),
       align: 'center',
       dataIndex: 'createTime',
-      width: '220px',
+      width: '160px',
       hideInMobile: true,
       scopedSlots: { customRender: 'createTime' },
     },
