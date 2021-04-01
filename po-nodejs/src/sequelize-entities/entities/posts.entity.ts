@@ -23,7 +23,7 @@ export default class Posts extends Model<
   public excerpt!: string;
   public type!: PostType | PostOperateType;
   public status!: PostStatus | PostOperateStatus;
-  public parent!: number;
+  public parent?: number;
   public commentStatus!: PostCommentStatus;
   public commentCount!: number;
 

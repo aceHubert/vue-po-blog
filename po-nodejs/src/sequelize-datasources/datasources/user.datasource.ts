@@ -31,20 +31,21 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
   /**
    * 是否是超级管理员
-   * @param loginNameOrId 登录名或User Id
+   * @param loginNameOrId 登录名或User Id/Ids
    * @returns boolean
    */
   isSupurAdmin(loginNameOrId: string): boolean;
-  isSupurAdmin(loginNameOrId: number): Promise<boolean>;
-  isSupurAdmin(loginNameOrId: number | string) {
-    if (typeof loginNameOrId === 'number') {
+  isSupurAdmin(loginNameOrId: number | number[]): Promise<boolean>;
+  isSupurAdmin(loginNameOrId: number | number[] | string) {
+    if (typeof loginNameOrId === 'string') {
+      return loginNameOrId === 'admin';
+    } else {
       return this.models.Users.count({
         where: {
+          id: loginNameOrId,
           loginName: 'admin',
         },
       }).then((count) => count > 0);
-    } else {
-      return loginNameOrId === 'admin';
     }
   }
 
@@ -397,7 +398,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async update(id: number, model: UpdateUserInput, requestUser: JwtPayload): Promise<boolean> {
     // 非修改自己信息
-    if (id !== requestUser.id) {
+    if (String(id) !== String(requestUser.id)) {
       await this.hasCapability(UserRoleCapability.EditUsers, requestUser);
     }
 
@@ -562,11 +563,11 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access capabilities: [DeleteUsers]
    * @param id User Id
    */
-  async delete(id: number, requestUser: JwtPayload): Promise<boolean> {
+  async delete(id: number, requestUser: JwtPayload): Promise<true> {
     await this.hasCapability(UserRoleCapability.DeleteUsers, requestUser);
 
     if (await this.isSupurAdmin(id)) {
-      throw new ForbiddenError('Can not delete "Super Admin"!');
+      throw new ForbiddenError('Could not delete "Super Admin" User!');
     }
 
     const t = await this.sequelize.transaction();
@@ -583,9 +584,43 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       await t.commit();
       return true;
     } catch (err) {
-      this.logger.error(`An error occurred during deleting user (id:${id}), Error: ${err.message}`);
       await t.rollback();
-      return false;
+      throw err;
+    }
+  }
+
+  /**
+   * 批量删除用户
+   * Super Admin 无法删除，抛出 ForbiddenError 错误
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [DeleteUsers]
+   * @param id User Id
+   */
+  async blukDelete(ids: number[], requestUser: JwtPayload): Promise<true> {
+    await this.hasCapability(UserRoleCapability.DeleteUsers, requestUser);
+
+    if (await this.isSupurAdmin(ids)) {
+      throw new ForbiddenError('Could not delete "Super Admin" User!');
+    }
+
+    const t = await this.sequelize.transaction();
+    try {
+      await this.models.UserMeta.destroy({
+        where: { userId: ids },
+        transaction: t,
+      });
+      await this.models.Users.destroy({
+        where: { id: ids },
+        transaction: t,
+      });
+
+      await t.commit();
+      return true;
+    } catch (err) {
+      await t.rollback();
+      throw err;
     }
   }
 

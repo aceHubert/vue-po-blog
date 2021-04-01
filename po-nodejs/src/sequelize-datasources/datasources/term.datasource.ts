@@ -16,7 +16,7 @@ import {
   NewTermRelationshipInput,
   UpdateTermInput,
 } from '../interfaces/term.interface';
-import { Transaction } from 'sequelize';
+import { WhereOptions, Transaction } from 'sequelize';
 
 @Injectable()
 export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInput> {
@@ -73,15 +73,23 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
       fields.push('id');
     }
 
+    const where: WhereOptions = {};
+    if (query.keyword) {
+      where['name'] = {
+        [this.Op.like]: `%${query.keyword}%`,
+      };
+    }
+    if (query.group) {
+      where['group'] = query.group;
+    }
+
     return this.models.TermTaxonomy.findAll({
       attributes: this.filterFields(fields, this.models.TermTaxonomy),
       include: [
         {
           model: this.models.Terms,
           attributes: this.filterFields(fields, this.models.Terms),
-          where: {
-            ...(query.group ? { group: query.group } : {}),
-          },
+          where: { ...where },
         },
       ],
       where: {
@@ -133,11 +141,11 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
       },
     }).then((values) =>
       values.map((term) => {
-        const { Terms, TermRelationships, ...rest } = term.toJSON() as any;
+        const { Term, TermRelationships, ...rest } = term.toJSON() as any;
         return {
           ...rest,
-          ...Terms,
-          ...TermRelationships,
+          ...Term,
+          ...TermRelationships[0],
         } as TermTaxonomyRelationshipModel;
       }),
     );
@@ -245,12 +253,33 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * @param id term Id
    * @param model 修改协议实体
    */
-  async update(id: number, model: UpdateTermInput): Promise<boolean> {
-    return await this.models.Terms.update(model, {
-      where: {
-        id,
-      },
-    }).then(([count]) => count > 0);
+  async update(id: number, model: UpdateTermInput): Promise<true> {
+    const { description, parentId, ...termModel } = model;
+    const t = await this.sequelize.transaction();
+    try {
+      await this.models.Terms.update(termModel, {
+        where: {
+          id,
+        },
+      });
+      await this.models.TermTaxonomy.update(
+        {
+          description,
+          parentId,
+        },
+        {
+          where: {
+            termId: id,
+          },
+        },
+      );
+
+      await t.commit();
+      return true;
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
   }
 
   /**
@@ -258,7 +287,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * @param objectId
    * @param taxonomyId
    */
-  async deleteRelationship(objectId: number, taxonomyId: number): Promise<boolean> {
+  async deleteRelationship(objectId: number, taxonomyId: number): Promise<true> {
     const t = await this.sequelize.transaction();
     try {
       const count = await this.models.TermRelationships.destroy({
@@ -282,9 +311,9 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
 
       await t.commit();
       return true;
-    } catch {
+    } catch (err) {
       await t.rollback();
-      return false;
+      throw err;
     }
   }
 
@@ -292,7 +321,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * 删除协议（包括类别，关系，元数据）
    * @param id term Id
    */
-  async delete(id: number): Promise<boolean> {
+  async delete(id: number): Promise<true> {
     const t = await this.sequelize.transaction();
     try {
       await this.models.TermMeta.destroy({
@@ -331,9 +360,56 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
       await t.commit();
       return true;
     } catch (err) {
-      this.logger.error(`An error occurred during deleting term (id:${id}), Error: ${err.message}`);
       await t.rollback();
-      return false;
+      throw err;
+    }
+  }
+
+  /**
+   * 批量删除协议（包括类别，关系，元数据）
+   * @param id term Id
+   */
+  async blukDelete(ids: number[]): Promise<true> {
+    const t = await this.sequelize.transaction();
+    try {
+      await this.models.TermMeta.destroy({
+        where: {
+          termId: ids,
+        },
+        transaction: t,
+      });
+
+      await this.models.Terms.destroy({
+        where: {
+          id: ids,
+        },
+        transaction: t,
+      });
+
+      await this.models.TermRelationships.destroy({
+        where: {
+          taxonomyId: await this.models.TermTaxonomy.findAll({
+            attributes: ['id'],
+            where: {
+              termId: ids,
+            },
+          }).then((termTaxonomys) => termTaxonomys.map(({ id }) => id)),
+        },
+        transaction: t,
+      });
+
+      await this.models.TermTaxonomy.destroy({
+        where: {
+          termId: ids,
+        },
+        transaction: t,
+      });
+
+      await t.commit();
+      return true;
+    } catch (err) {
+      await t.rollback();
+      throw err;
     }
   }
 }

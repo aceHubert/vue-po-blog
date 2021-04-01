@@ -8,7 +8,7 @@ import { MetaDataSource } from './meta.datasource';
 
 // Types
 import { Transaction, WhereOptions } from 'sequelize';
-import { PostAttributes, PostCreationAttributes, PostOperateStatus } from '@/orm-entities/interfaces';
+import { PostAttributes, PostCreationAttributes, PostOperateStatus, PostOperateType } from '@/orm-entities/interfaces';
 import {
   PostModel,
   PostMetaModel,
@@ -196,6 +196,41 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   }
 
   /**
+   * 获取文章/页面副本（用于编辑）
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @param id Post id
+   * @param type 类型
+   * @param fields 返回字段
+   */
+  async getDuplicate(id: number, type: PostType, requestUser: JwtPayload): Promise<PostModel | null> {
+    const post = await this.models.Posts.findOne({
+      attributes: {
+        exclude: ['id'],
+      },
+      where: { id, type },
+    });
+    if (post) {
+      // 是否有编辑权限
+      await this.hasEditCapability(post, requestUser);
+
+      const creationModel = post.toJSON() as PostAttributes;
+      creationModel.author = requestUser.id;
+      creationModel.name = `${id}-revision`;
+      creationModel.type = PostOperateType.Revision;
+      creationModel.status = PostOperateStatus.Inherit;
+      creationModel.parent = id;
+
+      const editPost = await this.models.Posts.create(creationModel);
+
+      return { ...editPost.toJSON(), status: post.status, type: post.type } as PostModel;
+    }
+    return null;
+  }
+
+  /**
    * 查询分页文章/页面列表
    * 没有状态条件时，返回的结果不包含 Trash 状态
    * @author Hubert
@@ -257,9 +292,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
               },
             }
           : undefined,
-      where: {
-        ...where,
-      },
+      where: { ...where },
       offset,
       limit,
       order: [['createdAt', 'DESC']],
@@ -382,11 +415,16 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [CreatePages]
+   * @access capabilities: [CreatePosts/CreatePages]
    * @param model 添加实体模型
    * @param type 类型
    */
   async create(model: NewPostInput | NewPageInput, type: PostType, requestUser: JwtPayload): Promise<PostModel> {
+    await this.hasCapability(
+      type === PostType.Post ? UserRoleCapability.CreatePosts : UserRoleCapability.CreatePages,
+      requestUser,
+    );
+
     const { name, title, metas, ...rest } = model;
     const creationModel: Omit<PostCreationAttributes, 'updatedAt' | 'createdAt'> = {
       ...rest,
@@ -441,15 +479,19 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * 修改文章
    * name 没有值的话，通过 title 生成
    * trash 状态下不可修改，先使用 restore 方法重置
+   * id 可是副本 post id(将会修改复本和原始值)
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
-   * @param id Post id
+   * @access capabilities: [EditPosts/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @param id Post id/副本 post id
    * @param model 修改实体模型
    */
   async update(id: number, model: UpdatePostInput | UpdatePageInput, requestUser: JwtPayload): Promise<boolean> {
-    const post = await this.models.Posts.findByPk(id);
+    let post = await this.models.Posts.findByPk(id);
+    if (post && post.parent) {
+      post = await this.models.Posts.findByPk(post.parent);
+    }
     if (post) {
       // 是否有编辑权限
       await this.hasEditCapability(post, requestUser);
@@ -468,9 +510,20 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
         }
 
         await this.models.Posts.update(model, {
-          where: { id },
+          where: { id: post.id },
           transaction: t,
         });
+
+        // 修改副本信息
+        if (post.id !== id) {
+          // 副本状态不会悠
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { status, ...restModel } = model;
+          await this.models.Posts.update(restModel, {
+            where: { id },
+            transaction: t,
+          });
+        }
 
         await t.commit();
         return true;
@@ -546,7 +599,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
         return true;
       } catch (err) {
         await t.rollback();
-        throw false;
+        throw err;
       }
     }
     return false;
@@ -666,7 +719,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @access Authorized
    * @param ids Post ids
    */
-  async blukRestore(ids: number[]): Promise<boolean> {
+  async blukRestore(ids: number[]): Promise<true> {
     // todo: hasEditCapability
 
     const t = await this.sequelize.transaction();
@@ -700,21 +753,36 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 修改评论状态
+   * id 可是副本 post id(将会修改复本和原始值)
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
-   * @param id Post id
+   * @param id Post id/副本 post id
    * @param status 状态
    */
   async updateCommentStatus(id: number, commentStatus: PostCommentStatus, requestUser: JwtPayload): Promise<boolean> {
-    const post = await this.models.Posts.findByPk(id);
+    let post = await this.models.Posts.findByPk(id);
+    if (post && post.parent) {
+      post = await this.models.Posts.findByPk(post.parent);
+    }
     if (post) {
       // 是否有编辑权限
       await this.hasEditCapability(post, requestUser);
 
       post.commentStatus = commentStatus;
       await post.save();
+
+      // 修改副本状态
+      if (post.id !== id) {
+        this.models.Posts.update(
+          { commentStatus },
+          {
+            where: { id },
+          },
+        );
+      }
+      return true;
     }
     return false;
   }
@@ -790,9 +858,8 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
         await t.commit();
         return true;
       } catch (err) {
-        this.logger.error(`An error occurred during deleting post/page(id:${id}), Error: ${err.message}`);
         await t.rollback();
-        return false;
+        throw err;
       }
     }
     return false;

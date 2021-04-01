@@ -34,7 +34,7 @@ registerEnumType(UserRoleWithNone, {
 });
 
 // middleware
-import { graphqlErrorInterceptorMiddleware } from '~/common/middlewares/graphql-error-interceptor.middleware';
+import { graphqlErrorInterceptorMiddleware } from '@/common/middlewares/graphql-error-interceptor.middleware';
 
 @Module({
   imports: [

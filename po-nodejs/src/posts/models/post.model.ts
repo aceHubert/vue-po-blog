@@ -26,6 +26,9 @@ export class Post {
   @Field((type) => Int, { description: '评论数量' })
   commentCount!: number;
 
+  @Field((type) => ID, { nullable: true, description: 'Parent Id' })
+  parent?: number;
+
   @Field({ description: '修改时间' })
   updatedAt!: Date;
 

@@ -42,6 +42,15 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     return this.postDataSource.get(id, PostType.Post, this.getFieldNames(fields.fieldsByTypeName.Post));
   }
 
+  @Authorized()
+  @Query((returns) => Post, { nullable: true, description: '获取编辑文章（在原有数据上创建副本进行编辑）' })
+  duplicatePost(
+    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
+    @Context('user') requestUser: JwtPayload,
+  ) {
+    return this.postDataSource.getDuplicate(id, PostType.Post, requestUser);
+  }
+
   @Query((returns) => PagedPost, { description: '获取分页文章列表' })
   posts(@Args() args: PagedPostArgs, @Fields() fields: ResolveTree) {
     return this.postDataSource.getPaged(
@@ -99,7 +108,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改文章（Trash 状态下不支持修改）' })
   modifyPost(
-    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Post id/副本 Post id' }) id: number,
     @Args('model', { type: () => UpdatePostInput }) model: UpdatePostInput,
     @Context('user') requestUser: JwtPayload,
   ): Promise<boolean> {
@@ -109,7 +118,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改文章评论状态' })
   modifyPostCommentStatus(
-    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Post id/副本 Post id' }) id: number,
     @Args('status', { type: () => PostCommentStatus, description: '评论状态' }) status: PostCommentStatus,
     @Context('user') requestUser: JwtPayload,
   ): Promise<boolean> {
@@ -128,7 +137,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '批量修改文章或页面状态（Trash 状态下不支持修改）' })
-  blukUpdatePostOrPageStatus(
+  blukModifyPostOrPageStatus(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
     @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
   ): Promise<boolean> {
