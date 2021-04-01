@@ -100,4 +100,9 @@ export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, New
   removeTerm(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<boolean> {
     return this.termDataSource.delete(id);
   }
+
+  @Mutation((returns) => Boolean, { description: '批量移除协议(包括相关联协议关系)' })
+  blukRemoveTerms(@Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[]): Promise<boolean> {
+    return this.termDataSource.blukDelete(ids);
+  }
 }

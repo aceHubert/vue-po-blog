@@ -1,6 +1,6 @@
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
-import { graphqlClient, gql } from '@/includes/functions';
+import { gql, formatError } from '@/includes/functions';
 import { PostStatus, PostCommentStatus, TermTaxonomy } from '@/includes/datas/enums';
 // import { isPlainObject } from '@vue-async/utils';
 import { markdownOption } from '@/config/markdownOptions';
@@ -11,13 +11,13 @@ import classes from './EditForm.less?module';
 import * as tsx from 'vue-tsx-support';
 import { WrappedFormUtils } from 'ant-design-vue/types/form/form';
 import { Term, TermCreationModel, TermRelationship, TermRelationshipCreationModel } from 'types/datas/term';
-import { PostCreationModel, PostUpdateModel, Post } from 'types/datas/post';
+import { PostUpdateModel, Post } from 'types/datas/post';
 
 @Component<PostEditForm>({
   name: 'PostEditForm',
   fetch() {
     // 获取标签和分类
-    return graphqlClient
+    return this.graphqlClient
       .query<
         {
           tags: Term[];
@@ -65,7 +65,8 @@ import { PostCreationModel, PostUpdateModel, Post } from 'types/datas/post';
         this.checkedCagegoryKeys = data.myCategories.map(({ taxonomyId }) => taxonomyId);
       })
       .catch((err) => {
-        this.$message.error(this.$tv(err.statusCode, 'Initial Categories and Tags failed!') as string);
+        const { message } = formatError(err);
+        this.$message.error(message);
       });
   },
 })
@@ -136,31 +137,11 @@ export default class PostEditForm extends Vue {
     this.changed = true;
   }
 
-  validate(callback: (error: Error[] | null, val?: Omit<PostCreationModel, 'status'>) => void) {
-    this.form.validateFieldsAndScroll((err, values) => {
-      if (!err) {
-        const pureValues = { ...values };
-        // if (pureValues.thumbnail.file) {
-        //   pureValues.thumbnail =
-        //     pureValues.thumbnail.file.response && isPlainObject(pureValues.thumbnail.file.response)
-        //       ? pureValues.thumbnail.file.response.extra
-        //       : null;
-        // } else {
-        //   pureValues.thumbnail = this.editModels.thumbnail || null;
-        // }
-
-        callback(null, pureValues);
-      } else {
-        callback(err);
-      }
-    });
-  }
-
   loadCategories(treeNode: any) {
     if (treeNode.dataRef.children) {
       return Promise.resolve();
     }
-    return graphqlClient
+    return this.graphqlClient
       .query<{ categories: Term[] }, { parentId: number }>({
         query: gql`
           query getCategories($parentId: ID!) {
@@ -183,33 +164,68 @@ export default class PostEditForm extends Vue {
         this.allCategories = [...this.allCategories];
       })
       .catch((err) => {
-        this.$message.error(this.$tv(err.code || 500, err.message) as string);
+        const { message } = formatError(err);
+        this.$message.error(message);
+      });
+  }
+
+  // 添加标签
+  addTag(name: string) {
+    return this.graphqlClient
+      .mutate<{ tag: Term }, { model: TermCreationModel }>({
+        mutation: gql`
+          mutation addTerm($model: NewTermInput!) {
+            tag: addTerm(model: $model) {
+              taxonomyId
+              name
+            }
+          }
+        `,
+        variables: {
+          model: {
+            name,
+            taxonomy: TermTaxonomy.Tag,
+          },
+        },
+      })
+      .then(({ data }) => {
+        this.allTags.push({
+          value: data!.tag.taxonomyId,
+          label: data!.tag.name,
+        });
+        return data!.tag.taxonomyId;
       });
   }
 
   // 添加关系，tag/category 可以共用
   addRelationship(taxonomyId: string) {
-    return graphqlClient.mutate<{ result: TermRelationship }, { model: TermRelationshipCreationModel }>({
-      mutation: gql`
-        mutation addTermRelationship($model: TermRelationshipAddModel!) {
-          result: addTermRelationship(model: $model) {
-            objectId
-            taxonomyId
+    return this.graphqlClient
+      .mutate<{ relationship: TermRelationship }, { model: TermRelationshipCreationModel }>({
+        mutation: gql`
+          mutation addTermRelationship($model: NewTermRelationshipInput!) {
+            relationship: addTermRelationship(model: $model) {
+              objectId
+              taxonomyId
+            }
           }
-        }
-      `,
-      variables: {
-        model: {
-          objectId: this.editModel.id,
-          taxonomyId: taxonomyId,
+        `,
+        variables: {
+          model: {
+            objectId: this.editModel.parent || this.editModel.id,
+            taxonomyId: taxonomyId,
+          },
         },
-      },
-    });
+      })
+      .then(({ data }) => data?.relationship)
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
+      });
   }
 
   // 移除关系，tag/category 可以共用
   removeRelationship(taxonomyId: string) {
-    return graphqlClient
+    return this.graphqlClient
       .mutate<{ result: boolean }, { objectId: string; taxonomyId: string }>({
         mutation: gql`
           mutation removeTermRelationship($objectId: ID!, $taxonomyId: ID!) {
@@ -217,19 +233,23 @@ export default class PostEditForm extends Vue {
           }
         `,
         variables: {
-          objectId: this.editModel.id,
+          objectId: this.editModel.parent || this.editModel.id,
           taxonomyId: taxonomyId,
         },
       })
-      .then(({ data }) => data?.result);
+      .then(({ data }) => !!data?.result)
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
+      });
   }
 
-  // no catch will be triggered
+  // 修改文章
   updatePost(status?: PostStatus) {
     return new Promise((resolve, reject) => {
-      this.validate((error, values) => {
+      this.form.validateFieldsAndScroll((error, values) => {
         if (error) {
-          return reject();
+          return reject(error);
         }
 
         const updateParams: PostUpdateModel = {
@@ -238,11 +258,11 @@ export default class PostEditForm extends Vue {
           status,
         };
 
-        graphqlClient
+        this.graphqlClient
           .mutate<{ result: boolean }, { id: string; model: PostUpdateModel }>({
             mutation: gql`
-              mutation updatePost($id: ID!, $model: PostUpdateModel!) {
-                result: updatePost(id: $id, model: $model)
+              mutation modifyPost($id: ID!, $model: UpdatePostInput!) {
+                result: modifyPost(id: $id, model: $model)
               }
             `,
             variables: {
@@ -253,27 +273,46 @@ export default class PostEditForm extends Vue {
           .then(({ data }) => {
             if (data?.result) {
               this.$emit('change', this.form.getFieldsValue());
-              status && this.$emit('statusChanged', status);
-              resolve(null);
-            } else {
-              reject();
             }
+            resolve(data?.result);
           })
           .catch((err) => {
-            this.$message.error(this.$tv(err.code, 'Update failed, please try later again!') as string);
-            reject();
+            const { message } = formatError(err);
+            this.$message.error(message);
+            reject(new Error(message));
           });
       });
     });
   }
 
-  // no catch will be triggered
+  // 修改状态
   updatePostStatus(status: PostStatus) {
-    return graphqlClient
+    return this.graphqlClient
       .mutate<{ result: boolean }, { id: string; status: PostStatus }>({
         mutation: gql`
-          mutation updatePostStatus($id: ID!, $status: POST_STATUS_WITHOUT_AUTO_DRAFT!) {
-            result: updatePostOrPageStatus(id: $id, status: $status)
+          mutation modifyPostStatus($id: ID!, $status: POST_STATUS_WITHOUT_AUTO_DRAFT!) {
+            result: modifyPostOrPageStatus(id: $id, status: $status)
+          }
+        `,
+        variables: {
+          id: this.editModel.parent || this.editModel.id,
+          status,
+        },
+      })
+      .then(({ data }) => !!data?.result)
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
+      });
+  }
+
+  // 修改评论状态
+  updatePostCommentStatus(status: PostCommentStatus) {
+    return this.graphqlClient
+      .mutate<{ result: boolean }, { id: string; status: PostCommentStatus }>({
+        mutation: gql`
+          mutation modifyPostCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
+            result: modifyPostCommentStatus(id: $id, status: $status)
           }
         `,
         variables: {
@@ -281,12 +320,10 @@ export default class PostEditForm extends Vue {
           status,
         },
       })
-      .then(() => {
-        this.$emit('statusChanged', status);
-        this.status = status;
-      })
+      .then(({ data }) => !!data?.result)
       .catch((err) => {
-        this.$message.error(this.$tv(err.statusCode, 'Update status failed, please try later again!') as string);
+        const { message } = formatError(err);
+        this.$message.error(message);
       });
   }
 
@@ -312,120 +349,44 @@ export default class PostEditForm extends Vue {
     this.thumbnailList = fileList;
   }
 
-  handleTagSelect(value: string) {
-    let promisify = Promise.resolve(value);
+  handleTagSelect(name: string) {
+    let promisify = Promise.resolve(name);
 
     // 如果是手动输入的tag, 先添加得到返回的key
-    if (!this.allTags.some((tag) => tag.value === value)) {
-      promisify = graphqlClient
-        .mutate<{ tag: Term }, { model: TermCreationModel }>({
-          mutation: gql`
-            mutation addTerm($model: TermAddModel!) {
-              tag: addTerm(model: $model) {
-                taxonomyId
-                name
-              }
-            }
-          `,
-          variables: {
-            model: {
-              name: value,
-              slug: value,
-              taxonomy: TermTaxonomy.Tag,
-              objectId: this.editModel.id,
-            },
-          },
-        })
-        .then(({ data }) => {
-          this.allTags.push({
-            value: data!.tag.taxonomyId,
-            label: data!.tag.name,
-          });
-          return data!.tag.taxonomyId;
-        });
+    if (!this.allTags.some((tag) => tag.value === name)) {
+      promisify = this.addTag(name);
     }
 
-    promisify
-      .then((key) => {
-        this.selectedTags.push(key);
-      })
-      .catch((err) => {
-        this.$message.error(this.$tv(err.code || 500, err.message) as string);
-      });
+    promisify.then((key) => {
+      this.selectedTags.push(key);
+      return this.addRelationship(key);
+    });
   }
 
   handleTagDeselect(value: string) {
-    this.removeRelationship(value)
-      .then(() => {
-        this.selectedTags = this.selectedTags.filter((key) => key !== value);
-      })
-      .catch((err) => {
-        this.$message.error(this.$tv(err.code || 500, err.message) as string);
-      });
+    this.removeRelationship(value).then(() => {
+      this.selectedTags = this.selectedTags.filter((key) => key !== value);
+    });
   }
 
   handCategoryChecked(selectedKeys: string[], { checked, node }: { checked: boolean; node: any }) {
     // node.loading = true;
     if (checked) {
-      graphqlClient
-        .mutate<{ result: TermRelationship }, { model: TermRelationshipCreationModel }>({
-          mutation: gql`
-            mutation addTermRelationship($model: TermRelationshipAddModel!) {
-              result: addTermRelationship(model: $model) {
-                objectId
-                taxonomyId
-              }
-            }
-          `,
-          variables: {
-            model: {
-              objectId: this.editModel.id,
-              taxonomyId: node.dataRef.key,
-            },
-          },
-        })
-        .then(() => {
-          this.checkedCagegoryKeys.push(node.dataRef.key);
-        })
-        .catch((err) => {
-          this.$message.error(this.$tv(err.code || 500, err.message) as string);
-        })
-        .finally(() => {
-          // node.loading = false;
-        });
+      this.addRelationship(node.dataRef.key).then(() => {
+        this.checkedCagegoryKeys.push(node.dataRef.key);
+      });
     } else {
-      this.removeRelationship(node.dataRef.key)
-        .then(() => {
-          this.checkedCagegoryKeys = this.checkedCagegoryKeys.filter((key) => key !== node.dataRef.key);
-        })
-        .catch((err) => {
-          this.$message.error(this.$tv(err.code || 500, err.message) as string);
-        })
-        .finally(() => {
-          // node.loading = false;
-        });
+      this.removeRelationship(node.dataRef.key).then(() => {
+        this.checkedCagegoryKeys = this.checkedCagegoryKeys.filter((key) => key !== node.dataRef.key);
+      });
     }
   }
 
   handleAllowCommentsChange() {
     this.allowCommentsChanging = true;
-    graphqlClient
-      .mutate<{ result: boolean }, { id: string; status: PostCommentStatus }>({
-        mutation: gql`
-          mutation updatePostCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
-            result: updatePostCommentStatus(id: $id, status: $status)
-          }
-        `,
-        variables: {
-          id: this.editModel.id,
-          status: this.allowComments ? PostCommentStatus.Disable : PostCommentStatus.Enable,
-        },
-      })
-      .then(({ data }) => {
-        data?.result && (this.allowComments = !this.allowComments);
-      })
-      .catch((err) => {
-        this.$message.error(this.$tv(err.code || 500, err.message) as string);
+    this.updatePostCommentStatus(this.allowComments ? PostCommentStatus.Disable : PostCommentStatus.Enable)
+      .then((result) => {
+        result && (this.allowComments = !this.allowComments);
       })
       .finally(() => {
         this.allowCommentsChanging = false;
@@ -435,10 +396,18 @@ export default class PostEditForm extends Vue {
   // 修改post 并将状态修改为draft
   handleSaveToDraft() {
     this.savingToDarft = true;
-    this.updatePost(PostStatus.Draft).finally(() => {
-      this.savingToDarft = false;
-      this.autoDraft && (this.autoDraft = false);
-    });
+    const status = PostStatus.Private;
+    this.updatePost(PostStatus.Draft)
+      .then((result) => {
+        if (result) {
+          this.$emit('statusChanged', status);
+          this.status = status;
+        }
+      })
+      .finally(() => {
+        this.savingToDarft = false;
+        this.autoDraft && (this.autoDraft = false);
+      });
   }
 
   // 修改post 但不会修改状态
@@ -452,24 +421,40 @@ export default class PostEditForm extends Vue {
   // 修改post 并将状态修改为publish
   handelPublish() {
     this.publishing = true;
-    this.updatePost(PostStatus.Publish).finally(() => {
-      this.publishing = false;
-    });
+    const status = PostStatus.Private;
+    this.updatePost(status)
+      .then((result) => {
+        if (result) {
+          this.$emit('statusChanged', status);
+          this.status = status;
+        }
+      })
+      .finally(() => {
+        this.publishing = false;
+      });
   }
 
   // 仅修改状态为 private, 不修改post
   handleMakePrivate() {
     this.makingPrivate = true;
-    this.updatePostStatus(PostStatus.Private).finally(() => {
-      this.makingPrivate = false;
-    });
+    const status = PostStatus.Private;
+    this.updatePostStatus(status)
+      .then((result) => {
+        if (result) {
+          this.$emit('statusChanged', status);
+          this.status = status;
+        }
+      })
+      .finally(() => {
+        this.makingPrivate = false;
+      });
   }
 
   created() {
     if (this.editModel.status === PostStatus.Trash) {
       this.$nuxt.error({
         statusCode: 500,
-        message: this.$tv('post.editForm.trashStatusEdit', 'Could not edit "trash" status Post') as string,
+        message: this.$tv('post.tips.trashStatusEdit', 'Could not edit "trash" status Post') as string,
       });
       return;
     }
@@ -495,7 +480,7 @@ export default class PostEditForm extends Vue {
       title: [
         {
           required: true,
-          message: this.$tv('post.editForm.titleRequired', 'Title is required'),
+          message: this.$tv('post.form.titleRequired', 'Title is required'),
           whitespace: true,
         },
       ],
@@ -521,21 +506,21 @@ export default class PostEditForm extends Vue {
                       <a-button
                         ghost
                         type="primary"
-                        disabled={!this.changed || this.processing}
+                        disabled={this.processing}
                         loading={this.savingToDarft}
-                        title={this.$tv('postCreate.btnTips.switchToDraft', 'swith the post into draft box')}
+                        title={this.$tv('post.btnTips.switchToDraft', 'swith the post into draft box')}
                         onClick={m.stop.prevent(this.handleSaveToDraft.bind(this))}
                       >
-                        {this.$tv('postCreate.btnText.switchToDraft', 'Switch to Draft')}
+                        {this.$tv('post.btnText.switchToDraft', 'Switch to Draft')}
                       </a-button>,
                       <a-button
                         type="primary"
                         disabled={!this.changed || this.processing}
                         loading={this.updating}
-                        title={this.$tv('postCreate.btnTips.update', 'Update the post')}
+                        title={this.$tv('post.btnTips.update', 'Update the post')}
                         onClick={m.stop.prevent(this.handleUpdate.bind(this))}
                       >
-                        {this.$tv('postCreate.btnText.update', 'Update')}
+                        {this.$tv('post.btnText.update', 'Update')}
                       </a-button>,
                     ]
                   : [
@@ -543,12 +528,12 @@ export default class PostEditForm extends Vue {
                         <a-button
                           ghost
                           type="primary"
-                          disabled={!this.changed || this.processing}
+                          disabled={this.processing}
                           loading={this.savingToDarft}
-                          title={this.$tv('postCreate.btnTips.saveToDraft', 'Save the post into draft box')}
+                          title={this.$tv('post.btnTips.saveToDraft', 'Save the post into draft box')}
                           onClick={m.stop.prevent(this.handleSaveToDraft.bind(this))}
                         >
-                          {this.$tv('postCreate.btnText.saveToDraft', 'Save to Draft')}
+                          {this.$tv('post.btnText.saveToDraft', 'Save to Draft')}
                         </a-button>
                       ) : this.status === PostStatus.Draft ? (
                         <a-button
@@ -556,20 +541,20 @@ export default class PostEditForm extends Vue {
                           type="primary"
                           disabled={!this.changed || this.processing}
                           loading={this.updating}
-                          title={this.$tv('postCreate.btnTips.save', 'Save ')}
+                          title={this.$tv('post.btnTips.save', 'Save ')}
                           onClick={m.stop.prevent(this.handleUpdate.bind(this))}
                         >
-                          {this.$tv('postCreate.btnText.save', 'Save')}
+                          {this.$tv('post.btnText.save', 'Save')}
                         </a-button>
                       ) : null,
                       <a-button
                         type="primary"
-                        disabled={!this.changed || this.processing}
+                        disabled={this.processing}
                         loading={this.publishing}
-                        title={this.$tv('postCreate.btnTips.publish', 'Publish the post')}
+                        title={this.$tv('post.btnTips.publish', 'Publish the post')}
                         onClick={m.stop.prevent(this.handelPublish.bind(this, false))}
                       >
-                        {this.$tv('postCreate.btnText.publish', 'Publish')}
+                        {this.$tv('post.btnText.publish', 'Publish')}
                       </a-button>,
                     ]}
                 <a-button disabled={!this.siderCollapsed} onClick={() => (this.siderCollapsed = false)}>
@@ -579,7 +564,7 @@ export default class PostEditForm extends Vue {
             </a-col>
           </a-row>
           {/* <a-drawer
-          title={this.$tv('postCreate.publishDrawerTitle', 'Publish Settings')}
+          title={this.$tv('post.publishDrawerTitle', 'Publish Settings')}
           placement="right"
           closable={false}
           mask={false}
@@ -595,37 +580,30 @@ export default class PostEditForm extends Vue {
                 boxShadow={false}
                 subfield={false}
                 ishljs={true}
-                placeholder={this.$tv('postCreate.contentPlaceholder', 'Please input content')}
+                placeholder={this.$tv('post.contentPlaceholder', 'Please input content')}
                 class={[classes.editor, 'grey lighten-4']}
               />
             </client-only>
           </a-layout-content>
           <a-layout-sider width="300" collapsed={this.siderCollapsed} collapsedWidth={0}>
-            <a-card title={this.$tv('postCreate.settingsTitle', 'Settings')} bordered={false}>
+            <a-card title={this.$tv('post.form.settingsTitle', 'Settings')} bordered={false}>
               <template slot="extra">
                 <a-icon type="close" onClick={() => (this.siderCollapsed = !this.siderCollapsed)}></a-icon>
               </template>
               <a-form form={this.form} class="px-4 py-3">
-                <a-form-item label={this.$tv('post.editForm.title', 'Title')}>
+                <a-form-item label={this.$tv('post.form.title', 'Title')}>
                   <a-input
-                    placeholder={this.$tv('post.editForm.titlePlaceholder', 'Please input title')}
+                    placeholder={this.$tv('post.form.titlePlaceholder', 'Please input title')}
                     {...{ directives: [{ name: 'decorator', value: ['title', { rules: this.rules.title }] }] }}
                   />
                 </a-form-item>
-                {/* <a-form-item label={this.$tv('post.editForm.author', 'Author')}>
-          <a-input
-            style="width: 220px; max-width: 100%"
-            placeholder={this.$tv('post.editForm.authorPlaceholder', 'Please input author')}
-            {...{ directives: [{ name: 'decorator', value: ['author', { rules: this.rules.author }] }] }}
-          />
-        </a-form-item> */}
                 <a-form-item
-                  label={this.$tv('post.editForm.excerpt', 'Excerpt')}
-                  help={this.$tv('post.editForm.excerptHelp', 'Write an excerpt(optional)')}
+                  label={this.$tv('post.form.excerpt', 'Excerpt')}
+                  help={this.$tv('post.form.excerptHelp', 'Write an excerpt(optional)')}
                   hasFeedback={false}
                 >
                   <a-textarea
-                    placeholder={this.$tv('post.editForm.excerptPlaceholder', 'Please input excerpt')}
+                    placeholder={this.$tv('post.form.excerptPlaceholder', 'Please input excerpt')}
                     {...{ directives: [{ name: 'decorator', value: ['excerpt'] }] }}
                   />
                 </a-form-item>
@@ -635,7 +613,7 @@ export default class PostEditForm extends Vue {
 
               {!this.$fetchState.pending ? (
                 <a-collapse bordered={false} expand-icon-position="right" class="shades transparent">
-                  <a-collapse-panel header={this.$tv('post.editForm.thumbnail', 'Thumbnail')}>
+                  <a-collapse-panel header={this.$tv('post.form.thumbnail', 'Thumbnail')}>
                     <a-upload
                       action="/api/plumemo-server/v1/file/upload/"
                       class="upload-list-inline"
@@ -652,7 +630,7 @@ export default class PostEditForm extends Vue {
                         : null}
                     </a-upload>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('post.editForm.categoryTitle', 'Categories')}>
+                  <a-collapse-panel header={this.$tv('post.form.categoryTitle', 'Categories')}>
                     <div class="mb-3">
                       <a-tree
                         checkable
@@ -664,29 +642,30 @@ export default class PostEditForm extends Vue {
                       ></a-tree>
                     </div>
                     <nuxt-link to={{ name: 'categories-create' }}>
-                      {this.$tv('postFrom.addCategoryLinkText', 'Add Cagetory')}
+                      {this.$tv('post.from.addCategoryLinkText', 'Add Cagetory')}
                     </nuxt-link>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('post.editForm.tagTitle', 'Tags')}>
+                  <a-collapse-panel header={this.$tv('post.form.tagTitle', 'Tags')}>
                     <a-select
                       value={this.selectedTags}
                       options={this.allTags}
                       maxTagCount={10}
                       mode="tags"
                       optionFilterProp="children"
-                      placeholder={this.$tv('post.editForm.tagPlaceholder', 'Please choose/input a tag')}
+                      placeholder={this.$tv('post.form.tagPlaceholder', 'Please choose/input a tag')}
+                      style="width:100%"
                       onSelect={this.handleTagSelect.bind(this)}
                       onDeselect={this.handleTagDeselect.bind(this)}
                       onSearch={() => {}}
                     ></a-select>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('post.editForm.discusionTitle', 'Discusion')}>
+                  <a-collapse-panel header={this.$tv('post.form.discusionTitle', 'Discusion')}>
                     <a-checkbox
                       checked={this.allowComments}
                       disabled={this.allowCommentsChanging}
                       onChange={this.handleAllowCommentsChange.bind(this)}
                     >
-                      {this.$tv('post.editForm.allowComments', 'Allow comments')}
+                      {this.$tv('post.form.allowCommentCheckboxText', 'Allow comments')}
                     </a-checkbox>
                   </a-collapse-panel>
                 </a-collapse>

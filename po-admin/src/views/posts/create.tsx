@@ -1,5 +1,5 @@
 import { Vue, Component } from 'nuxt-property-decorator';
-import { graphqlClient, gql } from '@/includes/functions';
+import { gql, formatError } from '@/includes/functions';
 import EditForm from './modules/EditForm';
 
 // Types
@@ -18,11 +18,11 @@ import { Post, PostCreationModel } from 'types/datas/post';
 @Component({
   name: 'PostCreate',
   layout: 'blank',
-  asyncData({ error, $i18n }) {
+  asyncData({ error, graphqlClient }) {
     return graphqlClient
       .mutate<{ result: Post }, { model: PostCreationModel }>({
         mutation: gql`
-          mutation addPost($model: PostAddModel!) {
+          mutation addPost($model: NewPostInput!) {
             result: addPost(model: $model) {
               id
               title
@@ -41,10 +41,8 @@ import { Post, PostCreationModel } from 'types/datas/post';
         post: data!.result,
       }))
       .catch((err) => {
-        error({
-          statusCode: 500,
-          message: $i18n.tv(err.code, err.message) as string,
-        });
+        const { statusCode, message } = formatError(err);
+        error({ statusCode, message });
       });
   },
 })

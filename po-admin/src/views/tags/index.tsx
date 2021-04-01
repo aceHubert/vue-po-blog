@@ -1,4 +1,18 @@
-import { Vue, Component } from 'nuxt-property-decorator';
+import { Vue, Component, Watch, Ref, InjectReactive } from 'nuxt-property-decorator';
+import { modifiers as m } from 'vue-tsx-support';
+import { AsyncTable, SearchForm } from '@/components';
+import { gql, formatError } from '@/includes/functions';
+import { table } from './modules/constants';
+import EditForm from './modules/EditForm';
+import classes from './styles/index.less?module';
+
+// Types
+import { Term, TermQuery, TermResponse } from 'types/datas';
+import { BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
+
+enum BlukActions {
+  Delete = 'delete',
+}
 
 {
   /* <router>
@@ -14,7 +28,333 @@ import { Vue, Component } from 'nuxt-property-decorator';
   name: 'Tags',
 })
 export default class Tags extends Vue {
+  @InjectReactive({ from: 'isMobile' }) isMobile!: boolean;
+  @Ref('table') table!: AsyncTable;
+
+  // type 定义
+  selectedRowKeys!: string[];
+  itemCount!: number;
+  searchQuery!: TermQuery;
+  blukApplying!: boolean;
+  formModelShown!: boolean;
+  editModel?: Term;
+
+  data() {
+    return {
+      selectedRowKeys: [],
+      itemCount: 0,
+      searchQuery: {},
+      blukApplying: false,
+      formModelShown: false,
+      editModel: undefined,
+    };
+  }
+
+  // 所有列配置。 动态计算，title 配置有多语言
+  get columns() {
+    return table({ i18nRender: (key, fallback) => this.$tv(key, fallback) }).columns;
+  }
+
+  // 动态计算，当是手机端时只显示第一列
+  get fixedColumns() {
+    if (this.isMobile) {
+      return this.columns.filter((column) => column.hideInMobile !== true);
+    }
+    return this.columns;
+  }
+
+  // 批量操作
+  get blukActionOptions(): BlukAcitonOption<BlukActions>[] {
+    return [
+      {
+        value: BlukActions.Delete,
+        label: this.$tv('tag.search.bulkDeleteAction', 'Delete') as string,
+      },
+    ];
+  }
+
+  @Watch('formModelShown')
+  watchFormModelShown(val: boolean) {
+    // v-model 只是显示/隐藏, EditForm数据修改后没会刷新
+    // 每次显示时强制刷新一次
+    if (val) {
+      this.$forceUpdate();
+    }
+  }
+
+  // 加载 table 数据
+  loadData() {
+    return this.graphqlClient
+      .query<{ terms: TermResponse }, TermQuery>({
+        query: gql`
+          query getTerms($keyword: String) {
+            terms(taxonomy: "tag", keyword: $keyword) {
+              id
+              name
+              slug
+              description
+              count
+            }
+          }
+        `,
+        variables: {
+          ...this.searchQuery,
+        },
+      })
+      .then(({ data }) => {
+        this.itemCount = data.terms.length;
+        return {
+          rows: data.terms,
+          total: data.terms.length,
+        };
+      })
+      .catch((err) => {
+        const { statusCode, message } = formatError(err);
+        throw new Error(this.$tv(`error.${statusCode}`, message) as string);
+      });
+  }
+
+  // 刷新 table, 会调用loadDate
+  refreshTable() {
+    this.table.refresh();
+  }
+
+  // keyword 的搜索按纽
+  handleSearch(query: { keyword?: string }) {
+    Object.assign(this.searchQuery, query);
+    this.refreshTable();
+  }
+
+  // 批量操作
+  handleBlukApply(action: BlukActions) {
+    if (!this.selectedRowKeys.length) {
+      this.$message.warn({ content: this.$tv('tag.tips.bulkRowReqrired', 'Please choose a row!') as string });
+      return;
+    }
+    if (action === BlukActions.Delete) {
+      this.$confirm({
+        content: this.$tv('tag.btnTips.blukDeletePopContent', 'Do you really want to delete these tags?'),
+        okText: this.$tv('tag.btnText.deletePopOkBtn', 'Ok') as string,
+        cancelText: this.$tv('tag.btnText.deletePopCancelBtn', 'No') as string,
+        onOk: () => {
+          this.blukApplying = true;
+          this.graphqlClient
+            .mutate<{ result: boolean }, { ids: string[] }>({
+              mutation: gql`
+                mutation blukRemove($ids: [ID!]!) {
+                  result: blukRemoveTerms(ids: $ids)
+                }
+              `,
+              variables: {
+                ids: this.selectedRowKeys,
+              },
+            })
+            .then(({ data }) => {
+              if (data?.result) {
+                this.selectedRowKeys = [];
+                this.refreshTable();
+              } else {
+                this.$message.error(
+                  this.$tv(
+                    'tag.tips.blukDeleteFailed',
+                    'An error occurred during deleting tags, please try later again!',
+                  ) as string,
+                );
+              }
+            })
+            .catch((err) => {
+              const { message } = formatError(err);
+              this.$message.error(message);
+            })
+            .finally(() => {
+              this.blukApplying = false;
+            });
+        },
+      });
+    }
+  }
+
+  // 删除标签
+  handleDelete(id: string) {
+    this.$nuxt.$loading.start();
+    this.graphqlClient
+      .mutate<{ result: boolean }, { id: string }>({
+        mutation: gql`
+          mutation remove($id: ID!) {
+            result: removeTerm(id: $id)
+          }
+        `,
+        variables: {
+          id,
+        },
+      })
+      .then(({ data }) => {
+        if (data?.result) {
+          this.refreshTable();
+        } else {
+          this.$message.error(
+            this.$tv(
+              'tag.tips.deleteFailed',
+              'An error occurred during deleting tag, please try later again!',
+            ) as string,
+          );
+        }
+      })
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
+      })
+      .finally(() => {
+        this.$nuxt.$loading.finish();
+      });
+  }
+
+  handleSelectChange(selectedRowKeys: Array<string | number>) {
+    this.selectedRowKeys = selectedRowKeys as any;
+  }
+
   render() {
-    return <h1>标签</h1>;
+    const getTitle = (dataIndex: string) => {
+      return (this.columns as Array<{ title: string; dataIndex: string }>).find(
+        (column) => column.dataIndex === dataIndex,
+      )?.title;
+    };
+
+    const renderActions = (record: Term) => (
+      <div class={classes.actions}>
+        <a
+          href="#none"
+          title={this.$tv('tag.btnTips.edit', 'Edit') as string}
+          onClick={m.stop.prevent(() => {
+            this.editModel = record;
+            this.formModelShown = true;
+          })}
+        >
+          {this.$tv('tag.btnText.edit', 'Edit')}
+        </a>
+        <a-divider type="vertical" />
+        <a-popconfirm
+          title={this.$tv('tag.btnTips.deletePopContent', 'Do you really want to delete this tag?')}
+          okText={this.$tv('tag.btnText.deletePopOkBtn', 'Ok')}
+          cancelText={this.$tv('tag.btnText.deletePopCancelBtn', 'No')}
+          onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
+        >
+          <a href="#none" title={this.$tv('tag.btnTips.delete', 'Delete this tag permanently') as string}>
+            {this.$tv('tag.btnText.delete', 'Delete')}
+          </a>
+        </a-popconfirm>
+      </div>
+    );
+
+    // $scopedSolts 不支持多参数类型定义
+    const scopedSolts = () => {
+      return {
+        name: (text: Term['name'], record: Term & { expand?: boolean }) => (
+          <div class={[classes.columnName]}>
+            <p class={[classes.name]}>
+              <span class="text-ellipsis" style="max-width:180px;display:inline-block;">
+                {text}
+              </span>
+              <a-icon
+                type={record.expand ? 'up-circle' : 'down-circle'}
+                class="grey--text"
+                onClick={() => {
+                  this.$set(record, 'expand', !record.expand);
+                }}
+              ></a-icon>
+            </p>
+
+            {this.isMobile ? (
+              <div class={[classes.content]} v-show={record.expand}>
+                <p class={classes.contentItem}>
+                  <span class="grey--text text--lighten1">{getTitle('slug') || 'Slug'}: </span>
+                  {record.slug}
+                </p>
+                <p class={classes.contentItem}>
+                  <span class="grey--text text--lighten1">{getTitle('description') || 'Description'}: </span>
+                  {record.description || '-'}
+                </p>
+                <p class={classes.contentItem}>
+                  <span class="grey--text text--lighten1">{getTitle('count') || 'Count'}: </span>
+                  {record.count}
+                </p>
+              </div>
+            ) : null}
+            {renderActions(record)}
+          </div>
+        ),
+        description: (text: Term['description']) => text || '-',
+      } as any;
+    };
+
+    return (
+      <a-card class="post-index" bordered={false} size="small">
+        <SearchForm
+          keywordPlaceholder={this.$tv('tag.search.keywordPlaceholder', 'Search Tag') as string}
+          itemCount={this.itemCount}
+          blukAcitonOptions={this.blukActionOptions}
+          blukApplying={this.blukApplying}
+          onPreFilters={(query) => {
+            Object.assign(this.searchQuery, query);
+          }}
+          onSearch={this.handleSearch.bind(this)}
+          onBlukApply={this.handleBlukApply.bind(this)}
+        >
+          <template slot="sub">
+            <a-button
+              type="primary"
+              title={this.$tv('tag.btnTips.createTag', 'Cerate Tag')}
+              onClick={m.stop(() => {
+                this.editModel = undefined;
+                this.formModelShown = true;
+              })}
+            >
+              {this.$tv('tag.btnText.createTag', 'Cerate Tag')}
+            </a-button>
+          </template>
+        </SearchForm>
+        <AsyncTable
+          ref="table"
+          rowKey="id"
+          size="small"
+          scroll={{ x: true, y: 0 }}
+          columns={this.fixedColumns}
+          dataSource={this.loadData.bind(this)}
+          showPagination="auto"
+          rowSelection={{
+            selectedRowKeys: this.selectedRowKeys,
+            onChange: this.handleSelectChange.bind(this),
+          }}
+          rowClassName={() => classes.tableRow}
+          {...{
+            scopedSlots: scopedSolts(),
+          }}
+        ></AsyncTable>
+
+        <a-modal
+          vModel={this.formModelShown}
+          title={this.$tv(
+            `tag.form.${this.editModel ? 'updateModelTitle' : 'creationModelTitle'}`,
+            this.editModel ? 'Update Tag' : 'Create Tag',
+          )}
+          keyboard={false}
+          maskClosable={false}
+          destroyOnClose={true}
+          footer={null}
+        >
+          <EditForm
+            editModel={this.editModel}
+            onCreated={() => {
+              this.formModelShown = false;
+              this.refreshTable();
+            }}
+            onUpdated={() => {
+              this.formModelShown = false;
+              this.refreshTable();
+            }}
+          />
+        </a-modal>
+      </a-card>
+    );
   }
 }

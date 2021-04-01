@@ -113,7 +113,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    * 根据 Id 删除
    * @param id Media Id
    */
-  async delete(id: number): Promise<boolean> {
+  async delete(id: number): Promise<true> {
     const t = await this.sequelize.transaction();
     try {
       await this.models.MediaMeta.destroy({
@@ -134,9 +134,8 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
 
       return true;
     } catch (err) {
-      this.logger.error(`An error occurred during deleting media (id:${id}), Error: ${err.message}`);
       await t.rollback();
-      return false;
+      throw err;
     }
   }
 }

@@ -6,6 +6,11 @@
     content: '';
     display: table;
   }
+
+  @media screen and (max-width: 576px) {
+    display: flex;
+    flex-direction: column-reverse;
+  }
 }
 
 .sub {
@@ -17,7 +22,7 @@
 
   @media screen and (max-width: 576px) {
     margin: 0 0 8px;
-    bottom: 0;
+    position: static;
   }
 
   &__item {
@@ -52,12 +57,25 @@
   }
 }
 
+.sub-slot {
+  line-height: 40px;
+  position: absolute;
+  z-index: 1;
+  order: 1; // 正序
+
+  @media screen and (max-width: 576px) {
+    position: static;
+  }
+}
+
 .search-form {
   @media screen and (max-width: 576px) {
-    margin-bottom: 36px !important;
+    .sub-slot + & {
+      margin-bottom: 4px !important;
+    }
   }
 
-  .search-item {
+  .search-input {
     float: right;
 
     @media screen and (max-width: 576px) {
@@ -67,15 +85,7 @@
     }
   }
 
-  .filter-row {
-    @media screen and (max-width: 1199px) {
-      & {
-        display: none;
-      }
-    }
-  }
-
-  .filter-right {
+  .item-count {
     float: right;
   }
 }

@@ -103,7 +103,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * 删除评论
    * @param id comment id
    */
-  async delete(id: number): Promise<boolean> {
+  async delete(id: number): Promise<true> {
     const t = await this.sequelize.transaction();
     try {
       await this.models.CommentMeta.destroy({
@@ -124,9 +124,8 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
 
       return true;
     } catch (err) {
-      this.logger.error(`An error occurred during deleting comment (id:${id}), Error: ${err.message}`);
       await t.rollback();
-      return false;
+      throw err;
     }
   }
 }

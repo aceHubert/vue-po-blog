@@ -85,7 +85,7 @@ export class DbInitDataSource extends BaseDataSource {
    * @access None
    * @param initArgs 初始化参数
    */
-  async initDatas(initArgs: InitArgs): Promise<boolean> {
+  async initDatas(initArgs: InitArgs): Promise<true> {
     const t = await this.sequelize.transaction();
     try {
       // 默认用户
@@ -219,8 +219,7 @@ export class DbInitDataSource extends BaseDataSource {
       return true;
     } catch (err) {
       await t.rollback();
-      this.logger.error(`An error occurred during init datas, Error: ${err.message}`);
-      return false;
+      throw err;
     }
   }
 }

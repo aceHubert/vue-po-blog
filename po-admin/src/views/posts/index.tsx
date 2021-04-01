@@ -10,10 +10,9 @@ import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
-import { PagerQuery, Post, PostPagerQuery, PostPagerResponse } from 'types/datas';
+import { PagerQuery, Post, PostPagerQuery, PostPagerResponse, Term } from 'types/datas';
 import { DataSource } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
-import { Term } from 'types/datas/term';
 
 type QueryParams = Omit<PostPagerQuery, keyof PagerQuery<{}>> & { categoryId: string };
 
@@ -347,7 +346,7 @@ export default class PostIndex extends Vue {
   // 批量操作
   handleBlukApply(action: BlukActions) {
     if (!this.selectedRowKeys.length) {
-      this.$message.warn({ content: this.$tv('post.bulkRowReqrired', 'Please choose a row!') as string });
+      this.$message.warn({ content: this.$tv('post.tips.bulkRowReqrired', 'Please choose a row!') as string });
       return;
     }
     if (action === BlukActions.MoveToTrash || action === BlukActions.Restore) {
@@ -357,7 +356,7 @@ export default class PostIndex extends Vue {
           mutation:
             action === BlukActions.MoveToTrash
               ? gql`
-                  mutation blukUpdatePostStatus($ids: [ID!]!) {
+                  mutation blukModifyStatus($ids: [ID!]!) {
                     result: blukUpdatePostOrPageStatus(ids: $ids, status: Trash)
                   }
                 `
@@ -378,12 +377,14 @@ export default class PostIndex extends Vue {
           }
         })
         .catch((err) => {
-          const { statusCode, message } = formatError(err);
-          this.$message.error(this.$tv(`error.${statusCode}`, message) as string);
+          const { message } = formatError(err);
+          this.$message.error(message);
         })
         .finally(() => {
           this.blukApplying = false;
         });
+    } else if (action === BlukActions.Edit) {
+      // todo
     }
   }
 
@@ -396,8 +397,8 @@ export default class PostIndex extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string; status: PostStatus }>({
         mutation: gql`
-          mutation updatePostStatus($id: ID!, $status: POST_STATUS!) {
-            result: updatePostOrPageStatus(id: $id, status: $status)
+          mutation modifyStatus($id: ID!, $status: POST_STATUS!) {
+            result: modifyPostOrPageStatus(id: $id, status: $status)
           }
         `,
         variables: {
@@ -405,12 +406,15 @@ export default class PostIndex extends Vue {
           status,
         },
       })
-      .then(() => {
-        this.refreshStatusCounts();
-        this.refreshTable();
+      .then(({ data }) => {
+        if (data?.result) {
+          this.refreshStatusCounts();
+          this.refreshTable();
+        }
       })
-      .catch(() => {
-        this.$message.error(this.$tv('post.status.errorTips', 'Status update failed!') as string);
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
       });
   }
 
@@ -419,7 +423,7 @@ export default class PostIndex extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
-          mutation restorePost($id: ID!) {
+          mutation restorePostOrPage($id: ID!) {
             result: restorePostOrPage(id: $id)
           }
         `,
@@ -427,12 +431,15 @@ export default class PostIndex extends Vue {
           id,
         },
       })
-      .then(() => {
-        this.refreshStatusCounts();
-        this.refreshTable();
+      .then(({ data }) => {
+        if (data?.result) {
+          this.refreshStatusCounts();
+          this.refreshTable();
+        }
       })
-      .catch(() => {
-        this.$message.error(this.$tv('post.restore.errorTips', 'Restore failed!') as string);
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
       });
   }
 
@@ -449,12 +456,15 @@ export default class PostIndex extends Vue {
           id,
         },
       })
-      .then(() => {
-        this.refreshStatusCounts();
-        this.refreshTable();
+      .then(({ data }) => {
+        if (data?.result) {
+          this.refreshStatusCounts();
+          this.refreshTable();
+        }
       })
-      .catch(() => {
-        this.$message.error(this.$tv('post.delete.errorTips', 'Delete failed!') as string);
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
       });
   }
 

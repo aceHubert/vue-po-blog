@@ -50,6 +50,7 @@ export enum UserRoleCapability {
   DeleteUsers = 'delete_users',
 
   // posts
+  CreatePosts = 'create_posts',
   EditPosts = 'edit_posts',
   EditOthersPosts = 'edit_others_post',
   EditPublishedPosts = 'edit_published_posts',
@@ -62,6 +63,7 @@ export enum UserRoleCapability {
   ModerateComments = 'moderate_comments',
 
   // pages
+  CreatePages = 'create_pages',
   EditPages = 'edit_pages',
   EditOthersPages = 'edit_others_pages',
   EditPublishedPages = 'edit_published_pages',

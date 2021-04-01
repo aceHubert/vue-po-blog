@@ -10,6 +10,7 @@ export type Post = {
   status: PostStatus;
   commentStatus: PostCommentStatus;
   commentCount: number;
+  parent?: string;
   createTime: Date;
 };
 

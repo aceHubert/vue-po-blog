@@ -128,4 +128,13 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   ): Promise<boolean> {
     return this.userDataSource.delete(id, requestUser);
   }
+
+  @Authorized()
+  @Mutation((returns) => Boolean, { description: '批量删除用户（永久）' })
+  blukRemoveUsers(
+    @Args('ids', { type: () => [ID!], description: 'User Ids' }) ids: number[],
+    @Context('user') requestUser: JwtPayload,
+  ): Promise<boolean> {
+    return this.userDataSource.blukDelete(ids, requestUser);
+  }
 }

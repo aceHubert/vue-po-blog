@@ -44,6 +44,7 @@ export interface TermTaxonomyRelationshipModel
 export interface TermTaxonomyArgs {
   taxonomy: string;
   parentId: number;
+  keyword?: string;
   group?: number;
 }
 
@@ -90,8 +91,5 @@ export interface NewTermRelationshipInput extends TermRelationshipCreationAttrib
 /**
  * 修改协议模型
  */
-export interface UpdateTermInput {
-  name?: string;
-  slug?: string;
-  group?: number;
-}
+export interface UpdateTermInput
+  extends Partial<Pick<NewTermInput, 'name' | 'slug' | 'description' | 'parentId' | 'group'>> {}

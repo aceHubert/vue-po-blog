@@ -24,10 +24,36 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
       title: this.$tv('pageTitle.user.profile', 'Profile') as string,
     };
   },
-  asyncData: async ({ error, $i18n, graphqlClient }) => {
-    try {
-      // 获取用户
-      return graphqlClient
+  asyncData: async ({ route, error, graphqlClient }) => {
+    let promisify;
+    if (route.query.id) {
+      promisify = graphqlClient
+        .query<{ user: UserResponse }, { id: string }>({
+          query: gql`
+            query getUser($id: ID!) {
+              user: userById(id: $id) {
+                id
+                username: loginName
+                email
+                mobile
+                displayName
+                url
+                status
+                isSuperAdmin
+                metas {
+                  key: metaKey
+                  value: metaValue
+                }
+              }
+            }
+          `,
+          variables: {
+            id: route.query.id as string,
+          },
+        })
+        .then(({ data }) => data.user);
+    } else {
+      promisify = graphqlClient
         .query<{ user: UserResponse }>({
           query: gql`
             query getUser {
@@ -48,26 +74,26 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
             }
           `,
         })
-        .then(({ data }) => {
-          const { metas, ...rest } = data.user;
-          return {
-            editModel: Object.assign(
-              {},
-              rest,
-              metas.reduce((prev, curr) => {
-                prev[camelCase(curr.key)] = curr.value;
-                return prev;
-              }, {} as Dictionary<string>),
-            ),
-          };
-        });
-    } catch (err) {
-      const { statusCode, message } = formatError(err);
-      return error({
-        statusCode: statusCode || 500,
-        message: $i18n.tv(`error.${statusCode}`, message) as string,
-      });
+        .then(({ data }) => data.user);
     }
+    return promisify
+      .then((user) => {
+        const { metas, ...rest } = user;
+        return {
+          editModel: Object.assign(
+            {},
+            rest,
+            metas.reduce((prev, curr) => {
+              prev[camelCase(curr.key)] = curr.value;
+              return prev;
+            }, {} as Dictionary<string>),
+          ),
+        };
+      })
+      .catch((err) => {
+        const { statusCode, message } = formatError(err);
+        return error({ statusCode, message });
+      });
   },
 })
 export default class Profile extends Vue {
@@ -81,7 +107,7 @@ export default class Profile extends Vue {
 
   render() {
     return (
-      <div>
+      <div style="max-width:900px;">
         <EditForm
           editModel={this.editModel}
           btnTitle={this.$tv('user.btnTips.updateProfile', 'Update Profile') as string}
