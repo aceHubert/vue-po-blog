@@ -2,8 +2,8 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator';
 import { upperFirst } from 'lodash-es';
 import { modifiers as m } from 'vue-tsx-support';
 import { gql, formatError } from '@/includes/functions';
-import { UserStatus, UserRole } from '@/includes/datas/enums';
-import { appStore } from '@/store/modules';
+import { UserRole } from '@/includes/datas/enums';
+import { appStore, userStore } from '@/store/modules';
 import { recomputable, recompute } from '@/utils/vue-recompute';
 // import classes from './form.less?module';
 
@@ -24,7 +24,6 @@ export default class UserEditForm extends Vue {
   _tsx!: tsx.DeclareProps<tsx.PickProps<UserEditForm, 'editModel' | 'btnTitle' | 'btnText'>> &
     tsx.DeclareOnEvents<{
       onChange: (values: Dictionary<any>) => void;
-      onStatusChange: (status: UserStatus) => void;
     }>;
 
   @Prop({ type: Object, required: true, validator: (val) => !!val.id }) editModel!: User & Partial<UserMetas>;
@@ -35,11 +34,12 @@ export default class UserEditForm extends Vue {
   form!: WrappedFormUtils;
   rules!: Dictionary<any>;
 
-  displayNameOptions!: string[];
-
   // data
   changed!: boolean; //  对象值改变
   submiting!: boolean;
+
+  // computed
+  displayNameOptions!: string[];
 
   data() {
     return {
@@ -129,12 +129,12 @@ export default class UserEditForm extends Vue {
         .then(({ data }) => {
           if (data?.result) {
             this.changed = false;
-            this.$message.success(this.$tv('user.tips.updateUserSuccess', 'Update user successfully!') as string);
+            this.$message.success(this.$tv('user.tips.updateSuccess', 'Update user info successfully!') as string);
           } else {
             this.$message.error(
               this.$tv(
-                'user.tips.updateUserFailed',
-                'An error occurred during updating user, please try later again!',
+                'user.tips.updateFailed',
+                'An error occurred during updating user info, please try later again!',
               ) as string,
             );
           }
@@ -154,7 +154,7 @@ export default class UserEditForm extends Vue {
       name: 'user_form',
       mapPropsToFields: () => {
         // 默认值
-        return Object.keys(this.editModel).reduce((prev: Dictionary<any>, key: string) => {
+        return Object.keys(this.editModel).reduce((prev, key) => {
           prev[key] = this.$form.createFormField({
             value:
               key === 'userRole'
@@ -164,7 +164,7 @@ export default class UserEditForm extends Vue {
                 : this.editModel![key],
           });
           return prev;
-        }, {});
+        }, {} as Dictionary<any>);
       },
       onValuesChange: (props: any, values: any) => {
         this.changed = true;
@@ -258,12 +258,12 @@ export default class UserEditForm extends Vue {
     return (
       <a-form
         form={this.form}
-        label-col={{ xs: { span: 24 }, sm: { span: 5 } }}
-        wrapper-col={{ xs: { span: 24 }, sm: { span: 12 } }}
+        label-col={{ xs: { span: 24 }, sm: { span: 6 } }}
+        wrapper-col={{ xs: { span: 24 }, sm: { span: 18 } }}
         onSubmit={m.stop.prevent(this.handleSave.bind(this))}
       >
         {/* Name */}
-        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 12, offset: 5 } }} style="margin-bottom:0;">
+        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 18, offset: 6 } }} style="margin-bottom:0;">
           <h1>{this.$tv('user.form.groupName', 'Name')}</h1>
         </a-form-item>
 
@@ -307,7 +307,7 @@ export default class UserEditForm extends Vue {
         </a-form-item>
 
         {/* Contact Info */}
-        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 12, offset: 5 } }} style="margin-bottom:0;">
+        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 18, offset: 6 } }} style="margin-bottom:0;">
           <h1>{this.$tv('user.form.groupContactInfo', 'Contact Info')}</h1>
         </a-form-item>
 
@@ -337,7 +337,7 @@ export default class UserEditForm extends Vue {
         </a-form-item>
 
         {/* About Yourself */}
-        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 12, offset: 5 } }} style="margin-bottom:0;">
+        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 18, offset: 6 } }} style="margin-bottom:0;">
           <h1>{this.$tv('user.form.groupAboutYourself', 'About Yourself')}</h1>
         </a-form-item>
 
@@ -352,7 +352,7 @@ export default class UserEditForm extends Vue {
         <a-form-item label={this.$tv('user.form.avator', 'Profile Picture')}></a-form-item>
 
         {/* Personal Options */}
-        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 12, offset: 5 } }} style="margin-bottom:0;">
+        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 18, offset: 6 } }} style="margin-bottom:0;">
           <h1>{this.$tv('user.form.groupPersonalOptions', 'Personal Options')}</h1>
         </a-form-item>
 
@@ -370,11 +370,11 @@ export default class UserEditForm extends Vue {
         <a-form-item label={this.$tv('user.form.adminColor', 'Admin Color Scheme')}></a-form-item>
 
         {/* Account Management */}
-        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 12, offset: 5 } }} style="margin-bottom:0;">
+        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 18, offset: 6 } }} style="margin-bottom:0;">
           <h1>{this.$tv('user.form.groupAccountManagement', 'Account Management')}</h1>
         </a-form-item>
 
-        {!this.editModel.isSuperAdmin ? (
+        {userStore.role === UserRole.Administrator && !this.editModel.isSuperAdmin ? (
           <a-form-item label={this.$tv('user.form.userRole', 'Role')}>
             <a-select style="width:160px" {...{ directives: [{ name: 'decorator', value: ['userRole'] }] }}>
               {Object.values(UserRole)
@@ -409,7 +409,7 @@ export default class UserEditForm extends Vue {
           />
         </a-form-item>
 
-        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 12, offset: 5 } }}>
+        <a-form-item wrapper-col={{ xs: { span: 24 }, sm: { span: 18, offset: 6 } }}>
           <a-button
             type="primary"
             html-type="submit"

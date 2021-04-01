@@ -49,7 +49,11 @@ export default class SearchFrom extends Vue {
       onBlukApply: (action: BlukAcitonOption['value']) => void;
     }>;
 
-  $scopedSlots!: tsx.InnerScopedSlots<{ filter?: void; filterRight?: void }>;
+  $scopedSlots!: tsx.InnerScopedSlots<{
+    sub?: void; // 左上角区域（如状态选择有选项则不显示）
+    filter?: void; // 批量修改后面(更多过滤条件)
+    filterRight?: void; // 批量修改右侧（默认显示数据条数）
+  }>;
 
   @Prop(String) keywordPlaceholder?: string; // keywork input placeholder
   @Prop({ type: String, default: 'status' }) statusName!: string; // 状态名字，显示到url query key 和 search 参数中 key, 默认：status
@@ -137,11 +141,13 @@ export default class SearchFrom extends Vue {
               ) : null,
             )}
           </ul>
+        ) : this.$scopedSlots.sub ? (
+          <div class={classes.subSlot}>{this.$scopedSlots.sub()}</div>
         ) : null}
         <a-form layout="inline" size="small" class={classes.searchForm}>
           <a-row>
             <a-col md={{ span: 16, offset: 8 }} sm={24}>
-              <a-form-item class={classes.searchItem}>
+              <a-form-item class={classes.searchInput}>
                 <a-input-search
                   vModel={this.localeKeyword}
                   placeholder={this.keywordPlaceholder || this.$tv('searchForm.keywordPlaceholder', 'Keyword')}
@@ -155,8 +161,8 @@ export default class SearchFrom extends Vue {
           this.$scopedSlots.filter ||
           this.$scopedSlots.filterRight ? (
             <a-row class={classes.filterRow}>
-              <a-col span={16}>
-                <a-space size="middle">
+              <a-col md={16} xs={24}>
+                <a-space size="middle" style="flex-wrap: wrap;">
                   {this.itemCount && this.itemCount > 0 ? (
                     <a-form-item>
                       <a-space>
@@ -184,16 +190,18 @@ export default class SearchFrom extends Vue {
                   </a-form-item>
                 </a-space>
               </a-col>
-              <a-col span={8}>
-                <a-form-item class={classes.filterRight}>
-                  <a-space>
-                    {this.$scopedSlots.filterRight ? (
-                      this.$scopedSlots.filterRight()
-                    ) : this.itemCount ? (
-                      <span>{`${this.itemCount} ${this.$tv('searchForm.itemCountLable', 'Items')}`}</span>
-                    ) : null}
+              <a-col md={8} xs={24}>
+                {this.$scopedSlots.filterRight ? (
+                  <a-space size="middle" style="flex-wrap: wrap;">
+                    {this.$scopedSlots.filterRight()}
                   </a-space>
-                </a-form-item>
+                ) : this.itemCount ? (
+                  <a-form-item class={classes.itemCount}>
+                    <span class={classes.itemCount}>
+                      {this.$tv('searchForm.itemCount', `${this.itemCount} Items`, { count: this.itemCount })}
+                    </span>
+                  </a-form-item>
+                ) : null}
               </a-col>
             </a-row>
           ) : null}

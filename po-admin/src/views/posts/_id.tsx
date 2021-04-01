@@ -1,5 +1,5 @@
 import { Vue, Component, Ref } from 'nuxt-property-decorator';
-import { graphqlClient, gql } from '@/includes/functions';
+import { gql, formatError } from '@/includes/functions';
 import { PostStatus } from '@/includes/datas/enums';
 import EditForm from './modules/EditForm';
 
@@ -20,34 +20,32 @@ import { Post } from 'types/datas/post';
 @Component({
   name: 'PostEdit',
   layout: 'blank',
-  asyncData({ route, error, $i18n }) {
-    const id = parseInt(route.params.id);
+  asyncData({ route, error, graphqlClient }) {
     return graphqlClient
-      .query<{ post: Post }, { id: number }>({
+      .query<{ post: Post }, { id: string }>({
         query: gql`
           query getPost($id: ID!) {
-            post(id: $id) {
+            post: duplicatePost(id: $id) {
               id
               title
               content
               excerpt
               status
+              parent
               commentStatus
             }
           }
         `,
         variables: {
-          id,
+          id: route.params.id,
         },
       })
       .then(({ data }) => ({
         post: data.post,
       }))
       .catch((err) => {
-        error({
-          statusCode: 500,
-          message: $i18n.tv(err.code, err.message) as string,
-        });
+        const { statusCode, message } = formatError(err);
+        error({ statusCode, message });
       });
   },
 })

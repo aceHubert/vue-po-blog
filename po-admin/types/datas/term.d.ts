@@ -1,6 +1,6 @@
 export type Term = {
+  id: string;
   taxonomyId: string;
-  termId: string;
   name: string;
   slug: string;
   description: string;
@@ -17,7 +17,7 @@ export type TermRelationship = {
 
 export type TermCreationModel = {
   name: string;
-  slug: string;
+  slug?: string;
   taxonomy: string;
   objectId?: string;
 };
@@ -29,3 +29,9 @@ export type TermRelationshipCreationModel = {
 };
 
 export type TermUpdateModel = Partial<TermCreationModel>;
+
+export type TermQuery = {
+  keywords?: string;
+};
+
+export type TermResponse = Term[];

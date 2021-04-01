@@ -36,7 +36,7 @@ const components = {
     keywordPlaceholder: '关键字',
     bulkActionPlaceholder: '批量操作',
     bulkApplyBtnText: '应用',
-    itemCountLable: '行',
+    itemCount: '{count}行',
   },
 };
 
@@ -48,8 +48,8 @@ const locale = {
       root: '文章',
       posts: '所有文章',
       create: '新建文章',
-      tags: '标签管理',
-      categories: '分类管理',
+      tags: '标签',
+      categories: '分类',
     },
     media: {
       root: '媒体',
@@ -96,15 +96,6 @@ const locale = {
       create: '新建用户',
       edit: '编辑用户',
       profile: '用户信息',
-    },
-  },
-
-  // 页面内容标题
-  title: {
-    user: {
-      create: '@:pageTitle.user.create',
-      edit: '@:pageTitle.user.edit',
-      profile: '@:pageTitle.user.profile',
     },
   },
 
@@ -174,19 +165,25 @@ const locale = {
       createTime: '创建时间',
     },
     form: {
+      settingsTitle: '设置',
       title: '文章标题',
       titlePlaceholder: '请输入@:post.form.title',
-      author: '作者',
-      authorPlaceholder: '请输入@:post.form.author',
-      summary: '文章描述',
-      summaryPlaceholder: '请输入@:post.form.summary',
+      titleRequired: '@:post.form.title必填',
+      excerpt: '摘要',
+      excerptHelp: '写一段简单的摘要（选填）',
+      excerptPlaceholder: '请输入文章摘要',
       thumbnail: '封面图',
-      tag: '标签',
-      tagPlaceholder: '请选择@:post.form.tag',
-      category: '分类',
-      categoryPlaceholder: '请选择@:post.form.category',
-      content: '文章内容',
-      contentPlaceholder: '编辑@:post.form.content',
+      tagTitle: '标签',
+      tagPlaceholder: '请选择/输入标签',
+      categoryTitle: '分类',
+      addCategoryLinkText: '添加分类',
+      discusionTitle: '评论',
+      allowCommentCheckboxText: '允许评论',
+      contentPlaceholder: '编辑文章内容',
+    },
+    tips: {
+      bulkRowReqrired: '@:common.tips.bulkRowReqrired',
+      trashStatusEdit: '文章在垃圾箱中，请先恢复后再操作！',
     },
     btnText: {
       edit: '@:common.btnText.edit',
@@ -202,6 +199,7 @@ const locale = {
       restore: '重置',
       moveToDraft: '移至草稿箱',
       moveToTrash: '移至垃圾箱',
+      switchToDraft: '切换到草稿箱',
     },
     btnTips: {
       edit: '@:post.btnText.edit',
@@ -217,6 +215,48 @@ const locale = {
       restore: '@:post.btnText.restore',
       moveToDraft: '@:post.btnText.moveToDraft',
       moveToTrash: '@:post.btnText.moveToTrash',
+      switchToDraft: '切换文章到草稿箱',
+    },
+  },
+
+  tag: {
+    search: {
+      keywordPlaceholder: '搜索标签',
+      bulkDeleteAction: '删除',
+    },
+    column: {
+      name: '名称',
+      slug: '别名',
+      description: '描述',
+      count: '数量',
+    },
+    form: {
+      creationModelTitle: '新建标签',
+      updateModelTitle: '修改标签',
+      name: '标签名称',
+      nameRequired: '@:tag.form.name必填',
+      nameHelp: '标签名称会显示在您的网站上。',
+      slug: '别名',
+      slugHelp: '"别名"是在URL中友好的显示标签名称，通过为英文字母组成。',
+      description: '描述',
+    },
+    tips: {
+      bulkRowReqrired: '@:common.tips.bulkRowReqrired',
+    },
+    btnText: {
+      createTag: '新建标签',
+      updateTag: '修改标签',
+      edit: '@:common.btnText.edit',
+      delete: '@:common.btnText.delete',
+      deletePopOkBtn: '@:common.btnText.ok',
+      deletePopCancelBtn: '@:common.btnText.no',
+    },
+    btnTips: {
+      createTag: '@:tag.btnText.createTag',
+      updateTag: '@:tag.btnText.updateTag',
+      edit: '@:tag.btnText.edit',
+      delete: '永久删除这条标签',
+      deletePopContent: '确定永久删除这条标签吗？',
     },
   },
 
@@ -234,6 +274,7 @@ const locale = {
     },
     search: {
       keywordPlaceholder: '搜索用户',
+      bulkDeleteAction: '删除',
     },
     column: {
       username: '用户名',
@@ -292,6 +333,10 @@ const locale = {
       sendUserNotification: '发送用户通知',
       sendUserNotificationCheckboxText: '向新用户发送有关账户详情的电子邮件。',
     },
+    tips: {
+      updateSuccess: '修改成功',
+      updateFailed: '修改用户信息发生错误，请稍后重试！',
+    },
     btnText: {
       createUser: '创建用户',
       updateUser: '更新用户',
@@ -329,6 +374,7 @@ const locale = {
     },
     tips: {
       required: '必填',
+      bulkRowReqrired: '请选择至少一行数据',
     },
     placeholder: {
       input: '请输入{field}',

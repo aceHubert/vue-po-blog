@@ -47,7 +47,7 @@ const UserRoleOrder = Object.keys(UserRole)
       title: this.$tv('pageTitle.user.index', 'Users') as string,
     };
   },
-  asyncData: async ({ error, $i18n, graphqlClient }) => {
+  asyncData: async ({ error, graphqlClient }) => {
     try {
       // const columns = await hook('user:columns').filter(
       //   table({ i18nRender: (key, fallback) => $i18n.tv(key, fallback) }).columns,
@@ -70,10 +70,7 @@ const UserRoleOrder = Object.keys(UserRole)
       };
     } catch (err) {
       const { statusCode, message } = formatError(err);
-      return error({
-        statusCode: statusCode || 500,
-        message: $i18n.tv(`error.${statusCode}`, message) as string,
-      });
+      return error({ statusCode, message });
     }
   },
 })
@@ -248,7 +245,45 @@ export default class UserIndex extends Vue {
     }
 
     if (action === BlukActions.Delete) {
-      // todo
+      this.$confirm({
+        content: this.$tv('user.btnTips.blukDeletePopContent', 'Do you really want to delete these users?'),
+        okText: this.$tv('user.btnText.deletePopOkBtn', 'Ok') as string,
+        cancelText: this.$tv('user.btnText.deletePopCancelBtn', 'No') as string,
+        onOk: () => {
+          this.blukApplying = true;
+          this.graphqlClient
+            .mutate<{ result: boolean }, { ids: string[] }>({
+              mutation: gql`
+                mutation blukRemove($ids: [ID!]!) {
+                  result: blukRemoveUsers(ids: $ids)
+                }
+              `,
+              variables: {
+                ids: this.selectedRowKeys,
+              },
+            })
+            .then(({ data }) => {
+              if (data?.result) {
+                this.refreshRoleCounts();
+                this.refreshTable();
+              } else {
+                this.$message.error(
+                  this.$tv(
+                    'user.tips.blukDeleteFailed',
+                    'An error occurred during deleting users, please try later again!',
+                  ) as string,
+                );
+              }
+            })
+            .catch((err) => {
+              const { message } = formatError(err);
+              this.$message.error(message);
+            })
+            .finally(() => {
+              this.blukApplying = false;
+            });
+        },
+      });
     }
   }
 
@@ -257,7 +292,7 @@ export default class UserIndex extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
-          mutation deleteUser($id: ID!) {
+          mutation remove($id: ID!) {
             result: removeUser(id: $id)
           }
         `,
@@ -265,12 +300,22 @@ export default class UserIndex extends Vue {
           id,
         },
       })
-      .then(() => {
-        this.refreshRoleCounts();
-        this.refreshTable();
+      .then(({ data }) => {
+        if (data?.result) {
+          this.refreshRoleCounts();
+          this.refreshTable();
+        } else {
+          this.$message.error(
+            this.$tv(
+              'user.tips.deleteFailed',
+              'An error occurred during deleting user, please try later again!',
+            ) as string,
+          );
+        }
       })
-      .catch(() => {
-        this.$message.error(this.$tv('post.delete.errorTips', 'Delete failed!') as string);
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
       });
   }
 
@@ -342,26 +387,26 @@ export default class UserIndex extends Vue {
 
             {this.isMobile ? (
               <div class={[classes.content]} v-show={record.expand}>
-                <p>
-                  <span>{getTitle('name', 'Name')}: </span>
+                <p class={classes.contentItem}>
+                  <span class="grey--text text--lighten1">{getTitle('name', 'Name')}: </span>
                   {record.firstName || record.lastName
                     ? `${record.firstName} ${record.lastName}`
                     : record.nickName || record.displayName}
                 </p>
-                <p>
-                  <span>{getTitle('mobile', 'Mobile')}: </span>
+                <p class={classes.contentItem}>
+                  <span class="grey--text text--lighten1">{getTitle('mobile', 'Mobile')}: </span>
                   {record.mobile || '-'}
                 </p>
-                <p>
-                  <span>{getTitle('email', 'Email')}: </span>
+                <p class={classes.contentItem}>
+                  <span class="grey--text text--lighten1">{getTitle('email', 'Email')}: </span>
                   <a href={`mailto:${record.email}`}>{record.email}</a>
                 </p>
-                <p>
-                  <span>{getTitle('userRole', 'Role')}: </span>
+                <p class={classes.contentItem}>
+                  <span class="grey--text text--lighten1">{getTitle('userRole', 'Role')}: </span>
                   {this.$tv(`user.role.${lowerFirst(record.userRole || 'none')}`, record.userRole || 'none')}
                 </p>
-                <p>
-                  <span>{getTitle('createTime', 'CreateTime')}: </span>
+                <p class={classes.contentItem}>
+                  <span class="grey--text text--lighten1">{getTitle('createTime', 'CreateTime')}: </span>
                   {$filters.dateFormat(record.createTime)}
                 </p>
               </div>
