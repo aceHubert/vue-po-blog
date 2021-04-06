@@ -1,4 +1,5 @@
 import { Field, ObjectType, InterfaceType, ID, createUnionType } from '@nestjs/graphql';
+import { FieldAuthorized } from '@/common/decorators/authorized.decorator';
 import { UserStatus, UserRole } from '@/common/helpers/enums';
 import { PagedResponse, Count } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
@@ -10,6 +11,7 @@ export abstract class BaseUser {
   id!: number;
 
   @Field({ description: '登录名' })
+  @FieldAuthorized(UserRole.Administrator)
   loginName!: string;
 
   @Field({ description: '显示名称' })

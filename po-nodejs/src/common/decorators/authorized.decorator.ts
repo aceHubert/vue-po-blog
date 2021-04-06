@@ -1,4 +1,5 @@
 import { SetMetadata, CustomDecorator } from '@nestjs/common';
+import { Extensions } from '@nestjs/graphql';
 import { getArrayFromOverloadedRest } from '../helpers/decorators';
 import { UserRole } from '../helpers/enums';
 import { ROLES_KEY } from '../constants';
@@ -32,8 +33,5 @@ export function FieldAuthorized(roles: UserRole[]): PropertyDecorator;
 export function FieldAuthorized(...roles: UserRole[]): PropertyDecorator;
 export function FieldAuthorized(...rolesOrRolesArray: Array<UserRole | UserRole[]>): PropertyDecorator {
   const roles = getArrayFromOverloadedRest(rolesOrRolesArray);
-  return (target, key) => {
-    Reflect.defineMetadata(ROLES_KEY, roles, target, key);
-    return target;
-  };
+  return Extensions({ roles });
 }

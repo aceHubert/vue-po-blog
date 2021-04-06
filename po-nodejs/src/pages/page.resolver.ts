@@ -3,7 +3,7 @@ import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int, Context
 import { PostType } from '@/common/helpers/enums';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
-import { Authorized } from '~/common/decorators/authorized.decorator';
+import { Authorized } from '@/common/decorators/authorized.decorator';
 import { PostDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types

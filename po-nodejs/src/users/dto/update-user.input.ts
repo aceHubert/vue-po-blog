@@ -27,7 +27,7 @@ export class UpdateUserInput extends PartialType(
 
   @Field((type) => UserRoleWithNone, {
     nullable: true,
-    description: '角色（包含 none，只允许管理权权限悠）',
+    description: '角色（包含 none，只允许有管理员权限的进行修改）',
   })
   userRole?: UserRole | 'none';
 }

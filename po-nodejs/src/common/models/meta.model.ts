@@ -1,4 +1,5 @@
 import { ObjectType, InputType, Field, ID } from '@nestjs/graphql';
+
 /**
  * 元数据实体模型
  */

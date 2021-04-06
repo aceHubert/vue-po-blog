@@ -1,6 +1,6 @@
 import { lowerFirst } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
-import { RuntimeError, ValidationError } from '@/common/utils/errors.utils';
+import { RuntimeError, ValidationError } from '@/common/utils/gql-errors.utils';
 import { BaseDataSource } from './base.datasource';
 
 // Types

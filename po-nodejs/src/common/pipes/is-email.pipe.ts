@@ -1,5 +1,5 @@
 import { PipeTransform, Injectable } from '@nestjs/common';
-import { UserInputError } from '@/common/utils/errors.utils';
+import { UserInputError } from '@/common/utils/gql-errors.utils';
 
 import { isEmail } from 'class-validator';
 

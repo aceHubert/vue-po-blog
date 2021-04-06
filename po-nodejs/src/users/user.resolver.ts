@@ -1,10 +1,11 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Context } from '@nestjs/graphql';
-import { UserStatus } from '@/common/helpers/enums';
+import { UserRole, UserStatus } from '@/common/helpers/enums';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
 import { IsEmailPipe } from '@/common/pipes/is-email.pipe';
+import { ForbiddenError } from '@/common/utils/gql-errors.utils';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
@@ -104,9 +105,14 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   @Mutation((returns) => Boolean, { description: '修改用户' })
   modifyUser(
     @Args('id', { type: () => ID, description: 'User Id' }) id: number,
-    @Args('model', { type: () => UpdateUserInput }) model: UpdateUserInput,
+    @Args('model') model: UpdateUserInput,
     @Context('user') requestUser: JwtPayload,
   ): Promise<boolean> {
+    if (model.userRole && requestUser.role !== UserRole.Administrator) {
+      throw new ForbiddenError(
+        `Access denied! You don't have permission for this action(role "${UserRole.Administrator}" required)!`,
+      );
+    }
     return this.userDataSource.update(id, model, requestUser);
   }
 

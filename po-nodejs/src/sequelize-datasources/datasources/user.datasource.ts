@@ -2,7 +2,7 @@ import md5 from 'md5';
 import { isUndefined } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ForbiddenError, ValidationError } from '@/common/utils/errors.utils';
+import { ForbiddenError, ValidationError } from '@/common/utils/gql-errors.utils';
 import { UserRole, UserRoleCapability, UserStatus } from '@/common/helpers/enums';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
 import { uuid } from '@/common/utils/uuid.utils';
@@ -392,12 +392,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [EditUsers(非修改自己信息)]
+   * @access capabilities: [EditUsers(修改非自己信息)]
    * @param id User Id
    * @param model 修改实体模型
    */
   async update(id: number, model: UpdateUserInput, requestUser: JwtPayload): Promise<boolean> {
-    // 非修改自己信息
+    // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
       await this.hasCapability(UserRoleCapability.EditUsers, requestUser);
     }

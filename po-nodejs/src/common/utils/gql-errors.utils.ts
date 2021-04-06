@@ -1,3 +1,6 @@
+/**
+ * Graphql Errors
+ */
 import { ApolloError } from 'apollo-server-core';
 
 export {
@@ -18,21 +21,5 @@ export class RuntimeError extends ApolloError {
     super(message, 'EXECUTE_FAILED', properties);
 
     Object.defineProperty(this, 'name', { value: 'RuntimeError' });
-  }
-}
-
-/**
- * 服务器执行错误
- */
-export class ServerError extends Error {
-  statusCode?: number;
-  response!: any;
-
-  constructor(response: any, message: string) {
-    super(message);
-    this.response = response;
-    this.statusCode = response && response.statusCode;
-
-    Object.defineProperty(this, 'name', { value: 'ServerError' });
   }
 }

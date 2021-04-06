@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { AuthenticationError } from './errors.utils';
+import { AuthenticationError } from './gql-errors.utils';
 
 /**
  * 获取Token

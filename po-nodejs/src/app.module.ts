@@ -33,8 +33,7 @@ registerEnumType(UserRoleWithNone, {
   description: 'UserRole(includes "none")',
 });
 
-// middleware
-import { graphqlErrorInterceptorMiddleware } from '@/common/middlewares/graphql-error-interceptor.middleware';
+const isProduction = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
@@ -52,16 +51,10 @@ import { graphqlErrorInterceptorMiddleware } from '@/common/middlewares/graphql-
     TermModule,
     UserModule,
     GraphQLModule.forRoot({
-      debug: process.env.NODE_ENV !== 'production',
-      playground: true,
+      debug: !isProduction,
+      playground: !isProduction,
       installSubscriptionHandlers: true,
       autoSchemaFile: path.join(__dirname, 'schema.gql'),
-      buildSchemaOptions: {
-        fieldMiddleware: [graphqlErrorInterceptorMiddleware],
-      },
-      subscriptions: {
-        path: '/subscriptions',
-      },
       context: async ({ req, connection }) => {
         if (connection) {
           // check connection for metadata
@@ -69,6 +62,7 @@ import { graphqlErrorInterceptorMiddleware } from '@/common/middlewares/graphql-
         } else {
           return {
             user: req.user, // from express-jwt
+            header: req.header,
           };
         }
       },

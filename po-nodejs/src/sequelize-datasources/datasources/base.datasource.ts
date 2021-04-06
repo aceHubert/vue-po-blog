@@ -2,7 +2,7 @@ import { ModuleRef } from '@nestjs/core';
 import { OnModuleInit, Logger } from '@nestjs/common';
 import { Sequelize, ModelDefined, ModelType, Op } from 'sequelize';
 import { kebabCase, isUndefined } from 'lodash';
-import { ForbiddenError } from '@/common/utils/errors.utils';
+import { ForbiddenError } from '@/common/utils/gql-errors.utils';
 import { UserRoleCapability, OptionAutoload } from '@/common/helpers/enums';
 
 import { EntityService } from '@/sequelize-entities/entity.service';

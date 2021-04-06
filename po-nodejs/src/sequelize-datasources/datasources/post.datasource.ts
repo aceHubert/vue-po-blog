@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError } from '@/common/utils/errors.utils';
+import { ValidationError } from '@/common/utils/gql-errors.utils';
 import { PostStatus, PostType, PostCommentStatus, UserRoleCapability } from '@/common/helpers/enums';
 import { OptionKeys } from '@/common/helpers/option-keys';
 import { PostMetaKeys } from '@/common/helpers/post-meta-keys';
