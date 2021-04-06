@@ -30,6 +30,16 @@ function isServerParseError(err: Error): err is ServerParseError {
     : err.hasOwnProperty('statusCode') && err.hasOwnProperty('bodyText');
 }
 
+// graphql error code 对应 http code 关系
+const GraphqlErrorCodes: Dictionary<number> = {
+  BAD_USER_INPUT: 400,
+  UNAUTHENTICATED: 401,
+  FORBIDDEN: 403,
+  VALIDATION_FAILED: 405,
+  INTERNAL_SERVER_ERROR: 500,
+  // 其它错误当成 500 处理
+};
+
 /**
  * 从error 中生成 code 和 message
  * code 在 networkError 中将会是 error.[statusCode], graphQLErrors 中将会是第一条 error.[extensions.code], fallbace: code.500
@@ -43,7 +53,7 @@ function formatError(err: Error) {
       // 第一要包含code的详细信息
       const extensions = graphQLErrors.find((error) => error.extensions && error.extensions.code)?.extensions;
       return {
-        statusCode: extensions ? (extensions.code as number) : 500,
+        statusCode: extensions ? extensions.statusCode || GraphqlErrorCodes[extensions.code] || 500 : 500,
         message: graphQLErrors
           .map((graphQLError) => graphQLError?.message)
           .filter(Boolean)
@@ -98,7 +108,7 @@ const authLink = setContext((operation, { headers, ...context }) => {
 // error handle
 const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) => {
   if (graphQLErrors) {
-    // 需要初始化数据库
+    // 需要初始化数据库(graphql resolver执行中产生的错误)
     if (graphQLErrors.some((err) => err.extensions?.dbInitRequired)) {
       appStore.goToInitPage();
       return;
@@ -124,7 +134,7 @@ const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) 
           return forward(operation);
         });
       } else if (statusCode === 500) {
-        // 需要初始化
+        // 需要初始化(以 http code 返回，中间件优先于graphql resolver执行时产生的错误)
         if (isServerError(networkError) && networkError.result.dbInitRequired) {
           appStore.goToInitPage();
         }
