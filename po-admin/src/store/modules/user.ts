@@ -4,7 +4,7 @@ import moment from 'moment';
 import { error as globalError } from '@vue-async/utils';
 import { store } from '@/store';
 import { httpClient, graphqlClient, gql } from '@/includes/functions';
-import { UserRole } from '@/includes/datas';
+import { UserRole, UserCapability } from '@/includes/datas';
 import cookie from '@/utils/cookie';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/config/proLayoutConfigs';
 
@@ -14,7 +14,7 @@ import { Context } from '@nuxt/types';
 export type UserRoles = {
   [role in UserRole]: {
     name: string;
-    capabilities: string[];
+    capabilities: UserCapability[];
   };
 };
 

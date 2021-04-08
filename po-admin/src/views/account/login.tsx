@@ -19,6 +19,9 @@ import { LoginQuery } from '@/store/modules/user';
 @Component({
   name: 'Login',
   layout: 'user',
+  meta: {
+    anonymous: true,
+  },
 })
 export default class Login extends Vue {
   @InjectReactive({ from: 'isMobile', default: false }) isMobile!: boolean;

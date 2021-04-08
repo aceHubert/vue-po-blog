@@ -1,5 +1,6 @@
 import { Vue, Component } from 'nuxt-property-decorator';
 import { gql, formatError } from '@/includes/functions';
+import { UserCapability } from '@/includes/datas/enums';
 import EditForm from './modules/EditForm';
 
 // Types
@@ -18,6 +19,9 @@ import { Post, PostCreationModel } from 'types/datas/post';
 @Component({
   name: 'PostCreate',
   layout: 'blank',
+  meta: {
+    capabilities: [UserCapability.CreatePosts],
+  },
   asyncData({ error, graphqlClient }) {
     return graphqlClient
       .mutate<{ result: Post }, { model: PostCreationModel }>({

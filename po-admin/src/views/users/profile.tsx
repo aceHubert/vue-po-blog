@@ -39,7 +39,6 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
                 displayName
                 url
                 status
-                isSuperAdmin
                 metas {
                   key: metaKey
                   value: metaValue
@@ -65,7 +64,6 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
                 displayName
                 url
                 status
-                isSuperAdmin
                 metas {
                   key: metaKey
                   value: metaValue

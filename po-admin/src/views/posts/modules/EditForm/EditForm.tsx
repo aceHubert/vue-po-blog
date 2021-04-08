@@ -13,6 +13,17 @@ import { WrappedFormUtils } from 'ant-design-vue/types/form/form';
 import { Term, TermCreationModel, TermRelationship, TermRelationshipCreationModel } from 'types/datas/term';
 import { PostUpdateModel, Post } from 'types/datas/post';
 
+export type TreeData = {
+  title: string;
+  key: string;
+  children?: TreeData[];
+};
+
+/**
+ * this.editModel.parent || this.editModel.id
+ * 当新建时是原始文章，使用id
+ * 当修改时是创建的副本，parent 才是原始id
+ */
 @Component<PostEditForm>({
   name: 'PostEditForm',
   fetch() {
@@ -39,6 +50,7 @@ import { PostUpdateModel, Post } from 'types/datas/post';
             categories: terms(taxonomy: "category") {
               taxonomyId
               name
+              parentId
             }
             myCategories: termRelationships(objectId: $objectId, taxonomy: "category") {
               taxonomyId
@@ -46,7 +58,7 @@ import { PostUpdateModel, Post } from 'types/datas/post';
           }
         `,
         variables: {
-          objectId: this.editModel.id,
+          objectId: this.editModel.parent || this.editModel.id,
         },
       })
       .then(({ data }) => {
@@ -56,12 +68,16 @@ import { PostUpdateModel, Post } from 'types/datas/post';
           label: name,
         }));
         this.selectedTags = data.myTags.map(({ taxonomyId }) => taxonomyId);
-        // a-tree treeData
-        this.allCategories = data.categories.map(({ taxonomyId, name }) => ({
-          key: taxonomyId,
-          title: name,
-          selectable: false,
-        }));
+        // a-tree treeData(sync)
+        this.allCategories = (function formatToTree(categories: Term[], pId = '0'): TreeData[] {
+          return categories
+            .filter((item) => item.parentId === pId)
+            .map(({ taxonomyId, name }) => ({
+              key: taxonomyId,
+              title: name,
+              children: formatToTree(categories, taxonomyId),
+            }));
+        })(data.categories);
         this.checkedCagegoryKeys = data.myCategories.map(({ taxonomyId }) => taxonomyId);
       })
       .catch((err) => {
@@ -88,7 +104,7 @@ export default class PostEditForm extends Vue {
 
   allTags!: Array<{ label: string; value: string }>;
   selectedTags!: string[];
-  allCategories!: Array<{ title: string; key: string; selectable: false }>;
+  allCategories!: TreeData[];
   checkedCagegoryKeys!: number[];
   status!: PostStatus;
   content!: string;
@@ -137,42 +153,10 @@ export default class PostEditForm extends Vue {
     this.changed = true;
   }
 
-  loadCategories(treeNode: any) {
-    if (treeNode.dataRef.children) {
-      return Promise.resolve();
-    }
-    return this.graphqlClient
-      .query<{ categories: Term[] }, { parentId: number }>({
-        query: gql`
-          query getCategories($parentId: ID!) {
-            categories: terms(taxonomy: "category", parentId: $parentId) {
-              taxonomyId
-              name
-            }
-          }
-        `,
-        variables: {
-          parentId: treeNode.dataRef.key,
-        },
-      })
-      .then(({ data }) => {
-        treeNode.dataRef.children = data.categories.map(({ taxonomyId, name }) => ({
-          key: taxonomyId,
-          title: name,
-          selectable: false,
-        }));
-        this.allCategories = [...this.allCategories];
-      })
-      .catch((err) => {
-        const { message } = formatError(err);
-        this.$message.error(message);
-      });
-  }
-
   // 添加标签
   addTag(name: string) {
     return this.graphqlClient
-      .mutate<{ tag: Term }, { model: TermCreationModel }>({
+      .mutate<{ tag: Term }, { model: TermCreationModel & { taxonomy: 'tag' } }>({
         mutation: gql`
           mutation addTerm($model: NewTermInput!) {
             tag: addTerm(model: $model) {
@@ -636,13 +620,13 @@ export default class PostEditForm extends Vue {
                         checkable
                         checkStrictly
                         checkedKeys={this.checkedCagegoryKeys}
+                        selectable={false}
                         treeData={this.allCategories}
-                        loadData={this.loadCategories.bind(this)}
                         onCheck={this.handCategoryChecked.bind(this)}
                       ></a-tree>
                     </div>
-                    <nuxt-link to={{ name: 'categories-create' }}>
-                      {this.$tv('post.from.addCategoryLinkText', 'Add Cagetory')}
+                    <nuxt-link to={{ name: 'categories' }}>
+                      {this.$tv('post.form.addCategoryLinkText', 'Add Cagetory')}
                     </nuxt-link>
                   </a-collapse-panel>
                   <a-collapse-panel header={this.$tv('post.form.tagTitle', 'Tags')}>
@@ -654,10 +638,14 @@ export default class PostEditForm extends Vue {
                       optionFilterProp="children"
                       placeholder={this.$tv('post.form.tagPlaceholder', 'Please choose/input a tag')}
                       style="width:100%"
+                      class="mb-3"
                       onSelect={this.handleTagSelect.bind(this)}
                       onDeselect={this.handleTagDeselect.bind(this)}
                       onSearch={() => {}}
                     ></a-select>
+                    <nuxt-link to={{ name: 'tags' }}>
+                      {this.$tv('post.form.tagManagementLinkText', 'Tag Management')}
+                    </nuxt-link>
                   </a-collapse-panel>
                   <a-collapse-panel header={this.$tv('post.form.discusionTitle', 'Discusion')}>
                     <a-checkbox

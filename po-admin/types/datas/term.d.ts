@@ -6,7 +6,8 @@ export type Term = {
   description: string;
   count: string;
   group: number;
-  children: Term[];
+  parentId: string;
+  children?: Term[];
 };
 
 export type TermRelationship = {
@@ -18,8 +19,8 @@ export type TermRelationship = {
 export type TermCreationModel = {
   name: string;
   slug?: string;
-  taxonomy: string;
-  objectId?: string;
+  description?: string;
+  parentId?: string;
 };
 
 export type TermRelationshipCreationModel = {
@@ -31,7 +32,5 @@ export type TermRelationshipCreationModel = {
 export type TermUpdateModel = Partial<TermCreationModel>;
 
 export type TermQuery = {
-  keywords?: string;
+  keyword?: string;
 };
-
-export type TermResponse = Term[];

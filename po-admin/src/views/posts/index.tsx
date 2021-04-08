@@ -4,14 +4,14 @@ import { lowerFirst } from 'lodash-es';
 import { trailingSlash } from '@/utils/path';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { PostCommentStatus, PostStatus } from '@/includes/datas/enums';
+import { PostCommentStatus, PostStatus, UserCapability } from '@/includes/datas/enums';
 import { userStore } from '@/store/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
 import { PagerQuery, Post, PostPagerQuery, PostPagerResponse, Term } from 'types/datas';
-import { DataSource } from '@/components/AsyncTable/AsyncTable';
+import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
 
 type QueryParams = Omit<PostPagerQuery, keyof PagerQuery<{}>> & { categoryId: string };
@@ -36,6 +36,9 @@ enum BlukActions {
 
 @Component<PostIndex>({
   name: 'PostIndex',
+  meta: {
+    capabilities: [UserCapability.EditPosts],
+  },
   asyncData({ error, $i18n, graphqlClient }) {
     // 获取分类
     return graphqlClient
@@ -49,6 +52,7 @@ enum BlukActions {
             categories: terms(taxonomy: "category") {
               taxonomyId
               name
+              parentId
             }
             statusCounts: postCountByStatus {
               status
@@ -133,7 +137,7 @@ export default class PostIndex extends Vue {
     return this.columns;
   }
 
-  // 添加 All 选项
+  // 状态选项 添加 All 选项
   get statusOptions(): StatusOption<PostStatus | undefined>[] {
     return [
       {
@@ -153,17 +157,18 @@ export default class PostIndex extends Vue {
     ];
   }
 
-  // a-tree-select treeData 级联异步加载, 添加 All 选项
-  get categoryOptions(): Array<{ key: string; title: string; value: string; isLeaf?: boolean }> {
+  // a-tree-select treeData 同步加载, 添加 All 选项
+  get categoryOptions(): Array<{ id: string; pId?: string; title: string; value: string; isLeaf?: boolean }> {
     return [
       {
-        key: '',
+        id: '',
         value: '',
         title: this.$tv('post.search.allCategories', 'All Categories') as string,
         isLeaf: true,
       },
-      ...this.allCategories.map(({ taxonomyId, name }) => ({
-        key: taxonomyId,
+      ...this.allCategories.map(({ taxonomyId, name, parentId }) => ({
+        id: taxonomyId,
+        pId: parentId === '0' ? undefined : parentId,
         value: taxonomyId,
         title: name,
       })),
@@ -205,41 +210,8 @@ export default class PostIndex extends Vue {
         ];
   }
 
-  // 异步加载分类
-  loadCategories(treeNode: any) {
-    if (treeNode.dataRef.children) {
-      return Promise.resolve();
-    }
-    return this.graphqlClient
-      .query<{ categories: Term[] }, { parentId: number }>({
-        query: gql`
-          query getCategories($parentId: ID!) {
-            categories: terms(taxonomy: "category", parentId: $parentId) {
-              taxonomyId
-              name
-            }
-          }
-        `,
-        variables: {
-          parentId: treeNode.dataRef.key,
-        },
-      })
-      .then(({ data }) => {
-        treeNode.dataRef.children = data.categories.map(({ taxonomyId, name }) => ({
-          key: taxonomyId,
-          value: taxonomyId,
-          title: name,
-        }));
-        this.allCategories = [...this.allCategories];
-      })
-      .catch((err) => {
-        const { statusCode, message } = formatError(err);
-        this.$message.error(this.$tv(`error.${statusCode}`, message) as string);
-      });
-  }
-
   // 加载 table 数据
-  loadData({ page, size }: Parameters<DataSource>[0]) {
+  loadData({ page, size }: Parameters<DataSourceFn>[0]) {
     const { categoryId, ...restQuery } = this.searchQuery;
     return this.graphqlClient
       .query<{ posts: PostPagerResponse }, PostPagerQuery>({
@@ -289,8 +261,8 @@ export default class PostIndex extends Vue {
         return data.posts;
       })
       .catch((err) => {
-        const { statusCode, message } = formatError(err);
-        throw new Error(this.$tv(`error.${statusCode}`, message) as string);
+        const { message } = formatError(err);
+        throw new Error(message);
       });
   }
 
@@ -321,9 +293,9 @@ export default class PostIndex extends Vue {
     this.table.refresh();
   }
 
-  getPreviewUrl(id: string) {
+  getViewUrl(id: string) {
     if (process.client) {
-      return `${trailingSlash(this.$userOptions['home'])}post/${id}`;
+      return `${trailingSlash(this.$userOptions['home'])}/${id}`;
     }
     return '#none';
   }
@@ -530,11 +502,8 @@ export default class PostIndex extends Vue {
                 {this.$tv('post.btnText.moveToTrash', 'Trash')}
               </a>,
               <a-divider type="vertical" />,
-              <a
-                href={this.getPreviewUrl(record.id)}
-                title={this.$tv('post.btnTips.preview', 'View this post') as string}
-              >
-                {this.$tv('post.btnText.preview', 'Preview')}
+              <a href={this.getViewUrl(record.id)} title={this.$tv('post.btnTips.view', 'View this post') as string}>
+                {this.$tv('post.btnText.view', 'View')}
               </a>,
             ]}
       </div>
@@ -629,9 +598,8 @@ export default class PostIndex extends Vue {
             ></a-select>
             <a-tree-select
               vModel={this.searchQuery.categoryId}
+              treeDataSimpleMode
               treeData={this.categoryOptions}
-              loadData={this.loadCategories.bind(this)}
-              maxTagCount={3}
               placeholder={this.$tv('post.search.chooseCategory', 'Choose category')}
               style="min-width:120px;"
             ></a-tree-select>

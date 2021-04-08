@@ -1,6 +1,7 @@
 import { Vue, Component } from 'nuxt-property-decorator';
 import { camelCase } from 'lodash-es';
 import { gql, formatError } from '@/includes/functions';
+import { UserCapability } from '@/includes/datas/enums';
 import EditForm from './modules/EditForm';
 
 // Types
@@ -18,6 +19,9 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
 
 @Component({
   name: 'UserEdit',
+  meta: {
+    capabilities: [UserCapability.EditUsers],
+  },
   head() {
     return {
       title: this.$tv('pageTitle.user.edit', 'Edit User') as string,
@@ -36,7 +40,6 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
               displayName
               url
               status
-              isSuperAdmin
               metas {
                 key: metaKey
                 value: metaValue

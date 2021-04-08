@@ -10,6 +10,9 @@ import { Context } from '@nuxt/types';
 @Component({
   name: 'Init',
   layout: 'blank',
+  meta: {
+    anonymous: true,
+  },
   asyncData({ redirect }: Context) {
     return appStore
       .checkDB()

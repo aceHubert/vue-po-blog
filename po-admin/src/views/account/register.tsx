@@ -4,7 +4,7 @@ import { Vue, Component } from 'nuxt-property-decorator';
 {
   path:'/register',
   meta:{
-    title: 'Site Settings',
+    title: 'Register',
   }
 }
 </router> */
@@ -12,6 +12,10 @@ import { Vue, Component } from 'nuxt-property-decorator';
 
 @Component({
   name: 'Register',
+  layout: 'user',
+  meta: {
+    anonymous: true,
+  },
 })
 export default class Register extends Vue {
   render() {

@@ -1,13 +1,13 @@
 import { Vue, Component, Watch, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
-import { AsyncTable, SearchForm } from '@/components';
+import { AsyncTable, SearchForm, TermEditForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
+import { TermTaxonomy, UserCapability } from '@/includes/datas/enums';
 import { table } from './modules/constants';
-import EditForm from './modules/EditForm';
 import classes from './styles/index.less?module';
 
 // Types
-import { Term, TermQuery, TermResponse } from 'types/datas';
+import { Term, TermQuery, TermCreationModel, TermUpdateModel } from 'types/datas';
 import { BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
 
 enum BlukActions {
@@ -26,6 +26,9 @@ enum BlukActions {
 
 @Component({
   name: 'Tags',
+  meta: {
+    capabilities: [UserCapability.EditPosts],
+  },
 })
 export default class Tags extends Vue {
   @InjectReactive({ from: 'isMobile' }) isMobile!: boolean;
@@ -85,7 +88,7 @@ export default class Tags extends Vue {
   // 加载 table 数据
   loadData() {
     return this.graphqlClient
-      .query<{ terms: TermResponse }, TermQuery>({
+      .query<{ terms: Term[] }, TermQuery>({
         query: gql`
           query getTerms($keyword: String) {
             terms(taxonomy: "tag", keyword: $keyword) {
@@ -109,14 +112,66 @@ export default class Tags extends Vue {
         };
       })
       .catch((err) => {
-        const { statusCode, message } = formatError(err);
-        throw new Error(this.$tv(`error.${statusCode}`, message) as string);
+        const { message } = formatError(err);
+        throw new Error(message);
       });
   }
 
   // 刷新 table, 会调用loadDate
   refreshTable() {
     this.table.refresh();
+  }
+
+  // 新建标签
+  onCreate(values: TermCreationModel) {
+    return this.graphqlClient
+      .mutate<{ term: Term }, { model: TermCreationModel & { taxonomy: 'tag' } }>({
+        mutation: gql`
+          mutation addTerm($model: NewTermInput!) {
+            term: addTerm(model: $model) {
+              id
+            }
+          }
+        `,
+        variables: {
+          model: {
+            ...values,
+            taxonomy: TermTaxonomy.Tag,
+          },
+        },
+      })
+      .then(() => {
+        this.formModelShown = false;
+        this.refreshTable();
+      })
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
+      });
+  }
+
+  // 修改标签
+  onUpdate(id: string, values: TermUpdateModel) {
+    return this.graphqlClient
+      .mutate<{ result: boolean }, { id: string; model: TermUpdateModel }>({
+        mutation: gql`
+          mutation modifyTerm($id: ID!, $model: UpdateTermInput!) {
+            result: modifyTerm(id: $id, model: $model)
+          }
+        `,
+        variables: {
+          id,
+          model: values,
+        },
+      })
+      .then(() => {
+        this.formModelShown = false;
+        this.refreshTable();
+      })
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
+      });
   }
 
   // keyword 的搜索按纽
@@ -209,6 +264,7 @@ export default class Tags extends Vue {
       });
   }
 
+  // 行选择
   handleSelectChange(selectedRowKeys: Array<string | number>) {
     this.selectedRowKeys = selectedRowKeys as any;
   }
@@ -290,7 +346,7 @@ export default class Tags extends Vue {
     return (
       <a-card class="post-index" bordered={false} size="small">
         <SearchForm
-          keywordPlaceholder={this.$tv('tag.search.keywordPlaceholder', 'Search Tag') as string}
+          keywordPlaceholder={this.$tv('tag.search.keywordPlaceholder', 'Search Tags') as string}
           itemCount={this.itemCount}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
@@ -303,13 +359,13 @@ export default class Tags extends Vue {
           <template slot="sub">
             <a-button
               type="primary"
-              title={this.$tv('tag.btnTips.createTag', 'Cerate Tag')}
+              title={this.$tv('tag.btnTips.create', 'New Tag')}
               onClick={m.stop(() => {
                 this.editModel = undefined;
                 this.formModelShown = true;
               })}
             >
-              {this.$tv('tag.btnText.createTag', 'Cerate Tag')}
+              {this.$tv('tag.btnText.create', 'New Tag')}
             </a-button>
           </template>
         </SearchForm>
@@ -320,7 +376,7 @@ export default class Tags extends Vue {
           scroll={{ x: true, y: 0 }}
           columns={this.fixedColumns}
           dataSource={this.loadData.bind(this)}
-          showPagination="auto"
+          showPagination={false}
           rowSelection={{
             selectedRowKeys: this.selectedRowKeys,
             onChange: this.handleSelectChange.bind(this),
@@ -342,16 +398,11 @@ export default class Tags extends Vue {
           destroyOnClose={true}
           footer={null}
         >
-          <EditForm
+          <TermEditForm
             editModel={this.editModel}
-            onCreated={() => {
-              this.formModelShown = false;
-              this.refreshTable();
-            }}
-            onUpdated={() => {
-              this.formModelShown = false;
-              this.refreshTable();
-            }}
+            taxonomy={TermTaxonomy.Tag}
+            createTerm={this.onCreate.bind(this)}
+            updateTerm={this.onUpdate.bind(this)}
           />
         </a-modal>
       </a-card>

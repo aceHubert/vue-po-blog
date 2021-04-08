@@ -4,7 +4,7 @@ import { Vue, Component } from 'nuxt-property-decorator';
 {
   path:'/lost-password',
   meta:{
-    title: 'Site Settings',
+    title: 'Lost Passwrod',
   }
 }
 </router> */
@@ -12,6 +12,10 @@ import { Vue, Component } from 'nuxt-property-decorator';
 
 @Component({
   name: 'LostPasswrod',
+  layout: 'user',
+  meta: {
+    anonymous: true,
+  },
 })
 export default class LostPasswrod extends Vue {
   render() {
