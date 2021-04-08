@@ -1,5 +1,5 @@
 import { ModuleRef } from '@nestjs/core';
-import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
 import { UserRole, UserStatus } from '@/common/helpers/enums';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
@@ -52,12 +52,6 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
       this.getFieldNames(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.UserWithRole),
       requestUser,
     );
-  }
-
-  @Authorized()
-  @ResolveField((type) => Boolean, { description: '是否是超级管理员' })
-  isSuperAdmin(@Parent() { loginName }: User): boolean {
-    return this.userDataSource.isSupurAdmin(loginName);
   }
 
   @Authorized()

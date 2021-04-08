@@ -16,7 +16,7 @@ export class PagedPostArgs extends PagedArgs {
   @Field((type) => PostStatus, { nullable: true, description: '文章状态(如果为空，则搜索状态为非 Trash 的文章)' })
   status?: PostStatus;
 
-  @Field((type) => [ID!], { nullable: true, description: '类别 Id' })
+  @Field((type) => [ID!], { nullable: true, description: '类别 Id（taxonomyId）' })
   categoryIds?: number[];
 
   @Field({ nullable: true, description: '日期，格式：yyyy(年)、yyyyMM(月)、yyyyMMdd(日)' })

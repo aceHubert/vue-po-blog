@@ -1,7 +1,8 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError } from '@/common/utils/gql-errors.utils';
-import { PostStatus, PostType, PostCommentStatus, UserRoleCapability } from '@/common/helpers/enums';
+import { PostStatus, PostType, PostCommentStatus } from '@/common/helpers/enums';
+import { UserCapability } from '@/common/helpers/user-capability';
 import { OptionKeys } from '@/common/helpers/option-keys';
 import { PostMetaKeys } from '@/common/helpers/post-meta-keys';
 import { MetaDataSource } from './meta.datasource';
@@ -66,14 +67,14 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
     // 是否有编辑权限
     await this.hasCapability(
-      post.type === PostType.Post ? UserRoleCapability.EditPosts : UserRoleCapability.EditPages,
+      post.type === PostType.Post ? UserCapability.EditPosts : UserCapability.EditPages,
       requestUser,
     );
 
     // 是否有编辑别人文章的权限
     if (post.author !== requestUser.id) {
       await this.hasCapability(
-        post.type === PostType.Post ? UserRoleCapability.EditOthersPosts : UserRoleCapability.EditOthersPages,
+        post.type === PostType.Post ? UserCapability.EditOthersPosts : UserCapability.EditOthersPages,
         requestUser,
       );
     }
@@ -81,7 +82,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     // 是否有编辑已发布的文章的权限
     if (post.status === PostStatus.Publish) {
       await this.hasCapability(
-        post.type === PostType.Post ? UserRoleCapability.EditPublishedPosts : UserRoleCapability.EditPublishedPages,
+        post.type === PostType.Post ? UserCapability.EditPublishedPosts : UserCapability.EditPublishedPages,
         requestUser,
       );
     }
@@ -89,7 +90,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     // 是否有编辑私有的文章权限
     if (post.status === PostStatus.Private) {
       await this.hasCapability(
-        post.type === PostType.Post ? UserRoleCapability.EditPrivatePosts : UserRoleCapability.EditPrivatePages,
+        post.type === PostType.Post ? UserCapability.EditPrivatePosts : UserCapability.EditPrivatePages,
         requestUser,
       );
     }
@@ -421,7 +422,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    */
   async create(model: NewPostInput | NewPageInput, type: PostType, requestUser: JwtPayload): Promise<PostModel> {
     await this.hasCapability(
-      type === PostType.Post ? UserRoleCapability.CreatePosts : UserRoleCapability.CreatePages,
+      type === PostType.Post ? UserCapability.CreatePosts : UserCapability.CreatePages,
       requestUser,
     );
 
@@ -801,14 +802,14 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     if (post) {
       // 是否有删除文章的权限
       await this.hasCapability(
-        post.type === PostType.Post ? UserRoleCapability.DeletePosts : UserRoleCapability.DeletePages,
+        post.type === PostType.Post ? UserCapability.DeletePosts : UserCapability.DeletePages,
         requestUser,
       );
 
       // 是否有删除别人文章的权限
       if (post.author !== requestUser.id) {
         await this.hasCapability(
-          post.type === PostType.Post ? UserRoleCapability.DeleteOthersPosts : UserRoleCapability.DeleteOthersPages,
+          post.type === PostType.Post ? UserCapability.DeleteOthersPosts : UserCapability.DeleteOthersPages,
           requestUser,
         );
       }
@@ -816,9 +817,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       // 是否有删除已发布的文章的权限
       if (post.status === PostStatus.Publish) {
         await this.hasCapability(
-          post.type === PostType.Post
-            ? UserRoleCapability.DeletePublishedPosts
-            : UserRoleCapability.DeletePublishedPages,
+          post.type === PostType.Post ? UserCapability.DeletePublishedPosts : UserCapability.DeletePublishedPages,
           requestUser,
         );
       }
@@ -826,7 +825,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       // 是否有删除私有的文章权限
       if (post.status === PostStatus.Private) {
         await this.hasCapability(
-          post.type === PostType.Post ? UserRoleCapability.DeletePrivatePosts : UserRoleCapability.DeletePrivatePages,
+          post.type === PostType.Post ? UserCapability.DeletePrivatePosts : UserCapability.DeletePrivatePages,
           requestUser,
         );
       }

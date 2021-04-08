@@ -1,65 +1,66 @@
-import { UserRole, UserRoleCapability } from './enums';
+import { UserRole } from './enums';
+import { UserCapability } from './user-capability';
 
 export type UserRoles = {
   [role: string]: {
     name: string;
-    capabilities: UserRoleCapability[];
+    capabilities: UserCapability[];
   };
 };
 
 export const UserRoles = {
   [UserRole.Administrator]: {
     name: 'Administrator',
-    capabilities: Object.values(UserRoleCapability),
+    capabilities: Object.values(UserCapability),
   },
   [UserRole.Editor]: {
     name: 'Editor',
     capabilities: [
-      UserRoleCapability.EditThemes,
-      UserRoleCapability.EditPlugins,
-      UserRoleCapability.ModerateComments,
-      UserRoleCapability.ManageLinks,
-      UserRoleCapability.ManageCategories,
-      UserRoleCapability.ManageTags,
-      UserRoleCapability.EditPosts,
-      UserRoleCapability.EditOthersPosts,
-      UserRoleCapability.EditPublishedPosts,
-      UserRoleCapability.EditPrivatePosts,
-      UserRoleCapability.DeletePosts,
-      UserRoleCapability.DeleteOthersPosts,
-      UserRoleCapability.DeletePublishedPosts,
-      UserRoleCapability.DeletePrivatePosts,
-      UserRoleCapability.EditPages,
-      UserRoleCapability.EditOthersPages,
-      UserRoleCapability.EditPublishedPages,
-      UserRoleCapability.EditPrivatePages,
-      UserRoleCapability.DeletePages,
-      UserRoleCapability.DeleteOthersPages,
-      UserRoleCapability.DeletePublishedPages,
-      UserRoleCapability.DeletePrivatePages,
-      UserRoleCapability.UploadFiles,
-      UserRoleCapability.Read,
-      UserRoleCapability.ReadPrivatePosts,
-      UserRoleCapability.ReadPrivatePages,
+      UserCapability.EditThemes,
+      UserCapability.EditPlugins,
+      UserCapability.ModerateComments,
+      UserCapability.ManageLinks,
+      UserCapability.ManageCategories,
+      UserCapability.ManageTags,
+      UserCapability.EditPosts,
+      UserCapability.EditOthersPosts,
+      UserCapability.EditPublishedPosts,
+      UserCapability.EditPrivatePosts,
+      UserCapability.DeletePosts,
+      UserCapability.DeleteOthersPosts,
+      UserCapability.DeletePublishedPosts,
+      UserCapability.DeletePrivatePosts,
+      UserCapability.EditPages,
+      UserCapability.EditOthersPages,
+      UserCapability.EditPublishedPages,
+      UserCapability.EditPrivatePages,
+      UserCapability.DeletePages,
+      UserCapability.DeleteOthersPages,
+      UserCapability.DeletePublishedPages,
+      UserCapability.DeletePrivatePages,
+      UserCapability.UploadFiles,
+      UserCapability.Read,
+      UserCapability.ReadPrivatePosts,
+      UserCapability.ReadPrivatePages,
     ],
   },
   [UserRole.Author]: {
     name: 'Author',
     capabilities: [
-      UserRoleCapability.EditPosts,
-      UserRoleCapability.EditPublishedPages,
-      UserRoleCapability.DeletePosts,
-      UserRoleCapability.DeletePublishedPosts,
-      UserRoleCapability.UploadFiles,
-      UserRoleCapability.Read,
+      UserCapability.EditPosts,
+      UserCapability.EditPublishedPages,
+      UserCapability.DeletePosts,
+      UserCapability.DeletePublishedPosts,
+      UserCapability.UploadFiles,
+      UserCapability.Read,
     ],
   },
   [UserRole.Contributor]: {
     name: 'Contributor',
-    capabilities: [UserRoleCapability.EditPosts, UserRoleCapability.DeletePosts, UserRoleCapability.Read],
+    capabilities: [UserCapability.EditPosts, UserCapability.DeletePosts, UserCapability.Read],
   },
   [UserRole.Subscriber]: {
     name: 'Subscriber',
-    capabilities: [UserRoleCapability.Read],
+    capabilities: [UserCapability.Read],
   },
 };

@@ -3,7 +3,8 @@ import { isUndefined } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ForbiddenError, ValidationError } from '@/common/utils/gql-errors.utils';
-import { UserRole, UserRoleCapability, UserStatus } from '@/common/helpers/enums';
+import { UserRole, UserStatus } from '@/common/helpers/enums';
+import { UserCapability } from '@/common/helpers/user-capability';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
 import { uuid } from '@/common/utils/uuid.utils';
 import { MetaDataSource } from './meta.datasource';
@@ -30,26 +31,6 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 是否是超级管理员
-   * @param loginNameOrId 登录名或User Id/Ids
-   * @returns boolean
-   */
-  isSupurAdmin(loginNameOrId: string): boolean;
-  isSupurAdmin(loginNameOrId: number | number[]): Promise<boolean>;
-  isSupurAdmin(loginNameOrId: number | number[] | string) {
-    if (typeof loginNameOrId === 'string') {
-      return loginNameOrId === 'admin';
-    } else {
-      return this.models.Users.count({
-        where: {
-          id: loginNameOrId,
-          loginName: 'admin',
-        },
-      }).then((count) => count > 0);
-    }
-  }
-
-  /**
    * 根据 Id 获取用户（不包含登录密码）
    * @author Hubert
    * @since 2020-10-01
@@ -60,7 +41,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async get(id: number | null, fields: string[], requestUser: JwtPayload): Promise<UserModel | null> {
     if (id) {
-      await this.hasCapability(UserRoleCapability.EditUsers, requestUser);
+      await this.hasCapability(UserCapability.EditUsers, requestUser);
     } else {
       id = requestUser.id;
     }
@@ -71,11 +52,6 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     // 主键
     if (!fields.includes('id')) {
       fields.push('id');
-    }
-
-    // 如果要查是否是超级管理员，必须查询 loginName 字段
-    if (fields.includes('isSuperAdmin') && !fields.includes('loginName')) {
-      fields.push('loginName');
     }
 
     return this.models.Users.findByPk(id, {
@@ -116,7 +92,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     fields: string[],
     requestUser: JwtPayload,
   ): Promise<PagedUserModel> {
-    await this.hasCapability(UserRoleCapability.ListUsers, requestUser);
+    await this.hasCapability(UserCapability.ListUsers, requestUser);
 
     const where: WhereOptions = {};
     if (query.keyword) {
@@ -136,15 +112,6 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       } else {
         where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = query.userRole;
       }
-    } else {
-      where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = {
-        [this.Op.not]: null,
-      };
-    }
-
-    // 如果要查是否是超级管理员，必须查询 loginName 字段
-    if (fields.includes('isSuperAdmin') && !fields.includes('loginName')) {
-      fields.push('loginName');
     }
 
     return this.models.Users.findAndCountAll({
@@ -285,7 +252,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param fields 返回的字段
    */
   async create(model: NewUserInput, requestUser: JwtPayload): Promise<UserModel> {
-    await this.hasCapability(UserRoleCapability.CreateUsers, requestUser);
+    await this.hasCapability(UserCapability.CreateUsers, requestUser);
 
     let isExists =
       (await this.models.Users.count({
@@ -399,7 +366,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async update(id: number, model: UpdateUserInput, requestUser: JwtPayload): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
-      await this.hasCapability(UserRoleCapability.EditUsers, requestUser);
+      await this.hasCapability(UserCapability.EditUsers, requestUser);
     }
 
     const user = await this.models.Users.findByPk(id);
@@ -542,7 +509,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param status 状态
    */
   async updateStatus(id: number, status: UserStatus, requestUser: JwtPayload): Promise<boolean> {
-    await this.hasCapability(UserRoleCapability.EditUsers, requestUser);
+    await this.hasCapability(UserCapability.EditUsers, requestUser);
 
     return await this.models.Users.update(
       { status },
@@ -564,10 +531,10 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id User Id
    */
   async delete(id: number, requestUser: JwtPayload): Promise<true> {
-    await this.hasCapability(UserRoleCapability.DeleteUsers, requestUser);
+    await this.hasCapability(UserCapability.DeleteUsers, requestUser);
 
-    if (await this.isSupurAdmin(id)) {
-      throw new ForbiddenError('Could not delete "Super Admin" User!');
+    if (id === requestUser.id) {
+      throw new ForbiddenError('Could not delete yourself!');
     }
 
     const t = await this.sequelize.transaction();
@@ -599,10 +566,10 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id User Id
    */
   async blukDelete(ids: number[], requestUser: JwtPayload): Promise<true> {
-    await this.hasCapability(UserRoleCapability.DeleteUsers, requestUser);
+    await this.hasCapability(UserCapability.DeleteUsers, requestUser);
 
-    if (await this.isSupurAdmin(ids)) {
-      throw new ForbiddenError('Could not delete "Super Admin" User!');
+    if (ids.includes(requestUser.id)) {
+      throw new ForbiddenError('Could not delete yourself!');
     }
 
     const t = await this.sequelize.transaction();
