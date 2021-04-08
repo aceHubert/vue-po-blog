@@ -93,7 +93,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
         },
       ],
       where: {
-        parentId: query.parentId,
+        ...(query.parentId ? { parentId: query.parentId } : {}),
         taxonomy: query.taxonomy,
       },
     }).then((values) =>
@@ -350,12 +350,28 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
         transaction: t,
       });
 
-      await this.models.TermTaxonomy.destroy({
+      const termTaxonomy = await this.models.TermTaxonomy.findOne({
         where: {
           termId: id,
         },
-        transaction: t,
       });
+
+      if (termTaxonomy) {
+        await termTaxonomy.destroy({
+          transaction: t,
+        });
+
+        // 子项层级提升
+        await this.models.TermTaxonomy.update(
+          { parentId: termTaxonomy.parentId },
+          {
+            where: {
+              parentId: termTaxonomy.id,
+            },
+            transaction: t,
+          },
+        );
+      }
 
       await t.commit();
       return true;
@@ -363,6 +379,18 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
       await t.rollback();
       throw err;
     }
+  }
+
+  // 批量删除时子项提升查找parentId
+  private getParentId(
+    deleteTermTaxonomies: Array<{ id: number; parentId: number }>,
+    itemModel: { id: number; parentId: number },
+  ): number {
+    const item = deleteTermTaxonomies.find((term) => term.id === itemModel.parentId);
+    if (item) {
+      return this.getParentId(deleteTermTaxonomies, item);
+    }
+    return itemModel.parentId;
   }
 
   /**
@@ -398,12 +426,35 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
         transaction: t,
       });
 
-      await this.models.TermTaxonomy.destroy({
+      const termTaxonomies = await this.models.TermTaxonomy.findAll({
         where: {
           termId: ids,
         },
-        transaction: t,
       });
+
+      if (termTaxonomies.length) {
+        await this.models.TermTaxonomy.destroy({
+          where: {
+            id: termTaxonomies.map(({ id }) => id),
+          },
+          transaction: t,
+        });
+
+        // 子项层级提升
+        await Promise.all(
+          termTaxonomies.map((termTaxonomy) =>
+            this.models.TermTaxonomy.update(
+              { parentId: this.getParentId(termTaxonomies, termTaxonomy) },
+              {
+                where: {
+                  parentId: termTaxonomy.id,
+                },
+                transaction: t,
+              },
+            ),
+          ),
+        );
+      }
 
       await t.commit();
       return true;

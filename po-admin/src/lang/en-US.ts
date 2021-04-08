@@ -75,24 +75,6 @@ const locale = {
       collapse: 'Collapse',
     },
   },
-
-  // 错误消息
-  error: {
-    401: 'Sorry, you can not visit this page!',
-    404: 'Page Not Found!',
-    500: 'System error, please try again later!',
-
-    // backend 返回错误
-    GRAPHQL_PARSE_FAILED: 'Parse failed!', //SyntaxError
-    BAD_USER_INPUT: 'Input incorrect!', //UserInputError
-    GRAPHQL_VALIDATION_FAILED: 'Validation failed!', //ValidationError
-    UNAUTHENTICATED: 'Unauthentication', //AuthenticationError
-    FORBIDDEN: 'Forbidden', //ForbiddenError
-    EXECUTE_FAILED: 'Execute failed!', // RuntimeError
-
-    // plugins error
-    modulesLoadError: 'Modules load error!',
-  },
 };
 
 export default {

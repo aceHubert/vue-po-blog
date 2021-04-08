@@ -82,23 +82,29 @@ export async function Locale(...params: Parameters<Plugin>) {
     silentFallbackWarn: true,
   });
 
-  new Vue({
-    created() {
-      this.$watch(
-        () => i18n.locale,
-        (locale: string) => {
-          if (!i18n.availableLocales.includes(locale)) {
-            loadLanguageAsync(locale).catch(() => {
-              // ate by dog
-            });
-          } else {
-            setLocale(locale);
-          }
-        },
-        { immediate: true },
-      );
-    },
-  });
+  // 当前使用语言不是默认语言时，加载语言
+  if (defaultLocale !== fallbackLocale) {
+    await loadLanguageAsync(defaultLocale);
+  }
+
+  // 监听语言变化
+  // new Vue({
+  //   created() {
+  //     this.$watch(
+  //       () => i18n.locale,
+  //       (locale: string) => {
+  //         if (!i18n.availableLocales.includes(locale)) {
+  //           loadLanguageAsync(locale).catch(() => {
+  //             // ate by dog
+  //           });
+  //         } else {
+  //           setLocale(locale);
+  //         }
+  //       },
+  //       // { immediate: true },
+  //     );
+  //   },
+  // });
 
   function setLocale(locale: string) {
     i18n.locale = locale;

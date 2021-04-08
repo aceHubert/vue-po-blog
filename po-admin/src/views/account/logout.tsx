@@ -17,6 +17,9 @@ import { Route } from 'vue-router';
 @Component({
   name: 'Logout',
   layout: 'blank',
+  meta: {
+    anonymous: true,
+  },
   beforeRouteEnter(to: Route, from: Route, next: Function) {
     next((vm: Logout) => {
       vm.returnUrl = from.fullPath;

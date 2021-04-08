@@ -43,7 +43,7 @@ export interface TermTaxonomyRelationshipModel
  */
 export interface TermTaxonomyArgs {
   taxonomy: string;
-  parentId: number;
+  parentId?: number;
   keyword?: string;
   group?: number;
 }

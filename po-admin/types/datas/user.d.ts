@@ -8,7 +8,6 @@ export type User = {
   mobile?: string;
   email: string;
   status: UserStatus;
-  isSuperAdmin: boolean;
   createTime: Date;
 };
 

@@ -1,0 +1,29 @@
+.name {
+  padding-right: 30px;
+  margin-bottom: 0;
+  position: relative;
+
+  i {
+    font-size: 16px;
+    position: absolute;
+    right: 0;
+
+    :global(.is-desktop) &,
+    :global(.is-tablet) & {
+      display: none;
+    }
+  }
+}
+
+.column-name {
+  display: inline-block;
+
+  .content {
+    margin-bottom: 1em;
+
+    &-item {
+      margin-bottom: 0;
+      line-height: 26px;
+    }
+  }
+}

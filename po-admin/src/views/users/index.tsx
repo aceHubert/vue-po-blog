@@ -3,14 +3,14 @@ import { camelCase, lowerFirst } from 'lodash-es';
 import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { UserRole } from '@/includes/datas/enums';
+import { UserRole, UserCapability } from '@/includes/datas/enums';
 import { userStore } from '@/store/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
 import { PagerQuery, UserWithRole, UserMetas, UserPagerQuery, UserPagerResponse } from 'types/datas';
-import { DataSource } from '@/components/AsyncTable/AsyncTable';
+import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
 
 // import { Table } from 'types/constants';
@@ -27,7 +27,6 @@ enum BlukActions {
   prop:true,
   meta:{
     title: 'All Users',
-    keepAlive: true,
   }
 }
 </router> */
@@ -42,6 +41,9 @@ const UserRoleOrder = Object.keys(UserRole)
 
 @Component<UserIndex>({
   name: 'UserIndex',
+  meta: {
+    capabilities: [UserCapability.ListUsers],
+  },
   head() {
     return {
       title: this.$tv('pageTitle.user.index', 'Users') as string,
@@ -121,7 +123,7 @@ export default class UserIndex extends Vue {
         label: this.$tv('user.role.all', 'All') as string,
         // 总数不记录 None 状态
         count: this.roleCounts.reduce((prev, curr) => {
-          return prev + (curr.userRole === 'None' ? 0 : curr.count);
+          return prev + curr.count;
         }, 0),
         keepStatusShown: true,
       },
@@ -150,7 +152,7 @@ export default class UserIndex extends Vue {
   }
 
   // 加载 table 数据
-  loadData({ page, size }: Parameters<DataSource>[0]) {
+  loadData({ page, size }: Parameters<DataSourceFn>[0]) {
     return this.graphqlClient
       .query<{ users: UserPagerResponse }, UserPagerQuery>({
         query: gql`
@@ -163,7 +165,6 @@ export default class UserIndex extends Vue {
                 mobile
                 email
                 status
-                isSuperAdmin
                 userRole
                 createTime: createdAt
                 metas(metaKeys: ["nick_name", "first_name", "last_name"]) {
@@ -199,8 +200,8 @@ export default class UserIndex extends Vue {
         };
       })
       .catch((err) => {
-        const { statusCode, message } = formatError(err);
-        throw new Error(this.$tv(`error.${statusCode}`, message) as string);
+        const { message } = formatError(err);
+        throw new Error(message);
       });
   }
 
@@ -346,7 +347,7 @@ export default class UserIndex extends Vue {
           {this.$tv('user.btnText.edit', 'Edit')}
         </nuxt-link>
 
-        {!record.isSuperAdmin
+        {record.id !== userStore.id
           ? [
               <a-divider type="vertical" />,
               <a-popconfirm

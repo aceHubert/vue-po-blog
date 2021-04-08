@@ -26,10 +26,7 @@ export default class ErrorLayout extends mixins(appMixin, deviceMixin) {
   }
 
   get message() {
-    return (
-      (this.error.message && (this.$tv(this.error.message, this.error.message) as string)) ||
-      (this.$tv(`error.${String(this.statusCode)}`, 'An error occurred') as string)
-    );
+    return this.error.message || (this.$tv(`error.serverError`, 'An error occurred') as string);
   }
 
   render() {
@@ -46,14 +43,7 @@ export default class ErrorLayout extends mixins(appMixin, deviceMixin) {
                 {this.$tv('error.backToHomeBtnText', 'Back to home')}
               </nuxt-link>
             </p>
-          ) : (
-            <p class={classes.description}>
-              {this.$tv(
-                'error.description',
-                'An error occurred while rendering the page. Check developer tools console for details.',
-              )}
-            </p>
-          )}
+          ) : null}
         </div>
       </div>
     );

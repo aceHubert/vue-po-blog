@@ -6,7 +6,7 @@ import { get } from 'lodash-es';
 import * as tsx from 'vue-tsx-support';
 import { Table, PaginationConfig, TableRowSelection } from 'ant-design-vue/types/table/table';
 
-export type DataSource = (filter: {
+export type DataSourceFn = (filter: {
   page: number;
   size: number;
   sortField?: string;
@@ -53,29 +53,34 @@ export default class AsyncTable extends Vue {
         | 'pageNoKey'
       >
   >;
-
+  /** 列， 参考 https://antdv.com/components/table/#API */
   @Prop({ type: Array, required: true }) columns!: any;
-  @Prop({ type: Function, required: true }) dataSource!: DataSource;
+  /** 数据源异步方法 */
+  @Prop({ type: Function, required: true }) dataSource!: DataSourceFn;
+  /** 页数 */
   @Prop({ type: Number, default: 1 }) pageNum!: number;
+  /** 页大小 */
   @Prop({ type: Number, default: 10 }) pageSize!: number;
+  /** 页大不是否可改变，参考 https://antdv.com/components/pagination/#API */
   @Prop({ type: Boolean, default: true }) showSizeChanger!: boolean;
+  /** 显示分页，auto: hideOnSinglePage=true, ture: shown always, false: hide pagination */
+  @Prop({ type: [String, Boolean], default: 'auto' }) showPagination!: 'auto' | boolean;
   /**
-   * alert: {
+   * 显示汇总(column 配置 needTotal)
+   * 例如:
+   * {
    *   show: true,
-   *   clear: Function | true
+   *   clear: Function | true // 显示清空选项，或清空选项前执行的方法
    * } | true
    */
   @Prop({ type: [Object, Boolean], default: null }) alert!: Alert;
-  @Prop({ type: [String, Boolean], default: 'auto' }) showPagination!: 'auto' | boolean;
-  /**
-   * dataSource 返回 Promise<{[rowsFieldName]:Array,[totalFieldName]:Number}>
-   */
+  /** dataSource 返回数据字段 Promise<{[rowsFieldName]:Array,[totalFieldName]:Number}>  */
   @Prop({ type: String, default: 'rows' }) rowsFieldName!: string;
+  /** dataSource 返回行数字段 Promise<{[rowsFieldName]:Array,[totalFieldName]:Number}>  */
   @Prop({ type: String, default: 'total' }) totolFieldName!: string;
   /**
-   * enable page URI mode
-   *
-   * e.g:
+   * 启用分页 URI 模式
+   * 例如:
    * /users/1
    * /users/2
    * /users/3?queryParam=test
@@ -83,6 +88,7 @@ export default class AsyncTable extends Vue {
    * ...
    */
   @Prop({ type: Boolean, default: false }) pageURI!: boolean;
+  /** URI 模式下显示分页的 key */
   @Prop({ type: String, default: 'page' }) pageNoKey!: string;
 
   needTotalList!: Array<{
@@ -147,7 +153,7 @@ export default class AsyncTable extends Vue {
         ...this.$route,
         name: this.$route.name!,
         params: Object.assign({}, this.$route.params, {
-          pageNo: val,
+          [this.pageNoKey]: val,
         }),
       });
   }

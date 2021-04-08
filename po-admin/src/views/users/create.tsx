@@ -1,7 +1,7 @@
 import { Vue, Component } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
 import { gql, formatError } from '@/includes/functions';
-import { UserRole } from '@/includes/datas/enums';
+import { UserRole, UserCapability } from '@/includes/datas/enums';
 import { appStore } from '@/store/modules';
 
 // Types
@@ -20,6 +20,9 @@ import { User, UserCreationModel } from 'types/datas/user';
 
 @Component<UserCreate>({
   name: 'UserCreate',
+  meta: {
+    capabilities: [UserCapability.CreateUsers],
+  },
   head() {
     return {
       title: this.$tv('pageTitle.user.create', 'New User') as string,

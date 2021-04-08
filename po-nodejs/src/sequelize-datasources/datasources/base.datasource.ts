@@ -3,8 +3,8 @@ import { OnModuleInit, Logger } from '@nestjs/common';
 import { Sequelize, ModelDefined, ModelType, Op } from 'sequelize';
 import { kebabCase, isUndefined } from 'lodash';
 import { ForbiddenError } from '@/common/utils/gql-errors.utils';
-import { UserRoleCapability, OptionAutoload } from '@/common/helpers/enums';
-
+import { OptionAutoload } from '@/common/helpers/enums';
+import { UserCapability } from '@/common/helpers/user-capability';
 import { EntityService } from '@/sequelize-entities/entity.service';
 import { ConfigService } from '@/config/config.service';
 
@@ -147,7 +147,7 @@ export abstract class BaseDataSource implements OnModuleInit {
    * @param requestUser 请求的用户
    * @param message 错误消息
    */
-  protected async hasCapability(capability: UserRoleCapability, requestUser: JwtPayload, message?: string) {
+  protected async hasCapability(capability: UserCapability, requestUser: JwtPayload, message?: string) {
     const userRoleCapabilities =
       requestUser && requestUser.role ? (await this.userRoles)[requestUser.role].capabilities : [];
 

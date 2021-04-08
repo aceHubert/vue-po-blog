@@ -18,6 +18,9 @@ export interface PagedPostArgs extends PagedArgs {
   keyword?: string;
   author?: number;
   status?: PostStatus;
+  /**
+   * taxonomyId
+   */
   categoryIds?: number[];
   date?: string;
 }

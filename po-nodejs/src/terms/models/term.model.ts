@@ -3,18 +3,6 @@ import { Meta } from '@/common/models/meta.model';
 
 @ObjectType({ description: '协议模型' })
 export class TermTaxonomy {
-  @Field(() => ID, { description: 'Taxonomy Id' })
-  taxonomyId!: number;
-
-  @Field({ description: '类别' })
-  taxonomy!: string;
-
-  @Field({ description: '类别说明' })
-  description!: string;
-
-  @Field((type) => Int, { description: '关联对象类别数量' })
-  count!: number;
-
   @Field(() => ID, { description: 'Term Id' })
   id!: number;
 
@@ -26,6 +14,21 @@ export class TermTaxonomy {
 
   @Field((type) => Int, { description: '分组' })
   group!: number;
+
+  @Field(() => ID, { description: 'Taxonomy Id' })
+  taxonomyId!: number;
+
+  @Field({ description: '类别' })
+  taxonomy!: string;
+
+  @Field({ description: '类别说明' })
+  description!: string;
+
+  @Field((type) => ID, { description: '父 Id（taxonomyId）' })
+  parentId!: number;
+
+  @Field((type) => Int, { description: '关联对象类别数量' })
+  count!: number;
 }
 
 @ObjectType({ description: '协议关系模型(包含TermTaxonomy)' })

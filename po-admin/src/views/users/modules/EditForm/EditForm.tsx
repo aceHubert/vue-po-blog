@@ -374,7 +374,7 @@ export default class UserEditForm extends Vue {
           <h1>{this.$tv('user.form.groupAccountManagement', 'Account Management')}</h1>
         </a-form-item>
 
-        {userStore.role === UserRole.Administrator && !this.editModel.isSuperAdmin ? (
+        {userStore.role === UserRole.Administrator ? (
           <a-form-item label={this.$tv('user.form.userRole', 'Role')}>
             <a-select style="width:160px" {...{ directives: [{ name: 'decorator', value: ['userRole'] }] }}>
               {Object.values(UserRole)

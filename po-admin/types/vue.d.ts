@@ -2,6 +2,7 @@ import { AxiosStatic } from 'axios';
 import { ApolloClient } from 'apollo-client';
 import { IVueI18n } from 'vue-i18n';
 import { HookFunction, HttpInstance, SettingsFunctions } from './functions';
+import { UserCapability } from 'src/includes/datas/enums';
 
 export interface VueExtraPrototypes
   extends Pick<SettingsFunctions, 'getBaseUrl' | 'getGraphqlPath' | 'getGraphqlWsPath' | 'getApiPath'> {
@@ -16,6 +17,7 @@ declare module 'vue/types/vue' {
     $tv: IVueI18n['tv'];
     $userOptions: Dictionary<string>;
     updateRouteQuery(query: Dictionary<string | undefined>, options?: { replace?: boolean }): void;
+    hasCapability(...capabilities: UserCapability[]): boolean;
   }
 
   interface VueConstructor {

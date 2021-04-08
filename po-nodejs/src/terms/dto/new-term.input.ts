@@ -18,6 +18,9 @@ export class NewTermInput {
   @Field((type) => Int, { nullable: true, description: '分组' })
   group?: number;
 
+  @Field((type) => ID, { nullable: true, defaultValue: 0, description: '父ID' })
+  parentId!: number;
+
   @Field((type) => ID, { nullable: true, description: '如果提供，则自动绑定关系' })
   objectId?: number;
 

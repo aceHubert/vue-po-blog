@@ -44,24 +44,37 @@ export default class SearchFrom extends Vue {
     >
   > &
     tsx.DeclareOnEvents<{
-      onPreFilters: (filters: { keyword?: string; [status: string]: any }) => void; // created 时从 router 我获取的参数
+      /** created 时从 router 获取的初始参数 */
+      onPreFilters: (filters: { keyword?: string; [status: string]: any }) => void;
+      /** 关键字输入框的查询 */
       onSearch: (filters: { keyword?: string; [status: string]: any }) => void;
+      /** 批量操作 */
       onBlukApply: (action: BlukAcitonOption['value']) => void;
     }>;
 
   $scopedSlots!: tsx.InnerScopedSlots<{
-    sub?: void; // 左上角区域（如状态选择有选项则不显示）
-    filter?: void; // 批量修改后面(更多过滤条件)
-    filterRight?: void; // 批量修改右侧（默认显示数据条数）
+    /** 左上角区域（如 statusOptions 有选项则不显示） */
+    sub?: void;
+    /** 批量修改后面(更多过滤条件) */
+    filter?: void;
+    /** 批量修改右侧（默认显示数据行数，如赋值则不显示行数） */
+    filterRight?: void;
   }>;
 
-  @Prop(String) keywordPlaceholder?: string; // keywork input placeholder
-  @Prop({ type: String, default: 'status' }) statusName!: string; // 状态名字，显示到url query key 和 search 参数中 key, 默认：status
-  @Prop({ type: Array, default: () => [] }) statusOptions!: StatusOption[]; // 默认选中值为 underfined 如果未能从 $route.query 中获取到选中参数
-  @Prop({ type: Boolean, default: false }) keepStatusShown!: boolean; // 一直显示所有状态，默认在数量为 > 0 的时候才显示
-  @Prop({ type: Array, default: () => [] }) blukAcitonOptions!: BlukAcitonOption[]; // 批量操作，如果没有选项则不显示
-  @Prop(Boolean) blukApplying?: boolean; // apply 按纽 loading 状态
-  @Prop(Number) itemCount?: number; // dataSource 行数量, 当 >0 时显示批量操作
+  /**  keyword input placeholder */
+  @Prop(String) keywordPlaceholder?: string;
+  /** 状态名字，显示到url query key 和 search 参数中 key, 默认：status */
+  @Prop({ type: String, default: 'status' }) statusName!: string;
+  /**  默认选中值为 underfined 如果未能从 $route.query 中获取到选中参数 */
+  @Prop({ type: Array, default: () => [] }) statusOptions!: StatusOption[];
+  /** 一直显示所有状态，默认在数量为 > 0 的时候才显示 */
+  @Prop({ type: Boolean, default: false }) keepStatusShown!: boolean;
+  /** 批量操作，如果没有选项则不显示 */
+  @Prop({ type: Array, default: () => [] }) blukAcitonOptions!: BlukAcitonOption[];
+  /** apply 按纽 loading 状态 */
+  @Prop(Boolean) blukApplying?: boolean;
+  /** dataSource 行数（显示在表格的右上角）, 当 >0 时显示批量操作, 当scopedSlots.filterRight 有设置时，右上角行数不显示 */
+  @Prop(Number) itemCount?: number;
 
   localeKeyword?: string;
   localeStatus?: StatusOption['value'];
@@ -178,6 +191,7 @@ export default class SearchFrom extends Vue {
                           ghost
                           type="primary"
                           loading={this.blukApplying}
+                          title={this.$tv('searchForm.bulkApplyBtnTitle', 'Apply')}
                           onClick={this.handleBlukAction.bind(this)}
                         >
                           {this.$tv('searchForm.bulkApplyBtnText', 'Apply')}

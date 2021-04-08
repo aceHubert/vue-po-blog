@@ -1,6 +1,6 @@
 import { Vue, Component, Ref } from 'nuxt-property-decorator';
 import { gql, formatError } from '@/includes/functions';
-import { PostStatus } from '@/includes/datas/enums';
+import { PostStatus, UserCapability } from '@/includes/datas/enums';
 import EditForm from './modules/EditForm';
 
 // Types
@@ -20,6 +20,9 @@ import { Post } from 'types/datas/post';
 @Component({
   name: 'PostEdit',
   layout: 'blank',
+  meta: {
+    capabilities: [UserCapability.CreatePosts],
+  },
   asyncData({ route, error, graphqlClient }) {
     return graphqlClient
       .query<{ post: Post }, { id: string }>({
