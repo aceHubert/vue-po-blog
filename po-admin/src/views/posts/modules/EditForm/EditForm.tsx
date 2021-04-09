@@ -3,7 +3,6 @@ import { modifiers as m } from 'vue-tsx-support';
 import { gql, formatError } from '@/includes/functions';
 import { PostStatus, PostCommentStatus, TermTaxonomy } from '@/includes/datas/enums';
 // import { isPlainObject } from '@vue-async/utils';
-import { markdownOption } from '@/config/markdownOptions';
 import LogoSvg from '@/assets/images/logo.svg?inline';
 import classes from './EditForm.less?module';
 
@@ -111,7 +110,6 @@ export default class PostEditForm extends Vue {
   thumbnailList!: any[];
   allowComments!: boolean;
   allowCommentsChanging!: boolean;
-  autoDraft!: boolean; // 从create进来第一次是 auto draft 状态，通过 saveToDraft 保存数据并改变为 draft 状态
   changed!: boolean; // Post 对象值改变
   savingToDarft!: boolean; // 状态变化 => handleSaveToDarft()
   publishing!: boolean; // 状态变化 => handlePublish()
@@ -130,7 +128,6 @@ export default class PostEditForm extends Vue {
       status: this.editModel.status,
       content: this.editModel.content,
       thumbnailList: [],
-      autoDraft: !!this.fromCreate,
       changed: false,
       savingToDarft: false,
       publishing: false,
@@ -140,12 +137,14 @@ export default class PostEditForm extends Vue {
     };
   }
 
-  get editorOptions() {
-    return markdownOption();
-  }
-
   get processing() {
     return this.savingToDarft || this.publishing || this.updating;
+  }
+
+  get editorConfig() {
+    return {
+      toolbar: ['bold', 'italic', '|', 'link'],
+    };
   }
 
   @Watch('content')
@@ -257,6 +256,7 @@ export default class PostEditForm extends Vue {
           .then(({ data }) => {
             if (data?.result) {
               this.$emit('change', this.form.getFieldsValue());
+              this.changed = false;
             }
             resolve(data?.result);
           })
@@ -280,27 +280,6 @@ export default class PostEditForm extends Vue {
         `,
         variables: {
           id: this.editModel.parent || this.editModel.id,
-          status,
-        },
-      })
-      .then(({ data }) => !!data?.result)
-      .catch((err) => {
-        const { message } = formatError(err);
-        this.$message.error(message);
-      });
-  }
-
-  // 修改评论状态
-  updatePostCommentStatus(status: PostCommentStatus) {
-    return this.graphqlClient
-      .mutate<{ result: boolean }, { id: string; status: PostCommentStatus }>({
-        mutation: gql`
-          mutation modifyPostCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
-            result: modifyPostCommentStatus(id: $id, status: $status)
-          }
-        `,
-        variables: {
-          id: this.editModel.id,
           status,
         },
       })
@@ -368,29 +347,27 @@ export default class PostEditForm extends Vue {
 
   handleAllowCommentsChange() {
     this.allowCommentsChanging = true;
-    this.updatePostCommentStatus(this.allowComments ? PostCommentStatus.Disable : PostCommentStatus.Enable)
+    this.graphqlClient
+      .mutate<{ result: boolean }, { id: string; status: PostCommentStatus }>({
+        mutation: gql`
+          mutation modifyPostCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
+            result: modifyPostCommentStatus(id: $id, status: $status)
+          }
+        `,
+        variables: {
+          id: this.editModel.id,
+          status: this.allowComments ? PostCommentStatus.Disable : PostCommentStatus.Enable,
+        },
+      })
       .then((result) => {
         result && (this.allowComments = !this.allowComments);
       })
-      .finally(() => {
-        this.allowCommentsChanging = false;
-      });
-  }
-
-  // 修改post 并将状态修改为draft
-  handleSaveToDraft() {
-    this.savingToDarft = true;
-    const status = PostStatus.Private;
-    this.updatePost(PostStatus.Draft)
-      .then((result) => {
-        if (result) {
-          this.$emit('statusChanged', status);
-          this.status = status;
-        }
+      .catch((err) => {
+        const { message } = formatError(err);
+        this.$message.error(message);
       })
       .finally(() => {
-        this.savingToDarft = false;
-        this.autoDraft && (this.autoDraft = false);
+        this.allowCommentsChanging = false;
       });
   }
 
@@ -402,10 +379,26 @@ export default class PostEditForm extends Vue {
     });
   }
 
+  // 修改post 并将状态修改为draft
+  handleSaveToDraft() {
+    this.savingToDarft = true;
+    const status = PostStatus.Draft;
+    this.updatePost(status)
+      .then((result) => {
+        if (result) {
+          this.$emit('statusChanged', status);
+          this.status = status;
+        }
+      })
+      .finally(() => {
+        this.savingToDarft = false;
+      });
+  }
+
   // 修改post 并将状态修改为publish
   handelPublish() {
     this.publishing = true;
-    const status = PostStatus.Private;
+    const status = PostStatus.Publish;
     this.updatePost(status)
       .then((result) => {
         if (result) {
@@ -508,29 +501,16 @@ export default class PostEditForm extends Vue {
                       </a-button>,
                     ]
                   : [
-                      this.status === PostStatus.Draft && this.autoDraft ? (
-                        <a-button
-                          ghost
-                          type="primary"
-                          disabled={this.processing}
-                          loading={this.savingToDarft}
-                          title={this.$tv('post.btnTips.saveToDraft', 'Save the post into draft box')}
-                          onClick={m.stop.prevent(this.handleSaveToDraft.bind(this))}
-                        >
-                          {this.$tv('post.btnText.saveToDraft', 'Save to Draft')}
-                        </a-button>
-                      ) : this.status === PostStatus.Draft ? (
-                        <a-button
-                          ghost
-                          type="primary"
-                          disabled={!this.changed || this.processing}
-                          loading={this.updating}
-                          title={this.$tv('post.btnTips.save', 'Save ')}
-                          onClick={m.stop.prevent(this.handleUpdate.bind(this))}
-                        >
-                          {this.$tv('post.btnText.save', 'Save')}
-                        </a-button>
-                      ) : null,
+                      <a-button
+                        ghost
+                        type="primary"
+                        disabled={this.processing}
+                        loading={this.savingToDarft}
+                        title={this.$tv('post.btnTips.saveToDraft', 'Save the post into draft box')}
+                        onClick={m.stop.prevent(this.handleSaveToDraft.bind(this))}
+                      >
+                        {this.$tv('post.btnText.saveToDraft', 'Save to Draft')}
+                      </a-button>,
                       <a-button
                         type="primary"
                         disabled={this.processing}
@@ -558,12 +538,9 @@ export default class PostEditForm extends Vue {
         <a-layout>
           <a-layout-content>
             <client-only>
-              <mavon-editor
+              <rich-editor
                 vModel={this.content}
-                toolbars={this.editorOptions}
-                boxShadow={false}
-                subfield={false}
-                ishljs={true}
+                config={this.editorConfig}
                 placeholder={this.$tv('post.contentPlaceholder', 'Please input content')}
                 class={[classes.editor, 'grey lighten-4']}
               />

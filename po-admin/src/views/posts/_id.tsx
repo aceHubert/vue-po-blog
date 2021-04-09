@@ -28,7 +28,7 @@ import { Post } from 'types/datas/post';
       .query<{ post: Post }, { id: string }>({
         query: gql`
           query getPost($id: ID!) {
-            post: duplicatePost(id: $id) {
+            post(id: $id) {
               id
               title
               content

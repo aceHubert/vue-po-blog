@@ -24,13 +24,17 @@ import { Post, PostCreationModel } from 'types/datas/post';
   },
   asyncData({ error, graphqlClient }) {
     return graphqlClient
-      .mutate<{ result: Post }, { model: PostCreationModel }>({
+      .mutate<{ post: Post }, { model: PostCreationModel }>({
         mutation: gql`
           mutation addPost($model: NewPostInput!) {
-            result: addPost(model: $model) {
+            post: addPost(model: $model) {
               id
               title
               content
+              excerpt
+              status
+              parent
+              commentStatus
             }
           }
         `,
@@ -42,7 +46,7 @@ import { Post, PostCreationModel } from 'types/datas/post';
         },
       })
       .then(({ data }) => ({
-        post: data!.result,
+        post: data!.post,
       }))
       .catch((err) => {
         const { statusCode, message } = formatError(err);
