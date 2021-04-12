@@ -251,8 +251,8 @@ export default class Categories extends Vue {
     if (action === BlukActions.Delete) {
       this.$confirm({
         content: this.$tv('category.btnTips.blukDeletePopContent', 'Do you really want to delete these categorys?'),
-        okText: this.$tv('category.btnText.deletePopOkBtn', 'Ok') as string,
-        cancelText: this.$tv('category.btnText.deletePopCancelBtn', 'No') as string,
+        okText: this.$tv('category.btnText.deletePopOkText', 'Ok') as string,
+        cancelText: this.$tv('category.btnText.deletePopCancelText', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
           this.graphqlClient
@@ -274,7 +274,7 @@ export default class Categories extends Vue {
                 this.$message.error(
                   this.$tv(
                     'category.tips.blukDeleteFailed',
-                    'An error occurred during deleting categorys, please try later again!',
+                    'An error occurred while deleting categorys, please try later again!',
                   ) as string,
                 );
               }
@@ -312,7 +312,7 @@ export default class Categories extends Vue {
           this.$message.error(
             this.$tv(
               'category.tips.deleteFailed',
-              'An error occurred during deleting category, please try later again!',
+              'An error occurred while deleting category, please try later again!',
             ) as string,
           );
         }
@@ -364,8 +364,8 @@ export default class Categories extends Vue {
               <a-divider type="vertical" />,
               <a-popconfirm
                 title={this.$tv('category.btnTips.deletePopContent', 'Do you really want to delete this category?')}
-                okText={this.$tv('category.btnText.deletePopOkBtn', 'Ok')}
-                cancelText={this.$tv('category.btnText.deletePopCancelBtn', 'No')}
+                okText={this.$tv('category.btnText.deletePopOkText', 'Ok')}
+                cancelText={this.$tv('category.btnText.deletePopCancelText', 'No')}
                 onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
               >
                 <a

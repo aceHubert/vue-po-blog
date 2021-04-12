@@ -189,8 +189,8 @@ export default class Tags extends Vue {
     if (action === BlukActions.Delete) {
       this.$confirm({
         content: this.$tv('tag.btnTips.blukDeletePopContent', 'Do you really want to delete these tags?'),
-        okText: this.$tv('tag.btnText.deletePopOkBtn', 'Ok') as string,
-        cancelText: this.$tv('tag.btnText.deletePopCancelBtn', 'No') as string,
+        okText: this.$tv('tag.btnText.deletePopOkText', 'Ok') as string,
+        cancelText: this.$tv('tag.btnText.deletePopCancelText', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
           this.graphqlClient
@@ -212,7 +212,7 @@ export default class Tags extends Vue {
                 this.$message.error(
                   this.$tv(
                     'tag.tips.blukDeleteFailed',
-                    'An error occurred during deleting tags, please try later again!',
+                    'An error occurred while deleting tags, please try later again!',
                   ) as string,
                 );
               }
@@ -250,7 +250,7 @@ export default class Tags extends Vue {
           this.$message.error(
             this.$tv(
               'tag.tips.deleteFailed',
-              'An error occurred during deleting tag, please try later again!',
+              'An error occurred while deleting tag, please try later again!',
             ) as string,
           );
         }
@@ -291,8 +291,8 @@ export default class Tags extends Vue {
         <a-divider type="vertical" />
         <a-popconfirm
           title={this.$tv('tag.btnTips.deletePopContent', 'Do you really want to delete this tag?')}
-          okText={this.$tv('tag.btnText.deletePopOkBtn', 'Ok')}
-          cancelText={this.$tv('tag.btnText.deletePopCancelBtn', 'No')}
+          okText={this.$tv('tag.btnText.deletePopOkText', 'Ok')}
+          cancelText={this.$tv('tag.btnText.deletePopCancelText', 'No')}
           onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
         >
           <a href="#none" title={this.$tv('tag.btnTips.delete', 'Delete this tag permanently') as string}>

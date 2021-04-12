@@ -1,4 +1,4 @@
-import { PagerResponse } from './pager';
+import { PagedQuery, PagedResponse } from './paged';
 
 export type PluginsModel = {
   description: string;
@@ -9,9 +9,6 @@ export type PluginsModel = {
   uid: string;
 };
 
-export type PluginsPagerResponse = PagerResponse<PluginsModel>;
+export type PluginsPagedQuery = PagedQuery<{}>;
 
-export type PluginsPagerQuery = {
-  page?: number;
-  size?: number;
-};
+export type PluginsPagedResponse = PagedResponse<PluginsModel>;

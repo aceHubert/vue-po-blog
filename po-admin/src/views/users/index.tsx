@@ -9,13 +9,13 @@ import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
-import { PagerQuery, UserWithRole, UserMetas, UserPagerQuery, UserPagerResponse } from 'types/datas';
+import { PagedQuery, UserWithRole, UserMetas, UserPagedQuery, UserPagedResponse } from 'types/datas';
 import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
 
 // import { Table } from 'types/constants';
 
-type QueryParams = Omit<UserPagerQuery, keyof PagerQuery<{}>>;
+type QueryParams = Omit<UserPagedQuery, keyof PagedQuery<{}>>;
 
 enum BlukActions {
   Delete = 'delete',
@@ -154,7 +154,7 @@ export default class UserIndex extends Vue {
   // 加载 table 数据
   loadData({ page, size }: Parameters<DataSourceFn>[0]) {
     return this.graphqlClient
-      .query<{ users: UserPagerResponse }, UserPagerQuery>({
+      .query<{ users: UserPagedResponse }, UserPagedQuery>({
         query: gql`
           query getUsers($keyword: String, $userRole: USER_ROLE_WITH_NONE, $limit: Int, $offset: Int) {
             users(keyword: $keyword, userRole: $userRole, limit: $limit, offset: $offset) {
@@ -248,8 +248,8 @@ export default class UserIndex extends Vue {
     if (action === BlukActions.Delete) {
       this.$confirm({
         content: this.$tv('user.btnTips.blukDeletePopContent', 'Do you really want to delete these users?'),
-        okText: this.$tv('user.btnText.deletePopOkBtn', 'Ok') as string,
-        cancelText: this.$tv('user.btnText.deletePopCancelBtn', 'No') as string,
+        okText: this.$tv('user.btnText.deletePopOkText', 'Ok') as string,
+        cancelText: this.$tv('user.btnText.deletePopCancelText', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
           this.graphqlClient
@@ -271,7 +271,7 @@ export default class UserIndex extends Vue {
                 this.$message.error(
                   this.$tv(
                     'user.tips.blukDeleteFailed',
-                    'An error occurred during deleting users, please try later again!',
+                    'An error occurred while deleting users, please try later again!',
                   ) as string,
                 );
               }
@@ -309,7 +309,7 @@ export default class UserIndex extends Vue {
           this.$message.error(
             this.$tv(
               'user.tips.deleteFailed',
-              'An error occurred during deleting user, please try later again!',
+              'An error occurred while deleting user, please try later again!',
             ) as string,
           );
         }
@@ -352,8 +352,8 @@ export default class UserIndex extends Vue {
               <a-divider type="vertical" />,
               <a-popconfirm
                 title={this.$tv('user.btnTips.deletePopContent', 'Do you really want to delete this user?')}
-                okText={this.$tv('user.btnText.deletePopOkBtn', 'Ok')}
-                cancelText={this.$tv('user.btnText.deletePopCancelBtn', 'No')}
+                okText={this.$tv('user.btnText.deletePopOkText', 'Ok')}
+                cancelText={this.$tv('user.btnText.deletePopCancelText', 'No')}
                 onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
               >
                 <a href="#none" title={this.$tv('user.btnTips.delete', 'Delete this user permanently') as string}>

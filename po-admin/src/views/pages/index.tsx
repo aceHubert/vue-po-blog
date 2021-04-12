@@ -10,11 +10,11 @@ import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
-import { PagedQuery, Post, PostPagedQuery, PostPagedResponse, Term } from 'types/datas';
+import { PagedQuery, Page, PagePagedQuery, PagePagedResponse } from 'types/datas';
 import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
 
-type QueryParams = Omit<PostPagedQuery, keyof PagedQuery<{}>> & { categoryId: string };
+type QueryParams = Omit<PagePagedQuery, keyof PagedQuery<{}>>;
 
 enum BlukActions {
   Edit = 'edit',
@@ -27,38 +27,31 @@ enum BlukActions {
 {
   prop:true,
   meta:{
-    title: 'All Posts',
-    keepAlive: true,
+    title: 'All Pages',
   }
 }
 </router> */
 }
 
-@Component<PostIndex>({
-  name: 'PostIndex',
+@Component<PageIndex>({
+  name: 'PageIndex',
   meta: {
-    capabilities: [UserCapability.EditPosts],
+    capabilities: [UserCapability.EditPages],
   },
   asyncData({ error, $i18n, graphqlClient }) {
     // 获取分类
     return graphqlClient
       .query<{
-        categories: Term[];
         statusCounts: Array<{ status: PostStatus; count: number }>;
         monthCounts: Array<{ month: string; count: number }>;
       }>({
         query: gql`
           query getFilters {
-            categories: terms(taxonomy: "category") {
-              taxonomyId
-              name
-              parentId
-            }
-            statusCounts: postCountByStatus {
+            statusCounts: pageCountByStatus {
               status
               count
             }
-            monthCounts: postCountByMonth {
+            monthCounts: pageCountByMonth {
               month
               count
             }
@@ -68,7 +61,6 @@ enum BlukActions {
       .then(({ data }) => {
         return {
           statusCounts: data.statusCounts,
-          allCategories: data.categories,
           allMonths: data.monthCounts,
         };
       })
@@ -81,14 +73,13 @@ enum BlukActions {
       });
   },
 })
-export default class PostIndex extends Vue {
+export default class PageIndex extends Vue {
   @InjectReactive({ from: 'isMobile' }) isMobile!: boolean;
   @Ref('table') table!: AsyncTable;
 
   // type 定义
   selectedRowKeys!: string[];
   statusCounts!: Array<{ status: PostStatus; count: number }>;
-  allCategories!: Term[];
   allMonths!: Array<{ month: string; count: number }>;
   itemCount!: number;
   searchQuery!: QueryParams;
@@ -96,12 +87,10 @@ export default class PostIndex extends Vue {
 
   data() {
     const query = this.$route.query as Dictionary<string | null>;
-    let categoryId = '';
     let date = '';
     let author = null;
     try {
       author = query.author ? parseInt(query.author) : null;
-      categoryId = query.cid ? query.cid : '';
       // yyyyMM
       date = query.d && query.d.length === 6 ? query.d : '';
     } catch {
@@ -111,13 +100,10 @@ export default class PostIndex extends Vue {
     return {
       selectedRowKeys: [],
       searchQuery: {
-        categoryId,
         author,
         date,
       },
       statusCounts: [],
-      allCategories: [],
-      categoryId,
       allMonths: [],
       itemCount: 0,
       blukApplying: false,
@@ -142,7 +128,7 @@ export default class PostIndex extends Vue {
     return [
       {
         value: undefined,
-        label: this.$tv('post.status.all', 'All') as string,
+        label: this.$tv('page.status.all', 'All') as string,
         // 总数不记录 trash 状态
         count: this.statusCounts.reduce((prev, curr) => {
           return prev + (curr.status === PostStatus.Trash ? 0 : curr.count);
@@ -157,30 +143,12 @@ export default class PostIndex extends Vue {
     ];
   }
 
-  // a-tree-select treeData 同步加载, 添加 All 选项
-  get categoryOptions(): Array<{ id: string; pId?: string; title: string; value: string; isLeaf?: boolean }> {
-    return [
-      {
-        id: '',
-        value: '',
-        title: this.$tv('post.search.allCategories', 'All Categories') as string,
-        isLeaf: true,
-      },
-      ...this.allCategories.map(({ taxonomyId, name, parentId }) => ({
-        id: taxonomyId,
-        pId: parentId === '0' ? undefined : parentId,
-        value: taxonomyId,
-        title: name,
-      })),
-    ];
-  }
-
   // a-select options, 添加 All 选项
   get dateOptions(): Array<{ value: string; label: string }> {
     return [
       {
         value: '',
-        label: this.$tv('post.search.allDates', 'All Dates') as string,
+        label: this.$tv('page.search.allDates', 'All Dates') as string,
       },
       ...this.allMonths.map(({ month }) => ({
         value: month,
@@ -195,47 +163,31 @@ export default class PostIndex extends Vue {
       ? [
           {
             value: BlukActions.Restore,
-            label: this.$tv('post.search.bulkRestoreAction', 'Restore') as string,
+            label: this.$tv('page.search.bulkRestoreAction', 'Restore') as string,
           },
         ]
       : [
           {
             value: BlukActions.Edit,
-            label: this.$tv('post.search.bulkEditAction', 'Edit') as string,
+            label: this.$tv('page.search.bulkEditAction', 'Edit') as string,
           },
           {
             value: BlukActions.MoveToTrash,
-            label: this.$tv('post.search.bulkTrashAction', 'Move To Trash') as string,
+            label: this.$tv('page.search.bulkTrashAction', 'Move To Trash') as string,
           },
         ];
   }
 
   // 加载 table 数据
   loadData({ page, size }: Parameters<DataSourceFn>[0]) {
-    const { categoryId, ...restQuery } = this.searchQuery;
     return this.graphqlClient
-      .query<{ posts: PostPagedResponse }, PostPagedQuery>({
+      .query<{ pages: PagePagedResponse }, PagePagedQuery>({
         query: gql`
-          query getPosts(
-            $keyword: String
-            $status: POST_STATUS
-            $categoryIds: [ID!]
-            $date: String
-            $limit: Int
-            $offset: Int
-          ) {
-            posts(
-              keyword: $keyword
-              status: $status
-              categoryIds: $categoryIds
-              date: $date
-              limit: $limit
-              offset: $offset
-            ) {
+          query getPages($keyword: String, $status: POST_STATUS, $date: String, $limit: Int, $offset: Int) {
+            pages(keyword: $keyword, status: $status, date: $date, limit: $limit, offset: $offset) {
               rows {
                 id
                 title
-                excerpt
                 status
                 commentStatus
                 commentCount
@@ -250,15 +202,14 @@ export default class PostIndex extends Vue {
           }
         `,
         variables: {
-          ...restQuery,
-          categoryIds: categoryId ? [categoryId] : [],
+          ...this.searchQuery,
           offset: (page - 1) * size,
           limit: size,
         },
       })
       .then(({ data }) => {
-        this.itemCount = data.posts.total;
-        return data.posts;
+        this.itemCount = data.pages.total;
+        return data.pages;
       })
       .catch((err) => {
         const { message } = formatError(err);
@@ -272,7 +223,7 @@ export default class PostIndex extends Vue {
       .query<{ statusCounts: Array<{ status: PostStatus; count: number }> }>({
         query: gql`
           query getStatusCounts {
-            statusCounts: postCountByStatus {
+            statusCounts: pageCountByStatus {
               status
               count
             }
@@ -318,7 +269,6 @@ export default class PostIndex extends Vue {
   // filter 按纽
   handleFilter() {
     this.updateRouteQuery({
-      cid: this.searchQuery.categoryId ? String(this.searchQuery.categoryId) : undefined,
       d: this.searchQuery.date,
     });
     this.refreshTable();
@@ -327,7 +277,7 @@ export default class PostIndex extends Vue {
   // 批量操作
   handleBlukApply(action: BlukActions) {
     if (!this.selectedRowKeys.length) {
-      this.$message.warn({ content: this.$tv('post.tips.bulkRowReqrired', 'Please choose a row!') as string });
+      this.$message.warn({ content: this.$tv('page.tips.bulkRowReqrired', 'Please choose a row!') as string });
       return;
     }
     if (action === BlukActions.MoveToTrash || action === BlukActions.Restore) {
@@ -460,68 +410,68 @@ export default class PostIndex extends Vue {
     };
 
     // 在全部状态下时区分每一条的状态显示
-    const getStatusText = (record: Post) => {
+    const getStatusText = (record: Page) => {
       if (!this.searchQuery.status) {
         if (record.status === PostStatus.Draft) {
-          return this.$tv('post.status.draft', 'Draft');
+          return this.$tv('page.status.draft', 'Draft');
         } else if (record.status === PostStatus.Trash) {
-          return this.$tv('post.status.trash', 'Trash');
+          return this.$tv('page.status.trash', 'Trash');
         } else if (record.status === PostStatus.Private) {
-          return this.$tv('post.status.private', 'Private');
+          return this.$tv('page.status.private', 'Private');
         }
       }
       return;
     };
 
-    const renderActions = (record: Post) => (
+    const renderActions = (record: Page) => (
       <div class={classes.actions}>
         {record.status === PostStatus.Trash
           ? [
               <a
                 href="#none"
-                title={this.$tv('post.btnTips.restore', 'Restore this post') as string}
+                title={this.$tv('page.btnTips.restore', 'Restore this post') as string}
                 onClick={m.stop.prevent(this.handleRestore.bind(this, record.id))}
               >
-                {this.$tv('post.btnText.restore', 'Restore')}
+                {this.$tv('page.btnText.restore', 'Restore')}
               </a>,
               <a-divider type="vertical" />,
               <a-popconfirm
-                title={this.$tv('post.btnTips.deletePopContent', 'Do you really want to delete this post?')}
-                okText={this.$tv('post.btnText.deletePopOkText', 'Ok')}
-                cancelText={this.$tv('post.btnText.deletePopCancelText', 'No')}
+                title={this.$tv('page.btnTips.deletePopContent', 'Do you really want to delete this post?')}
+                okText={this.$tv('page.btnText.deletePopOkText', 'Ok')}
+                cancelText={this.$tv('page.btnText.deletePopCancelText', 'No')}
                 onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
               >
-                <a href="#none" title={this.$tv('post.btnTips.delete', 'Delete this post permanently') as string}>
-                  {this.$tv('post.btnText.delete', 'Delete Permanently')}
+                <a href="#none" title={this.$tv('page.btnTips.delete', 'Delete this post permanently') as string}>
+                  {this.$tv('page.btnText.delete', 'Delete Permanently')}
                 </a>
               </a-popconfirm>,
             ]
           : [
               <nuxt-link
-                to={{ name: 'posts-edit', params: { id: String(record.id) } }}
-                title={this.$tv('post.btnTips.edit', 'Edit') as string}
+                to={{ name: 'pages-edit', params: { id: String(record.id) } }}
+                title={this.$tv('page.btnTips.edit', 'Edit') as string}
               >
-                {this.$tv('post.btnText.edit', 'Edit')}
+                {this.$tv('page.btnText.edit', 'Edit')}
               </nuxt-link>,
               <a-divider type="vertical" />,
               <a
                 href="#none"
-                title={this.$tv('post.btnTips.moveToTrash', 'Move to trash') as string}
+                title={this.$tv('page.btnTips.moveToTrash', 'Move to trash') as string}
                 onClick={m.stop.prevent(this.handleModifyStatus.bind(this, record.id, PostStatus.Trash))}
               >
-                {this.$tv('post.btnText.moveToTrash', 'Trash')}
+                {this.$tv('page.btnText.moveToTrash', 'Trash')}
               </a>,
               <a-divider type="vertical" />,
               record.status === PostStatus.Draft ? (
                 <a
                   href={this.getPreviewUrl(record.id)}
-                  title={this.$tv('post.btnTips.preview', 'Preview this post') as string}
+                  title={this.$tv('page.btnTips.preview', 'Preview this post') as string}
                 >
-                  {this.$tv('post.btnText.preview', 'Preview')}
+                  {this.$tv('page.btnText.preview', 'Preview')}
                 </a>
               ) : (
-                <a href={this.getViewUrl(record.id)} title={this.$tv('post.btnTips.view', 'View this post') as string}>
-                  {this.$tv('post.btnText.view', 'View')}
+                <a href={this.getViewUrl(record.id)} title={this.$tv('page.btnTips.view', 'View this post') as string}>
+                  {this.$tv('page.btnText.view', 'View')}
                 </a>
               ),
             ]}
@@ -531,7 +481,7 @@ export default class PostIndex extends Vue {
     // $scopedSolts 不支持多参数类型定义
     const scopedSolts = () => {
       return {
-        titles: (text: Post['title'], record: Post & { expand?: boolean }) => (
+        titles: (text: Page['title'], record: Page & { expand?: boolean }) => (
           <div class={[classes.columnTitle]}>
             <p class={[classes.title]}>
               <span class="text-ellipsis" style="max-width:180px;display:inline-block;">
@@ -561,7 +511,7 @@ export default class PostIndex extends Vue {
                         name: 'users-profile',
                         query: record.author.id === userStore.id ? {} : { id: String(record.author.id) },
                       }}
-                      title={this.$tv('post.btnTips.edit', 'Edit') as string}
+                      title={this.$tv('page.btnTips.edit', 'Edit') as string}
                     >
                       {record.author.displayName}
                     </nuxt-link>
@@ -582,21 +532,21 @@ export default class PostIndex extends Vue {
             {renderActions(record)}
           </div>
         ),
-        author: (text: Post['author']) =>
+        author: (text: Page['author']) =>
           text ? (
             <nuxt-link
               to={{
                 name: 'users-profile',
                 query: text.id === userStore.id ? {} : { id: text.id },
               }}
-              title={this.$tv('post.btnTips.edit', 'Edit') as string}
+              title={this.$tv('page.btnTips.edit', 'Edit') as string}
             >
               {text.displayName}
             </nuxt-link>
           ) : (
             '-'
           ),
-        commentCount: (text: string, record: Post) => (record.commentStatus === PostCommentStatus.Enable ? text : '-'),
+        commentCount: (text: string, record: Page) => (record.commentStatus === PostCommentStatus.Enable ? text : '-'),
         createTime: (text: string) => $filters.dateFormat(text),
       } as any;
     };
@@ -604,7 +554,7 @@ export default class PostIndex extends Vue {
     return (
       <a-card class="post-index" bordered={false}>
         <SearchForm
-          keywordPlaceholder={this.$tv('post.search.keywordPlaceholder', 'Search Post') as string}
+          keywordPlaceholder={this.$tv('page.search.keywordPlaceholder', 'Search Page') as string}
           itemCount={this.itemCount}
           statusOptions={this.statusOptions}
           blukAcitonOptions={this.blukActionOptions}
@@ -619,18 +569,11 @@ export default class PostIndex extends Vue {
             <a-select
               vModel={this.searchQuery.date}
               options={this.dateOptions}
-              placeholder={this.$tv('post.search.chooseDate', 'Choose date')}
+              placeholder={this.$tv('page.search.chooseDate', 'Choose date')}
               style="min-width:100px;"
             ></a-select>
-            <a-tree-select
-              vModel={this.searchQuery.categoryId}
-              treeDataSimpleMode
-              treeData={this.categoryOptions}
-              placeholder={this.$tv('post.search.chooseCategory', 'Choose category')}
-              style="min-width:120px;"
-            ></a-tree-select>
             <a-button ghost type="primary" onClick={this.handleFilter.bind(this)}>
-              {this.$tv('post.search.filterBtnText', 'Filter')}
+              {this.$tv('page.search.filterBtnText', 'Filter')}
             </a-button>
           </template>
         </SearchForm>

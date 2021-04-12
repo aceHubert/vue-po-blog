@@ -6,21 +6,23 @@ import PostEditMixin from './modules/mixin';
 {
   /* <router>
 {
+  name:'posts-edit',
+  path:':id/edit',
   meta:{
-    title: 'New',   
+    title: 'Edit',
   }
 }
 </router> */
 }
 
-@Component({
-  name: 'PostCreate',
+@Component<PostEdit>({
+  name: 'PostEdit',
   layout: 'blank',
   meta: {
-    capabilities: [UserCapability.CreatePosts],
+    capabilities: [UserCapability.EditPosts],
   },
 })
-export default class PostCreate extends mixins(PostEditMixin) {
+export default class PostEdit extends mixins(PostEditMixin) {
   render() {
     return (
       <PostEditForm
@@ -29,6 +31,7 @@ export default class PostCreate extends mixins(PostEditMixin) {
         editModel={this.post}
         updatePost={this.onUpdatePost.bind(this)}
         updatePostStatus={this.onUpdatePostStatus.bind(this)}
+        onStatusChange={(status) => (this.status = status)}
         {...{
           scopedSlots: {
             formItemAppend: () => (

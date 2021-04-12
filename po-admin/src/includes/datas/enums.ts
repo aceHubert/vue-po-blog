@@ -5,16 +5,14 @@ export enum PostStatus {
   Trash = 'Trash',
 }
 
+export enum PostVisibility {
+  Private,
+  Public,
+}
+
 export enum PostCommentStatus {
   Enable = 'Enable',
   Disable = 'Disabled',
-}
-
-export enum PageStatus {
-  Draft = 'Draft',
-  Publish = 'Publish',
-  Private = 'Private',
-  Trash = 'Trash',
 }
 
 export enum TermTaxonomy {
@@ -67,7 +65,7 @@ export enum UserCapability {
   EditPrivatePosts = 'edit_private_posts',
   DeletePosts = 'delete_posts',
   DeleteOthersPosts = 'delete_others_posts',
-  DeletePublishedPosts = 'delete_publishedPosts',
+  DeletePublishedPosts = 'delete_published_posts',
   DeletePrivatePosts = 'delete_private_posts',
   PublishPost = 'publish_post',
   ModerateComments = 'moderate_comments',

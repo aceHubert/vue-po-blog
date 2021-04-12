@@ -134,7 +134,7 @@ export default class UserEditForm extends Vue {
             this.$message.error(
               this.$tv(
                 'user.tips.updateFailed',
-                'An error occurred during updating user info, please try later again!',
+                'An error occurred while updating user info, please try later again!',
               ) as string,
             );
           }
