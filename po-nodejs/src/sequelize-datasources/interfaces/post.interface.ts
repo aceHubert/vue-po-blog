@@ -1,4 +1,4 @@
-import { PostStatus, PostCommentStatus } from '@/common/helpers/enums';
+import { PostStatus } from '@/common/helpers/enums';
 import { PostAttributes, PostCreationAttributes } from '@/orm-entities/interfaces';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
@@ -17,25 +17,27 @@ export interface PostMetaModel extends MetaModel {
 export interface PagedPostArgs extends PagedArgs {
   keyword?: string;
   author?: number;
+  /**
+   * 匿名用户无效
+   * 注意：查询所有状态时是不包含 Trash 状态
+   */
   status?: PostStatus;
   /**
    * taxonomyId
    */
   categoryIds?: number[];
+  /**
+   * 年(YYYY)/月(YYYYMM)
+   */
   date?: string;
 }
 
-export interface PagedPageArgs extends PagedArgs {
-  keyword?: string;
-  author?: number;
-  status?: PostStatus;
-  date?: string;
-}
+export interface PagedPageArgs extends Omit<PagedPostArgs, 'categoryIds'> {}
 
 export interface PagedPostModel extends Paged<PostModel> {}
 
 export interface NewPostInput
-  extends Omit<PostCreationAttributes, 'id' | 'author' | 'commentCount' | 'createdAt' | 'updatedAt'> {
+  extends Omit<PostCreationAttributes, 'id' | 'author' | 'commentStatus' | 'commentCount' | 'createdAt' | 'updatedAt'> {
   /**
    * metaKey 不可以重复
    */
@@ -62,7 +64,6 @@ export interface UpdatePostInput {
   content?: string;
   excerpt?: string;
   status?: PostStatus;
-  commentStatus?: PostCommentStatus;
 }
 
 export interface UpdatePageInput {

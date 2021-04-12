@@ -22,6 +22,7 @@ export const UserRoles = {
       UserCapability.ManageLinks,
       UserCapability.ManageCategories,
       UserCapability.ManageTags,
+      UserCapability.CreatePosts,
       UserCapability.EditPosts,
       UserCapability.EditOthersPosts,
       UserCapability.EditPublishedPosts,
@@ -30,6 +31,8 @@ export const UserRoles = {
       UserCapability.DeleteOthersPosts,
       UserCapability.DeletePublishedPosts,
       UserCapability.DeletePrivatePosts,
+      UserCapability.ModerateComments,
+      UserCapability.CreatePages,
       UserCapability.EditPages,
       UserCapability.EditOthersPages,
       UserCapability.EditPublishedPages,
@@ -47,8 +50,9 @@ export const UserRoles = {
   [UserRole.Author]: {
     name: 'Author',
     capabilities: [
+      UserCapability.CreatePosts,
       UserCapability.EditPosts,
-      UserCapability.EditPublishedPages,
+      UserCapability.EditPublishedPosts,
       UserCapability.DeletePosts,
       UserCapability.DeletePublishedPosts,
       UserCapability.UploadFiles,

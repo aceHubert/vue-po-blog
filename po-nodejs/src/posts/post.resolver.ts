@@ -38,31 +38,25 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   post(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Fields() fields: ResolveTree,
+    @Context('user') requestUser?: JwtPayload,
   ): Promise<Post | null> {
-    return this.postDataSource.get(id, PostType.Post, this.getFieldNames(fields.fieldsByTypeName.Post));
-  }
-
-  @Authorized()
-  @Query((returns) => Post, { nullable: true, description: '获取编辑文章（在原有数据上创建副本进行编辑）' })
-  duplicatePost(
-    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
-    @Context('user') requestUser: JwtPayload,
-  ) {
-    return this.postDataSource.getDuplicate(id, PostType.Post, requestUser);
+    return this.postDataSource.get(id, PostType.Post, this.getFieldNames(fields.fieldsByTypeName.Post), requestUser);
   }
 
   @Query((returns) => PagedPost, { description: '获取分页文章列表' })
-  posts(@Args() args: PagedPostArgs, @Fields() fields: ResolveTree) {
+  posts(@Args() args: PagedPostArgs, @Fields() fields: ResolveTree, @Context('user') requestUser?: JwtPayload) {
     return this.postDataSource.getPaged(
       args,
       PostType.Post,
       this.getFieldNames(fields.fieldsByTypeName.PagedPost.rows.fieldsByTypeName.Post),
+      requestUser,
     );
   }
 
+  @Authorized()
   @Query((returns) => [PostStatusCount], { description: '获取文章按状态分组数量' })
-  postCountByStatus() {
-    return this.postDataSource.getCountByStatus(PostType.Post);
+  postCountByStatus(@Context('user') requestUser: JwtPayload) {
+    return this.postDataSource.getCountByStatus(PostType.Post, requestUser);
   }
 
   @Query((returns) => [PostDayCount], { description: '获取文章按天分组数量' })
@@ -115,16 +109,6 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     return this.postDataSource.update(id, model, requestUser);
   }
 
-  @Authorized()
-  @Mutation((returns) => Boolean, { description: '修改文章评论状态' })
-  modifyPostCommentStatus(
-    @Args('id', { type: () => ID, description: 'Post id/副本 Post id' }) id: number,
-    @Args('status', { type: () => PostCommentStatus, description: '评论状态' }) status: PostCommentStatus,
-    @Context('user') requestUser: JwtPayload,
-  ): Promise<boolean> {
-    return this.postDataSource.updateCommentStatus(id, status, requestUser);
-  }
-
   // Page 状共用以下方法
   @Mutation((returns) => Boolean, { description: '修改文章或页面状态（Trash 状态下不支持修改）' })
   modifyPostOrPageStatus(
@@ -140,8 +124,19 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   blukModifyPostOrPageStatus(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
     @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
+    @Context('user') requestUser: JwtPayload,
   ): Promise<boolean> {
-    return this.postDataSource.blukUpdateStatus(ids, status);
+    return this.postDataSource.blukUpdateStatus(ids, status, requestUser);
+  }
+
+  @Authorized()
+  @Mutation((returns) => Boolean, { description: '修改文章或页面评论状态' })
+  modifyPostOrPageCommentStatus(
+    @Args('id', { type: () => ID, description: 'Post id/副本 Post id' }) id: number,
+    @Args('status', { type: () => PostCommentStatus, description: '评论状态' }) status: PostCommentStatus,
+    @Context('user') requestUser: JwtPayload,
+  ): Promise<boolean> {
+    return this.postDataSource.updateCommentStatus(id, status, requestUser);
   }
 
   @Authorized()
@@ -172,5 +167,14 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     @Context('user') requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.delete(id, requestUser);
+  }
+
+  @Authorized()
+  @Mutation((returns) => Boolean, { description: '删除文章或页面（非 Trash 状态下无法删除）' })
+  blukRemovePostOrPage(
+    @Args('ids', { type: () => [ID!], description: 'Post/Page id' }) ids: number[],
+    @Context('user') requestUser: JwtPayload,
+  ): Promise<boolean> {
+    return this.postDataSource.blukDelete(ids, requestUser);
   }
 }

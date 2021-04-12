@@ -167,7 +167,7 @@ export class DbInitDataSource extends BaseDataSource {
 
       // 初始化页面和文章
       await this.models.Posts.bulkCreate(
-        [{ title: 'Article', name: 'article', author: 1, content: '##### This is an article.' }],
+        [{ title: 'Article', name: 'article', author: 1, content: '<p>This is an article.</p>' }],
         { transaction: t },
       );
 

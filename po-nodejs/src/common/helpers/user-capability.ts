@@ -24,16 +24,16 @@ export enum UserCapability {
 
   // posts
   CreatePosts = 'create_posts',
-  EditPosts = 'edit_posts',
-  EditOthersPosts = 'edit_others_post',
-  EditPublishedPosts = 'edit_published_posts',
-  EditPrivatePosts = 'edit_private_posts',
+  EditPosts = 'edit_posts', // 编辑文章
+  EditOthersPosts = 'edit_others_post', // 编辑别人的文章
+  EditPublishedPosts = 'edit_published_posts', // 编辑发布的文章
+  EditPrivatePosts = 'edit_private_posts', // 编辑别人的私有文章
   DeletePosts = 'delete_posts',
   DeleteOthersPosts = 'delete_others_posts',
-  DeletePublishedPosts = 'delete_publishedPosts',
+  DeletePublishedPosts = 'delete_published_posts',
   DeletePrivatePosts = 'delete_private_posts',
-  PublishPost = 'publish_post',
-  ModerateComments = 'moderate_comments',
+  PublishPost = 'publish_post', // 发布文章
+  ModerateComments = 'moderate_comments', // 修改评论
 
   // pages
   CreatePages = 'create_pages',

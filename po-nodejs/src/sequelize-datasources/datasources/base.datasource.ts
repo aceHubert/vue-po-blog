@@ -142,16 +142,28 @@ export abstract class BaseDataSource implements OnModuleInit {
   }
 
   /**
-   * 验证用户是否有功能操作权限，如果没有则抛出 ForbiddenError
+   * 验证用户是否有功能操作权限
    * @param capability 验证的功能
    * @param requestUser 请求的用户
-   * @param message 错误消息
+   * @param messageOrCallback 错误消息（如果没有权限，则抛出 ForbiddenError 异常） 或 callback 函数（结果会通过参数传递给函数）
    */
-  protected async hasCapability(capability: UserCapability, requestUser: JwtPayload, message?: string) {
+  protected async hasCapability(
+    capability: UserCapability,
+    requestUser: JwtPayload,
+    messageOrCallback?: string | ((result: boolean) => void),
+  ) {
     const userRoleCapabilities =
       requestUser && requestUser.role ? (await this.userRoles)[requestUser.role].capabilities : [];
 
-    if (!userRoleCapabilities.length || !userRoleCapabilities.some((userCapability) => userCapability === capability)) {
+    const result = Boolean(
+      userRoleCapabilities.length && userRoleCapabilities.some((userCapability) => userCapability === capability),
+    );
+
+    if (messageOrCallback && typeof messageOrCallback === 'function') {
+      const callback = messageOrCallback;
+      callback(result);
+    } else if (!result) {
+      const message = messageOrCallback;
       throw new ForbiddenError(
         message || `Access denied! You don't have capability "${kebabCase(capability)}" for this action!`,
       );
