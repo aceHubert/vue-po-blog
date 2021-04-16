@@ -3,7 +3,7 @@
  */
 import { Component, Ref, mixins } from 'nuxt-property-decorator';
 import { gql, formatError } from '@/includes/functions';
-import { PostCommentStatus, PostStatus, PostVisibility, TermTaxonomy } from '@/includes/datas/enums';
+import { PostCommentStatus, PostStatus, PostVisibility, UserCapability, TermTaxonomy } from '@/includes/datas';
 import { PostEditForm } from '@/components';
 import { termMixin, postMixin } from '@/mixins';
 
@@ -74,6 +74,7 @@ import { Term } from 'types/datas/term';
             model: {
               title: '',
               content: '',
+              excerpt: '',
             },
           },
         })
@@ -100,7 +101,7 @@ import { Term } from 'types/datas/term';
                   taxonomyId
                   name
                 }
-                myTags: termRelationships(objectId: $id, taxonomy: "tag") {
+                myTags: termsByObjectId(objectId: $id, taxonomy: "tag") {
                   taxonomyId
                 }
                 categories: terms(taxonomy: "category") {
@@ -108,7 +109,7 @@ import { Term } from 'types/datas/term';
                   name
                   parentId
                 }
-                myCategories: termRelationships(objectId: $id, taxonomy: "category") {
+                myCategories: termsByObjectId(objectId: $id, taxonomy: "category") {
                   taxonomyId
                 }
               }
@@ -177,6 +178,10 @@ export default class PostEditMixin extends mixins(postMixin, termMixin) {
       thumbnailList: [],
       post: {},
     };
+  }
+
+  get hasPublishCapability() {
+    return this.hasCapability(UserCapability.PublishPosts);
   }
 
   onUpdatePost(model: PostUpdateModel) {

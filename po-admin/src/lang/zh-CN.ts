@@ -120,6 +120,7 @@ const locale = {
     installedPlugins: '@:menu.plugin.installed',
     allUsers: '@:menu.user.users',
     users: '@:menu.user.root',
+    profile: '个人信息',
     tools: '@:menu.tools.root',
     import: '@:menu.tools.import',
     export: '@:menu.tools.export',
@@ -146,10 +147,13 @@ const locale = {
   post: {
     status: {
       all: '全部', // 仅用于搜索
+      self: '我的',
       draft: '草稿',
       publish: '已发布',
       private: '私有',
-      trash: '垃圾箱',
+      pending: '待发布',
+      review: '待审核', // pending 状态自己显示的状态
+      trash: '回收站',
     },
     visibility: {
       private: '私有',
@@ -160,14 +164,16 @@ const locale = {
       allDates: '所有日期',
       allCategories: '所有分类',
       bulkEditAction: '编辑',
-      bulkTrashAction: '移至垃圾箱',
+      bulkTrashAction: '移至回收站',
       filterBtnText: '过滤',
     },
     column: {
       title: '标题',
       author: '作者',
-      commentCount: '评论数量',
-      createTime: '创建时间',
+      category: '分类',
+      tag: '标签',
+      commentCount: '评论',
+      createTime: '日期',
     },
     form: {
       settingsTitle: '设置',
@@ -191,7 +197,7 @@ const locale = {
     },
     tips: {
       bulkRowReqrired: '@:common.tips.bulkRowReqrired',
-      trashStatusEdit: '文章在垃圾箱中，请先恢复后再操作！',
+      trashStatusEdit: '文章在回收站中，请先恢复后再操作！',
       notExists: '文章不在在，或被管理员删除！',
       updateFaild: '修改文章发生错误，请稍后重试！',
       updateSuccessful: '修改文章成功！',
@@ -207,12 +213,13 @@ const locale = {
       deletePopOkText: '@:common.btnText.ok',
       deletePopCancelText: '@:common.btnText.no',
       publish: '发布',
+      review: '提交审核',
       upload: '点击上传',
       view: '查看',
       preview: '预览',
       restore: '重置',
       moveToDraft: '移至草稿箱',
-      moveToTrash: '移至垃圾箱',
+      moveToTrash: '移至回收站',
       switchToDraft: '切换到草稿箱',
     },
     btnTips: {
@@ -223,8 +230,8 @@ const locale = {
       delete: '@:post.btnText.delete',
       deletePopContent: '确定永久删除这篇文章吗？',
       reset: '@:post.btnText.reset',
-      back: '@:post.btnText.back',
       publish: '@:post.btnText.publish',
+      review: '@:post.btnText.review',
       view: '@:post.btnText.view',
       preview: '@:post.btnText.preview',
       restore: '@:post.btnText.restore',
@@ -238,16 +245,17 @@ const locale = {
   page: {
     status: {
       all: '全部', // 仅用于搜索
+      self: '我的',
       draft: '草稿',
       publish: '已发布',
       private: '私有',
-      trash: '垃圾箱',
+      trash: '回收站',
     },
     search: {
       keywordPlaceholder: '搜索页面',
       allDates: '所有日期',
       bulkEditAction: '编辑',
-      bulkTrashAction: '移至垃圾箱',
+      bulkTrashAction: '移至回收站',
       filterBtnText: '过滤',
     },
     column: {
@@ -272,7 +280,7 @@ const locale = {
     },
     tips: {
       bulkRowReqrired: '@:common.tips.bulkRowReqrired',
-      trashStatusEdit: '页面在垃圾箱中，请先恢复后再操作！',
+      trashStatusEdit: '页面在回收站中，请先恢复后再操作！',
       notExists: '页面不在在，或被管理员删除！',
       updateFaild: '修改页面发生错误，请稍后重试！',
       updateSuccessful: '修改页面成功！',
@@ -290,12 +298,13 @@ const locale = {
       unpublishOkText: '@:common.btnText.ok',
       unpublishCancelBtn: '@:common.btnText.no',
       publish: '发布',
+      review: '提交审核',
       upload: '点击上传',
       view: '查看',
       preview: '预览',
       restore: '重置',
       moveToDraft: '移至草稿箱',
-      moveToTrash: '移至垃圾箱',
+      moveToTrash: '移至回收站',
       switchToDraft: '切换到草稿箱',
     },
     btnTips: {
@@ -306,8 +315,8 @@ const locale = {
       delete: '@:page.btnText.delete',
       deletePopContent: '确定永久删除这篇文章吗？',
       reset: '@:page.btnText.reset',
-      back: '@:page.btnText.back',
       publish: '@:page.btnText.publish',
+      review: '@:post.btnText.review',
       view: '@:page.btnText.view',
       preview: '@:page.btnText.preview',
       restore: '@:page.btnText.restore',
@@ -527,6 +536,7 @@ const locale = {
     tips: {
       required: '必填',
       bulkRowReqrired: '请选择至少一行数据',
+      logout: '登出...',
     },
     placeholder: {
       input: '请输入{field}',

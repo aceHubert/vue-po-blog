@@ -51,7 +51,7 @@ export type UserResponse = User & {
 };
 
 export type UserPagedQuery = PagedQuery<{
-  keywords?: string;
+  keyword?: string;
   userRole?: UserRole;
 }>;
 

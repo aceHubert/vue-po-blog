@@ -1,5 +1,5 @@
 import { Component, mixins } from 'nuxt-property-decorator';
-import { PostStatus, PostVisibility, UserCapability } from '@/includes/datas/enums';
+import { PostStatus, PostVisibility, UserCapability } from '@/includes/datas';
 import PostEditForm from '@/components/PostEditForm';
 import PageEditMixin from './modules/mixin';
 
@@ -34,7 +34,7 @@ export default class PageEdit extends mixins(PageEditMixin) {
         isPage
         {...{
           scopedSlots: {
-            formItemAppend: () => (
+            afterFormItem: () => (
               <div>
                 <a-divider class="my-0"></a-divider>
 

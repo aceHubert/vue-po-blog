@@ -2,6 +2,9 @@ import { Vue, Component } from 'nuxt-property-decorator';
 import { appStore } from '@/store/modules';
 import { Layout, Theme, ContentWidth } from '@/config/proLayoutConfigs';
 
+// Types
+import { Menu } from 'types/functions';
+
 @Component
 export default class AppMixin extends Vue {
   get layout() {
@@ -84,5 +87,40 @@ export default class AppMixin extends Vue {
   }
   setColorWeak(val: boolean) {
     appStore.toggleColorWeak(val);
+  }
+
+  /**
+   * 菜单角色权限过滤
+   */
+  menuRoleFilter(menus: Menu[]): Menu[] {
+    return menus
+      .map((menu) => {
+        // 根目录没有设置权限，或有权限
+        if (!menu.capabilities || this.hasCapability(menu.capabilities)) {
+          // 如果有设置子目录，判断权限，否则直接显示
+          if (menu.children) {
+            const children = menu.children
+              .map((child) => {
+                // 子目录有权限
+                if (!child.capabilities || this.hasCapability(child.capabilities)) {
+                  return child;
+                }
+                return false;
+              })
+              .filter(Boolean);
+            // 如果不在在子目录，则根目录也一同不显示
+            if (children.length) {
+              return {
+                ...menu,
+                children,
+              };
+            }
+            return false;
+          }
+          return menu;
+        }
+        return false;
+      })
+      .filter(Boolean) as Menu[];
   }
 }

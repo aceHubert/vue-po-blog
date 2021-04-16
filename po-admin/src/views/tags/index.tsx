@@ -2,7 +2,7 @@ import { Vue, Component, Watch, Ref, InjectReactive } from 'nuxt-property-decora
 import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm, TermEditForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { TermTaxonomy, UserCapability } from '@/includes/datas/enums';
+import { TermTaxonomy, UserCapability } from '@/includes/datas';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
@@ -27,7 +27,7 @@ enum BlukActions {
 @Component({
   name: 'Tags',
   meta: {
-    capabilities: [UserCapability.EditPosts],
+    capabilities: [UserCapability.ManageTags],
   },
 })
 export default class Tags extends Vue {
@@ -37,7 +37,6 @@ export default class Tags extends Vue {
   // type 定义
   selectedRowKeys!: string[];
   itemCount!: number;
-  searchQuery!: TermQuery;
   blukApplying!: boolean;
   formModelShown!: boolean;
   editModel?: Term;
@@ -46,7 +45,6 @@ export default class Tags extends Vue {
     return {
       selectedRowKeys: [],
       itemCount: 0,
-      searchQuery: {},
       blukApplying: false,
       formModelShown: false,
       editModel: undefined,
@@ -67,7 +65,7 @@ export default class Tags extends Vue {
   }
 
   // 批量操作
-  get blukActionOptions(): BlukAcitonOption<BlukActions>[] {
+  get blukActionOptions(): BlukAcitonOption[] {
     return [
       {
         value: BlukActions.Delete,
@@ -87,6 +85,9 @@ export default class Tags extends Vue {
 
   // 加载 table 数据
   loadData() {
+    const query: TermQuery = {
+      keyword: this.$route.query['keyword'] as string,
+    };
     return this.graphqlClient
       .query<{ terms: Term[] }, TermQuery>({
         query: gql`
@@ -100,9 +101,7 @@ export default class Tags extends Vue {
             }
           }
         `,
-        variables: {
-          ...this.searchQuery,
-        },
+        variables: query,
       })
       .then(({ data }) => {
         this.itemCount = data.terms.length;
@@ -175,13 +174,12 @@ export default class Tags extends Vue {
   }
 
   // keyword 的搜索按纽
-  handleSearch(query: { keyword?: string }) {
-    Object.assign(this.searchQuery, query);
+  handleSearch() {
     this.refreshTable();
   }
 
   // 批量操作
-  handleBlukApply(action: BlukActions) {
+  handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
       this.$message.warn({ content: this.$tv('tag.tips.bulkRowReqrired', 'Please choose a row!') as string });
       return;
@@ -350,9 +348,6 @@ export default class Tags extends Vue {
           itemCount={this.itemCount}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
-          onPreFilters={(query) => {
-            Object.assign(this.searchQuery, query);
-          }}
           onSearch={this.handleSearch.bind(this)}
           onBlukApply={this.handleBlukApply.bind(this)}
         >

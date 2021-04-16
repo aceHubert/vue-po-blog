@@ -1,7 +1,7 @@
 import { Component, mixins } from 'nuxt-property-decorator';
-import { PostStatus, PostVisibility, UserCapability } from '@/includes/datas/enums';
+import { PostStatus, PostVisibility, UserCapability } from '@/includes/datas';
 import { PostEditForm } from '@/components';
-import PostEditMixin from './modules/mixin';
+import PostEditMixin from './modules/edit-mixin';
 
 {
   /* <router>
@@ -34,7 +34,7 @@ export default class PostEdit extends mixins(PostEditMixin) {
         onStatusChange={(status) => (this.status = status)}
         {...{
           scopedSlots: {
-            formItemAppend: () => (
+            afterFormItem: () => (
               <div>
                 <a-form-item
                   class="px-3 pb-4"
@@ -64,33 +64,42 @@ export default class PostEdit extends mixins(PostEditMixin) {
                         <span style="line-height:24px;"> {this.$tv('post.form.visibility', 'Visibility')}</span>
                       </a-col>
                       <a-col span={18}>
-                        <a-popover vModel={this.visibilityPopShown} placement="bottomRight" trigger="click">
-                          <template slot="content">
-                            <a-radio-group vModel={this.visibility} onChange={this.handleVisibility.bind(this)}>
-                              <a-radio style="display:block" value={PostVisibility.Public}>
-                                {this.$tv('post.visibility.public', 'Public')}
-                                <span class="grey--text" style="display:block">
-                                  {this.$tv('post.visibility.publicDescription', 'Visible for everyone!')}
-                                </span>
-                              </a-radio>
-                              <a-radio style="display:block" value={PostVisibility.Private}>
-                                {this.$tv('post.visibility.private', 'Private')}
-                                <span class="grey--text" style="display:block">
-                                  {this.$tv(
-                                    'post.visibility.privateDescription',
-                                    'Only visible to site admins and editors',
-                                  )}
-                                </span>
-                              </a-radio>
-                            </a-radio-group>
-                          </template>
-                          <a-button type="link" size="small">
+                        {this.hasPublishCapability ? (
+                          <a-popover vModel={this.visibilityPopShown} placement="bottomRight" trigger="click">
+                            <template slot="content">
+                              <a-radio-group vModel={this.visibility} onChange={this.handleVisibility.bind(this)}>
+                                <a-radio style="display:block" value={PostVisibility.Public}>
+                                  {this.$tv('post.visibility.public', 'Public')}
+                                  <span class="grey--text" style="display:block">
+                                    {this.$tv('post.visibility.publicDescription', 'Visible for everyone!')}
+                                  </span>
+                                </a-radio>
+                                <a-radio style="display:block" value={PostVisibility.Private}>
+                                  {this.$tv('post.visibility.private', 'Private')}
+                                  <span class="grey--text" style="display:block">
+                                    {this.$tv(
+                                      'post.visibility.privateDescription',
+                                      'Only visible to site admins and editors',
+                                    )}
+                                  </span>
+                                </a-radio>
+                              </a-radio-group>
+                            </template>
+                            <a-button type="link" size="small">
+                              {this.$tv(
+                                `post.visibility.${this.status === PostStatus.Private ? 'private' : 'public'}`,
+                                this.status === PostStatus.Private ? 'Private' : 'Public',
+                              )}
+                            </a-button>
+                          </a-popover>
+                        ) : (
+                          <span style="line-height:24px;">
                             {this.$tv(
                               `post.visibility.${this.status === PostStatus.Private ? 'private' : 'public'}`,
                               this.status === PostStatus.Private ? 'Private' : 'Public',
                             )}
-                          </a-button>
-                        </a-popover>
+                          </span>
+                        )}
                       </a-col>
                     </a-row>
                   </a-collapse-panel>

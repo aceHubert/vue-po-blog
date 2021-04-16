@@ -28,6 +28,8 @@ export default class TermMixin extends Vue {
           mutation createTerm($model: NewTermInput!) {
             term: addTerm(model: $model) {
               id
+              taxonomyId
+              name
             }
           }
         `,

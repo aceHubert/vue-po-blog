@@ -1,7 +1,7 @@
 import { Vue, Component } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
 import { gql, formatError } from '@/includes/functions';
-import { UserRole, UserCapability } from '@/includes/datas/enums';
+import { UserRole, UserCapability } from '@/includes/datas';
 import { appStore } from '@/store/modules';
 
 // Types

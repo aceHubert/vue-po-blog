@@ -1,8 +1,8 @@
-import { Vue, Component, Watch, Ref, InjectReactive } from 'nuxt-property-decorator';
+import { Vue, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm, TermEditForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { TermTaxonomy, UserCapability } from '@/includes/datas/enums';
+import { TermTaxonomy, UserCapability } from '@/includes/datas';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
@@ -27,7 +27,7 @@ enum BlukActions {
 @Component({
   name: 'Categories',
   meta: {
-    capabilities: [UserCapability.EditPosts],
+    capabilities: [UserCapability.ManageCategories],
   },
 })
 export default class Categories extends Vue {
@@ -37,7 +37,6 @@ export default class Categories extends Vue {
   // type 定义
   selectedRowKeys!: string[];
   itemCount!: number;
-  searchQuery!: TermQuery;
   blukApplying!: boolean;
   formModelShown!: boolean;
   editModel?: Term;
@@ -46,7 +45,6 @@ export default class Categories extends Vue {
     return {
       selectedRowKeys: [],
       itemCount: 0,
-      searchQuery: {},
       blukApplying: false,
       formModelShown: false,
       editModel: undefined,
@@ -67,7 +65,7 @@ export default class Categories extends Vue {
   }
 
   // 批量操作
-  get blukActionOptions(): BlukAcitonOption<BlukActions>[] {
+  get blukActionOptions(): BlukAcitonOption[] {
     return [
       {
         value: BlukActions.Delete,
@@ -76,17 +74,11 @@ export default class Categories extends Vue {
     ];
   }
 
-  @Watch('formModelShown')
-  watchFormModelShown(val: boolean) {
-    // v-model 只是显示/隐藏, EditForm数据修改后没会刷新
-    // 每次显示时强制刷新一次
-    if (val) {
-      this.$forceUpdate();
-    }
-  }
-
   // 加载 table 数据
   loadData() {
+    const query: TermQuery = {
+      keyword: this.$route.query['keyword'] as string,
+    };
     return this.graphqlClient
       .query<{ terms: Term[] }, TermQuery>({
         query: gql`
@@ -102,15 +94,13 @@ export default class Categories extends Vue {
             }
           }
         `,
-        variables: {
-          ...this.searchQuery,
-        },
+        variables: query,
       })
       .then(({ data }) => {
         this.itemCount = data.terms.length;
         const rows: Array<Term & { displayName?: string }> = [];
         // 当有搜索条件时，嵌套会出现断层。直接显示即可
-        if (this.searchQuery.keyword) {
+        if (query.keyword) {
           // 根目录倒序
           rows.push(...data.terms.sort((a, b) => (a.id > b.id ? -1 : 1)));
         } else {
@@ -237,13 +227,12 @@ export default class Categories extends Vue {
   }
 
   // keyword 的搜索按纽
-  handleSearch(query: { keyword?: string }) {
-    Object.assign(this.searchQuery, query);
+  handleSearch() {
     this.refreshTable();
   }
 
   // 批量操作
-  handleBlukApply(action: BlukActions) {
+  handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
       this.$message.warn({ content: this.$tv('category.tips.bulkRowReqrired', 'Please choose a row!') as string });
       return;
@@ -326,15 +315,6 @@ export default class Categories extends Vue {
       });
   }
 
-  // 行Checkbox状态
-  getCheckboxProps(record: Term) {
-    return {
-      props: {
-        disabled: record.id === this.$userOptions['default_category'],
-      },
-    };
-  }
-
   // 行选择
   handleSelectChange(selectedRowKeys: Array<string | number>) {
     this.selectedRowKeys = selectedRowKeys as any;
@@ -345,6 +325,15 @@ export default class Categories extends Vue {
       return (this.columns as Array<{ title: string; dataIndex: string }>).find(
         (column) => column.dataIndex === dataIndex,
       )?.title;
+    };
+
+    // 行Checkbox状态
+    const getCheckboxProps = (record: Term) => {
+      return {
+        props: {
+          disabled: record.id === this.$userOptions['default_category'],
+        },
+      };
     };
 
     const renderActions = (record: Term) => (
@@ -428,9 +417,6 @@ export default class Categories extends Vue {
           itemCount={this.itemCount}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
-          onPreFilters={(query) => {
-            Object.assign(this.searchQuery, query);
-          }}
           onSearch={this.handleSearch.bind(this)}
           onBlukApply={this.handleBlukApply.bind(this)}
         >
@@ -457,7 +443,7 @@ export default class Categories extends Vue {
           showPagination={false}
           rowSelection={{
             selectedRowKeys: this.selectedRowKeys,
-            getCheckboxProps: this.getCheckboxProps.bind(this),
+            getCheckboxProps: getCheckboxProps.bind(this),
             onChange: this.handleSelectChange.bind(this),
           }}
           rowClassName={() => classes.tableRow}

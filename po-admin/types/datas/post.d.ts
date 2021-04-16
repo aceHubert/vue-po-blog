@@ -10,6 +10,8 @@ export type Post = {
   status: PostStatus;
   commentStatus: PostCommentStatus;
   commentCount: number;
+  categories: Array<{ id: string; name: string }>;
+  tags: Array<{ id: string; name: string }>;
   createTime: Date;
 };
 
@@ -30,10 +32,13 @@ export type PostUpdateModel = Partial<
 >;
 
 export type PostPagedQuery = PagedQuery<{
-  keywords?: string;
+  keyword?: string;
   author?: number;
   status?: PostStatus;
-  categoryIds?: string[];
+  categoryId?: string;
+  categoryName?: string;
+  tagId?: string;
+  tagName?: string;
   date?: string; // yyyyMM
 }>;
 

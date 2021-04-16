@@ -4,7 +4,7 @@ import { lowerFirst } from 'lodash-es';
 import { trailingSlash } from '@/utils/path';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { PostCommentStatus, PostStatus, UserCapability } from '@/includes/datas/enums';
+import { PostCommentStatus, PostStatus, UserCapability } from '@/includes/datas';
 import { userStore } from '@/store/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
@@ -17,7 +17,6 @@ import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchFo
 type QueryParams = Omit<PagePagedQuery, keyof PagedQuery<{}>>;
 
 enum BlukActions {
-  Edit = 'edit',
   MoveToTrash = 'moveToTrash',
   Restore = 'restore',
 }
@@ -124,7 +123,7 @@ export default class PageIndex extends Vue {
   }
 
   // 状态选项 添加 All 选项
-  get statusOptions(): StatusOption<PostStatus | undefined>[] {
+  get statusOptions(): StatusOption[] {
     return [
       {
         value: undefined,
@@ -158,7 +157,7 @@ export default class PageIndex extends Vue {
   }
 
   // 批量操作
-  get blukActionOptions(): BlukAcitonOption<BlukActions>[] {
+  get blukActionOptions(): BlukAcitonOption[] {
     return this.searchQuery.status === PostStatus.Trash
       ? [
           {
@@ -167,10 +166,6 @@ export default class PageIndex extends Vue {
           },
         ]
       : [
-          {
-            value: BlukActions.Edit,
-            label: this.$tv('page.search.bulkEditAction', 'Edit') as string,
-          },
           {
             value: BlukActions.MoveToTrash,
             label: this.$tv('page.search.bulkTrashAction', 'Move To Trash') as string,
@@ -261,8 +256,7 @@ export default class PageIndex extends Vue {
   }
 
   // keyword 的搜索按纽
-  handleSearch(query: { keyword?: string; status?: PostStatus }) {
-    Object.assign(this.searchQuery, query);
+  handleSearch() {
     this.refreshTable();
   }
 
@@ -275,7 +269,7 @@ export default class PageIndex extends Vue {
   }
 
   // 批量操作
-  handleBlukApply(action: BlukActions) {
+  handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
       this.$message.warn({ content: this.$tv('page.tips.bulkRowReqrired', 'Please choose a row!') as string });
       return;
@@ -314,8 +308,6 @@ export default class PageIndex extends Vue {
         .finally(() => {
           this.blukApplying = false;
         });
-    } else if (action === BlukActions.Edit) {
-      // todo
     }
   }
 
@@ -559,9 +551,6 @@ export default class PageIndex extends Vue {
           statusOptions={this.statusOptions}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
-          onPreFilters={(query) => {
-            Object.assign(this.searchQuery, query);
-          }}
           onSearch={this.handleSearch.bind(this)}
           onBlukApply={this.handleBlukApply.bind(this)}
         >

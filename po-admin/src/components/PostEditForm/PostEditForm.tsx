@@ -1,6 +1,6 @@
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
-import { PostStatus } from '@/includes/datas/enums';
+import { PostStatus, UserCapability } from '@/includes/datas';
 // import { isPlainObject } from '@vue-async/utils';
 import LogoSvg from '@/assets/images/logo.svg?inline';
 import classes from './PostEditForm.less?module';
@@ -35,10 +35,22 @@ export default class PostEditForm extends Vue {
     }>;
 
   $scopedSlots!: tsx.InnerScopedSlots<{
+    /** logo 右侧 */
+    leftAction?: void;
+    /** 右侧操作按纽之前 */
+    rightPrefixAction?: void;
+    /** 右侧按纽中间（操作按纽之后，设置按纽之前） */
+    rightMiddleAction?: void;
+    /** 设置按纽之后 */
+    rightAppendAction?: void;
+    /** 跟在 form-item 之前，form 内部 */
+    beforeFormItem?: void;
     /** 跟在 form-item 之后，form 内部 */
-    formItemAppend?: void;
-    /** 跟在 form之后 */
-    formAppend?: void;
+    afterFormItem?: void;
+    /** 跟在 form 之前 */
+    beforeForm?: void;
+    /** 跟在 form 之后 */
+    afterForm?: void;
   }>;
 
   /** 修改的实体 */
@@ -64,6 +76,7 @@ export default class PostEditForm extends Vue {
   publishing!: boolean; // 状态变化 => handlePublish()
   updating!: boolean; // 状态无变化 => handleUpdate()
   makingPrivate!: boolean; // 状态变化 => handleMakePrivate()
+  reviewSubmiting!: boolean; // 状态变化 => handleSubmitReview()
   siderCollapsed!: boolean; // 展开侧边栏
 
   data() {
@@ -75,12 +88,13 @@ export default class PostEditForm extends Vue {
       publishing: false,
       updating: false,
       makingPrivate: false,
+      reviewSubmiting: false,
       siderCollapsed: false,
     };
   }
 
   get processing() {
-    return this.savingToDarft || this.publishing || this.makingPrivate || this.updating;
+    return this.savingToDarft || this.publishing || this.makingPrivate || this.reviewSubmiting || this.updating;
   }
 
   get editorConfig() {
@@ -91,6 +105,10 @@ export default class PostEditForm extends Vue {
 
   get taxonomy() {
     return this.isPage ? 'page' : 'post';
+  }
+
+  get hasPublishCapability() {
+    return this.hasCapability(this.isPage ? UserCapability.PublishPages : UserCapability.PublishPosts);
   }
 
   @Watch('content')
@@ -126,7 +144,7 @@ export default class PostEditForm extends Vue {
     });
   }
 
-  // 修改post 但不会修改状态
+  // 更新，修改post 但不会修改状态
   handleUpdate() {
     this.updating = true;
     this.onUpdatePost().finally(() => {
@@ -134,7 +152,7 @@ export default class PostEditForm extends Vue {
     });
   }
 
-  // 修改post 并将状态修改为draft （当 status 是 private 时，不改变状态）
+  // 保存到草稿，修改post 并将状态修改为draft （当 status 是 private 时，不改变状态）
   handleSaveToDraft() {
     this.savingToDarft = true;
     const status = this.status === PostStatus.Private ? PostStatus.Private : PostStatus.Draft;
@@ -148,7 +166,8 @@ export default class PostEditForm extends Vue {
       });
   }
 
-  // 修改post 并将状态修改为draft （当 status 是 private 时，强制修改成 draft, 显示将会变为public）
+  // 从发布状态（包括 private）切换到草稿状态，修改post 并将状态修改为draft
+  // 当 status 是 private 时，强制修改成 draft, 显示将会变为public
   handleSwitchToDraft() {
     this.$confirm({
       content: this.$tv(
@@ -172,7 +191,7 @@ export default class PostEditForm extends Vue {
     });
   }
 
-  // 修改post 并将状态修改为 publish（当 status 是 private 时，不改变状态）
+  // 发布，修改post 并将状态修改为 publish（当 status 是 private 时，不改变状态）
   handelPublish() {
     this.publishing = true;
     const status = this.status === PostStatus.Private ? PostStatus.Private : PostStatus.Publish;
@@ -186,7 +205,7 @@ export default class PostEditForm extends Vue {
       });
   }
 
-  // 修改post 并将状态修改为 private
+  // 私有发布，修改post 并将状态修改为 Private
   handleMakePrivate() {
     this.makingPrivate = true;
     const status = PostStatus.Private;
@@ -197,6 +216,20 @@ export default class PostEditForm extends Vue {
       })
       .finally(() => {
         this.makingPrivate = false;
+      });
+  }
+
+  // 提交审核，修改post 并将状态修改为 Pending
+  handleSubmitReview() {
+    this.reviewSubmiting = true;
+    const status = PostStatus.Pending;
+    this.onUpdatePost(status)
+      .then(() => {
+        this.$emit('statusChange', status);
+        this.status = status;
+      })
+      .finally(() => {
+        this.reviewSubmiting = false;
       });
   }
 
@@ -231,11 +264,25 @@ export default class PostEditForm extends Vue {
                 <a href="javascript:;" class={[classes.logo]} onClick={() => this.$router.back()}>
                   <LogoSvg />
                 </a>
+                {this.$scopedSlots.leftAction ? this.$scopedSlots.leftAction() : null}
               </a-space>
             </a-col>
             <a-col flex={1} class={['text-right']}>
               <a-space>
-                {this.status === PostStatus.Publish || this.status === PostStatus.Private
+                {this.$scopedSlots.rightPrefixAction ? this.$scopedSlots.rightPrefixAction() : null}
+                {this.status === PostStatus.Pending
+                  ? [
+                      <a-button
+                        type="primary"
+                        disabled={!this.changed || this.processing || this.disabledActions}
+                        loading={this.updating}
+                        title={this.$tv(`${this.taxonomy}.btnTips.review`, 'Review the post')}
+                        onClick={m.stop.prevent(this.handleUpdate.bind(this))}
+                      >
+                        {this.$tv(`${this.taxonomy}.btnText.review`, 'Review')}
+                      </a-button>,
+                    ]
+                  : this.status === PostStatus.Publish || this.status === PostStatus.Private
                   ? [
                       <a-button
                         ghost
@@ -247,15 +294,27 @@ export default class PostEditForm extends Vue {
                       >
                         {this.$tv(`${this.taxonomy}.btnText.switchToDraft`, 'Switch to Draft')}
                       </a-button>,
-                      <a-button
-                        type="primary"
-                        disabled={!this.changed || this.processing || this.disabledActions}
-                        loading={this.updating}
-                        title={this.$tv(`${this.taxonomy}.btnTips.update`, 'Update the post')}
-                        onClick={m.stop.prevent(this.handleUpdate.bind(this))}
-                      >
-                        {this.$tv(`${this.taxonomy}.btnText.update`, 'Update')}
-                      </a-button>,
+                      this.hasPublishCapability ? (
+                        <a-button
+                          type="primary"
+                          disabled={!this.changed || this.processing || this.disabledActions}
+                          loading={this.updating}
+                          title={this.$tv(`${this.taxonomy}.btnTips.update`, 'Update the post')}
+                          onClick={m.stop.prevent(this.handleUpdate.bind(this))}
+                        >
+                          {this.$tv(`${this.taxonomy}.btnText.update`, 'Update')}
+                        </a-button>
+                      ) : (
+                        <a-button
+                          type="primary"
+                          disabled={!this.changed || this.processing || this.disabledActions}
+                          loading={this.reviewSubmiting}
+                          title={this.$tv(`${this.taxonomy}.btnTips.review`, 'Review the post')}
+                          onClick={m.stop.prevent(this.handleSubmitReview.bind(this))}
+                        >
+                          {this.$tv(`${this.taxonomy}.btnText.review`, 'Review')}
+                        </a-button>
+                      ),
                     ]
                   : [
                       <a-button
@@ -268,19 +327,33 @@ export default class PostEditForm extends Vue {
                       >
                         {this.$tv(`${this.taxonomy}.btnText.saveToDraft`, 'Save to Draft')}
                       </a-button>,
-                      <a-button
-                        type="primary"
-                        disabled={this.processing || this.disabledActions}
-                        loading={this.publishing}
-                        title={this.$tv(`${this.taxonomy}.btnTips.publish`, 'Publish the post')}
-                        onClick={m.stop.prevent(this.handelPublish.bind(this, false))}
-                      >
-                        {this.$tv(`${this.taxonomy}.btnText.publish`, 'Publish')}
-                      </a-button>,
+                      this.hasPublishCapability ? (
+                        <a-button
+                          type="primary"
+                          disabled={this.processing || this.disabledActions}
+                          loading={this.publishing}
+                          title={this.$tv(`${this.taxonomy}.btnTips.publish`, 'Publish the post')}
+                          onClick={m.stop.prevent(this.handelPublish.bind(this, false))}
+                        >
+                          {this.$tv(`${this.taxonomy}.btnText.publish`, 'Publish')}
+                        </a-button>
+                      ) : (
+                        <a-button
+                          type="primary"
+                          disabled={!this.changed || this.processing || this.disabledActions}
+                          loading={this.reviewSubmiting}
+                          title={this.$tv(`${this.taxonomy}.btnTips.review`, 'Review the post')}
+                          onClick={m.stop.prevent(this.handleSubmitReview.bind(this))}
+                        >
+                          {this.$tv(`${this.taxonomy}.btnText.review`, 'Review')}
+                        </a-button>
+                      ),
                     ]}
+                {this.$scopedSlots.rightMiddleAction ? this.$scopedSlots.rightMiddleAction() : null}
                 <a-button disabled={!this.siderCollapsed} onClick={() => (this.siderCollapsed = false)}>
                   <a-icon type="setting"></a-icon>
                 </a-button>
+                {this.$scopedSlots.rightAppendAction ? this.$scopedSlots.rightAppendAction() : null}
               </a-space>
             </a-col>
           </a-row>
@@ -308,16 +381,18 @@ export default class PostEditForm extends Vue {
               <template slot="extra">
                 <a-icon type="close" onClick={() => (this.siderCollapsed = !this.siderCollapsed)}></a-icon>
               </template>
+              {this.$scopedSlots.beforeForm ? this.$scopedSlots.beforeForm() : null}
               <a-form form={this.form}>
+                {this.$scopedSlots.beforeFormItem ? this.$scopedSlots.beforeFormItem() : null}
                 <a-form-item class="px-3 pt-2" label={this.$tv(`${this.taxonomy}.form.title`, 'Title')}>
                   <a-input
                     placeholder={this.$tv(`${this.taxonomy}.form.titlePlaceholder`, 'Please input title')}
                     {...{ directives: [{ name: 'decorator', value: ['title'] }] }}
                   />
                 </a-form-item>
-                {this.$scopedSlots.formItemAppend ? this.$scopedSlots.formItemAppend() : null}
+                {this.$scopedSlots.afterFormItem ? this.$scopedSlots.afterFormItem() : null}
               </a-form>
-              {this.$scopedSlots.formAppend ? this.$scopedSlots.formAppend() : null}
+              {this.$scopedSlots.afterForm ? this.$scopedSlots.afterForm() : null}
             </a-card>
           </a-layout-sider>
         </a-layout>

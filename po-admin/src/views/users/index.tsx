@@ -3,19 +3,17 @@ import { camelCase, lowerFirst } from 'lodash-es';
 import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { UserRole, UserCapability } from '@/includes/datas/enums';
+import { UserRole, UserCapability } from '@/includes/datas';
 import { userStore } from '@/store/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
-import { PagedQuery, UserWithRole, UserMetas, UserPagedQuery, UserPagedResponse } from 'types/datas';
+import { UserWithRole, UserMetas, UserPagedQuery, UserPagedResponse } from 'types/datas';
 import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
 
 // import { Table } from 'types/constants';
-
-type QueryParams = Omit<UserPagedQuery, keyof PagedQuery<{}>>;
 
 enum BlukActions {
   Delete = 'delete',
@@ -86,14 +84,12 @@ export default class UserIndex extends Vue {
   selectedRowKeys!: string[];
   roleCounts!: Array<{ userRole: UserRole | 'None'; count: number }>;
   itemCount!: number;
-  searchQuery!: QueryParams;
   blukApplying!: boolean;
 
   data() {
     return {
       // columns: [],
       selectedRowKeys: [],
-      searchQuery: {},
       roleCounts: [],
       itemCount: 0,
       blukApplying: false,
@@ -116,7 +112,7 @@ export default class UserIndex extends Vue {
   }
 
   // 添加 All 选项
-  get roleOptions(): StatusOption<UserRole | 'None' | undefined>[] {
+  get roleOptions(): StatusOption[] {
     return [
       {
         value: undefined,
@@ -142,7 +138,7 @@ export default class UserIndex extends Vue {
   }
 
   // 批量操作
-  get blukActionOptions(): BlukAcitonOption<BlukActions>[] {
+  get blukActionOptions(): BlukAcitonOption[] {
     return [
       {
         value: BlukActions.Delete,
@@ -153,6 +149,12 @@ export default class UserIndex extends Vue {
 
   // 加载 table 数据
   loadData({ page, size }: Parameters<DataSourceFn>[0]) {
+    const query: UserPagedQuery = {
+      keyword: this.$route.query['keyword'] as string,
+      userRole: this.$route.query['role'] as UserRole,
+      offset: (page - 1) * size,
+      limit: size,
+    };
     return this.graphqlClient
       .query<{ users: UserPagedResponse }, UserPagedQuery>({
         query: gql`
@@ -176,11 +178,7 @@ export default class UserIndex extends Vue {
             }
           }
         `,
-        variables: {
-          ...this.searchQuery,
-          offset: (page - 1) * size,
-          limit: size,
-        },
+        variables: query,
       })
       .then(({ data }) => {
         this.itemCount = data.users.total;
@@ -233,13 +231,12 @@ export default class UserIndex extends Vue {
   }
 
   // keyword 的搜索按纽
-  handleSearch(query: { keyword?: string; role?: UserRole | 'None' }) {
-    Object.assign(this.searchQuery, query);
+  handleSearch() {
     this.refreshTable();
   }
 
   // 批量操作
-  handleBlukApply(action: BlukActions) {
+  handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
       this.$message.warn({ content: this.$tv('user.bulkRowReqrired', 'Please choose a row!') as string });
       return;
@@ -431,14 +428,11 @@ export default class UserIndex extends Vue {
       <a-card class="post-index" bordered={false}>
         <SearchForm
           keywordPlaceholder={this.$tv('user.search.keywordPlaceholder', 'Search Post') as string}
-          statusName="userRole"
+          statusName="role"
           itemCount={this.itemCount}
           statusOptions={this.roleOptions}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
-          onPreFilters={(query) => {
-            Object.assign(this.searchQuery, query);
-          }}
           onSearch={this.handleSearch.bind(this)}
           onBlukApply={this.handleBlukApply.bind(this)}
         ></SearchForm>
