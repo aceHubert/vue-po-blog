@@ -145,13 +145,19 @@ export abstract class BaseDataSource implements OnModuleInit {
    * 验证用户是否有功能操作权限
    * @param capability 验证的功能
    * @param requestUser 请求的用户
-   * @param messageOrCallback 错误消息（如果没有权限，则抛出 ForbiddenError 异常） 或 callback 函数（结果会通过参数传递给函数）
+   * @param callbackOrThrow 当为 function 时如果验证不过参数 error 将是 ForbiddenError，否则为null; 为 ture 时，验证不过则抛出异常
    */
+  protected async hasCapability(capability: UserCapability, requestUser: JwtPayload): Promise<boolean>;
   protected async hasCapability(
     capability: UserCapability,
     requestUser: JwtPayload,
-    messageOrCallback?: string | ((result: boolean) => void),
-  ) {
+    callbackOrThrow: true | ((error: Error | null) => void),
+  ): Promise<void>;
+  protected async hasCapability(
+    capability: UserCapability,
+    requestUser: JwtPayload,
+    callbackOrThrow?: true | ((error: Error | null) => void),
+  ): Promise<boolean | void> {
     const userRoleCapabilities =
       requestUser && requestUser.role ? (await this.userRoles)[requestUser.role].capabilities : [];
 
@@ -159,14 +165,21 @@ export abstract class BaseDataSource implements OnModuleInit {
       userRoleCapabilities.length && userRoleCapabilities.some((userCapability) => userCapability === capability),
     );
 
-    if (messageOrCallback && typeof messageOrCallback === 'function') {
-      const callback = messageOrCallback;
-      callback(result);
-    } else if (!result) {
-      const message = messageOrCallback;
-      throw new ForbiddenError(
-        message || `Access denied! You don't have capability "${kebabCase(capability)}" for this action!`,
+    if (callbackOrThrow) {
+      const callback =
+        typeof callbackOrThrow === 'function'
+          ? callbackOrThrow
+          : (error: Error | null) => {
+              if (error) throw error;
+            };
+
+      return callback(
+        !result
+          ? new ForbiddenError(`Access denied! You don't have capability "${kebabCase(capability)}" for this action!`)
+          : null,
       );
+    } else {
+      return result;
     }
   }
 

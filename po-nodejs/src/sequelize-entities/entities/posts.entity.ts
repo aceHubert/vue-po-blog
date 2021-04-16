@@ -63,6 +63,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       },
       excerpt: {
         type: DataTypes.TEXT,
+        allowNull: false,
         comment: '摘要',
       },
       type: {

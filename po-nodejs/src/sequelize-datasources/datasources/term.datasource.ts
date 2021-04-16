@@ -1,22 +1,24 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
+import { isUndefined } from 'lodash';
 import { ValidationError } from '@/common/utils/gql-errors.utils';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
+import { WhereOptions, Transaction } from 'sequelize';
+import { TermAttributes } from '@/orm-entities/interfaces';
 import {
   TermMetaModel,
   TermTaxonomyArgs,
+  ChildrenTermTaxonomyArgs,
+  TermTaxonomyByObjectIdArgs,
   TermTaxonomyModel,
-  TermTaxonomyRelationshipArgs,
   TermRelationshipModel,
-  TermTaxonomyRelationshipModel,
   NewTermInput,
   NewTermMetaInput,
   NewTermRelationshipInput,
   UpdateTermInput,
 } from '../interfaces/term.interface';
-import { WhereOptions, Transaction } from 'sequelize';
 
 @Injectable()
 export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInput> {
@@ -40,6 +42,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
       include: [
         {
           model: this.models.Terms,
+          as: 'Terms',
           attributes: this.filterFields(fields, this.models.Terms),
           where: {
             id,
@@ -49,11 +52,11 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
     }).then((term) => {
       if (term) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { Term, id: taxonomyId, termId, ...rest } = term.toJSON() as any;
+        const { Terms, id: taxonomyId, termId, ...rest } = term.toJSON() as any;
         return {
           taxonomyId,
           ...rest,
-          ...Term,
+          ...Terms,
         } as TermTaxonomyModel;
       }
       return null;
@@ -62,24 +65,27 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
 
   /**
    * 获取协议列表
-   * 包含 taxonomy, Term.id => termId,TermTaxonomy.id => taxonomyId;
-   * Term.group, TermTaxonomy.id, TermTaxonomy.taxonomy 会强制查询，可用于级联条件调用;
    * @param query 过滤的字段
    * @param fields 返回的字段
    */
-  getList(query: TermTaxonomyArgs, fields: string[]): Promise<Array<TermTaxonomyModel>> {
+  getList(query: TermTaxonomyArgs | ChildrenTermTaxonomyArgs, fields: string[]): Promise<TermTaxonomyModel[]> {
     // 主键(meta/children 查询)
     if (!fields.includes('id')) {
       fields.push('id');
     }
 
-    const where: WhereOptions = {};
-    if (query.keyword) {
+    const keyword = (query as TermTaxonomyArgs).keyword;
+    const taxonomy = (query as TermTaxonomyArgs).taxonomy;
+    const parentId = query.parentId;
+    const group = query.group;
+
+    const where: WhereOptions<TermAttributes> = {};
+    if (keyword) {
       where['name'] = {
-        [this.Op.like]: `%${query.keyword}%`,
+        [this.Op.like]: `%${keyword}%`,
       };
     }
-    if (query.group) {
+    if (!isUndefined(group)) {
       where['group'] = query.group;
     }
 
@@ -88,22 +94,23 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
       include: [
         {
           model: this.models.Terms,
+          as: 'Terms',
           attributes: this.filterFields(fields, this.models.Terms),
-          where: { ...where },
+          where,
         },
       ],
       where: {
-        ...(query.parentId ? { parentId: query.parentId } : {}),
-        taxonomy: query.taxonomy,
+        ...(!isUndefined(parentId) ? { parentId } : {}),
+        ...(taxonomy ? { taxonomy } : {}),
       },
     }).then((values) =>
       values.map((term) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { Term, id: taxonomyId, termId, ...restTaxonomy } = term.toJSON() as any;
+        const { Terms, id: taxonomyId, termId, ...restTaxonomy } = term.toJSON() as any;
         return {
           taxonomyId,
           ...restTaxonomy,
-          ...Term,
+          ...Terms,
         } as TermTaxonomyModel;
       }),
     );
@@ -114,11 +121,11 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * @param objectId 对象ID
    * @param fields 返回的字段
    */
-  getTermRelationships(
-    query: TermTaxonomyRelationshipArgs,
-    fields: string[],
-  ): Promise<Array<TermTaxonomyRelationshipModel>> {
-    fields = fields.filter((field) => field !== 'id'); // 排除 id, 在下面独自处理添加(两个表共有字段)
+  getListByObjectId(query: TermTaxonomyByObjectIdArgs, fields: string[]): Promise<TermTaxonomyModel[]> {
+    // 主键(meta/children 查询)
+    if (!fields.includes('id')) {
+      fields.push('id');
+    }
 
     return this.models.TermTaxonomy.findAll({
       attributes: this.filterFields(fields, this.models.TermTaxonomy),
@@ -126,27 +133,34 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
         {
           model: this.models.Terms,
           attributes: this.filterFields(fields, this.models.Terms),
+          as: 'Terms',
+          where: {
+            ...(!isUndefined(query.group) ? { group: query.group } : {}),
+          },
           required: true,
         },
         {
           model: this.models.TermRelationships,
-          attributes: this.filterFields(fields, this.models.TermRelationships),
+          as: 'TermRelationships',
           where: {
             objectId: query.objectId,
           },
         },
       ],
       where: {
+        ...(!isUndefined(query.parentId) ? { parentId: query.parentId } : {}),
         taxonomy: query.taxonomy,
       },
+      order: [[this.models.TermRelationships, 'order', query.desc ? 'DESC' : 'ASC']],
     }).then((values) =>
       values.map((term) => {
-        const { Term, TermRelationships, ...rest } = term.toJSON() as any;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { Terms, id: taxonomyId, termId, ...restTaxonomy } = term.toJSON() as any;
         return {
-          ...rest,
-          ...Term,
-          ...TermRelationships[0],
-        } as TermTaxonomyRelationshipModel;
+          taxonomyId,
+          ...restTaxonomy,
+          ...Terms,
+        } as TermTaxonomyModel;
       }),
     );
   }

@@ -1,13 +1,15 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int, Context } from '@nestjs/graphql';
 import { PostType, PostStatus, PostCommentStatus } from '@/common/helpers/enums';
+import { TermTaxonomy as TermTaxonomyEnum } from '@/common/helpers/term-taxonomy';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
-import { PostDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
+import { PostDataSource, UserDataSource, TermDataSource } from '@/sequelize-datasources/datasources';
 
 // Typs
 import { SimpleUser } from '@/users/models/user.model';
+import { TermTaxonomy } from '@/terms/models/term.model';
 import { PagedPostArgs } from './dto/paged-post.args';
 import { NewPostInput } from './dto/new-post.input';
 import { NewPostMetaInput } from './dto/new-post-meta.input';
@@ -30,6 +32,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     protected readonly moduleRef: ModuleRef,
     private readonly postDataSource: PostDataSource,
     private readonly userDataSource: UserDataSource,
+    private readonly termDataSource: TermDataSource,
   ) {
     super(moduleRef);
   }
@@ -53,10 +56,52 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     );
   }
 
+  @ResolveField((returns) => SimpleUser, { nullable: true, description: '作者' })
+  author(
+    @Parent() { author: authorId }: { author: number },
+    @Fields() fields: ResolveTree,
+  ): Promise<SimpleUser | null> {
+    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
+  }
+
+  @ResolveField((returns) => [TermTaxonomy!], { description: '分类' })
+  categories(
+    @Args('parentId', { type: () => ID, nullable: true, description: '父Id（没有值则查询所有，0是根目录）' })
+    parentId: number | undefined,
+    @Args('desc', { type: () => Boolean, nullable: true, description: '排序（默认正序排列）' })
+    desc: boolean | undefined,
+    @Parent() { id }: { id: number },
+    @Fields() fields: ResolveTree,
+  ) {
+    return this.termDataSource.getListByObjectId(
+      { objectId: id, taxonomy: TermTaxonomyEnum.Category, parentId, desc },
+      this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+    );
+  }
+
+  @ResolveField((returns) => [TermTaxonomy!], { description: '分类' })
+  tags(
+    @Args('desc', { type: () => Boolean, nullable: true, description: '排序（默认正序排列）' })
+    desc: boolean | undefined,
+    @Parent() { id }: { id: number },
+    @Fields() fields: ResolveTree,
+  ) {
+    return this.termDataSource.getListByObjectId(
+      { objectId: id, taxonomy: TermTaxonomyEnum.Tag, desc },
+      this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+    );
+  }
+
   @Authorized()
   @Query((returns) => [PostStatusCount], { description: '获取文章按状态分组数量' })
   postCountByStatus(@Context('user') requestUser: JwtPayload) {
     return this.postDataSource.getCountByStatus(PostType.Post, requestUser);
+  }
+
+  @Authorized()
+  @Query((returns) => Int, { description: '获取我的文章数量' })
+  postCountBySelf(@Context('user') requestUser: JwtPayload) {
+    return this.postDataSource.getCountBySelf(PostType.Post, requestUser);
   }
 
   @Query((returns) => [PostDayCount], { description: '获取文章按天分组数量' })
@@ -80,14 +125,6 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Query((returns) => [PostYearCount], { description: '获取文章按年分组数量' })
   postCountByYear() {
     return this.postDataSource.getCountByYear(PostType.Post);
-  }
-
-  @ResolveField((returns) => SimpleUser, { nullable: true, description: '作者' })
-  author(
-    @Parent() { author: authorId }: { author: number },
-    @Fields() fields: ResolveTree,
-  ): Promise<SimpleUser | null> {
-    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
   }
 
   @Authorized()
@@ -156,8 +193,9 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   })
   blukRestorePostOrPage(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
+    @Context('user') requestUser: JwtPayload,
   ): Promise<boolean> {
-    return this.postDataSource.blukRestore(ids);
+    return this.postDataSource.blukRestore(ids, requestUser);
   }
 
   @Authorized()

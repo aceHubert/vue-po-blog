@@ -14,6 +14,10 @@ export interface PostMetaModel extends MetaModel {
   postId: number;
 }
 
+/**
+ * category 和 tag 不可以同时出现（Id 和 name 也不可以同时出现）
+ * 优先级是 categoryId > tagId > categoryName >tagName
+ */
 export interface PagedPostArgs extends PagedArgs {
   keyword?: string;
   author?: number;
@@ -23,9 +27,15 @@ export interface PagedPostArgs extends PagedArgs {
    */
   status?: PostStatus;
   /**
-   * taxonomyId
+   * category (termId)
    */
-  categoryIds?: number[];
+  categoryId?: number;
+  categoryName?: string;
+  /**
+   * tag (termId)
+   */
+  tagId?: number;
+  tagName?: string;
   /**
    * 年(YYYY)/月(YYYYMM)
    */

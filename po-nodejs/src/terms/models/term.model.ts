@@ -1,4 +1,4 @@
-import { Field, ObjectType, ID, Int, OmitType } from '@nestjs/graphql';
+import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
 import { Meta } from '@/common/models/meta.model';
 
 @ObjectType({ description: '协议模型' })
@@ -29,18 +29,6 @@ export class TermTaxonomy {
 
   @Field((type) => Int, { description: '关联对象类别数量' })
   count!: number;
-}
-
-@ObjectType({ description: '协议关系模型(包含TermTaxonomy)' })
-export class TermTaxonomyRelationship extends OmitType(TermTaxonomy, ['id'] as const) {
-  @Field(() => ID, { description: 'Term Id' })
-  termId!: number;
-
-  @Field(() => ID, { description: 'Post/Link等对象 Id' })
-  objectId!: number;
-
-  @Field((type) => Int, { description: '排序' })
-  order!: number;
 }
 
 @ObjectType({ description: '协议关系模型' })

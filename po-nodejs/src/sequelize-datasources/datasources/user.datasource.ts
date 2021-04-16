@@ -11,7 +11,7 @@ import { MetaDataSource } from './meta.datasource';
 
 // Types
 import { WhereOptions } from 'sequelize';
-
+import { UserAttributes } from '@/orm-entities/interfaces';
 import {
   UserModel,
   UserSimpleModel,
@@ -41,7 +41,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async get(id: number | null, fields: string[], requestUser: JwtPayload): Promise<UserModel | null> {
     if (id) {
-      await this.hasCapability(UserCapability.EditUsers, requestUser);
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     } else {
       id = requestUser.id;
     }
@@ -92,9 +92,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     fields: string[],
     requestUser: JwtPayload,
   ): Promise<PagedUserModel> {
-    await this.hasCapability(UserCapability.ListUsers, requestUser);
+    await this.hasCapability(UserCapability.ListUsers, requestUser, true);
 
-    const where: WhereOptions = {};
+    const where: WhereOptions<UserAttributes> = {};
     if (query.keyword) {
       where['loginName'] = {
         [this.Op.like]: `%${query.keyword}%`,
@@ -105,13 +105,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     }
 
     if (query.userRole) {
-      if (query.userRole === 'none') {
-        where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = {
-          [this.Op.is]: null,
-        };
-      } else {
-        where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = query.userRole;
-      }
+      where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$` as keyof UserAttributes] =
+        query.userRole === 'none'
+          ? {
+              [this.Op.is]: null,
+            }
+          : query.userRole;
     }
 
     return this.models.Users.findAndCountAll({
@@ -127,9 +126,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           duplicating: false,
         },
       ],
-      where: {
-        ...where,
-      },
+      where,
       offset,
       limit,
       order: [['createdAt', 'DESC']],
@@ -252,7 +249,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param fields 返回的字段
    */
   async create(model: NewUserInput, requestUser: JwtPayload): Promise<UserModel> {
-    await this.hasCapability(UserCapability.CreateUsers, requestUser);
+    await this.hasCapability(UserCapability.CreateUsers, requestUser, true);
 
     let isExists =
       (await this.models.Users.count({
@@ -366,7 +363,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async update(id: number, model: UpdateUserInput, requestUser: JwtPayload): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
-      await this.hasCapability(UserCapability.EditUsers, requestUser);
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     }
 
     const user = await this.models.Users.findByPk(id);
@@ -509,7 +506,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param status 状态
    */
   async updateStatus(id: number, status: UserStatus, requestUser: JwtPayload): Promise<boolean> {
-    await this.hasCapability(UserCapability.EditUsers, requestUser);
+    await this.hasCapability(UserCapability.EditUsers, requestUser, true);
 
     return await this.models.Users.update(
       { status },
@@ -531,7 +528,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id User Id
    */
   async delete(id: number, requestUser: JwtPayload): Promise<true> {
-    await this.hasCapability(UserCapability.DeleteUsers, requestUser);
+    await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     if (id === requestUser.id) {
       throw new ForbiddenError('Could not delete yourself!');
@@ -566,7 +563,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id User Id
    */
   async blukDelete(ids: number[], requestUser: JwtPayload): Promise<true> {
-    await this.hasCapability(UserCapability.DeleteUsers, requestUser);
+    await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     if (ids.includes(requestUser.id)) {
       throw new ForbiddenError('Could not delete yourself!');

@@ -14,8 +14,8 @@ export class Post {
   @Field({ description: '内容' })
   content!: string;
 
-  @Field({ nullable: true, description: '摘要' })
-  excerpt?: string;
+  @Field({ description: '摘要' })
+  excerpt!: string;
 
   @Field((type) => PostStatus, { description: '状态' })
   status!: PostStatus;

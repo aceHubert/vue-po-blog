@@ -12,8 +12,8 @@ export class NewPostInput {
   @Field({ description: '内容' })
   content!: string;
 
-  @Field({ nullable: true, description: '摘要' })
-  excerpt?: string;
+  @Field({ description: '摘要' })
+  excerpt!: string;
 
   @Field((type) => [NewMetaInput!], { nullable: true, description: '文章元数据' })
   metas?: NewMetaInput[];
