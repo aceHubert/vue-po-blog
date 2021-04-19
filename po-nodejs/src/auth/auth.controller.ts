@@ -14,7 +14,11 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() userLoginDto: UserLoginDto): Promise<Response<TokenResponse>> {
-    const tokenOrFalse = await this.authService.login(userLoginDto.username, userLoginDto.password);
+    const tokenOrFalse = await this.authService.login(
+      userLoginDto.username,
+      userLoginDto.password,
+      userLoginDto.device,
+    );
     if (tokenOrFalse) {
       return {
         success: true,
@@ -73,8 +77,8 @@ export class AuthController {
 
   @Authorized()
   @Post('logout')
-  async logout(@User('id') userId: number): Promise<Response<{ message: string }>> {
-    await this.authService.logout(userId);
+  async logout(@User('id') userId: number, @User('device') device: string): Promise<Response<{ message: string }>> {
+    await this.authService.logout(userId, device);
     return {
       success: true,
       message: 'Log out successfully!',

@@ -353,6 +353,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   /**
    * 修改用户
    * mobile, email 要求必须是唯一，否则会抛出 ValidationError
+   * todo: 修改了角色后要重置 access_token
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -590,40 +591,72 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
   /** -----Authorization----- */
 
-  private genNewScrect(userId: number) {
-    // '[userId]_[uuid]_[config.jwt-screct]'
-    return md5(`${userId}_${uuid()}_${this.config.get('jwt_screct')}`);
+  private get screctMetaKey() {
+    return `$${this.tablePrefix}token_screct`.toUpperCase();
+  }
+
+  private get refreshScrectMetaKey() {
+    return `$${this.tablePrefix}refresh_token_screct`.toUpperCase();
   }
 
   /**
-   * 获取验证 token 的screct
+   * 生成一个新的 screct
+   * @param userId 用户 Id
+   */
+  genNewScrect(userId: number) {
+    // '[userId]_[uuid]_[config.jwt-screct]'
+    return md5(`${userId}_${uuid()}_${this.getConfig('jwt_screct')}`);
+  }
+
+  /**
+   * 通过设备生成一个唯一设备 Id
+   * @param userId 用户 Id
+   * @param drivceId 设备 Id
+   */
+  getDeviceId(userId: number, device: string) {
+    return md5(`USER_DEVICE_${userId}_${device}`);
+  }
+
+  /**
+   * 获取验证 token 的screct，如果不存在则会生成一个新 screct
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
-   * @param userId User id
+   * @param userId 用户 Id
+   * @param device 设备名称
    * @param refreshToken 获取 refresh token 的 screct
    */
-  async getTokenScrect(userId: number, refreshToken: boolean = false): Promise<string> {
-    const screctMetaKey = refreshToken ? `${this.tablePrefix}refresh_token_screct` : `${this.tablePrefix}screct`;
+  async getTokenScrect(userId: number, device: string, refreshToken: boolean = false): Promise<string> {
+    const screctMetaKey = refreshToken ? this.refreshScrectMetaKey : this.screctMetaKey;
+    const deviceId = this.getDeviceId(userId, device);
     const screctMeta = await this.models.UserMeta.findOne({
-      attributes: ['metaValue'],
       where: {
         userId,
-        metaKey: screctMetaKey,
+        metaKey: refreshToken ? this.refreshScrectMetaKey : this.screctMetaKey,
       },
     });
-    let screct: string;
+    let screct: string = '';
+    let metaValue: Dictionary<{ name: string; value: string }> = {};
     if (screctMeta) {
-      screct = screctMeta.metaValue;
+      metaValue = JSON.parse(screctMeta.metaValue);
+      screct = metaValue[deviceId]?.value;
+      if (!screct) {
+        const newScrect = this.genNewScrect(userId);
+        screctMeta.metaValue = JSON.stringify({
+          ...JSON.parse(screctMeta.metaValue),
+          [deviceId]: { name: device, value: newScrect },
+        });
+        await screctMeta.save();
+        screct = newScrect;
+      }
     } else {
       // 数据库的screct丢失,将重新生成一个新的
       const newScrect = this.genNewScrect(userId);
       await this.models.UserMeta.create({
         userId,
         metaKey: screctMetaKey,
-        metaValue: newScrect,
-        private: 'yes',
+        metaValue: JSON.stringify({ ...metaValue, [deviceId]: { name: device, value: newScrect } }),
       });
       screct = newScrect;
     }
@@ -631,29 +664,78 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 修改 token 的 screct
-   * 在登出，修改密码，忘记密码等场景中更新 screct 重置 access/refresh token
+   * 修改 token 的 screct，返回新 screct
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
-   * @param userId User id
+   * @param userId 用户 Id
+   * @param device 设备名称
    * @param refreshToken 修改 refresh token 的 screct
    */
-  async updateTokenScrect(userId: number, refreshToken: boolean = false) {
+  async updateTokenScrect(userId: number, device: string, refreshToken: boolean = false): Promise<string> {
+    const screctMetaKey = refreshToken ? this.refreshScrectMetaKey : this.screctMetaKey;
+    const deviceId = this.getDeviceId(userId, device);
     const newScrect = this.genNewScrect(userId);
-    await this.models.UserMeta.update(
-      {
-        metaValue: newScrect,
+    const screctMeta = await this.models.UserMeta.findOne({
+      where: {
+        userId,
+        metaKey: screctMetaKey,
       },
-      {
-        where: {
-          userId,
-          metaKey: refreshToken ? `${this.tablePrefix}refresh_token_screct` : `${this.tablePrefix}screct`,
-        },
-      },
-    );
+    });
+    if (screctMeta) {
+      screctMeta.metaValue = JSON.stringify({
+        ...JSON.parse(screctMeta.metaValue),
+        [deviceId]: { name: device, value: newScrect },
+      });
+      await screctMeta.save();
+    } else {
+      // 数据库的screct丢失,将重新生成一个新的
+      await this.models.UserMeta.create({
+        userId,
+        metaKey: screctMetaKey,
+        metaValue: JSON.stringify({ [deviceId]: { name: device, value: newScrect } }),
+      });
+    }
     return newScrect;
+  }
+
+  /**
+   * 重置所有设备的 token screct
+   * 在退出、修改密码、忘记密码等场景中修改用户信息后需要重新登录
+   * @param userId 用户 Id
+   * @param device 设备名称, 当值为null时重置所有
+   * @param refreshToken 修改 refresh token 的 screct
+   * @returns 退出的设备Id
+   */
+  async resetTokenScrect(userId: number, device: string | null, refreshToken: boolean = false): Promise<string[]> {
+    const screctMetaKey = refreshToken ? this.refreshScrectMetaKey : this.screctMetaKey;
+    const screctMeta = await this.models.UserMeta.findOne({
+      where: {
+        userId,
+        metaKey: screctMetaKey,
+      },
+    });
+    if (!screctMeta) {
+      return [];
+    }
+    let deviceIds: string[] = [];
+    if (device) {
+      // 退出单个设备
+      const deviceId = this.getDeviceId(userId, device);
+      const metaValue = JSON.parse(screctMeta.metaValue);
+      if (metaValue[deviceId]) {
+        delete metaValue[deviceId];
+      }
+      screctMeta.metaValue = JSON.stringify(metaValue);
+      deviceIds = [deviceId];
+    } else {
+      // 退出所有设备（如修改密码后）
+      screctMeta.metaValue = '{}';
+      deviceIds = Object.keys(JSON.parse(screctMeta.metaValue));
+    }
+    await screctMeta.save();
+    return deviceIds;
   }
 
   /**
@@ -674,17 +756,17 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
   /**
    * 登录
-   * 成功则返回token，否则返回 false
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
    * @param loginName 登录名/邮箱/手机号码
    * @param loginPwd 登录密码
+   * @param fields 返回字段
    */
-  async verifyUser(loginName: string, loginPwd: string): Promise<JwtPayload | null> {
+  async verifyUser(loginName: string, loginPwd: string, fields: string[]): Promise<UserModel | null> {
     const user = await this.models.Users.findOne({
-      attributes: ['id', 'loginName', 'createdAt'],
+      attributes: this.filterFields(fields, this.models.Users),
       where: {
         [this.Op.or]: [{ loginName }, { email: loginName }, { mobile: loginName }],
         loginPwd: md5(loginPwd),
@@ -693,13 +775,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     });
 
     if (user) {
-      // 角色
-      const role = await this.getRole(user.id);
-
-      return {
-        ...user.toJSON(),
-        role,
-      } as JwtPayload;
+      return user.toJSON() as UserModel;
     }
     return null;
   }

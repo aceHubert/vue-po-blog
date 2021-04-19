@@ -6,6 +6,7 @@ declare global {
     id: number;
     loginName: string;
     role: UserRole | null;
+    device: string;
     createdAt: Date;
   };
 

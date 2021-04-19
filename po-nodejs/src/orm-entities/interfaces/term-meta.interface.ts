@@ -5,7 +5,6 @@ export interface TermMetaAttributes {
   termId: number;
   metaKey: string;
   metaValue: string | null;
-  private: 'yes' | 'no';
 }
 
-export interface TermMetaCreationAttributes extends Optional<TermMetaAttributes, 'id' | 'private'> {}
+export interface TermMetaCreationAttributes extends Optional<TermMetaAttributes, 'id'> {}

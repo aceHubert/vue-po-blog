@@ -5,7 +5,6 @@ export interface UserMetaAttributes {
   userId: number;
   metaKey: string;
   metaValue: string | null;
-  private: 'yes' | 'no';
 }
 
-export interface UserMetaCreationAttributes extends Optional<UserMetaAttributes, 'id' | 'private'> {}
+export interface UserMetaCreationAttributes extends Optional<UserMetaAttributes, 'id'> {}

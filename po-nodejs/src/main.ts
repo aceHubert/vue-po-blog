@@ -18,8 +18,9 @@ async function bootstrap() {
   app.use(
     jwt({
       secret(req: Request, payload: JwtPayload, done: (err: any, secret?: secretType) => void) {
+        console.log(payload.device);
         authService
-          .getScrect(payload.id)
+          .getScrect(payload.id, payload.device)
           .then((secret) => done(null, secret))
           .catch(done);
       },
