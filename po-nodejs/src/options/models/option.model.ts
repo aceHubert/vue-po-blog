@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { OptionAutoload } from '@/common/helpers/enums';
+import { OptionAutoload } from '../enums';
 
 @ObjectType({ description: '配置项' })
 export class Option {

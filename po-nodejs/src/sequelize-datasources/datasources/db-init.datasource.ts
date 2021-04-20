@@ -1,9 +1,10 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { PostCommentStatus, UserRole } from '@/common/helpers/enums';
 import { UserRoles } from '@/common/helpers/user-roles';
 import { OptionKeys, OptionTablePrefixKeys } from '@/common/helpers/option-keys';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
+import { UserRole } from '@/users/enums';
+import { PostCommentStatus } from '@/posts/enums';
 import { BaseDataSource } from './base.datasource';
 
 // Types
@@ -152,8 +153,11 @@ export class DbInitDataSource extends BaseDataSource {
       );
 
       // 初始化默认分类
+      const defautlCategoryName = await this.i18nService.t('datasource.default_data.uncategorized', {
+        lang: initArgs.locale,
+      });
       const defaultCategory = await this.models.Terms.create(
-        { name: 'Uncategorized', slug: 'uncategorized' },
+        { name: defautlCategoryName, slug: 'uncategorized' },
         {
           transaction: t,
         },
@@ -166,8 +170,22 @@ export class DbInitDataSource extends BaseDataSource {
       );
 
       // 初始化页面和文章
+      const defaultArticleTitle = await this.i18nService.t('datasource.default_data.article_title', {
+        lang: initArgs.locale,
+      });
+      const defaultArticleContent = await this.i18nService.t('datasource.default_data.article_content', {
+        lang: initArgs.locale,
+      });
       await this.models.Posts.bulkCreate(
-        [{ title: 'Article', name: 'article', author: 1, content: '<p>This is an article.</p>', excerpt: '' }],
+        [
+          {
+            title: defaultArticleTitle,
+            name: 'article',
+            author: 1,
+            content: `<p>${defaultArticleContent}</p>`,
+            excerpt: '',
+          },
+        ],
         { transaction: t },
       );
 

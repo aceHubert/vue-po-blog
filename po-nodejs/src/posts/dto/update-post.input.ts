@@ -1,5 +1,5 @@
 import { Field, InputType, PartialType, PickType } from '@nestjs/graphql';
-import { PostStatus } from '@/common/helpers/enums';
+import { PostStatus } from '../enums';
 import { NewPostInput } from './new-post.input';
 
 @InputType({ description: '文章修改模型' })

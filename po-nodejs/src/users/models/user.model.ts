@@ -1,9 +1,8 @@
 import { Field, ObjectType, InterfaceType, ID, createUnionType } from '@nestjs/graphql';
 import { FieldAuthorized } from '@/common/decorators/authorized.decorator';
-import { UserStatus, UserRole } from '@/common/helpers/enums';
 import { PagedResponse, Count } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
-import { UserRoleWithNone } from '../dto/update-user.input';
+import { UserRole, UserRoleWithNone, UserStatus } from '../enums';
 
 @InterfaceType()
 export abstract class BaseUser {

@@ -1,5 +1,5 @@
 import { Field, InputType, Int, PartialType, PickType } from '@nestjs/graphql';
-import { PostStatus } from '@/common/helpers/enums';
+import { PostStatus } from '@/posts/enums';
 import { NewPageInput } from './new-page.input';
 
 @InputType({ description: '页面修改模型' })

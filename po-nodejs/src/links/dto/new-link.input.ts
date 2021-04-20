@@ -1,5 +1,5 @@
 import { Field, InputType, ID } from '@nestjs/graphql';
-import { LinkTarget, LinkVisible } from '@/common/helpers/enums';
+import { LinkTarget, LinkVisible } from '../enums';
 
 @InputType({ description: '链接新建模型' })
 export class NewLinkInput {

@@ -169,7 +169,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * 新建协议
    * @param model 新建协议实体
    */
-  async create(model: NewTermInput): Promise<TermTaxonomyModel> {
+  async create(model: NewTermInput, requestUser: JwtPayload & { lang?: string }): Promise<TermTaxonomyModel> {
     const t = await this.sequelize.transaction();
     const { name, slug, group, taxonomy, description, parentId, metas } = model;
     try {
@@ -214,6 +214,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
             objectId: model.objectId,
             taxonomyId: termTaxonomy.id,
           },
+          requestUser,
           t,
         );
       }
@@ -238,7 +239,11 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * 新建协议关系
    * @param model 新建协议关系实体
    */
-  async createRelationship(model: NewTermRelationshipInput, transaction?: Transaction): Promise<TermRelationshipModel> {
+  async createRelationship(
+    model: NewTermRelationshipInput,
+    requestUser: JwtPayload & { lang?: string },
+    transaction?: Transaction,
+  ): Promise<TermRelationshipModel> {
     const isExists =
       (await this.models.TermRelationships.count({
         where: {
@@ -248,7 +253,9 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
       })) > 0;
 
     if (isExists) {
-      throw new ValidationError('The relationship has been defined!');
+      throw new ValidationError(
+        await this.i18nService.t('relationship_duplicate_definition', { lang: requestUser.lang }),
+      );
     }
 
     // 数量 +1

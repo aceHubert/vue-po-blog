@@ -1,15 +1,16 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int, Context } from '@nestjs/graphql';
-import { PostType, PostStatus, PostCommentStatus } from '@/common/helpers/enums';
 import { TermTaxonomy as TermTaxonomyEnum } from '@/common/helpers/term-taxonomy';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
+import { PostType } from '@/orm-entities/interfaces';
 import { PostDataSource, UserDataSource, TermDataSource } from '@/sequelize-datasources/datasources';
 
 // Typs
 import { SimpleUser } from '@/users/models/user.model';
 import { TermTaxonomy } from '@/terms/models/term.model';
+import { PostStatus, PostCommentStatus } from './enums';
 import { PagedPostArgs } from './dto/paged-post.args';
 import { NewPostInput } from './dto/new-post.input';
 import { NewPostMetaInput } from './dto/new-post-meta.input';

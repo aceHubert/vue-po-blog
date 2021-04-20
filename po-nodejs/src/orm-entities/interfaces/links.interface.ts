@@ -1,5 +1,5 @@
 import { Optional } from './optional.interface';
-import { LinkTarget, LinkVisible } from '@/common/helpers/enums';
+import { LinkTarget, LinkVisible } from '@/links/enums';
 
 export interface LinkAttributes {
   id: number;
@@ -17,5 +17,3 @@ export interface LinkAttributes {
 }
 
 export interface LinkCreationAttributes extends Optional<LinkAttributes, 'id' | 'visible' | 'userId' | 'rel' | 'rss'> {}
-
-export { LinkTarget, LinkVisible };

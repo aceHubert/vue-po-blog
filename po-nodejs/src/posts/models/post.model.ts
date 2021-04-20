@@ -1,7 +1,7 @@
 import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
-import { PostStatus, PostCommentStatus } from '@/common/helpers/enums';
 import { PagedResponse, Count } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
+import { PostStatus, PostCommentStatus } from '../enums';
 
 @ObjectType({ description: '文章模型' })
 export class Post {

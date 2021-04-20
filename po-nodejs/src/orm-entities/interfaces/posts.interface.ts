@@ -1,5 +1,5 @@
 import { Optional } from './optional.interface';
-import { PostType, PostStatus, PostCommentStatus } from '@/common/helpers/enums';
+import { PostStatus, PostCommentStatus } from '@/posts/enums';
 
 // 仅内部使用
 export enum PostOperateStatus {
@@ -12,7 +12,13 @@ export enum PostOperateType {
   Revision = 'revision', //状态为 inherit
 }
 
-export { PostType, PostStatus, PostCommentStatus };
+/**
+ * 文章类型
+ */
+export enum PostType {
+  Post = 'post',
+  Page = 'page',
+}
 
 export interface PostAttributes {
   id: number;

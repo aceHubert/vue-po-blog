@@ -3,10 +3,10 @@ import { isUndefined } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ForbiddenError, ValidationError } from '@/common/utils/gql-errors.utils';
-import { UserRole, UserStatus } from '@/common/helpers/enums';
 import { UserCapability } from '@/common/helpers/user-capability';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
 import { uuid } from '@/common/utils/uuid.utils';
+import { UserRole, UserStatus } from '@/users/enums';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
@@ -36,10 +36,14 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers(optional)]
-   * @param id User Id（null 则查询请求用户，否则需要 EditUsers 权限）
+   * @param id 用户 Id（null 则查询请求用户，否则需要 EditUsers 权限）
    * @param fields 返回的字段
    */
-  async get(id: number | null, fields: string[], requestUser: JwtPayload): Promise<UserModel | null> {
+  async get(
+    id: number | null,
+    fields: string[],
+    requestUser: JwtPayload & { lang?: string },
+  ): Promise<UserModel | null> {
     if (id) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     } else {
@@ -66,7 +70,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access none
-   * @param id User Id（null返回请求用户的实体）
+   * @param id 用户 Id（null返回请求用户的实体）
    * @param fields 返回的字段
    */
   async getSimpleInfo(id: number, fields: string[]): Promise<UserSimpleModel | null> {
@@ -248,25 +252,25 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewUserInput, requestUser: JwtPayload): Promise<UserModel> {
+  async create(model: NewUserInput, requestUser: JwtPayload & { lang?: string }): Promise<UserModel> {
     await this.hasCapability(UserCapability.CreateUsers, requestUser, true);
 
-    let isExists =
-      (await this.models.Users.count({
-        where: {
-          [this.Op.or]: {
-            loginName: model.loginName,
-            email: model.email,
-          },
-        },
-      })) > 0;
-
-    if (model.mobile && !isExists) {
-      isExists = await this.isMobileExists(model.mobile);
+    if (await this.isLoginNameExists(model.loginName)) {
+      throw new ValidationError(
+        await this.i18nService.t('datasource.user.username_unique_required', { lang: requestUser.lang }),
+      );
     }
 
-    if (isExists) {
-      throw new ValidationError('The loginName, mobile, email are rqiured to be unique!');
+    if (await this.isEmailExists(model.email)) {
+      throw new ValidationError(
+        await this.i18nService.t('datasource.user.email_unique_required', { lang: requestUser.lang }),
+      );
+    }
+
+    if (model.mobile && (await this.isMobileExists(model.mobile))) {
+      throw new ValidationError(
+        await this.i18nService.t('datasource.user.mobile_unique_required', { lang: requestUser.lang }),
+      );
     }
 
     const { loginName, loginPwd, firstName, lastName, avator, description, userRole, locale, ...rest } = model;
@@ -358,10 +362,11 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers(修改非自己信息)]
-   * @param id User Id
+   * @param id 用户 Id
    * @param model 修改实体模型
+   * @param requestUser 请求的用户
    */
-  async update(id: number, model: UpdateUserInput, requestUser: JwtPayload): Promise<boolean> {
+  async update(id: number, model: UpdateUserInput, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
@@ -369,15 +374,15 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
     const user = await this.models.Users.findByPk(id);
     if (user) {
-      let isExists = false;
-      if (model.email && model.email !== user.email) {
-        isExists = await this.isEmailExists(model.email);
+      if (model.email && model.email !== user.email && (await this.isEmailExists(model.email))) {
+        throw new ValidationError(
+          await this.i18nService.t('datasource.user.email_unique_required', { lang: requestUser.lang }),
+        );
       }
-      if (!isExists && model.mobile && model.mobile !== user.mobile) {
-        isExists == (await this.isMobileExists(model.mobile));
-      }
-      if (isExists) {
-        throw new ValidationError('The mobile, email are rqiured to be unique!');
+      if (model.mobile && model.mobile !== user.mobile && (await this.isMobileExists(model.mobile))) {
+        throw new ValidationError(
+          await this.i18nService.t('datasource.user.mobile_unique_required', { lang: requestUser.lang }),
+        );
       }
 
       const { nickName, firstName, lastName, avator, description, adminColor, userRole, locale, ...updateUser } = model;
@@ -498,15 +503,85 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
+   * 修改用户Email
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(修改非自己信息)]
+   * @param id 用户 Id
+   * @param email Email
+   * @param requestUser 请求的用户
+   */
+  async updateEmail(id: number, email: string, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+    // 修改非自己信息
+    if (String(id) !== String(requestUser.id)) {
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    }
+
+    const user = await this.models.Users.findByPk(id);
+    if (user) {
+      // 相同不需要修改
+      if (email === user.email) {
+        return true;
+      }
+      if (await this.isEmailExists(email)) {
+        throw new ValidationError(
+          await this.i18nService.t('datasource.user.email_unique_required', { lang: requestUser.lang }),
+        );
+      }
+
+      user.email = email;
+      await user.save();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 修改用户手机号码
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(修改非自己信息)]
+   * @param id 用户 Id
+   * @param mobile 手机号码
+   * @param requestUser 请求的用户
+   */
+  async updateMobile(id: number, mobile: string, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+    // 修改非自己信息
+    if (String(id) !== String(requestUser.id)) {
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    }
+
+    const user = await this.models.Users.findByPk(id);
+    if (user) {
+      // 相同不需要修改
+      if (mobile === user.mobile) {
+        return true;
+      }
+      if (await this.isMobileExists(mobile)) {
+        throw new ValidationError(
+          await this.i18nService.t('datasource.user.mobile_unique_required', { lang: requestUser.lang }),
+        );
+      }
+
+      user.mobile = mobile;
+      await user.save();
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * 修改用户状态
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers]
-   * @param id User Id
+   * @param id 用户 Id
    * @param status 状态
    */
-  async updateStatus(id: number, status: UserStatus, requestUser: JwtPayload): Promise<boolean> {
+  async updateStatus(id: number, status: UserStatus, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
     await this.hasCapability(UserCapability.EditUsers, requestUser, true);
 
     return await this.models.Users.update(
@@ -526,13 +601,15 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [DeleteUsers]
-   * @param id User Id
+   * @param id 用户 Id
    */
-  async delete(id: number, requestUser: JwtPayload): Promise<true> {
+  async delete(id: number, requestUser: JwtPayload & { lang?: string }): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     if (id === requestUser.id) {
-      throw new ForbiddenError('Could not delete yourself!');
+      throw new ForbiddenError(
+        await this.i18nService.t('datasource.user.delete_self_forbidden', { lang: requestUser.lang }),
+      );
     }
 
     const t = await this.sequelize.transaction();
@@ -561,13 +638,15 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [DeleteUsers]
-   * @param id User Id
+   * @param id 用户 Id
    */
-  async blukDelete(ids: number[], requestUser: JwtPayload): Promise<true> {
+  async blukDelete(ids: number[], requestUser: JwtPayload & { lang?: string }): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     if (ids.includes(requestUser.id)) {
-      throw new ForbiddenError('Could not delete yourself!');
+      throw new ForbiddenError(
+        await this.i18nService.t('datasource.user.delete_self_forbidden', { lang: requestUser.lang }),
+      );
     }
 
     const t = await this.sequelize.transaction();
@@ -740,7 +819,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
   /**
    * 获取用户角色
-   * @param userId User id
+   * @param userId 用户 Id
    */
   async getRole(userId: number): Promise<UserRole | null> {
     // 角色
@@ -783,7 +862,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   /**
    * 修改密码
    * 旧密码不正确返回 false
-   * @param userId User id
+   * @param userId 用户 Id
    * @param oldPwd 旧密码
    * @param newPwd 新密码
    * @returns

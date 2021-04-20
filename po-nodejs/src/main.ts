@@ -11,8 +11,8 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const authService = app.get(AuthService);
   const reflector = app.get(Reflector);
+  const authService = app.get(AuthService);
 
   // express-jwt middleware
   app.use(

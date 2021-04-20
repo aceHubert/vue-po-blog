@@ -1,0 +1,10 @@
+{
+  "init_data": {
+    "success": "initialize datas successful!",
+    "faild": "An error occurred while initializing datas!"
+  },
+  "init_database": {
+    "success": "initialize database successful!",
+    "faild": "An error occurred while initializing database!"
+  }
+}

@@ -1,4 +1,5 @@
 import { Body, Controller, Query, Post, Scope } from '@nestjs/common';
+import { I18n, I18nContext } from 'nestjs-i18n';
 import { Authorized } from '@/common/decorators/authorized.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { AuthService } from './auth.service';
@@ -13,7 +14,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() userLoginDto: UserLoginDto): Promise<Response<TokenResponse>> {
+  async login(@Body() userLoginDto: UserLoginDto, @I18n() i18n: I18nContext): Promise<Response<TokenResponse>> {
     const tokenOrFalse = await this.authService.login(
       userLoginDto.username,
       userLoginDto.password,
@@ -27,15 +28,18 @@ export class AuthController {
     } else {
       return {
         success: false,
-        message: 'Username or password is incorrect!',
+        message: await i18n.t('auth.login.faild'),
       };
     }
   }
 
   @Post('refresh')
-  async refresh(@Query('refreshtoken') token: string): Promise<Response<RefreshTokenResponse>> {
+  async refresh(
+    @Query('refreshtoken') token: string,
+    @I18n() i18n: I18nContext,
+  ): Promise<Response<RefreshTokenResponse>> {
     try {
-      const newToken = await this.authService.refreshToken(token);
+      const newToken = await this.authService.refreshToken(token, i18n.detectedLanguage);
       if (newToken) {
         return {
           success: true,
@@ -44,7 +48,7 @@ export class AuthController {
       } else {
         return {
           success: false,
-          message: 'Invalid token!',
+          message: await i18n.t('auth.token.invalid'),
         };
       }
     } catch (err) {
@@ -60,28 +64,33 @@ export class AuthController {
   async updatePwd(
     @User('id') userId: number,
     @Body() updatePwdDto: UpdatePwdDto,
+    @I18n() i18n: I18nContext,
   ): Promise<Response<{ message: string }>> {
     const result = await this.authService.updatePwd(userId, updatePwdDto.oldPwd, updatePwdDto.newPwd);
     if (result) {
       return {
         success: true,
-        message: 'Update sucessfully!',
+        message: await i18n.t('auth.update_pwd.success'),
       };
     } else {
       return {
         success: false,
-        message: 'The old password is incorrect!',
+        message: await i18n.t('auth.update_pwd.old_pwd_incorrect'),
       };
     }
   }
 
   @Authorized()
   @Post('logout')
-  async logout(@User('id') userId: number, @User('device') device: string): Promise<Response<{ message: string }>> {
+  async logout(
+    @User('id') userId: number,
+    @User('device') device: string,
+    @I18n() i18n: I18nContext,
+  ): Promise<Response<{ message: string }>> {
     await this.authService.logout(userId, device);
     return {
       success: true,
-      message: 'Log out successfully!',
+      message: await i18n.t('auth.logout.success'),
     };
   }
 }

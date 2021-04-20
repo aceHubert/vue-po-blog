@@ -1,0 +1,28 @@
+{
+  "default_data": {
+    "uncategorized": "Uncategorized",
+    "article_title": "Simple Article",
+    "article_content": "This is your first article."
+  },
+  "no_capability": "Access denied, You don't have capability \"{capability}\" for this action!",
+  "user": {
+    "username_unique_required": "Username is reqiured to be unique!",
+    "email_unique_required": "Email is reqiured to be unique!",
+    "mobile_unique_required": "Mobile is reqiured to be unique!",
+    "delete_self_forbidden": "Could not delete yourself!"
+  },
+  "term": {
+    "relationship_duplicate_definition": "Relationship has been defined!"
+  },
+  "post": {
+    "update_trash_forbidden": "Cound not update with \"trush\" status, use \"restore\" function first!",
+    "update_trash_forbidden_with_ids": "Cound not update with \"trush\" status, use \"restore\" function first, ids: {ids}!",
+    "restore_without_trash_forbidden": "Could not restore without \"trush\" status!",
+    "restore_without_trash_forbidden_with_ids": "Could not restore without \"trush\" status, ids: {ids}!",
+    "delete_without_trash_forbidden": "Could not delete without \"trash\" status!",
+    "delete_without_trash_forbidden_with_ids": "Could not delete without \"trash\" status, ids: {ids}!"
+  },
+  "option":{
+    "name_exists": "OptionName \"{name}\" has existed!"
+  }
+}

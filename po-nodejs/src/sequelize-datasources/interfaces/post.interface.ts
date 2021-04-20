@@ -1,4 +1,4 @@
-import { PostStatus } from '@/common/helpers/enums';
+import { PostStatus } from '@/posts/enums';
 import { PostAttributes, PostCreationAttributes } from '@/orm-entities/interfaces';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';

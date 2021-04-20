@@ -1,7 +1,5 @@
 import { Optional } from './optional.interface';
-import { CommentType } from '@/common/helpers/enums';
-
-export { CommentType };
+import { CommentType } from '@/comments/enums';
 
 export interface CommentAttributes {
   id: number;

@@ -2,6 +2,7 @@ import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nest
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
 import { LinkDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
+import { Authorized } from '@/common/decorators/authorized.decorator';
 
 // Types
 import { SimpleUser } from '@/users/models/user.model';
@@ -37,11 +38,13 @@ export class LinkResolver extends BaseResolver {
     return this.userDataSoruce.getSimpleInfo(userId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
   }
 
+  @Authorized()
   @Mutation((returns) => Link, { description: '添加链接' })
   addLink(@Args('model', { type: () => NewLinkInput }) model: NewLinkInput): Promise<Link> {
     return this.linkDataSource.create(model);
   }
 
+  @Authorized()
   @Mutation((returns) => Boolean, { description: '修改链接' })
   modifyLink(
     @Args('id', { type: () => ID!, description: 'Link id' }) id: number,
@@ -50,6 +53,7 @@ export class LinkResolver extends BaseResolver {
     return this.linkDataSource.update(id, model);
   }
 
+  @Authorized()
   @Mutation((returns) => Boolean, { description: '删除链接' })
   removeLink(@Args('id', { type: () => ID!, description: 'Link id' }) id: number): Promise<boolean> {
     return this.linkDataSource.delete(id);

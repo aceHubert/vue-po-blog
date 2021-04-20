@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { isPlainObject } from 'lodash';
 import { Injectable, UnauthorizedException, CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
+import { I18nService } from 'nestjs-i18n';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@/config/config.service';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
@@ -14,7 +15,8 @@ export class AuthService {
 
   constructor(
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
-    private readonly config: ConfigService,
+    private readonly configService: ConfigService,
+    private readonly i18nService: I18nService,
     private readonly userDataSource: UserDataSource,
   ) {}
 
@@ -31,14 +33,14 @@ export class AuthService {
    * jwt 协议， 默认：HS256
    */
   get JwtAlgorithm() {
-    return this.config.get('jwt_algorithm');
+    return this.configService.get('jwt_algorithm');
   }
 
   /**
    * jwt access token 过期时间，默认：30 minutes
    */
   get jwtTokenExpiresIn() {
-    return this.config.get('jwt_expiresIn');
+    return this.configService.get('jwt_expiresIn');
   }
 
   /**
@@ -54,7 +56,7 @@ export class AuthService {
    * jwt refresh token 过期时间，默认：15 days
    */
   get jwtRefreshTokenExpiresIn() {
-    return this.config.get('jwt_refresh_token_expiresIn') || '15d';
+    return this.configService.get('jwt_refresh_token_expiresIn') || '15d';
   }
 
   /**
@@ -158,18 +160,19 @@ export class AuthService {
    * @param token access_token
    * @param options jwt.VerifyOptions
    */
-  async verifyToken(token: string, options?: jwt.VerifyOptions): Promise<JwtPayload> {
-    const payload = this.decodeToken(token);
+  async verifyToken(token: string, options?: jwt.VerifyOptions & { lang?: string }): Promise<JwtPayload> {
+    const { lang, ...jwtOptions } = options || {};
+    const payload = await this.decodeToken(token);
     if (payload && isPlainObject(payload) && payload.id) {
       const screct = await this.getScrect(payload.id, payload.device);
       try {
-        jwt.verify(token, screct, options);
+        jwt.verify(token, screct, jwtOptions);
         return payload;
       } catch {
-        throw new UnauthorizedException('Invalid token!');
+        throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
       }
     } else {
-      throw new UnauthorizedException('Invalid token!');
+      throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
     }
   }
 
@@ -183,18 +186,22 @@ export class AuthService {
    * @param token refresh_token
    * @param options jwt.VerifyOptions
    */
-  async verifyRefreshToken(refreshToken: string, options?: jwt.VerifyOptions): Promise<Omit<JwtPayload, 'role'>> {
-    const payload = this.decodeToken(refreshToken);
+  async verifyRefreshToken(
+    refreshToken: string,
+    options?: jwt.VerifyOptions & { lang?: string },
+  ): Promise<Omit<JwtPayload, 'role'>> {
+    const { lang, ...jwtOptions } = options || {};
+    const payload = await this.decodeToken(refreshToken, { lang });
     if (payload && isPlainObject(payload) && payload.id) {
       const screct = await this.getRefreshTokenScrect(payload.id, payload.device);
       try {
-        jwt.verify(refreshToken, screct, options);
+        jwt.verify(refreshToken, screct, jwtOptions);
         return payload;
       } catch {
-        throw new UnauthorizedException('Invalid token!');
+        throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
       }
     } else {
-      throw new UnauthorizedException('Invalid token!');
+      throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
     }
   }
 
@@ -207,11 +214,12 @@ export class AuthService {
    * @access None
    * @param token token
    */
-  decodeToken(token: string): JwtPayload | null {
+  async decodeToken(token: string, options?: jwt.DecodeOptions & { lang?: string }): Promise<JwtPayload | null> {
+    const { lang, ...jwtOptions } = options || {};
     try {
-      return jwt.decode(token, { json: true }) as JwtPayload | null;
+      return jwt.decode(token, { ...jwtOptions, json: true }) as JwtPayload | null;
     } catch (err) {
-      throw new UnauthorizedException('Invalid token!');
+      throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
     }
   }
 
@@ -262,8 +270,8 @@ export class AuthService {
    * @access None
    * @param token refresh token
    */
-  async refreshToken(refreshToken: string): Promise<false | RefreshTokenResponse> {
-    const refreshTokenPayload = await this.verifyRefreshToken(refreshToken);
+  async refreshToken(refreshToken: string, lang?: string): Promise<false | RefreshTokenResponse> {
+    const refreshTokenPayload = await this.verifyRefreshToken(refreshToken, { lang });
     if (refreshTokenPayload && isPlainObject(refreshTokenPayload) && refreshTokenPayload.id) {
       const jwtScrect = await this.updateScrect(refreshTokenPayload.id, refreshTokenPayload.device);
 

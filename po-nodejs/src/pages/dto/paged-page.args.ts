@@ -1,6 +1,6 @@
 import { Field, ArgsType } from '@nestjs/graphql';
 import { PagedArgs } from '@/common/models/general.model';
-import { PostStatus } from '@/common/helpers/enums';
+import { PostStatus } from '@/posts/enums';
 
 /**
  * 页面分页查询参数

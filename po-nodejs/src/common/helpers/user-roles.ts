@@ -1,4 +1,4 @@
-import { UserRole } from './enums';
+import { UserRole } from '@/users/enums';
 import { UserCapability } from './user-capability';
 
 export type UserRoles = {

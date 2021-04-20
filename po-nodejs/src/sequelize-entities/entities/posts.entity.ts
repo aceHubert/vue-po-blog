@@ -1,10 +1,9 @@
 import { Model, DataTypes } from 'sequelize';
+import { PostStatus, PostCommentStatus } from '@/posts/enums';
 import {
   PostAttributes,
   PostCreationAttributes,
   PostType,
-  PostStatus,
-  PostCommentStatus,
   PostOperateType,
   PostOperateStatus,
 } from '@/orm-entities/interfaces/posts.interface';

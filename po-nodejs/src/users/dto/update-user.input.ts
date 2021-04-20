@@ -1,16 +1,6 @@
 import { Field, InputType, PartialType, PickType } from '@nestjs/graphql';
-import { UserRole } from '@/common/helpers/enums';
+import { UserRole, UserRoleWithNone } from '../enums';
 import { NewUserInput } from './new-user.input';
-
-// todo: enum union type
-export enum UserRoleWithNone {
-  Administrator = 'administrator',
-  Editor = 'editor',
-  Author = 'author',
-  Contributor = 'contributor',
-  Subscriber = 'subscriber',
-  None = 'none',
-}
 
 @InputType({ description: '用户修改模型' })
 export class UpdateUserInput extends PartialType(

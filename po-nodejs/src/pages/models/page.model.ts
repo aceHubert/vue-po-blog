@@ -1,5 +1,5 @@
 import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
-import { PostStatus, PostCommentStatus } from '@/common/helpers/enums';
+import { PostStatus, PostCommentStatus } from '@/posts/enums';
 import { PagedResponse } from '@/common/models/general.model';
 
 @ObjectType({ description: '页面模型' })
