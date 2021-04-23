@@ -33,7 +33,7 @@ export class OptionResolver extends BaseResolver {
 
   @Authorized()
   @Mutation((returns) => Option, { description: '添加配置项' })
-  addOption(
+  createOption(
     @Args('model', { type: () => NewOptionInput }) model: NewOptionInput,
     requestUser: JwtPayload,
   ): Promise<Option> {
@@ -42,7 +42,7 @@ export class OptionResolver extends BaseResolver {
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改配置项' })
-  modifyOption(
+  updateOption(
     @Args('id', { type: () => ID }) id: number,
     @Args('model', { type: () => UpdateOptionInput })
     model: UpdateOptionInput,
@@ -53,7 +53,7 @@ export class OptionResolver extends BaseResolver {
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '删除配置项' })
-  removeOption(@Args('id', { type: () => ID }) id: number, requestUser: JwtPayload): Promise<boolean> {
+  deleteOption(@Args('id', { type: () => ID }) id: number, requestUser: JwtPayload): Promise<boolean> {
     return this.optionDataSource.delete(id, requestUser);
   }
 }

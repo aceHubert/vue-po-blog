@@ -18,7 +18,7 @@ export class NewMediaInput {
   @Field({ description: '相对路径' })
   path!: string;
 
-  @Field(() => ID, { nullable: true, description: 'User Id' })
+  @Field(() => ID, { nullable: true, description: '用户 Id' })
   userId?: number;
 
   @Field((type) => [NewMetaInput], { nullable: true, description: '媒体元数据' })

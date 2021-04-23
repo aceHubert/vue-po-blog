@@ -40,13 +40,13 @@ export class LinkResolver extends BaseResolver {
 
   @Authorized()
   @Mutation((returns) => Link, { description: '添加链接' })
-  addLink(@Args('model', { type: () => NewLinkInput }) model: NewLinkInput): Promise<Link> {
+  createLink(@Args('model', { type: () => NewLinkInput }) model: NewLinkInput): Promise<Link> {
     return this.linkDataSource.create(model);
   }
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改链接' })
-  modifyLink(
+  updateLink(
     @Args('id', { type: () => ID!, description: 'Link id' }) id: number,
     @Args('model', { type: () => UpdateLinkInput }) model: UpdateLinkInput,
   ): Promise<boolean> {
@@ -55,7 +55,7 @@ export class LinkResolver extends BaseResolver {
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '删除链接' })
-  removeLink(@Args('id', { type: () => ID!, description: 'Link id' }) id: number): Promise<boolean> {
+  deleteLink(@Args('id', { type: () => ID!, description: 'Link id' }) id: number): Promise<boolean> {
     return this.linkDataSource.delete(id);
   }
 }

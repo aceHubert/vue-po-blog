@@ -1,9 +1,10 @@
 import { ModuleRef } from '@nestjs/core';
-import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int, Context } from '@nestjs/graphql';
+import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
 import { TermTaxonomy as TermTaxonomyEnum } from '@/common/helpers/term-taxonomy';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
+import { User } from '@/common/decorators/user.decorator';
 import { PostType } from '@/orm-entities/interfaces';
 import { PostDataSource, UserDataSource, TermDataSource } from '@/sequelize-datasources/datasources';
 
@@ -42,13 +43,13 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   post(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Fields() fields: ResolveTree,
-    @Context('user') requestUser?: JwtPayload,
+    @User() requestUser?: JwtPayload,
   ): Promise<Post | null> {
     return this.postDataSource.get(id, PostType.Post, this.getFieldNames(fields.fieldsByTypeName.Post), requestUser);
   }
 
   @Query((returns) => PagedPost, { description: '获取分页文章列表' })
-  posts(@Args() args: PagedPostArgs, @Fields() fields: ResolveTree, @Context('user') requestUser?: JwtPayload) {
+  posts(@Args() args: PagedPostArgs, @Fields() fields: ResolveTree, @User() requestUser?: JwtPayload) {
     return this.postDataSource.getPaged(
       args,
       PostType.Post,
@@ -95,13 +96,13 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
 
   @Authorized()
   @Query((returns) => [PostStatusCount], { description: '获取文章按状态分组数量' })
-  postCountByStatus(@Context('user') requestUser: JwtPayload) {
+  postCountByStatus(@User() requestUser: JwtPayload) {
     return this.postDataSource.getCountByStatus(PostType.Post, requestUser);
   }
 
   @Authorized()
   @Query((returns) => Int, { description: '获取我的文章数量' })
-  postCountBySelf(@Context('user') requestUser: JwtPayload) {
+  postCountBySelf(@User() requestUser: JwtPayload) {
     return this.postDataSource.getCountBySelf(PostType.Post, requestUser);
   }
 
@@ -130,29 +131,29 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
 
   @Authorized()
   @Mutation((returns) => Post, { description: '添加文章' })
-  addPost(
+  createPost(
     @Args('model', { type: () => NewPostInput }) model: NewPostInput,
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<Post> {
     return this.postDataSource.create(model, PostType.Post, requestUser);
   }
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改文章（Trash 状态下不支持修改）' })
-  modifyPost(
+  updatePost(
     @Args('id', { type: () => ID, description: 'Post id/副本 Post id' }) id: number,
     @Args('model', { type: () => UpdatePostInput }) model: UpdatePostInput,
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.update(id, model, requestUser);
   }
 
   // Page 状共用以下方法
   @Mutation((returns) => Boolean, { description: '修改文章或页面状态（Trash 状态下不支持修改）' })
-  modifyPostOrPageStatus(
+  updatePostOrPageStatus(
     @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
     @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.updateStatus(id, status, requestUser);
   }
@@ -162,17 +163,17 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   blukModifyPostOrPageStatus(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
     @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.blukUpdateStatus(ids, status, requestUser);
   }
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改文章或页面评论状态' })
-  modifyPostOrPageCommentStatus(
+  updatePostOrPageCommentStatus(
     @Args('id', { type: () => ID, description: 'Post id/副本 Post id' }) id: number,
     @Args('status', { type: () => PostCommentStatus, description: '评论状态' }) status: PostCommentStatus,
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.updateCommentStatus(id, status, requestUser);
   }
@@ -183,7 +184,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   })
   restorePostOrPage(
     @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.restore(id, requestUser);
   }
@@ -194,16 +195,16 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   })
   blukRestorePostOrPage(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.blukRestore(ids, requestUser);
   }
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '删除文章或页面（非 Trash 状态下无法删除）' })
-  removePostOrPage(
+  deletePostOrPage(
     @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.delete(id, requestUser);
   }
@@ -212,7 +213,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Mutation((returns) => Boolean, { description: '删除文章或页面（非 Trash 状态下无法删除）' })
   blukRemovePostOrPage(
     @Args('ids', { type: () => [ID!], description: 'Post/Page id' }) ids: number[],
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.blukDelete(ids, requestUser);
   }

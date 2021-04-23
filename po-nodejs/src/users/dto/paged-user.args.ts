@@ -10,15 +10,15 @@ import { PagedUserArgs as IPagedUserArgs } from '@/sequelize-datasources/interfa
  */
 @ArgsType()
 export class PagedUserArgs extends PagedArgs implements IPagedUserArgs {
-  @Field({ nullable: true, description: '搜索关键字（根据登录名模糊查询）' })
+  @Field({ nullable: true, description: 'Search keyword（from loginName）' })
   keyword?: string;
 
-  @Field((type) => UserStatus, { nullable: true, description: '用户状态' })
-  status!: UserStatus;
+  @Field((type) => UserStatus, { nullable: true, description: 'User status' })
+  status?: UserStatus;
 
   @Field((type) => UserRoleWithNone, {
     nullable: true,
-    description: '用户角色（如果为空，则查询有角色（即非 None 的）的用户）',
+    description: "User role（if null，search for all roles but not 'None'",
   })
   userRole?: UserRole | 'none';
 }

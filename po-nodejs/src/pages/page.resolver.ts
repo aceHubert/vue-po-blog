@@ -1,8 +1,9 @@
 import { ModuleRef } from '@nestjs/core';
-import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int, Context } from '@nestjs/graphql';
+import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
+import { User } from '@/common/decorators/user.decorator';
 import { PostType } from '@/orm-entities/interfaces';
 import { PostDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
@@ -32,13 +33,13 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
   page(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Fields() fields: ResolveTree,
-    @Context('user') requestUser?: JwtPayload,
+    @User() requestUser?: JwtPayload,
   ): Promise<Page | null> {
     return this.postDataSource.get(id, PostType.Page, this.getFieldNames(fields.fieldsByTypeName.Page), requestUser);
   }
 
   @Query((returns) => PagedPage, { description: '获取分页页面列表' })
-  pages(@Args() args: PagedPageArgs, @Fields() fields: ResolveTree, @Context('user') requestUser?: JwtPayload) {
+  pages(@Args() args: PagedPageArgs, @Fields() fields: ResolveTree, @User() requestUser?: JwtPayload) {
     return this.postDataSource.getPaged(
       args,
       PostType.Page,
@@ -49,7 +50,7 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
 
   @Authorized()
   @Query((returns) => [PostStatusCount], { description: '获取文章按状态分组数量' })
-  pageCountByStatus(@Context('user') requestUser: JwtPayload) {
+  pageCountByStatus(@User() requestUser: JwtPayload) {
     return this.postDataSource.getCountByStatus(PostType.Page, requestUser);
   }
 
@@ -86,19 +87,19 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
 
   @Authorized()
   @Mutation((returns) => Page, { description: '添加页面' })
-  addPage(
+  createPage(
     @Args('model', { type: () => NewPageInput }) model: NewPageInput,
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<Page> {
     return this.postDataSource.create(model, PostType.Page, requestUser);
   }
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改页面（Trash 状态下不支持修改）' })
-  modifyPage(
+  updatePage(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Args('model', { type: () => UpdatePageInput }) model: UpdatePageInput,
-    @Context('user') requestUser: JwtPayload,
+    @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.update(id, model, requestUser);
   }

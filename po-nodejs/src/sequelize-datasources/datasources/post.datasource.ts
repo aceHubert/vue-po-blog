@@ -205,7 +205,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * [批量]移除 trash 之前的状态
    * @param postId Post id
    */
-  private async removeStorageTrashStatus(postId: number | number[], t?: Transaction) {
+  private async deleteStorageTrashStatus(postId: number | number[], t?: Transaction) {
     return await this.models.PostMeta.destroy({
       where: {
         postId,
@@ -283,19 +283,19 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     query: PagedPostArgs,
     type: PostType.Post,
     fields: string[],
-    requestUser?: JwtPayload,
+    requestUser?: JwtPayload & { lang?: string },
   ): Promise<PagedPostModel>;
   async getPaged(
     query: PagedPageArgs,
     type: PostType.Page,
     fields: string[],
-    requestUser?: JwtPayload,
+    requestUser?: JwtPayload & { lang?: string },
   ): Promise<PagedPostModel>;
   async getPaged(
     { offset, limit, ...query }: PagedPostArgs | PagedPageArgs,
     type: PostType,
     fields: string[],
-    requestUser?: JwtPayload,
+    requestUser?: JwtPayload & { lang?: string },
   ): Promise<PagedPostModel> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
@@ -1046,7 +1046,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
             transaction: t,
           });
 
-          await this.removeStorageTrashStatus(id, t);
+          await this.deleteStorageTrashStatus(id, t);
 
           await t.commit();
           return true;
@@ -1122,7 +1122,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
         ),
       );
 
-      await this.removeStorageTrashStatus(ids, t);
+      await this.deleteStorageTrashStatus(ids, t);
 
       await t.commit();
       return true;

@@ -1,4 +1,7 @@
 {
+
+  "no_capability": "拒绝访问，您没有\"{capability}\"权限！",
+    "no_role_permission": "拒绝访问，需要\"{role}\"角色权限！",
   "login": {
     "faild": "用户名或密码不正确!",
     "success": "登录成功!"

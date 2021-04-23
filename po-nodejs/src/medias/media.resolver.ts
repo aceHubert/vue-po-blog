@@ -37,13 +37,13 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
 
   @Authorized()
   @Mutation((returns) => Media, { description: '添加媒体' })
-  addMedia(@Args('model', { type: () => NewMediaInput }) model: NewMediaInput): Promise<Media> {
+  createMedia(@Args('model', { type: () => NewMediaInput }) model: NewMediaInput): Promise<Media> {
     return this.mediaDataSource.create(model);
   }
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '删除媒体' })
-  removeMedia(@Args('id', { type: () => ID!, description: 'Media id' }) id: number): Promise<boolean> {
+  deleteMedia(@Args('id', { type: () => ID!, description: 'Media id' }) id: number): Promise<boolean> {
     return this.mediaDataSource.delete(id);
   }
 }

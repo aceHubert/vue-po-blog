@@ -1,0 +1,25 @@
+{
+  "user_login_dto": {
+    "username": {
+      "is_not_empty": "用户名必填"
+    },
+    "password": {
+      "is_not_empty": "密码必填",
+      "min_length": "密码长度不可小于6位"
+    },
+    "device": {
+      "is_not_empty": "登录设备必填"
+    }
+  },
+  "new_user_input": {
+    "email": {
+      "is_email": "Email格式不正确"
+    },
+    "mobile": {
+      "is_phone_number": "手机号码格式不正确"
+    },
+    "url": {
+      "is_url": "Url地址格式不正确"
+    }
+  }
+}

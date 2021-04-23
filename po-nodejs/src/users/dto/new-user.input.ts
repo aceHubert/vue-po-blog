@@ -1,46 +1,46 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, Length, MinLength, IsEmail, IsUrl } from 'class-validator';
+import { IsOptional, MinLength, IsEmail, IsUrl, IsMobilePhone } from 'class-validator';
 import { UserRole, UserStatus } from '../enums';
 
-@InputType({ description: '用户新建模型' })
+@InputType({ description: 'New user input' })
 export class NewUserInput {
-  @Field({ description: '登录名' })
+  @Field({ description: 'Login name' })
   loginName!: string;
 
-  @Field({ description: '登录密码' })
-  @MinLength(6, { message: '最小长度不得小于6位' })
+  @MinLength(6, { message: 'field $property must be longer than or equal to $constraint1 characters' })
+  @Field({ description: 'Login password' })
   loginPwd!: string;
 
+  @IsEmail({}, { message: 'field $property must be an email' })
   @Field({ description: 'Email' })
-  @IsEmail({}, { message: '邮箱格式不正确' })
   email!: string;
 
-  @Field({ nullable: true, description: '手机号码' })
   @IsOptional()
-  @Length(11, 11, { message: '手机号码长度为11位' })
+  @IsMobilePhone('any' as any, {}, { message: 'field $property must be a mobile number' })
+  @Field({ nullable: true, description: 'Mobile number' })
   mobile?: string;
 
-  @Field({ nullable: true, description: '名' })
+  @Field({ nullable: true, description: 'First name' })
   firstName?: string;
 
-  @Field({ nullable: true, description: '姓' })
+  @Field({ nullable: true, description: 'Last name' })
   lastName?: string;
 
-  @Field({ nullable: true, description: '客户端 URL' })
   @IsOptional()
   // eslint-disable-next-line @typescript-eslint/camelcase
-  @IsUrl({ require_tld: false }, { message: 'Url 格式错误' })
+  @IsUrl({ require_tld: false }, { message: 'field $property must be an URL address' })
+  @Field({ nullable: true, description: 'Home URL address' })
   url?: string;
 
-  @Field(() => UserStatus, { defaultValue: UserStatus.Enable, description: '状态' })
+  @Field(() => UserStatus, { defaultValue: UserStatus.Enable, description: 'User status' })
   status!: UserStatus;
 
-  @Field(() => UserRole, { defaultValue: UserRole.Subscriber, description: '角色' })
+  @Field(() => UserRole, { defaultValue: UserRole.Subscriber, description: 'User role' })
   userRole!: UserRole;
 
-  @Field({ nullable: true, description: '语言' })
+  @Field({ nullable: true, description: 'User language' })
   locale?: string;
 
-  @Field(() => Boolean, { defaultValue: true, description: '发送账号信息到用户邮箱' })
+  @Field(() => Boolean, { defaultValue: true, description: "Send account infomations to user's email" })
   sendUserNotification!: boolean;
 }

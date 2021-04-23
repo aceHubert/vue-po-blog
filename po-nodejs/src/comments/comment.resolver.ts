@@ -62,13 +62,13 @@ export class CommentResolver extends createMetaResolver(Comment, CommentMeta, Ne
 
   @Authorized()
   @Mutation((returns) => Comment, { description: '添加评论' })
-  addComment(@Args('model', { type: () => NewCommentInput }) model: NewCommentInput): Promise<Comment> {
+  createComment(@Args('model', { type: () => NewCommentInput }) model: NewCommentInput): Promise<Comment> {
     return this.commentDataSource.create(model);
   }
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '修改评论' })
-  modifyComment(
+  updateComment(
     @Args('id', { type: () => ID, description: 'Comment id' }) id: number,
     @Args('model', { type: () => UpdateCommentInput }) model: UpdateCommentInput,
   ): Promise<boolean> {
@@ -77,7 +77,7 @@ export class CommentResolver extends createMetaResolver(Comment, CommentMeta, Ne
 
   @Authorized()
   @Mutation((returns) => Boolean, { description: '删除评论' })
-  removeComment(@Args('id', { type: () => ID, description: 'Comment id' }) id: number): Promise<boolean> {
+  deleteComment(@Args('id', { type: () => ID, description: 'Comment id' }) id: number): Promise<boolean> {
     return this.commentDataSource.delete(id);
   }
 }

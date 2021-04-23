@@ -15,7 +15,7 @@ import { Meta, NewMetaInput } from '../models/meta.model';
 export type Options = {
   /**
    * Query/Mutation命名(以大写命名)， 默认值为:  resolverType.name
-   * 例如设置为Post,则会命名为 postMetas, addPostMeta, modifyPostMeta, removePostMeta 的Query和Mutation方法
+   * 例如设置为Post,则会命名为 postMetas, createPostMeta, updatePostMeta, deletePostMeta 的Query和Mutation方法
    */
   resolverName?: string;
   /**
@@ -88,18 +88,18 @@ export function createMetaResolver<
 
     @Mutation((returns) => metaReturnType, {
       nullable: true,
-      name: `add${resolverName || resolverType.name}Meta`,
+      name: `create${resolverName || resolverType.name}Meta`,
       description: `添加 ${description || resolverName || resolverType.name} 元数据`,
     })
-    addMeta(@Args('model', { type: () => newMetaInputType }) model: NewMetaInputType) {
+    createMeta(@Args('model', { type: () => newMetaInputType }) model: NewMetaInputType) {
       return this.metaDataSource.createMeta(model);
     }
 
     @Mutation((returns) => [metaReturnType!], {
-      name: `add${resolverName || resolverType.name}Metas`,
+      name: `create${resolverName || resolverType.name}Metas`,
       description: `批量添加 ${description || resolverName || resolverType.name} 元数据`,
     })
-    addMetas(
+    createMetas(
       @Args('id', { type: () => ID, description: `${description || resolverName || resolverType.name} Meta Id` })
       id: number,
       @Args('models', { type: () => [NewMetaInput!] }) models: NewMetaInput[],
@@ -108,10 +108,10 @@ export function createMetaResolver<
     }
 
     @Mutation((returns) => Boolean, {
-      name: `modify${resolverName || resolverType.name}Meta`,
+      name: `update${resolverName || resolverType.name}Meta`,
       description: `修改 ${description || resolverName || resolverType.name} 元数据`,
     })
-    modifyMeta(
+    updateMeta(
       @Args('id', { type: () => ID, description: `${description || resolverName || resolverType.name} Meta Id` })
       id: number,
       @Args('metaValue') metaValue: string,
@@ -120,10 +120,10 @@ export function createMetaResolver<
     }
 
     @Mutation((returns) => Boolean, {
-      name: `modify${resolverName || resolverType.name}MetaByKey`,
+      name: `update${resolverName || resolverType.name}MetaByKey`,
       description: `修改 ${description || resolverName || resolverType.name} 元数据`,
     })
-    modifyMetaByKey(
+    updateMetaByKey(
       @Args(`${lowerFirst(resolverName || resolverType.name)}Id`, {
         type: () => ID,
         description: `${description || resolverName || resolverType.name} Id`,
@@ -136,10 +136,10 @@ export function createMetaResolver<
     }
 
     @Mutation((returns) => Boolean, {
-      name: `remove${resolverName || resolverType.name}Meta`,
+      name: `delete${resolverName || resolverType.name}Meta`,
       description: `删除 ${description || resolverName || resolverType.name} 元数据`,
     })
-    removeMeta(
+    deleteMeta(
       @Args('id', { type: () => ID, description: `${description || resolverName || resolverType.name} Meta Id` })
       id: number,
     ) {

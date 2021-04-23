@@ -21,7 +21,7 @@ export class NewLinkInput {
   @Field((type) => LinkVisible, { nullable: true, description: '是否显示' })
   visible?: LinkVisible;
 
-  @Field(() => ID, { nullable: true, description: 'User Id' })
+  @Field(() => ID, { nullable: true, description: '用户 Id' })
   userId?: number;
 
   @Field({ nullable: true, description: 'rel' })

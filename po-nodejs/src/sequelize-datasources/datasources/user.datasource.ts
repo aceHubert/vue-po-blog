@@ -94,7 +94,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async getPaged(
     { offset, limit, ...query }: PagedUserArgs,
     fields: string[],
-    requestUser: JwtPayload,
+    requestUser: JwtPayload & { lang?: string },
   ): Promise<PagedUserModel> {
     await this.hasCapability(UserCapability.ListUsers, requestUser, true);
 

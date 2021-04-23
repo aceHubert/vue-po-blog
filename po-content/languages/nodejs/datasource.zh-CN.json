@@ -4,7 +4,6 @@
     "article_title": "示例文章",
     "article_content": "这是您的第一篇文章。"
   },
-  "no_capability": "拒绝访问，您没有\"{capability}\"权限！",
   "user": {
     "username_unique_required": "用户名必须是唯一的！",
     "email_unique_required": "Email必须是唯一的！",

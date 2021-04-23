@@ -1,16 +1,13 @@
-import { IsString, IsNotEmpty, MinLength } from 'class-validator';
+import { IsNotEmpty, MinLength } from 'class-validator';
 
 export class UserLoginDto {
-  @IsString()
-  @IsNotEmpty({ message: 'Username is required!' })
-  readonly username!: string;
+  @IsNotEmpty({ message: 'field $property is required' })
+  username!: string;
 
-  @IsString()
-  @IsNotEmpty({ message: 'Password is required!' })
-  @MinLength(6, { message: 'The password length must not be less than 6 characters!' })
-  readonly password!: string;
+  @IsNotEmpty({ message: 'field $property is required!' })
+  @MinLength(6, { message: 'field $property must be longer than or equal to $constraint1 characters' })
+  password!: string;
 
-  @IsString()
-  @IsNotEmpty({ message: 'Device is required!' })
-  readonly device!: string;
+  @IsNotEmpty({ message: 'field device is required!' })
+  device!: string;
 }

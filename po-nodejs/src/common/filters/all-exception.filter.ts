@@ -1,12 +1,4 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-  ForbiddenException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { GqlContextType } from '@nestjs/graphql';
 import { Request, Response } from 'express';
 import { UnauthorizedError } from 'express-jwt';
@@ -92,14 +84,26 @@ export class AllExceptionFilter implements ExceptionFilter {
    * @param exception Error
    */
   private getGraphqlCodeFromError(exception: Error) {
-    return exception instanceof UnauthorizedError || // 将 express-jwt UnauthorizedError 转换成 UNAUTHENTICATED
-      exception instanceof UnauthorizedException // UnauthorizedException from guard
+    return exception instanceof HttpException
+      ? getFromHttpStatus(exception.getStatus())
+      : exception instanceof UnauthorizedError // 将 express-jwt UnauthorizedError 转换成 UNAUTHENTICATED
       ? 'UNAUTHENTICATED'
-      : exception instanceof ForbiddenException // ForbiddenException from guard
-      ? 'FORBIDDEN'
       : exception instanceof DatabaseError
       ? 'DATABASE_ERROR' // 将 database error 转换成 DATABASE_ERROR
       : 'INTERNAL_SERVER_ERROR';
+
+    function getFromHttpStatus(status: number) {
+      switch (status) {
+        case 400:
+          return 'BAD_USER_INPUT';
+        case 401:
+          return 'UNAUTHENTICATED';
+        case 403:
+          return 'FORBIDDEN';
+        default:
+          return 'INTERNAL_SERVER_ERROR';
+      }
+    }
   }
 
   /**

@@ -4,7 +4,6 @@
     "article_title": "Simple Article",
     "article_content": "This is your first article."
   },
-  "no_capability": "Access denied, You don't have capability \"{capability}\" for this action!",
   "user": {
     "username_unique_required": "Username is reqiured to be unique!",
     "email_unique_required": "Email is reqiured to be unique!",
