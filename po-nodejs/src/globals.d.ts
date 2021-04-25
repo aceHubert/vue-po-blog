@@ -10,6 +10,10 @@ declare global {
     createdAt: Date;
   };
 
+  export type JwtPayloadWithLang = JwtPayload & {
+    lang?: string;
+  };
+
   export type GqlContext = Context<{
     user: JwtPayload | null;
   }>;
@@ -20,19 +24,17 @@ declare global {
     message: string;
   };
 
-  export type Response<T extends Record<string, any> = {}> =
-    | ({
-        success: true;
-      } & T)
-    | ResponseError;
+  export type ResponseSuccess<T extends Record<string, any> = {}> = {
+    success: true;
+  } & T;
 
-  export type PagedResponse<T = any> =
-    | {
-        success: true;
-        rows: Array<T>;
-        total: number;
-      }
-    | ResponseError;
+  export type PagedResponseSuccess<T = any> = ResponseSuccess<{
+    rows: Array<T>;
+    total: number;
+  }>;
+
+  export type Response<T extends Record<string, any> = {}> = ResponseSuccess<T> | ResponseError;
+  export type PagedResponse<T extends Record<string, any> = {}> = PagedResponseSuccess<T> | ResponseError;
 
   export type Dictionary<T> = Record<string, T>;
 

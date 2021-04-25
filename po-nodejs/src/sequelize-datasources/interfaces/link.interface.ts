@@ -5,12 +5,19 @@ import { PagedArgs, Paged } from './paged.interface';
 export interface LinkModel extends LinkAttributes {}
 
 export interface PagedLinkArgs extends PagedArgs {
-  name?: string;
+  /**
+   * 根据 name 模糊查询
+   */
+  keyword?: string;
 }
 
 export interface PagedLinkModel extends Paged<LinkModel> {}
 
-export interface NewLinkInput extends Omit<LinkCreationAttributes, 'id' | 'updatedAt' | 'createdAt'> {}
+export interface NewLinkInput
+  extends Pick<
+    LinkCreationAttributes,
+    'url' | 'name' | 'image' | 'target' | 'description' | 'visible' | 'rel' | 'rss'
+  > {}
 
 export class UpdateLinkInput {
   url?: string;

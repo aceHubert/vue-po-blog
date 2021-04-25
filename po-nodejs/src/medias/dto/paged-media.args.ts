@@ -6,9 +6,9 @@ import { PagedArgs } from '@/common/models/general.model';
  */
 @ArgsType()
 export class PagedMediaArgs extends PagedArgs {
-  @Field({ nullable: true, description: '文件后缀' })
+  @Field({ nullable: true, description: 'File extention' })
   extention?: string;
 
-  @Field({ nullable: true, description: '媒体类型' })
+  @Field({ nullable: true, description: 'File mime type' })
   mimeType?: string;
 }

@@ -31,39 +31,39 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       url: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '地址',
+        comment: 'URL address',
       },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '名称',
+        comment: 'Name',
       },
       image: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '图片',
+        comment: 'Image',
       },
       target: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        comment: '打开方式,values:[_blank,_self]',
+        comment: 'Open window method (values:[_blank, _self])',
       },
       description: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '说明',
+        comment: 'Description',
       },
       visible: {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: 'yes',
-        comment: '是否可见，yes：是；no：否；',
+        comment: 'Visible ("yes" or "no", default: "yes")',
       },
       userId: {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
         defaultValue: 1,
-        comment: '用户ID',
+        comment: 'User id',
       },
       rel: {
         type: DataTypes.STRING,
@@ -82,7 +82,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         { name: 'visible', fields: ['visible'] },
         { name: 'user_id', fields: ['user_id'] },
       ],
-      comment: '外部链接表',
+      comment: 'Links',
     },
   );
 };

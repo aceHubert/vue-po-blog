@@ -6,7 +6,7 @@ export default class MediaMeta extends Model<MediaMetaAttributes, MediaMetaCreat
   public id!: number;
   public mediaId!: number;
   public metaKey!: string;
-  public metaValue!: string;
+  public metaValue?: string;
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
@@ -21,16 +21,16 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
         defaultValue: 0,
-        comment: '媒体ID',
+        comment: 'Media id',
       },
       metaKey: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '元数据Key',
+        comment: 'Meta key',
       },
       metaValue: {
         type: new DataTypes.TEXT('long'),
-        comment: '元数据Value',
+        comment: 'Meta value',
       },
     },
     {
@@ -42,7 +42,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       ],
       createdAt: false,
       updatedAt: false,
-      comment: '媒体扩展表',
+      comment: 'Media metas',
     },
   );
 };

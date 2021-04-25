@@ -1,11 +1,20 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Request } from 'express';
+import { getContextObject } from '../utils/get-context-object.utils';
 
 /**
- * 从 http header 或 query 中获取token
+ * 当前请求的 JwtPayload & lang
  */
-export const User = createParamDecorator((field: keyof JwtPayload, ctx: ExecutionContext) => {
-  const request = ctx.switchToHttp().getRequest<Request>();
-  const user = request.user;
-  return field ? user && user[field] : user;
+export const User = createParamDecorator((field: keyof JwtPayloadWithLang, context: ExecutionContext) => {
+  const ctx = getContextObject(context);
+
+  if (!ctx) {
+    throw Error(`context type: ${context.getType()} not supported`);
+  }
+
+  const user: JwtPayloadWithLang = {
+    ...ctx.user,
+    lang: ctx.i18nLang,
+  };
+
+  return field ? user[field] : user;
 });

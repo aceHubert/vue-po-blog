@@ -5,18 +5,24 @@ import { Field, ArgsType, ID, Int } from '@nestjs/graphql';
  */
 @ArgsType()
 export class TermByObjectIdArgs {
-  @Field((type) => ID, { description: 'Post/Link等对象 ID' })
+  @Field((type) => ID, { description: 'Object id (Post, Link, etc...)' })
   objectId!: number;
 
-  @Field({ description: '类别' })
+  @Field({ description: 'Taxonomy name' })
   taxonomy!: string;
 
-  @Field((type) => ID, { nullable: true, description: '父Id（没有值则查询所有，0是根目录）' })
+  @Field((type) => ID, {
+    nullable: true,
+    description: 'Parent id (it will search for all if none value is provided, 0 is root parent id)',
+  })
   parentId?: number;
 
-  @Field((type) => Int, { nullable: true, description: '分组' })
+  @Field((type) => Int, {
+    nullable: true,
+    description: 'Group(it will search for all if none value is provided)',
+  })
   group?: number;
 
-  @Field((type) => Boolean, { nullable: true, description: '排序（默认正序排列）' })
+  @Field((type) => Boolean, { nullable: true, description: 'Sort（ default: asc）' })
   desc?: boolean;
 }

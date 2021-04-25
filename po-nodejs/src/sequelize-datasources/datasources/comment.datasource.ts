@@ -1,5 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
+import { UserCapability } from '@/common/helpers/user-capability';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
@@ -60,12 +61,18 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewCommentInput): Promise<CommentModel> {
+  async create(model: NewCommentInput, requestUser: JwtPayloadWithLang): Promise<CommentModel> {
     const { metas, ...rest } = model;
 
     const t = await this.sequelize.transaction();
     try {
-      const comment = await this.models.Comments.create(rest, { transaction: t });
+      const comment = await this.models.Comments.create(
+        {
+          ...rest,
+          userId: requestUser.id,
+        },
+        { transaction: t },
+      );
 
       if (metas && metas.length) {
         this.models.CommentMeta.bulkCreate(
@@ -90,42 +97,63 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
 
   /**
    * 修改评论
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [ModerateComments (if not yours)]
    * @param id Link Id
    * @param model 修改实体模型
    */
-  update(id: number, model: UpdateCommentInput): Promise<boolean> {
-    return this.models.Comments.update(model, {
-      where: { id },
-    }).then(([count]) => count > 0);
+  async update(id: number, model: UpdateCommentInput, requestUser: JwtPayloadWithLang): Promise<boolean> {
+    const comment = await this.models.Comments.findByPk(id, {
+      attributes: ['userId'],
+    });
+    if (comment) {
+      if (comment.userId !== requestUser.id) {
+        await this.hasCapability(UserCapability.ModerateComments, requestUser, true);
+      }
+
+      await this.models.Comments.update(model, {
+        where: { id },
+      });
+      return true;
+    }
+    return false;
   }
 
   /**
    * 删除评论
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [ModerateComments (if not yours)]
    * @param id comment id
    */
-  async delete(id: number): Promise<true> {
-    const t = await this.sequelize.transaction();
-    try {
-      await this.models.CommentMeta.destroy({
-        where: {
-          commentId: id,
-        },
-        transaction: t,
-      });
+  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
+    const comment = await this.models.Comments.findByPk(id);
+    if (comment) {
+      if (comment.userId !== requestUser.id) {
+        await this.hasCapability(UserCapability.ModerateComments, requestUser, true);
+      }
+      const t = await this.sequelize.transaction();
+      try {
+        await comment.destroy({ transaction: t });
 
-      await this.models.Comments.destroy({
-        where: {
-          id,
-        },
-        transaction: t,
-      });
+        await this.models.CommentMeta.destroy({
+          where: {
+            commentId: id,
+          },
+          transaction: t,
+        });
 
-      await t.commit();
+        await t.commit();
 
-      return true;
-    } catch (err) {
-      await t.rollback();
-      throw err;
+        return true;
+      } catch (err) {
+        await t.rollback();
+        throw err;
+      }
     }
+    return false;
   }
 }

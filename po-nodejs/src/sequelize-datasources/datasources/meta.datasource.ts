@@ -203,7 +203,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * @param modelId  实体 id
    * @param models 元数据实体集合
    */
-  async blukCreateMeta(modelId: number, models: NewMetaInput[]): Promise<MetaReturnType[]> {
+  async bulkCreateMeta(modelId: number, models: NewMetaInput[]): Promise<MetaReturnType[]> {
     models.forEach((model) => {
       model.metaKey = this.fixMetaKey(model.metaKey);
     });

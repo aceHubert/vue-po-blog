@@ -1,7 +1,11 @@
 import path from 'path';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { I18nModule, QueryResolver, HeaderResolver, AcceptLanguageResolver, CookieResolver } from 'nestjs-i18n';
 import { I18nJsonParser } from '@/common/parsers/i18n.json.parser';
+import { AuthorizedGuard } from '@/common/guards/authorized.guard';
+import { AllExceptionFilter } from '@/common/filters/all-exception.filter';
+import { I18nValidationPipe } from '@/common/pipes/i18n-validation.pipe';
 import { ConfigModule } from '@/config/config.module';
 import { GlobalCacheModule } from '@/global-cache/global-cache.module';
 import { DataSourceModule } from '@/sequelize-datasources/datasource.module';
@@ -37,7 +41,7 @@ const contentPath = path.join(__dirname, '../../po-content');
             'zh-*': 'zh-CN',
           },
           parserOptions: {
-            paths: [path.join(contentPath, '/languages/')],
+            paths: [path.join(contentPath, '/languages/nodejs')],
             watch: !isProduction,
           },
         };
@@ -80,6 +84,20 @@ const contentPath = path.join(__dirname, '../../po-content');
         }
       },
     }),
+  ],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: I18nValidationPipe,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthorizedGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionFilter,
+    },
   ],
 })
 export class AppModule {}

@@ -22,18 +22,18 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false,
-        comment: '配置名称',
+        comment: 'Opiton name',
       },
       optionValue: {
         type: new DataTypes.TEXT('long'),
         allowNull: false,
-        comment: '配置值',
+        comment: 'Option value',
       },
       autoload: {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: 'yes',
-        comment: '是否自动加载, yes：是；no：否;',
+        comment: 'Autoload ("yes" or "no", default: "yes")',
       },
     },
     {
@@ -42,7 +42,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       indexes: [{ name: 'autoload', fields: ['autoload'] }],
       createdAt: false,
       updatedAt: false,
-      comment: '配置表',
+      comment: 'Options',
     },
   );
 };

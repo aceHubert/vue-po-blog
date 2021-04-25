@@ -23,3 +23,11 @@ export class RuntimeError extends ApolloError {
     Object.defineProperty(this, 'name', { value: 'RuntimeError' });
   }
 }
+
+/**
+ * 判断是 apollo error
+ * @param err Error
+ */
+export function isApolloError(err: Error) {
+  return err.hasOwnProperty('graphQLErrors');
+}

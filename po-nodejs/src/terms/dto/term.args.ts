@@ -5,15 +5,18 @@ import { Field, ArgsType, ID, Int } from '@nestjs/graphql';
  */
 @ArgsType()
 export class TermArgs {
-  @Field({ description: '类别名称' })
+  @Field({ description: 'Taxonomy name' })
   taxonomy!: string;
 
-  @Field({ nullable: true, description: '搜索关键字（根据标题模糊查询）' })
+  @Field({ nullable: true, description: 'Search keywork (fuzzy searching from term name)' })
   keyword?: string;
 
-  @Field((type) => ID, { nullable: true, description: '父Id（没有值则查询所有，0是根目录）' })
+  @Field((type) => ID, {
+    nullable: true,
+    description: 'Parent id (it will search for all if none value is provided, 0 is root parent id)',
+  })
   parentId?: number;
 
-  @Field((type) => Int, { nullable: true, description: '分组' })
+  @Field((type) => Int, { nullable: true, description: 'Group(it will search for all if none value is provided)' })
   group?: number;
 }

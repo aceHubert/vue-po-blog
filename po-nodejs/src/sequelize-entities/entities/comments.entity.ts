@@ -13,7 +13,7 @@ export default class Comments extends Model<
   public author!: string;
   public authorEmail?: string;
   public authorUrl?: string;
-  public authorIP?: string;
+  public authorIp?: string;
   public content!: string;
   public approved!: boolean;
   public edited!: boolean;
@@ -38,64 +38,65 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       postId: {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
-        comment: '文章ID',
+        comment: 'Post id',
       },
       author: {
         type: new DataTypes.TEXT('tiny'),
         allowNull: false,
-        comment: '评论者',
+        comment: 'Author name',
       },
       authorEmail: {
         type: DataTypes.STRING(100),
-        comment: '评论者邮箱',
+        comment: "Author's email",
       },
       authorUrl: {
         type: DataTypes.STRING(200),
-        comment: '评论者客户端URL',
+        field: 'author_URL',
+        comment: "Author's client URL address",
       },
-      authorIP: {
+      authorIp: {
         type: DataTypes.STRING(100),
         field: 'author_IP',
-        comment: '评论者IP',
+        comment: "Author's client IP address",
       },
       content: {
         type: DataTypes.TEXT,
         allowNull: false,
-        comment: '评论内容',
+        comment: 'Comment content',
       },
       approved: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
-        comment: '是否能过审核',
+        comment: 'Is approved',
       },
       edited: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
-        comment: '是否在发布之后被修改',
+        comment: 'Is edited',
       },
       type: {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: 'comment',
-        comment: '扩展字段：类型，默认为"coomment"',
+        comment: 'Type (for future, default: "comment")',
       },
       agent: {
         type: DataTypes.STRING,
-        comment: '浏览器 UserAgent',
+        comment: 'Client UserAgent',
       },
       parentId: {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
         defaultValue: 0,
-        comment: '父ID',
+        comment: 'Parent id',
       },
       userId: {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
         defaultValue: 0,
-        comment: '用户ID',
+        comment: 'User id',
       },
     },
     {
@@ -107,7 +108,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         { name: 'parent_id', fields: ['parent_id'] },
         { name: 'user_id', fields: ['user_id'] },
       ],
-      comment: '评论表',
+      comment: 'Comments',
     },
   );
 };

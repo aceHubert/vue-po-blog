@@ -7,7 +7,7 @@ export interface OptionArgs {
   autoload?: OptionAutoload;
 }
 
-export interface NewOptionInput extends Omit<OptionCreationAttributes, 'id'> {}
+export interface NewOptionInput extends Pick<OptionCreationAttributes, 'optionName' | 'optionValue' | 'autoload'> {}
 
 export class UpdateOptionInput {
   optionValue?: string;

@@ -1,17 +1,17 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { OptionAutoload } from '../enums';
 
-@ObjectType({ description: '配置项' })
+@ObjectType({ description: 'Option model' })
 export class Option {
-  @Field(() => ID, { description: 'Id' })
+  @Field(() => ID, { description: 'Option id' })
   id!: number;
 
-  @Field({ description: 'Name' })
+  @Field({ description: 'Option name' })
   optionName!: string;
 
-  @Field({ description: 'Value' })
+  @Field({ description: 'Option name' })
   optionValue!: string;
 
-  @Field((type) => OptionAutoload, { description: '程序启动自动加载项' })
+  @Field((type) => OptionAutoload, { description: 'Autoload at the front-end apps' })
   autoload!: OptionAutoload;
 }

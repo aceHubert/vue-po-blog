@@ -41,10 +41,18 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    * @param fields 返回的字段
    */
   getPaged({ offset, limit, ...query }: PagedMediaArgs, fields: string[]): Promise<PagedMediaModel> {
+    const { keyword, ...restQuery } = query;
     return this.models.Medias.findAndCountAll({
       attributes: this.filterFields(fields, this.models.Medias),
       where: {
-        ...query,
+        ...(keyword
+          ? {
+              fileName: {
+                [this.Op.like]: `%${keyword}%`,
+              },
+            }
+          : null),
+        ...restQuery,
       },
       offset,
       limit,
@@ -70,21 +78,25 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
   }
 
   /**
-   * 添加媒体（如果文件名已经存在，则返回 null）
+   * 添加媒体
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewMediaInput): Promise<MediaModel> {
-    const isExists = await this.isExists(model.fileName);
-
-    if (isExists) {
+  async create(model: NewMediaInput, requestUser: JwtPayloadWithLang): Promise<MediaModel> {
+    if (await this.isExists(model.fileName)) {
       throw new ValidationError(`The media filename "${model.fileName}" has existed!`);
     }
 
     const { metas, ...rest } = model;
     const t = await this.sequelize.transaction();
     try {
-      const media = await this.models.Medias.create(rest, { transaction: t });
+      const media = await this.models.Medias.create(
+        {
+          ...rest,
+          userId: requestUser.id,
+        },
+        { transaction: t },
+      );
 
       if (metas && metas.length) {
         this.models.MediaMeta.bulkCreate(
@@ -103,36 +115,6 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       await t.commit();
 
       return media.toJSON() as MediaModel;
-    } catch (err) {
-      await t.rollback();
-      throw err;
-    }
-  }
-
-  /**
-   * 根据 Id 删除
-   * @param id Media Id
-   */
-  async delete(id: number): Promise<true> {
-    const t = await this.sequelize.transaction();
-    try {
-      await this.models.MediaMeta.destroy({
-        where: {
-          mediaId: id,
-        },
-        transaction: t,
-      });
-
-      await this.models.Medias.destroy({
-        where: {
-          id,
-        },
-        transaction: t,
-      });
-
-      await t.commit();
-
-      return true;
     } catch (err) {
       await t.rollback();
       throw err;

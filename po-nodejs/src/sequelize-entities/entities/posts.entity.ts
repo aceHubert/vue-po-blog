@@ -43,61 +43,63 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       name: {
         type: DataTypes.STRING(200),
         allowNull: false,
-        comment: '唯一名称，用于URL地址',
+        comment: 'Name (display at the URL address, must be unique)',
       },
       title: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '标题',
+        comment: 'Title',
       },
       author: {
         type: DataTypes.BIGINT,
         allowNull: false,
-        comment: '作者',
+        comment: 'Author id',
       },
       content: {
         type: new DataTypes.TEXT('long'),
         allowNull: false,
-        comment: '内容',
+        comment: 'Content',
       },
       excerpt: {
         type: DataTypes.TEXT,
         allowNull: false,
-        comment: '摘要',
+        comment: 'excerpt',
       },
       type: {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: 'post',
-        comment: '类型，如 post：文章；page：页面；等',
+        comment: 'Type ("post", "page", ect...)',
       },
       status: {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: 'publish',
-        comment: '状态，如 draft：草稿；publish：发布；等',
+        comment: 'Post status ("draft", "publish", ect.... default: "publish")',
       },
       order: {
         type: DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 0,
-        comment: '排序',
+        comment: 'Sort (default: 0)',
       },
-      parent: {
+      parentId: {
         type: DataTypes.BIGINT({ unsigned: true }),
-        comment: '父 Id',
+        allowNull: false,
+        defaultValue: 0,
+        comment: 'Parent id',
       },
       commentStatus: {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: 'open',
-        comment: '评论状态，open：启用；close：禁用；',
+        comment: 'Comment status, ("open" or "close", default: "open")',
       },
       commentCount: {
         type: DataTypes.BIGINT,
         allowNull: false,
         defaultValue: 0,
-        comment: '评论数量',
+        comment: 'Comment count',
       },
     },
     {
@@ -109,7 +111,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         { name: 'status', fields: ['status'] },
         { name: 'comment_status', fields: ['comment_status'] },
       ],
-      comment: '文章表',
+      comment: 'Posts',
     },
   );
 };

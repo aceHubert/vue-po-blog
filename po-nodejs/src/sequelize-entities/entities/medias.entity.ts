@@ -30,33 +30,33 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       fileName: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '文件名',
+        comment: 'File name',
       },
       originalFileName: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '原始文件名',
+        comment: 'Original file name',
       },
       extention: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        comment: '文件后缀',
+        comment: 'File extention',
       },
       mimeType: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        comment: '文件类型',
+        comment: 'File mime type',
       },
       path: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '文件相对/绝对路径',
+        comment: 'File relative path',
       },
       userId: {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
-        defaultValue: 1,
-        comment: '用户ID',
+        defaultValue: 0,
+        comment: 'User id',
       },
     },
     {
@@ -68,7 +68,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         { name: 'user_id', fields: ['user_id'] },
       ],
       updatedAt: false,
-      comment: '媒体表',
+      comment: 'Medias',
     },
   );
 };

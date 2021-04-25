@@ -60,8 +60,8 @@ export interface TermTaxonomyByObjectIdArgs {
  * 新建协议（类别）实体
  */
 export interface NewTermInput
-  extends Omit<TermCreationAttributes, 'id' | 'slug'>,
-    Omit<TermTaxonomyCreationAttributes, 'id' | 'termId' | 'count'> {
+  extends Pick<TermCreationAttributes, 'name' | 'group'>,
+    Pick<TermTaxonomyCreationAttributes, 'taxonomy' | 'parentId' | 'description'> {
   /**
    * 可为空，不填将以name填充
    */

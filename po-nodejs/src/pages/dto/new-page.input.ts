@@ -1,17 +1,21 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { NewMetaInput } from '@/common/models/meta.model';
 
-@InputType({ description: '页面新建模型' })
+@InputType({ description: 'New page input' })
 export class NewPageInput {
-  @Field({ description: '标题' })
+  @Field({ description: 'Title' })
   title!: string;
 
-  @Field({ nullable: true, description: '唯一标识，用于 Url 显示' })
+  @Field({
+    nullable: true,
+    description:
+      'Name (display at the URL address, it will fill by encoded title if none value is provided, must be unique)',
+  })
   name?: string;
 
-  @Field({ description: '内容' })
+  @Field({ description: 'Content' })
   content!: string;
 
-  @Field((type) => [NewMetaInput!], { nullable: true, description: '页面元数据' })
+  @Field((type) => [NewMetaInput!], { nullable: true, description: 'Page metas' })
   metas?: NewMetaInput[];
 }

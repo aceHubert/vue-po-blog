@@ -1,9 +1,12 @@
 import { ModuleRef } from '@nestjs/core';
-import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { isEmail, isMobilePhone } from 'class-validator';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
-import { IsEmailPipe } from '@/common/pipes/is-email.pipe';
+import { User as RequestUser } from '@/common/decorators/user.decorator';
+import { ArgValidateByPipe } from '@/common/pipes/arg-valitate-by.pipe';
 import { ForbiddenError } from '@/common/utils/gql-errors.utils';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
 import { UserRole } from './enums/user-role.enum';
@@ -19,34 +22,37 @@ import { BaseUser, User, PagedUser, UserMeta, UserStatusCount, UserRoleCount } f
 @Resolver(() => BaseUser)
 export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUserMetaInput, UserDataSource, {
   resolverName: 'User',
-  description: '用户',
+  descriptionName: 'user',
 }) {
   constructor(protected readonly moduleRef: ModuleRef, private readonly userDataSource: UserDataSource) {
     super(moduleRef);
   }
 
   @Authorized()
-  @Query((returns) => User, { nullable: true, description: '获取当前用户' })
-  user(@Fields() fields: ResolveTree, @Context('user') requestUser: JwtPayload): Promise<User | null> {
+  @Query((returns) => User, { nullable: true, description: 'Get current user info.' })
+  user(@Fields() fields: ResolveTree, @RequestUser() requestUser: JwtPayloadWithLang): Promise<User | null> {
     return this.userDataSource.get(null, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
   }
 
   @Authorized()
-  @Query((returns) => User, { nullable: true, description: '获取用户(必须有编辑用户权限)' })
+  @Query((returns) => User, {
+    nullable: true,
+    description: 'Get user info by id (only user with "edit_users" capability is allowed for this action).',
+  })
   userById(
     @Args('id', { type: () => ID }) id: number,
     @Fields() fields: ResolveTree,
-    @Context('user') requestUser: JwtPayload,
+    @RequestUser() requestUser: JwtPayloadWithLang,
   ): Promise<User | null> {
     return this.userDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
   }
 
   @Authorized()
-  @Query((returns) => PagedUser, { description: '获取用户分页列表' })
+  @Query((returns) => PagedUser, { description: 'Get users.' })
   users(
     @Args() args: PagedUserArgs,
     @Fields() fields: ResolveTree,
-    @Context('user') requestUser: JwtPayload,
+    @RequestUser() requestUser: JwtPayloadWithLang,
   ): Promise<PagedUser> {
     return this.userDataSource.getPaged(
       args,
@@ -56,37 +62,51 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   }
 
   @Authorized()
-  @Query((returns) => [UserStatusCount], { description: '获取用户状态分组数量' })
+  @Query((returns) => [UserStatusCount], { description: 'Get user count by status.' })
   userCountByStatus() {
     return this.userDataSource.getCountByStatus();
   }
 
   @Authorized()
-  @Query((returns) => [UserRoleCount], { description: '获取用户角色分组数量' })
+  @Query((returns) => [UserRoleCount], { description: 'Get user count by role' })
   userCountByRole() {
     return this.userDataSource.getCountByRole();
   }
 
-  @Query((returns) => Boolean, { description: '判断登录名是否存在' })
+  @Query((returns) => Boolean, { description: 'Is login name exists?' })
   isLoginNameExists(@Args('loginName', { type: () => String }) loginName: string): Promise<boolean> {
     return this.userDataSource.isLoginNameExists(loginName);
   }
 
-  @Query((returns) => Boolean, { description: '判断手机号码是否存在' })
-  isMobileExists(@Args('mobile', { type: () => String }) mobile: string): Promise<boolean> {
+  @Query((returns) => Boolean, { description: 'Is mobile number exists?' })
+  isMobileExists(
+    @Args(
+      'mobile',
+      { type: () => String },
+      new ArgValidateByPipe({ validate: isMobilePhone, args: [], message: 'mobile format is incorrect' }),
+    )
+    mobile: string,
+  ): Promise<boolean> {
     return this.userDataSource.isMobileExists(mobile);
   }
 
-  @Query((returns) => Boolean, { description: '判断email是否存在' })
-  isEmailExists(@Args('email', { type: () => String }, new IsEmailPipe()) email: string): Promise<boolean> {
+  @Query((returns) => Boolean, { description: 'Is email exists?' })
+  isEmailExists(
+    @Args(
+      'email',
+      { type: () => String },
+      new ArgValidateByPipe({ validate: isEmail, args: [], message: 'email format is incorrect' }),
+    )
+    email: string,
+  ): Promise<boolean> {
     return this.userDataSource.isEmailExists(email);
   }
 
   @Authorized()
-  @Mutation((returns) => User, { description: '添加用户' })
-  async addUser(
+  @Mutation((returns) => User, { description: 'Create a new user.' })
+  async createUser(
     @Args('model', { type: () => NewUserInput }) model: NewUserInput,
-    @Context('user') requestUser: JwtPayload,
+    @RequestUser() requestUser: JwtPayloadWithLang,
   ): Promise<User> {
     const { sendUserNotification, ...newUser } = model;
     const user = await this.userDataSource.create(newUser, requestUser);
@@ -97,45 +117,50 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '修改用户' })
-  modifyUser(
-    @Args('id', { type: () => ID, description: 'User Id' }) id: number,
+  @Mutation((returns) => Boolean, { description: 'Update user info.' })
+  async updateUser(
+    @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @Args('model') model: UpdateUserInput,
-    @Context('user') requestUser: JwtPayload,
+    @RequestUser() requestUser: JwtPayloadWithLang,
+    @I18n() i18n: I18nContext,
   ): Promise<boolean> {
     if (model.userRole && requestUser.role !== UserRole.Administrator) {
       throw new ForbiddenError(
-        `Access denied! You don't have permission for this action(role "${UserRole.Administrator}" required)!`,
+        await i18n.t('auth.no_role_permission', {
+          args: {
+            role: UserRole.Administrator,
+          },
+        }),
       );
     }
     return this.userDataSource.update(id, model, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '修改用户状态' })
-  modifyUserStatus(
-    @Args('id', { type: () => ID, description: 'User Id' }) id: number,
+  @Mutation((returns) => Boolean, { description: 'Update user status.' })
+  updateUserStatus(
+    @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @Args('status', { type: () => UserStatus }) status: UserStatus,
-    @Context('user') requestUser: JwtPayload,
+    @RequestUser() requestUser: JwtPayloadWithLang,
   ): Promise<boolean> {
     return this.userDataSource.updateStatus(id, status, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '删除用户（永久）' })
-  removeUser(
-    @Args('id', { type: () => ID, description: 'User Id' }) id: number,
-    @Context('user') requestUser: JwtPayload,
+  @Mutation((returns) => Boolean, { description: 'Delete user permanently.' })
+  deleteUser(
+    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @RequestUser() requestUser: JwtPayloadWithLang,
   ): Promise<boolean> {
     return this.userDataSource.delete(id, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '批量删除用户（永久）' })
-  blukRemoveUsers(
-    @Args('ids', { type: () => [ID!], description: 'User Ids' }) ids: number[],
-    @Context('user') requestUser: JwtPayload,
+  @Mutation((returns) => Boolean, { description: 'Delete bulk of users permanently.' })
+  bulkDeleteUsers(
+    @Args('ids', { type: () => [ID!], description: 'User ids' }) ids: number[],
+    @RequestUser() requestUser: JwtPayloadWithLang,
   ): Promise<boolean> {
-    return this.userDataSource.blukDelete(ids, requestUser);
+    return this.userDataSource.bulkDelete(ids, requestUser);
   }
 }

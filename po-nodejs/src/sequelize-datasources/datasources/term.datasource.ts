@@ -169,7 +169,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * 新建协议
    * @param model 新建协议实体
    */
-  async create(model: NewTermInput, requestUser: JwtPayload & { lang?: string }): Promise<TermTaxonomyModel> {
+  async create(model: NewTermInput, requestUser: JwtPayloadWithLang): Promise<TermTaxonomyModel> {
     const t = await this.sequelize.transaction();
     const { name, slug, group, taxonomy, description, parentId, metas } = model;
     try {
@@ -241,7 +241,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    */
   async createRelationship(
     model: NewTermRelationshipInput,
-    requestUser: JwtPayload & { lang?: string },
+    requestUser: JwtPayloadWithLang,
     transaction?: Transaction,
   ): Promise<TermRelationshipModel> {
     const isExists =
@@ -418,7 +418,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * 批量删除协议（包括类别，关系，元数据）
    * @param id term Id
    */
-  async blukDelete(ids: number[]): Promise<true> {
+  async bulkDelete(ids: number[]): Promise<true> {
     const t = await this.sequelize.transaction();
     try {
       await this.models.TermMeta.destroy({

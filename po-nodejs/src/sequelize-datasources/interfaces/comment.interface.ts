@@ -15,7 +15,22 @@ export interface PagedCommentArgs extends PagedArgs {
 
 export interface PagedCommentModel extends Paged<CommentModel> {}
 
-export interface NewCommentInput extends Omit<CommentCreationAttributes, 'id' | 'updatedAt' | 'createdAt'> {
+export interface NewCommentInput
+  extends Pick<
+    CommentCreationAttributes,
+    | 'postId'
+    | 'author'
+    | 'authorEmail'
+    | 'authorUrl'
+    | 'authorIp'
+    | 'content'
+    | 'approved'
+    | 'edited'
+    | 'type'
+    | 'agent'
+    | 'parentId'
+    | 'userId'
+  > {
   /**
    * metaKey 不可以重复
    */

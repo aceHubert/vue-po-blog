@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 
-@InputType({ description: '评论新建模型' })
+@InputType({ description: 'Update comment input' })
 export class UpdateCommentInput {
-  @Field({ description: '内容' })
+  @Field({ description: 'Content' })
   content!: string;
 }

@@ -2,37 +2,34 @@ import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
 import { PostStatus, PostCommentStatus } from '@/posts/enums';
 import { PagedResponse } from '@/common/models/general.model';
 
-@ObjectType({ description: '页面模型' })
+@ObjectType({ description: 'Page model' })
 export class Page {
-  @Field((type) => ID, { description: 'Id' })
+  @Field((type) => ID, { description: 'Page id' })
   id!: number;
 
-  @Field({ description: '标题' })
+  @Field({ description: 'Title' })
   title!: string;
 
-  @Field({ description: '内容' })
+  @Field({ description: 'Content' })
   content!: string;
 
-  @Field((type) => PostStatus, { description: '状态' })
+  @Field((type) => PostStatus, { description: 'Page status' })
   status!: PostStatus;
 
-  @Field({ description: '排序' })
-  order!: number;
-
-  @Field((type) => PostCommentStatus, { description: '评论状态' })
+  @Field((type) => PostCommentStatus, { description: 'Comment status' })
   commentStatus!: PostCommentStatus;
 
-  @Field((type) => Int, { description: '评论数量' })
+  @Field((type) => Int, { description: 'Comment count' })
   commentCount!: number;
 
-  @Field({ description: '修改时间' })
+  @Field({ description: 'Update time' })
   updatedAt!: Date;
 
-  @Field({ description: '创建时间' })
+  @Field({ description: 'Creation time' })
   createdAt!: Date;
 }
 
-@ObjectType({ description: '页面分页模型' })
+@ObjectType({ description: 'Paged page model' })
 export class PagedPage extends PagedResponse(Page) {
   // other fields
 }

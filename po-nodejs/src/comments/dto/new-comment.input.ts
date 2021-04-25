@@ -1,35 +1,32 @@
 import { Field, InputType, ID } from '@nestjs/graphql';
 import { NewMetaInput } from '@/common/models/meta.model';
 
-@InputType({ description: '评论新建模型' })
+@InputType({ description: 'New comment input' })
 export class NewCommentInput {
-  @Field(() => ID, { description: '文章 Id' })
+  @Field(() => ID, { description: 'Post id' })
   postId!: number;
 
-  @Field({ description: '评论人' })
+  @Field({ description: 'Author name' })
   author!: string;
 
-  @Field({ nullable: true, description: '评论人 Email' })
+  @Field({ nullable: true, description: "Author's email" })
   authorEmail?: string;
 
-  @Field({ nullable: true, description: '评论人客户端 Url' })
+  @Field({ nullable: true, description: "Author's client URL address" })
   authorUrl?: string;
 
-  @Field({ nullable: true, description: '评论人客户端 IP' })
-  authorIP?: string;
+  @Field({ nullable: true, description: "Author's client IP address" })
+  authorIp?: string;
 
-  @Field({ description: '内容' })
+  @Field({ description: 'content' })
   content!: string;
 
-  @Field({ nullable: true, description: '浏览器 UserAgent' })
+  @Field({ nullable: true, description: 'Client UserAgent' })
   agent?: string;
 
-  @Field((type) => ID, { nullable: true, description: '父 Id' })
+  @Field((type) => ID, { nullable: true, description: 'Parent id' })
   parentId?: number;
 
-  @Field((type) => ID, { nullable: true, description: '登录用户 Id' })
-  userId?: number;
-
-  @Field((type) => [NewMetaInput!], { nullable: true, description: '文章元数据' })
+  @Field((type) => [NewMetaInput!], { nullable: true, description: 'Comment metas' })
   metas?: NewMetaInput[];
 }

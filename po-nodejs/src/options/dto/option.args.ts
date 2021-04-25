@@ -6,6 +6,6 @@ import { OptionAutoload } from '../enums';
  */
 @ArgsType()
 export class OptionArgs {
-  @Field((type) => OptionAutoload, { nullable: true, description: '程序启动自动加载项' })
+  @Field((type) => OptionAutoload, { nullable: true, description: 'Autoload at the front-end apps' })
   autoload?: OptionAutoload;
 }

@@ -2,6 +2,7 @@ import { Body, Controller, Query, Post, Scope } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { Authorized } from '@/common/decorators/authorized.decorator';
 import { User } from '@/common/decorators/user.decorator';
+import { BaseController } from '@/common/controllers/base.controller';
 import { AuthService } from './auth.service';
 
 // Types
@@ -10,8 +11,10 @@ import { UpdatePwdDto } from './dto/update-pwd.dto';
 import { TokenResponse, RefreshTokenResponse } from './interfaces/token-response.interface';
 
 @Controller({ path: 'api/auth', scope: Scope.REQUEST })
-export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+export class AuthController extends BaseController {
+  constructor(private readonly authService: AuthService) {
+    super();
+  }
 
   @Post('login')
   async login(@Body() userLoginDto: UserLoginDto, @I18n() i18n: I18nContext): Promise<Response<TokenResponse>> {
@@ -21,15 +24,9 @@ export class AuthController {
       userLoginDto.device,
     );
     if (tokenOrFalse) {
-      return {
-        success: true,
-        ...tokenOrFalse,
-      };
+      return this.success(tokenOrFalse);
     } else {
-      return {
-        success: false,
-        message: await i18n.t('auth.login.faild'),
-      };
+      return this.faild(await i18n.t('auth.login.faild'));
     }
   }
 
@@ -41,21 +38,12 @@ export class AuthController {
     try {
       const newToken = await this.authService.refreshToken(token, i18n.detectedLanguage);
       if (newToken) {
-        return {
-          success: true,
-          ...newToken,
-        };
+        return this.success(newToken);
       } else {
-        return {
-          success: false,
-          message: await i18n.t('auth.token.invalid'),
-        };
+        return this.faild(await i18n.t('auth.token.invalid'));
       }
     } catch (err) {
-      return {
-        success: false,
-        message: err.message,
-      };
+      return this.faild(err.message);
     }
   }
 
@@ -68,15 +56,11 @@ export class AuthController {
   ): Promise<Response<{ message: string }>> {
     const result = await this.authService.updatePwd(userId, updatePwdDto.oldPwd, updatePwdDto.newPwd);
     if (result) {
-      return {
-        success: true,
+      return this.success({
         message: await i18n.t('auth.update_pwd.success'),
-      };
+      });
     } else {
-      return {
-        success: false,
-        message: await i18n.t('auth.update_pwd.old_pwd_incorrect'),
-      };
+      return this.faild(await i18n.t('auth.update_pwd.old_pwd_incorrect'));
     }
   }
 
@@ -88,9 +72,8 @@ export class AuthController {
     @I18n() i18n: I18nContext,
   ): Promise<Response<{ message: string }>> {
     await this.authService.logout(userId, device);
-    return {
-      success: true,
+    return this.success({
       message: await i18n.t('auth.logout.success'),
-    };
+    });
   }
 }

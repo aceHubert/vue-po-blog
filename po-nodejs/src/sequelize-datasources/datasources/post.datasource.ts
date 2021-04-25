@@ -65,7 +65,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param post Post
    * @param requestUser 登录用户
    */
-  private async hasEditCapability(post: PostAttributes, requestUser: JwtPayload & { lang?: string }) {
+  private async hasEditCapability(post: PostAttributes, requestUser: JwtPayloadWithLang) {
     // 是否有编辑权限
     await this.hasCapability(
       post.type === PostType.Post ? UserCapability.EditPosts : UserCapability.EditPages,
@@ -104,7 +104,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param post Post
    * @param requestUser 登录用户
    */
-  private async hasDeleteCapability(post: PostAttributes, requestUser: JwtPayload & { lang?: string }) {
+  private async hasDeleteCapability(post: PostAttributes, requestUser: JwtPayloadWithLang) {
     // 是否有删除文章的权限
     await this.hasCapability(
       post.type === PostType.Post ? UserCapability.DeletePosts : UserCapability.DeletePages,
@@ -170,7 +170,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * 批量记录修改为 Trash 状态之前的状态
    * @param postIds Post ids
    */
-  private async blukStoreTrashStatus(postIds: number[], t?: Transaction) {
+  private async bulkStoreTrashStatus(postIds: number[], t?: Transaction) {
     const posts = await this.models.Posts.findAll({
       attributes: ['id', 'status'],
       where: {
@@ -205,7 +205,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * [批量]移除 trash 之前的状态
    * @param postId Post id
    */
-  private async removeStorageTrashStatus(postId: number | number[], t?: Transaction) {
+  private async deleteStorageTrashStatus(postId: number | number[], t?: Transaction) {
     return await this.models.PostMeta.destroy({
       where: {
         postId,
@@ -226,12 +226,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param fields 返回字段
    * @param requestUser 请求的用户
    */
-  async get(
-    id: number,
-    type: PostType,
-    fields: string[],
-    requestUser?: JwtPayload & { lang?: string },
-  ): Promise<PostModel | null> {
+  async get(id: number, type: PostType, fields: string[], requestUser?: JwtPayloadWithLang): Promise<PostModel | null> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
       fields.push('id');
@@ -283,19 +278,19 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     query: PagedPostArgs,
     type: PostType.Post,
     fields: string[],
-    requestUser?: JwtPayload,
+    requestUser?: JwtPayloadWithLang,
   ): Promise<PagedPostModel>;
   async getPaged(
     query: PagedPageArgs,
     type: PostType.Page,
     fields: string[],
-    requestUser?: JwtPayload,
+    requestUser?: JwtPayloadWithLang,
   ): Promise<PagedPostModel>;
   async getPaged(
     { offset, limit, ...query }: PagedPostArgs | PagedPageArgs,
     type: PostType,
     fields: string[],
-    requestUser?: JwtPayload,
+    requestUser?: JwtPayloadWithLang,
   ): Promise<PagedPostModel> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
@@ -482,7 +477,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param type 类型
    * @param requestUser 请求的用户
    */
-  async getCountByStatus(type: PostType, requestUser: JwtPayload & { lang?: string }) {
+  async getCountByStatus(type: PostType, requestUser: JwtPayloadWithLang) {
     const andWhere: WhereOptions<PostAttributes>[] | WhereValue<PostAttributes>[] = [];
     const where: WhereOptions<PostAttributes> = {
       type,
@@ -538,7 +533,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param type 类型
    * @param requestUser 请求的用户
    */
-  getCountBySelf(type: PostType, requestUser: JwtPayload & { lang?: string }) {
+  getCountBySelf(type: PostType, requestUser: JwtPayloadWithLang) {
     return this.models.Posts.count({
       where: {
         type,
@@ -650,7 +645,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   async create(
     model: NewPostInput | NewPageInput,
     type: PostType,
-    requestUser: JwtPayload & { lang?: string },
+    requestUser: JwtPayloadWithLang,
   ): Promise<PostModel> {
     await this.hasCapability(
       type === PostType.Post ? UserCapability.EditPosts : UserCapability.EditPages,
@@ -734,7 +729,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   async update(
     id: number,
     model: UpdatePostInput | UpdatePageInput,
-    requestUser: JwtPayload & { lang?: string },
+    requestUser: JwtPayloadWithLang,
   ): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
@@ -795,7 +790,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
               name: `${id}-revision`,
               type: PostOperateType.Revision,
               status: PostOperateStatus.Inherit,
-              parent: id,
+              parentId: id,
               commentStatus: post.commentStatus,
               commentCount: post.commentCount,
             },
@@ -827,7 +822,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param id Post id
    * @param name 唯一标识
    */
-  async updateName(id: number, name: string, requestUser: JwtPayload & { lang?: string }): Promise<string | false> {
+  async updateName(id: number, name: string, requestUser: JwtPayloadWithLang): Promise<string | false> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 是否有编辑权限
@@ -861,7 +856,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param id Post id
    * @param status 状态
    */
-  async updateStatus(id: number, status: PostStatus, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async updateStatus(id: number, status: PostStatus, requestUser: JwtPayloadWithLang): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 状态相同，忽略
@@ -932,11 +927,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param ids Post ids
    * @param status 状态
    */
-  async blukUpdateStatus(
-    ids: number[],
-    status: PostStatus,
-    requestUser: JwtPayload & { lang?: string },
-  ): Promise<true> {
+  async bulkUpdateStatus(ids: number[], status: PostStatus, requestUser: JwtPayloadWithLang): Promise<true> {
     const posts = await this.models.Posts.findAll({
       where: {
         id: ids,
@@ -980,7 +971,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     try {
       // 移到 Trash 之前记录状态
       if (status === PostStatus.Trash) {
-        await this.blukStoreTrashStatus(ids, t);
+        await this.bulkStoreTrashStatus(ids, t);
       }
 
       await this.models.Posts.update(
@@ -1017,7 +1008,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * ]
    * @param id Post id
    */
-  async restore(id: number, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async restore(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
     const metaStatus = await this.models.PostMeta.findOne({
       attributes: ['metaValue'],
       where: {
@@ -1046,7 +1037,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
             transaction: t,
           });
 
-          await this.removeStorageTrashStatus(id, t);
+          await this.deleteStorageTrashStatus(id, t);
 
           await t.commit();
           return true;
@@ -1074,7 +1065,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * ]
    * @param ids Post ids
    */
-  async blukRestore(ids: number[], requestUser: JwtPayload & { lang?: string }): Promise<true> {
+  async bulkRestore(ids: number[], requestUser: JwtPayloadWithLang): Promise<true> {
     const posts = await this.models.Posts.findAll({
       where: {
         id: ids,
@@ -1122,7 +1113,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
         ),
       );
 
-      await this.removeStorageTrashStatus(ids, t);
+      await this.deleteStorageTrashStatus(ids, t);
 
       await t.commit();
       return true;
@@ -1149,7 +1140,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   async updateCommentStatus(
     id: number,
     commentStatus: PostCommentStatus,
-    requestUser: JwtPayload & { lang?: string },
+    requestUser: JwtPayloadWithLang,
   ): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
@@ -1177,7 +1168,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * ]
    * @param id Post id
    */
-  async delete(id: number, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 非 trash 状态下不可以删除
@@ -1236,7 +1227,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * ]
    * @param id Post id
    */
-  async blukDelete(ids: number[], requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async bulkDelete(ids: number[], requestUser: JwtPayloadWithLang): Promise<boolean> {
     const posts = await this.models.Posts.findAll({
       where: {
         id: ids,

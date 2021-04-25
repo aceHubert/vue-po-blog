@@ -1,4 +1,4 @@
-import { Field, ObjectType, InterfaceType, ID, createUnionType } from '@nestjs/graphql';
+import { Field, ObjectType, InterfaceType, ID } from '@nestjs/graphql';
 import { FieldAuthorized } from '@/common/decorators/authorized.decorator';
 import { PagedResponse, Count } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
@@ -6,36 +6,36 @@ import { UserRole, UserRoleWithNone, UserStatus } from '../enums';
 
 @InterfaceType()
 export abstract class BaseUser {
-  @Field((type) => ID, { description: 'Id' })
+  @Field((type) => ID, { description: 'User id' })
   id!: number;
 
-  @Field({ description: '登录名' })
   @FieldAuthorized(UserRole.Administrator)
+  @Field({ description: 'Login name' })
   loginName!: string;
 
-  @Field({ description: '显示名称' })
+  @Field({ description: 'Display name' })
   displayName!: string;
 
-  @Field((type) => String, { nullable: true, description: '手机号码' })
+  @Field((type) => String, { nullable: true, description: 'Mobile number' })
   mobile!: string | null;
 
-  @Field({ description: '电子邮箱' })
+  @Field({ description: 'Email address' })
   email!: string;
 
-  @Field((type) => String, { nullable: true, description: '客户端的 URL' })
+  @Field((type) => String, { nullable: true, description: 'Home URL address' })
   url!: string | null;
 
-  @Field((type) => UserStatus, { description: '用户状态' })
+  @Field((type) => UserStatus, { description: 'User status' })
   status!: UserStatus;
 
-  @Field({ description: '修改时间' })
+  @Field({ description: 'Update time' })
   updatedAt!: Date;
 
-  @Field({ description: '创建时间' })
+  @Field({ description: 'Creation time' })
   createdAt!: Date;
 }
 
-@ObjectType({ implements: BaseUser, description: '用户模型' })
+@ObjectType({ implements: BaseUser, description: 'User model' })
 export class User implements BaseUser {
   id!: number;
   loginName!: string;
@@ -48,7 +48,7 @@ export class User implements BaseUser {
   createdAt!: Date;
 }
 
-@ObjectType({ implements: BaseUser, description: '用户模型（包含角色）' })
+@ObjectType({ implements: BaseUser, description: 'User model with role' })
 export class UserWithRole implements BaseUser {
   id!: number;
   loginName!: string;
@@ -60,97 +60,41 @@ export class UserWithRole implements BaseUser {
   updatedAt!: Date;
   createdAt!: Date;
 
-  @Field((type) => UserRole, { nullable: true, description: '用户角色' })
+  @Field((type) => UserRole, { nullable: true, description: 'User role' })
   userRole?: UserRole;
 }
 
-@ObjectType({ description: '基本用户信息' })
+@ObjectType({ description: 'Basic user info' })
 export class SimpleUser {
-  @Field((type) => ID, { description: 'Id' })
+  @Field((type) => ID, { description: 'User id' })
   id!: number;
 
-  @Field({ description: '显示名称' })
+  @Field({ description: 'Display name' })
   displayName!: string;
 
-  @Field({ description: '电子邮箱' })
+  @Field({ description: 'Email address' })
   email!: string;
 }
 
-@ObjectType({ description: '用户分页模型' })
+@ObjectType({ description: 'User paged model' })
 export class PagedUser extends PagedResponse(UserWithRole) {
   // other fields
 }
 
-@ObjectType({ description: `用户按状态分组数量模型` })
+@ObjectType({ description: `User count by status` })
 export class UserStatusCount extends Count {
-  @Field((type) => UserStatus, { description: '状态' })
+  @Field((type) => UserStatus, { description: 'User status' })
   status!: UserStatus;
 }
 
-@ObjectType({ description: `用户按角色分组数量模型` })
+@ObjectType({ description: `User count by role` })
 export class UserRoleCount extends Count {
-  @Field((type) => UserRoleWithNone, { description: '角色' })
+  @Field((type) => UserRoleWithNone, { description: 'User role (include "None")' })
   userRole!: UserRole | 'none';
 }
 
-@ObjectType({ description: '用户元数据模型' })
+@ObjectType({ description: 'User meta' })
 export class UserMeta extends Meta {
-  @Field((type) => ID, { description: 'User Id' })
+  @Field((type) => ID, { description: 'User id' })
   userId!: number;
 }
-
-@ObjectType({ description: '返回是否成功' })
-abstract class IsSuccessResponse<S extends boolean> {
-  @Field({ description: '登录是否成功' })
-  success!: S;
-}
-
-@ObjectType({ description: '用户登录成功返回模型' })
-class UserLoginSuccessResponse extends IsSuccessResponse<true> {
-  @Field({ description: 'Token' })
-  token!: string;
-}
-
-@ObjectType({ description: '用户登录失败返回模型' })
-class UserLoginFailedResponse extends IsSuccessResponse<false> {
-  @Field({ description: 'Message' })
-  message!: string;
-}
-
-export const UserLoginUnionResponse = createUnionType({
-  name: 'UserLoginUnionType',
-  description: '用户登录返回模型',
-  types: () => [UserLoginSuccessResponse, UserLoginFailedResponse],
-  resolveType: (value) => {
-    if (value.success) {
-      return UserLoginSuccessResponse;
-    } else {
-      return UserLoginFailedResponse;
-    }
-  },
-});
-
-@ObjectType({ description: '用户登录成功返回模型' })
-class RefreshTokenSuccessResponse extends IsSuccessResponse<true> {
-  @Field({ description: 'Token' })
-  token!: string;
-}
-
-@ObjectType({ description: '用户登录失败返回模型' })
-class RefreshTokenFailedResponse extends IsSuccessResponse<false> {
-  @Field({ description: 'Message' })
-  message!: string;
-}
-
-export const RefreshTokenUnionResponse = createUnionType({
-  name: 'RefreshTokenUnionType',
-  description: '更新 Token 返回模型',
-  types: () => [RefreshTokenSuccessResponse, RefreshTokenFailedResponse],
-  resolveType: (value) => {
-    if (value.success) {
-      return RefreshTokenSuccessResponse;
-    } else {
-      return RefreshTokenFailedResponse;
-    }
-  },
-});

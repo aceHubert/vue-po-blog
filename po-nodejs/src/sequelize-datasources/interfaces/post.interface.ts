@@ -19,6 +19,9 @@ export interface PostMetaModel extends MetaModel {
  * 优先级是 categoryId > tagId > categoryName >tagName
  */
 export interface PagedPostArgs extends PagedArgs {
+  /**
+   * 根据 title 模糊查询
+   */
   keyword?: string;
   author?: number;
   /**
@@ -46,19 +49,14 @@ export interface PagedPageArgs extends Omit<PagedPostArgs, 'categoryIds'> {}
 
 export interface PagedPostModel extends Paged<PostModel> {}
 
-export interface NewPostInput
-  extends Omit<PostCreationAttributes, 'id' | 'author' | 'commentStatus' | 'commentCount' | 'createdAt' | 'updatedAt'> {
+export interface NewPostInput extends Pick<PostCreationAttributes, 'name' | 'title' | 'excerpt' | 'content'> {
   /**
    * metaKey 不可以重复
    */
   metas?: NewMetaInput[];
 }
 
-export interface NewPageInput
-  extends Omit<
-    PostCreationAttributes,
-    'id' | 'author' | 'excerpt' | 'commentStatus' | 'commentCount' | 'createdAt' | 'updatedAt'
-  > {
+export interface NewPageInput extends Pick<PostCreationAttributes, 'name' | 'title' | 'content'> {
   /**
    * metaKey 不可以重复
    */

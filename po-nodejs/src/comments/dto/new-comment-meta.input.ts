@@ -1,8 +1,8 @@
 import { Field, InputType, ID } from '@nestjs/graphql';
 import { NewMetaInput } from '@/common/models/meta.model';
 
-@InputType({ description: '评论元数据新建模型' })
+@InputType({ description: 'New comment meta input' })
 export class NewCommentMetaInput extends NewMetaInput {
-  @Field(() => ID, { description: 'Comment Id' })
+  @Field(() => ID, { description: 'Comment id' })
   commentId!: number;
 }

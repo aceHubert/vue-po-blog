@@ -4,8 +4,8 @@ import { NewMetaInput } from '@/common/models/meta.model';
 // Types
 import { NewUserMetaInput as INewUserMetaInput } from '@/sequelize-datasources/interfaces';
 
-@InputType({ description: '用户元数据新建模型' })
+@InputType({ description: 'New user meta input' })
 export class NewUserMetaInput extends NewMetaInput implements INewUserMetaInput {
-  @Field(() => ID, { description: 'User Id' })
+  @Field(() => ID, { description: 'User id' })
   userId!: number;
 }

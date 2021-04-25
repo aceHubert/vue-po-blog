@@ -21,18 +21,18 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '名称',
+        comment: 'Term name',
       },
       slug: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: '别名',
+        comment: 'Term slug',
       },
       group: {
         type: DataTypes.BIGINT,
         allowNull: false,
         defaultValue: 0,
-        comment: '组',
+        comment: 'Group (default: 0)',
       },
     },
     {
@@ -44,7 +44,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       ],
       createdAt: false,
       updatedAt: false,
-      comment: '协议表',
+      comment: 'Terms',
     },
   );
 };
