@@ -6,8 +6,10 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from
 import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
 import { GraphQLResolveInfo, GraphQLNonNull, isObjectType, isInterfaceType } from 'graphql';
 import { Request } from 'express';
-import { UserRole } from '../helpers/enums';
 import { ROLES_KEY } from '../constants';
+
+// Types
+import { UserRole } from '@/users/enums';
 
 @Injectable()
 export class AuthorizedGuard implements CanActivate {

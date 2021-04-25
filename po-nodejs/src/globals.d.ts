@@ -1,11 +1,12 @@
 import { Context } from 'apollo-server-core';
-import { UserRole } from '@/common/helpers/enums';
+import { UserRole } from '@/users/enums';
 
 declare global {
   export type JwtPayload = {
     id: number;
     loginName: string;
     role: UserRole | null;
+    device: string;
     createdAt: Date;
   };
 

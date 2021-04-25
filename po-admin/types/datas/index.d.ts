@@ -1,4 +1,4 @@
-export * from './pager';
+export * from './paged';
 export * from './term';
 export * from './post';
 export * from './page';

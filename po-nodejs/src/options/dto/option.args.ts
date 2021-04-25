@@ -1,5 +1,5 @@
 import { Field, ArgsType } from '@nestjs/graphql';
-import { OptionAutoload } from '@/common/helpers/enums';
+import { OptionAutoload } from '../enums';
 
 /**
  * 配置查询参数

@@ -1,8 +1,10 @@
 import { SetMetadata, CustomDecorator } from '@nestjs/common';
 import { Extensions } from '@nestjs/graphql';
 import { getArrayFromOverloadedRest } from '../helpers/decorators';
-import { UserRole } from '../helpers/enums';
 import { ROLES_KEY } from '../constants';
+
+// Types
+import { UserRole } from '@/users/enums';
 
 /**
  * 角色权限验证

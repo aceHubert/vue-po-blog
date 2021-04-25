@@ -1,7 +1,5 @@
 import { Optional } from './optional.interface';
-import { OptionAutoload } from '@/common/helpers/enums';
-
-export { OptionAutoload };
+import { OptionAutoload } from '@/options/enums';
 
 export interface OptionAttributes {
   id: number;

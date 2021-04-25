@@ -3,15 +3,15 @@ import { isUndefined } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ForbiddenError, ValidationError } from '@/common/utils/gql-errors.utils';
-import { UserRole, UserStatus } from '@/common/helpers/enums';
 import { UserCapability } from '@/common/helpers/user-capability';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
 import { uuid } from '@/common/utils/uuid.utils';
+import { UserRole, UserStatus } from '@/users/enums';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
 import { WhereOptions } from 'sequelize';
-
+import { UserAttributes } from '@/orm-entities/interfaces';
 import {
   UserModel,
   UserSimpleModel,
@@ -36,12 +36,16 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers(optional)]
-   * @param id User Id（null 则查询请求用户，否则需要 EditUsers 权限）
+   * @param id 用户 Id（null 则查询请求用户，否则需要 EditUsers 权限）
    * @param fields 返回的字段
    */
-  async get(id: number | null, fields: string[], requestUser: JwtPayload): Promise<UserModel | null> {
+  async get(
+    id: number | null,
+    fields: string[],
+    requestUser: JwtPayload & { lang?: string },
+  ): Promise<UserModel | null> {
     if (id) {
-      await this.hasCapability(UserCapability.EditUsers, requestUser);
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     } else {
       id = requestUser.id;
     }
@@ -66,7 +70,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access none
-   * @param id User Id（null返回请求用户的实体）
+   * @param id 用户 Id（null返回请求用户的实体）
    * @param fields 返回的字段
    */
   async getSimpleInfo(id: number, fields: string[]): Promise<UserSimpleModel | null> {
@@ -92,9 +96,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     fields: string[],
     requestUser: JwtPayload,
   ): Promise<PagedUserModel> {
-    await this.hasCapability(UserCapability.ListUsers, requestUser);
+    await this.hasCapability(UserCapability.ListUsers, requestUser, true);
 
-    const where: WhereOptions = {};
+    const where: WhereOptions<UserAttributes> = {};
     if (query.keyword) {
       where['loginName'] = {
         [this.Op.like]: `%${query.keyword}%`,
@@ -105,13 +109,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     }
 
     if (query.userRole) {
-      if (query.userRole === 'none') {
-        where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = {
-          [this.Op.is]: null,
-        };
-      } else {
-        where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$`] = query.userRole;
-      }
+      where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$` as keyof UserAttributes] =
+        query.userRole === 'none'
+          ? {
+              [this.Op.is]: null,
+            }
+          : query.userRole;
     }
 
     return this.models.Users.findAndCountAll({
@@ -127,9 +130,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           duplicating: false,
         },
       ],
-      where: {
-        ...where,
-      },
+      where,
       offset,
       limit,
       order: [['createdAt', 'DESC']],
@@ -251,25 +252,25 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewUserInput, requestUser: JwtPayload): Promise<UserModel> {
-    await this.hasCapability(UserCapability.CreateUsers, requestUser);
+  async create(model: NewUserInput, requestUser: JwtPayload & { lang?: string }): Promise<UserModel> {
+    await this.hasCapability(UserCapability.CreateUsers, requestUser, true);
 
-    let isExists =
-      (await this.models.Users.count({
-        where: {
-          [this.Op.or]: {
-            loginName: model.loginName,
-            email: model.email,
-          },
-        },
-      })) > 0;
-
-    if (model.mobile && !isExists) {
-      isExists = await this.isMobileExists(model.mobile);
+    if (await this.isLoginNameExists(model.loginName)) {
+      throw new ValidationError(
+        await this.i18nService.t('datasource.user.username_unique_required', { lang: requestUser.lang }),
+      );
     }
 
-    if (isExists) {
-      throw new ValidationError('The loginName, mobile, email are rqiured to be unique!');
+    if (await this.isEmailExists(model.email)) {
+      throw new ValidationError(
+        await this.i18nService.t('datasource.user.email_unique_required', { lang: requestUser.lang }),
+      );
+    }
+
+    if (model.mobile && (await this.isMobileExists(model.mobile))) {
+      throw new ValidationError(
+        await this.i18nService.t('datasource.user.mobile_unique_required', { lang: requestUser.lang }),
+      );
     }
 
     const { loginName, loginPwd, firstName, lastName, avator, description, userRole, locale, ...rest } = model;
@@ -356,30 +357,32 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   /**
    * 修改用户
    * mobile, email 要求必须是唯一，否则会抛出 ValidationError
+   * todo: 修改了角色后要重置 access_token
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers(修改非自己信息)]
-   * @param id User Id
+   * @param id 用户 Id
    * @param model 修改实体模型
+   * @param requestUser 请求的用户
    */
-  async update(id: number, model: UpdateUserInput, requestUser: JwtPayload): Promise<boolean> {
+  async update(id: number, model: UpdateUserInput, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
-      await this.hasCapability(UserCapability.EditUsers, requestUser);
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     }
 
     const user = await this.models.Users.findByPk(id);
     if (user) {
-      let isExists = false;
-      if (model.email && model.email !== user.email) {
-        isExists = await this.isEmailExists(model.email);
+      if (model.email && model.email !== user.email && (await this.isEmailExists(model.email))) {
+        throw new ValidationError(
+          await this.i18nService.t('datasource.user.email_unique_required', { lang: requestUser.lang }),
+        );
       }
-      if (!isExists && model.mobile && model.mobile !== user.mobile) {
-        isExists == (await this.isMobileExists(model.mobile));
-      }
-      if (isExists) {
-        throw new ValidationError('The mobile, email are rqiured to be unique!');
+      if (model.mobile && model.mobile !== user.mobile && (await this.isMobileExists(model.mobile))) {
+        throw new ValidationError(
+          await this.i18nService.t('datasource.user.mobile_unique_required', { lang: requestUser.lang }),
+        );
       }
 
       const { nickName, firstName, lastName, avator, description, adminColor, userRole, locale, ...updateUser } = model;
@@ -500,16 +503,86 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
+   * 修改用户Email
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(修改非自己信息)]
+   * @param id 用户 Id
+   * @param email Email
+   * @param requestUser 请求的用户
+   */
+  async updateEmail(id: number, email: string, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+    // 修改非自己信息
+    if (String(id) !== String(requestUser.id)) {
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    }
+
+    const user = await this.models.Users.findByPk(id);
+    if (user) {
+      // 相同不需要修改
+      if (email === user.email) {
+        return true;
+      }
+      if (await this.isEmailExists(email)) {
+        throw new ValidationError(
+          await this.i18nService.t('datasource.user.email_unique_required', { lang: requestUser.lang }),
+        );
+      }
+
+      user.email = email;
+      await user.save();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 修改用户手机号码
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(修改非自己信息)]
+   * @param id 用户 Id
+   * @param mobile 手机号码
+   * @param requestUser 请求的用户
+   */
+  async updateMobile(id: number, mobile: string, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+    // 修改非自己信息
+    if (String(id) !== String(requestUser.id)) {
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    }
+
+    const user = await this.models.Users.findByPk(id);
+    if (user) {
+      // 相同不需要修改
+      if (mobile === user.mobile) {
+        return true;
+      }
+      if (await this.isMobileExists(mobile)) {
+        throw new ValidationError(
+          await this.i18nService.t('datasource.user.mobile_unique_required', { lang: requestUser.lang }),
+        );
+      }
+
+      user.mobile = mobile;
+      await user.save();
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * 修改用户状态
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers]
-   * @param id User Id
+   * @param id 用户 Id
    * @param status 状态
    */
-  async updateStatus(id: number, status: UserStatus, requestUser: JwtPayload): Promise<boolean> {
-    await this.hasCapability(UserCapability.EditUsers, requestUser);
+  async updateStatus(id: number, status: UserStatus, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+    await this.hasCapability(UserCapability.EditUsers, requestUser, true);
 
     return await this.models.Users.update(
       { status },
@@ -528,13 +601,15 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [DeleteUsers]
-   * @param id User Id
+   * @param id 用户 Id
    */
-  async delete(id: number, requestUser: JwtPayload): Promise<true> {
-    await this.hasCapability(UserCapability.DeleteUsers, requestUser);
+  async delete(id: number, requestUser: JwtPayload & { lang?: string }): Promise<true> {
+    await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     if (id === requestUser.id) {
-      throw new ForbiddenError('Could not delete yourself!');
+      throw new ForbiddenError(
+        await this.i18nService.t('datasource.user.delete_self_forbidden', { lang: requestUser.lang }),
+      );
     }
 
     const t = await this.sequelize.transaction();
@@ -563,13 +638,15 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [DeleteUsers]
-   * @param id User Id
+   * @param id 用户 Id
    */
-  async blukDelete(ids: number[], requestUser: JwtPayload): Promise<true> {
-    await this.hasCapability(UserCapability.DeleteUsers, requestUser);
+  async blukDelete(ids: number[], requestUser: JwtPayload & { lang?: string }): Promise<true> {
+    await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     if (ids.includes(requestUser.id)) {
-      throw new ForbiddenError('Could not delete yourself!');
+      throw new ForbiddenError(
+        await this.i18nService.t('datasource.user.delete_self_forbidden', { lang: requestUser.lang }),
+      );
     }
 
     const t = await this.sequelize.transaction();
@@ -593,40 +670,72 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
   /** -----Authorization----- */
 
-  private genNewScrect(userId: number) {
-    // '[userId]_[uuid]_[config.jwt-screct]'
-    return md5(`${userId}_${uuid()}_${this.config.get('jwt_screct')}`);
+  private get screctMetaKey() {
+    return `$${this.tablePrefix}token_screct`.toUpperCase();
+  }
+
+  private get refreshScrectMetaKey() {
+    return `$${this.tablePrefix}refresh_token_screct`.toUpperCase();
   }
 
   /**
-   * 获取验证 token 的screct
+   * 生成一个新的 screct
+   * @param userId 用户 Id
+   */
+  genNewScrect(userId: number) {
+    // '[userId]_[uuid]_[config.jwt-screct]'
+    return md5(`${userId}_${uuid()}_${this.getConfig('jwt_screct')}`);
+  }
+
+  /**
+   * 通过设备生成一个唯一设备 Id
+   * @param userId 用户 Id
+   * @param drivceId 设备 Id
+   */
+  getDeviceId(userId: number, device: string) {
+    return md5(`USER_DEVICE_${userId}_${device}`);
+  }
+
+  /**
+   * 获取验证 token 的screct，如果不存在则会生成一个新 screct
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
-   * @param userId User id
+   * @param userId 用户 Id
+   * @param device 设备名称
    * @param refreshToken 获取 refresh token 的 screct
    */
-  async getTokenScrect(userId: number, refreshToken: boolean = false): Promise<string> {
-    const screctMetaKey = refreshToken ? `${this.tablePrefix}refresh_token_screct` : `${this.tablePrefix}screct`;
+  async getTokenScrect(userId: number, device: string, refreshToken: boolean = false): Promise<string> {
+    const screctMetaKey = refreshToken ? this.refreshScrectMetaKey : this.screctMetaKey;
+    const deviceId = this.getDeviceId(userId, device);
     const screctMeta = await this.models.UserMeta.findOne({
-      attributes: ['metaValue'],
       where: {
         userId,
-        metaKey: screctMetaKey,
+        metaKey: refreshToken ? this.refreshScrectMetaKey : this.screctMetaKey,
       },
     });
-    let screct: string;
+    let screct: string = '';
+    let metaValue: Dictionary<{ name: string; value: string }> = {};
     if (screctMeta) {
-      screct = screctMeta.metaValue;
+      metaValue = JSON.parse(screctMeta.metaValue);
+      screct = metaValue[deviceId]?.value;
+      if (!screct) {
+        const newScrect = this.genNewScrect(userId);
+        screctMeta.metaValue = JSON.stringify({
+          ...JSON.parse(screctMeta.metaValue),
+          [deviceId]: { name: device, value: newScrect },
+        });
+        await screctMeta.save();
+        screct = newScrect;
+      }
     } else {
       // 数据库的screct丢失,将重新生成一个新的
       const newScrect = this.genNewScrect(userId);
       await this.models.UserMeta.create({
         userId,
         metaKey: screctMetaKey,
-        metaValue: newScrect,
-        private: 'yes',
+        metaValue: JSON.stringify({ ...metaValue, [deviceId]: { name: device, value: newScrect } }),
       });
       screct = newScrect;
     }
@@ -634,34 +743,83 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 修改 token 的 screct
-   * 在登出，修改密码，忘记密码等场景中更新 screct 重置 access/refresh token
+   * 修改 token 的 screct，返回新 screct
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
-   * @param userId User id
+   * @param userId 用户 Id
+   * @param device 设备名称
    * @param refreshToken 修改 refresh token 的 screct
    */
-  async updateTokenScrect(userId: number, refreshToken: boolean = false) {
+  async updateTokenScrect(userId: number, device: string, refreshToken: boolean = false): Promise<string> {
+    const screctMetaKey = refreshToken ? this.refreshScrectMetaKey : this.screctMetaKey;
+    const deviceId = this.getDeviceId(userId, device);
     const newScrect = this.genNewScrect(userId);
-    await this.models.UserMeta.update(
-      {
-        metaValue: newScrect,
+    const screctMeta = await this.models.UserMeta.findOne({
+      where: {
+        userId,
+        metaKey: screctMetaKey,
       },
-      {
-        where: {
-          userId,
-          metaKey: refreshToken ? `${this.tablePrefix}refresh_token_screct` : `${this.tablePrefix}screct`,
-        },
-      },
-    );
+    });
+    if (screctMeta) {
+      screctMeta.metaValue = JSON.stringify({
+        ...JSON.parse(screctMeta.metaValue),
+        [deviceId]: { name: device, value: newScrect },
+      });
+      await screctMeta.save();
+    } else {
+      // 数据库的screct丢失,将重新生成一个新的
+      await this.models.UserMeta.create({
+        userId,
+        metaKey: screctMetaKey,
+        metaValue: JSON.stringify({ [deviceId]: { name: device, value: newScrect } }),
+      });
+    }
     return newScrect;
   }
 
   /**
+   * 重置所有设备的 token screct
+   * 在退出、修改密码、忘记密码等场景中修改用户信息后需要重新登录
+   * @param userId 用户 Id
+   * @param device 设备名称, 当值为null时重置所有
+   * @param refreshToken 修改 refresh token 的 screct
+   * @returns 退出的设备Id
+   */
+  async resetTokenScrect(userId: number, device: string | null, refreshToken: boolean = false): Promise<string[]> {
+    const screctMetaKey = refreshToken ? this.refreshScrectMetaKey : this.screctMetaKey;
+    const screctMeta = await this.models.UserMeta.findOne({
+      where: {
+        userId,
+        metaKey: screctMetaKey,
+      },
+    });
+    if (!screctMeta) {
+      return [];
+    }
+    let deviceIds: string[] = [];
+    if (device) {
+      // 退出单个设备
+      const deviceId = this.getDeviceId(userId, device);
+      const metaValue = JSON.parse(screctMeta.metaValue);
+      if (metaValue[deviceId]) {
+        delete metaValue[deviceId];
+      }
+      screctMeta.metaValue = JSON.stringify(metaValue);
+      deviceIds = [deviceId];
+    } else {
+      // 退出所有设备（如修改密码后）
+      screctMeta.metaValue = '{}';
+      deviceIds = Object.keys(JSON.parse(screctMeta.metaValue));
+    }
+    await screctMeta.save();
+    return deviceIds;
+  }
+
+  /**
    * 获取用户角色
-   * @param userId User id
+   * @param userId 用户 Id
    */
   async getRole(userId: number): Promise<UserRole | null> {
     // 角色
@@ -677,17 +835,17 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
   /**
    * 登录
-   * 成功则返回token，否则返回 false
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
    * @param loginName 登录名/邮箱/手机号码
    * @param loginPwd 登录密码
+   * @param fields 返回字段
    */
-  async verifyUser(loginName: string, loginPwd: string): Promise<JwtPayload | null> {
+  async verifyUser(loginName: string, loginPwd: string, fields: string[]): Promise<UserModel | null> {
     const user = await this.models.Users.findOne({
-      attributes: ['id', 'loginName', 'createdAt'],
+      attributes: this.filterFields(fields, this.models.Users),
       where: {
         [this.Op.or]: [{ loginName }, { email: loginName }, { mobile: loginName }],
         loginPwd: md5(loginPwd),
@@ -696,13 +854,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     });
 
     if (user) {
-      // 角色
-      const role = await this.getRole(user.id);
-
-      return {
-        ...user.toJSON(),
-        role,
-      } as JwtPayload;
+      return user.toJSON() as UserModel;
     }
     return null;
   }
@@ -710,7 +862,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   /**
    * 修改密码
    * 旧密码不正确返回 false
-   * @param userId User id
+   * @param userId 用户 Id
    * @param oldPwd 旧密码
    * @param newPwd 新密码
    * @returns

@@ -1,12 +1,13 @@
 import { ModuleRef } from '@nestjs/core';
 import { OnModuleInit, Logger } from '@nestjs/common';
+import { I18nService } from 'nestjs-i18n';
 import { Sequelize, ModelDefined, ModelType, Op } from 'sequelize';
 import { kebabCase, isUndefined } from 'lodash';
 import { ForbiddenError } from '@/common/utils/gql-errors.utils';
-import { OptionAutoload } from '@/common/helpers/enums';
 import { UserCapability } from '@/common/helpers/user-capability';
 import { EntityService } from '@/sequelize-entities/entity.service';
 import { ConfigService } from '@/config/config.service';
+import { OptionAutoload } from '@/options/enums';
 
 // Types
 import { ProjectionAlias } from 'sequelize';
@@ -16,15 +17,19 @@ import { UserRoles } from '@/common/helpers/user-roles';
 export abstract class BaseDataSource implements OnModuleInit {
   private __AUTOLOAD_OPTIONS__: Dictionary<string> | null = null;
   private __USER_ROLES__: UserRoles | null = null;
-  protected readonly logger = new Logger('DataSource');
-  protected entity!: EntityService;
-  protected config!: ConfigService;
+  protected readonly logger!: Logger;
+  protected entityService!: EntityService;
+  protected configService!: ConfigService;
+  protected i18nService!: I18nService;
 
-  constructor(protected readonly moduleRef: ModuleRef) {}
+  constructor(protected readonly moduleRef: ModuleRef) {
+    this.logger = new Logger(this.constructor.name);
+  }
 
   async onModuleInit() {
-    this.entity = this.moduleRef.get(EntityService, { strict: false });
-    this.config = this.moduleRef.get(ConfigService, { strict: false });
+    this.entityService = this.moduleRef.get(EntityService, { strict: false });
+    this.configService = this.moduleRef.get(ConfigService, { strict: false });
+    this.i18nService = this.moduleRef.get(I18nService, { strict: false });
   }
 
   protected get Sequelize() {
@@ -36,11 +41,11 @@ export abstract class BaseDataSource implements OnModuleInit {
   }
 
   protected get sequelize() {
-    return this.entity.sequelize;
+    return this.entityService.sequelize;
   }
 
   protected get models() {
-    return this.entity.models;
+    return this.entityService.models;
   }
 
   protected get autoloadOptions() {
@@ -85,7 +90,14 @@ export abstract class BaseDataSource implements OnModuleInit {
    * table 前缀
    */
   protected get tablePrefix() {
-    return this.config.get('table_prefix');
+    return this.configService.get('table_prefix');
+  }
+
+  /**
+   * 获取配置
+   */
+  protected getConfig(key: keyof Config) {
+    return this.configService.get(key);
   }
 
   /**
@@ -94,13 +106,6 @@ export abstract class BaseDataSource implements OnModuleInit {
   protected resetOptions() {
     this.__AUTOLOAD_OPTIONS__ = null;
     this.__USER_ROLES__ == null;
-  }
-
-  /**
-   * 获取配置
-   */
-  protected getConfig(key: keyof Config) {
-    return this.config.get(key);
   }
 
   /**
@@ -142,19 +147,49 @@ export abstract class BaseDataSource implements OnModuleInit {
   }
 
   /**
-   * 验证用户是否有功能操作权限，如果没有则抛出 ForbiddenError
+   * 验证用户是否有功能操作权限
    * @param capability 验证的功能
    * @param requestUser 请求的用户
-   * @param message 错误消息
+   * @param callbackOrThrow 当为 function 时如果验证不过参数 error 将是 ForbiddenError，否则为null; 为 ture 时，验证不过则抛出异常
    */
-  protected async hasCapability(capability: UserCapability, requestUser: JwtPayload, message?: string) {
+  protected async hasCapability(capability: UserCapability, requestUser: JwtPayload): Promise<boolean>;
+  protected async hasCapability(
+    capability: UserCapability,
+    requestUser: JwtPayload,
+    callbackOrThrow: true | ((error: Error | null) => void),
+  ): Promise<void>;
+  protected async hasCapability(
+    capability: UserCapability,
+    requestUser: JwtPayload & { lang?: string },
+    callbackOrThrow?: true | ((error: Error | null) => void),
+  ): Promise<boolean | void> {
     const userRoleCapabilities =
       requestUser && requestUser.role ? (await this.userRoles)[requestUser.role].capabilities : [];
 
-    if (!userRoleCapabilities.length || !userRoleCapabilities.some((userCapability) => userCapability === capability)) {
-      throw new ForbiddenError(
-        message || `Access denied! You don't have capability "${kebabCase(capability)}" for this action!`,
+    const result = Boolean(
+      userRoleCapabilities.length && userRoleCapabilities.some((userCapability) => userCapability === capability),
+    );
+
+    if (callbackOrThrow) {
+      const callback =
+        typeof callbackOrThrow === 'function'
+          ? callbackOrThrow
+          : (error: Error | null) => {
+              if (error) throw error;
+            };
+
+      return callback(
+        !result
+          ? new ForbiddenError(
+              await this.i18nService.t('datasource.no_capability', {
+                lang: requestUser.lang,
+                args: { capability: kebabCase(capability) },
+              }),
+            )
+          : null,
       );
+    } else {
+      return result;
     }
   }
 

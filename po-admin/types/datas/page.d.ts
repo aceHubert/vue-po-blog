@@ -1,27 +1,20 @@
-import { PagerQuery, PagerResponse } from './pager';
-import { PageStatus } from 'src/includes/datas/enums';
+import { PagedResponse } from './paged';
+import { Post, PostCreationModel, PostPagedQuery } from './post';
+import { PostStatus } from 'src/includes/datas/enums';
 
-export type Page = {
-  id: string;
-  title: string;
-  content: string;
-  status: number;
-  createTime: Date;
-};
+export type Page = Omit<Post, 'excerpt' | 'categories' | 'tags'>;
 
 export type PageWithoutContent = Omit<Page, 'content'>;
 
-export type CreatePageModel = {
-  title: string;
-  content: string;
-};
+export type PageCreationModel = Omit<PostCreationModel, 'excerpt' | 'commentStatus'>;
 
-export type UpdatePageModel = Partial<CreatePageModel>;
+export type PageUpdateModel = Partial<
+  PageCreationModel & {
+    author: string;
+    status: PostStatus;
+  }
+>;
 
-export type PagePagerQuery = PagerQuery<{
-  keywords?: string;
-  status?: PageStatus;
-  createTime?: [string | Date | null, string | Date | null];
-}>;
+export type PagePagedQuery = Omit<PostPagedQuery, 'categoryId'>;
 
-export type PagePagerResponse = PagerResponse<PageWithoutContent>;
+export type PagePagedResponse = PagedResponse<PageWithoutContent>;

@@ -1,4 +1,4 @@
-import { UserRole } from './enums';
+import { UserRole } from '@/users/enums';
 import { UserCapability } from './user-capability';
 
 export type UserRoles = {
@@ -16,9 +16,6 @@ export const UserRoles = {
   [UserRole.Editor]: {
     name: 'Editor',
     capabilities: [
-      UserCapability.EditThemes,
-      UserCapability.EditPlugins,
-      UserCapability.ModerateComments,
       UserCapability.ManageLinks,
       UserCapability.ManageCategories,
       UserCapability.ManageTags,
@@ -30,6 +27,8 @@ export const UserRoles = {
       UserCapability.DeleteOthersPosts,
       UserCapability.DeletePublishedPosts,
       UserCapability.DeletePrivatePosts,
+      UserCapability.PublishPosts,
+      UserCapability.ModerateComments,
       UserCapability.EditPages,
       UserCapability.EditOthersPages,
       UserCapability.EditPublishedPages,
@@ -38,6 +37,7 @@ export const UserRoles = {
       UserCapability.DeleteOthersPages,
       UserCapability.DeletePublishedPages,
       UserCapability.DeletePrivatePages,
+      UserCapability.PublishPages,
       UserCapability.UploadFiles,
       UserCapability.Read,
       UserCapability.ReadPrivatePosts,
@@ -48,9 +48,10 @@ export const UserRoles = {
     name: 'Author',
     capabilities: [
       UserCapability.EditPosts,
-      UserCapability.EditPublishedPages,
+      UserCapability.EditPublishedPosts,
       UserCapability.DeletePosts,
       UserCapability.DeletePublishedPosts,
+      UserCapability.PublishPosts,
       UserCapability.UploadFiles,
       UserCapability.Read,
     ],

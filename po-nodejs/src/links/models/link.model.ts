@@ -1,6 +1,6 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { LinkTarget, LinkVisible } from '@/common/helpers/enums';
 import { PagedResponse } from '@/common/models/general.model';
+import { LinkTarget, LinkVisible } from '../enums';
 
 @ObjectType({ description: '链接模型' })
 export class Link {

@@ -1,5 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
+import { UserCapability } from '@/common/helpers/user-capability';
 import { ValidationError } from '@/common/utils/gql-errors.utils';
 import { BaseDataSource } from './base.datasource';
 
@@ -104,11 +105,15 @@ export class OptionDataSource extends BaseDataSource {
    * 新建 Options
    * @param model 新建模型
    */
-  async create(model: NewOptionInput): Promise<OptionModel> {
-    const isExists = await this.isExists(model.optionName);
+  async create(model: NewOptionInput, requestUser: JwtPayload & { lang?: string }): Promise<OptionModel> {
+    await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
 
-    if (isExists) {
-      throw new ValidationError(`The option name "${model.optionName}" has existed!`);
+    if (await this.isExists(model.optionName)) {
+      throw new ValidationError(
+        await this.i18nService.t('datasource.option.name_exists', {
+          lang: requestUser.lang,
+        }),
+      );
     }
 
     const option = await this.models.Options.create(model);
@@ -121,7 +126,9 @@ export class OptionDataSource extends BaseDataSource {
    * @param id Options id
    * @param model 修改实体模型
    */
-  async update(id: number, model: UpdateOptionInput): Promise<boolean> {
+  async update(id: number, model: UpdateOptionInput, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+    await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
+
     const result = await this.models.Options.update(model, {
       where: { id },
     }).then(([count]) => count > 0);
@@ -133,7 +140,9 @@ export class OptionDataSource extends BaseDataSource {
    * 删除 Options
    * @param id Option Id
    */
-  async delete(id: number): Promise<boolean> {
+  async delete(id: number, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+    await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
+
     const result = await this.models.Options.destroy({
       where: { id },
     }).then((count) => count > 0);

@@ -1,12 +1,13 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
-import { UserRole, UserStatus } from '@/common/helpers/enums';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
 import { IsEmailPipe } from '@/common/pipes/is-email.pipe';
 import { ForbiddenError } from '@/common/utils/gql-errors.utils';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
+import { UserRole } from './enums/user-role.enum';
+import { UserStatus } from './enums/user-status.enum';
 
 // Types
 import { NewUserInput } from './dto/new-user.input';

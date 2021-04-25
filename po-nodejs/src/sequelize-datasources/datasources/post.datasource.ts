@@ -1,15 +1,23 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError } from '@/common/utils/gql-errors.utils';
-import { PostStatus, PostType, PostCommentStatus } from '@/common/helpers/enums';
+import { isUndefined } from 'lodash';
+import { ForbiddenError } from '@/common/utils/gql-errors.utils';
+import { TermTaxonomy } from '@/common/helpers/term-taxonomy';
 import { UserCapability } from '@/common/helpers/user-capability';
 import { OptionKeys } from '@/common/helpers/option-keys';
 import { PostMetaKeys } from '@/common/helpers/post-meta-keys';
+import { PostStatus, PostCommentStatus } from '@/posts/enums';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
-import { Transaction, WhereOptions } from 'sequelize';
-import { PostAttributes, PostCreationAttributes, PostOperateStatus, PostOperateType } from '@/orm-entities/interfaces';
+import { Transaction, WhereOptions, WhereValue, Includeable } from 'sequelize';
+import {
+  PostAttributes,
+  PostCreationAttributes,
+  PostType,
+  PostOperateStatus,
+  PostOperateType,
+} from '@/orm-entities/interfaces';
 import {
   PostModel,
   PostMetaModel,
@@ -53,23 +61,26 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   }
 
   /**
-   * 是否有修改权限，没有则会直接抛出异常(author, status is required)
+   * 是否有修改权限，没有则会直接抛出异常
    * @param post Post
+   * @param requestUser 登录用户
    */
-  private async hasEditCapability(post: PostAttributes, requestUser: JwtPayload) {
-    if (post.status === PostOperateStatus.Inherit) {
-      const parentPost = await this.models.Posts.findByPk(post.parent);
-      // 理论上不会为null, 防止意义和ts类型检测
-      if (parentPost) {
-        post = parentPost;
-      }
-    }
-
+  private async hasEditCapability(post: PostAttributes, requestUser: JwtPayload & { lang?: string }) {
     // 是否有编辑权限
     await this.hasCapability(
       post.type === PostType.Post ? UserCapability.EditPosts : UserCapability.EditPages,
       requestUser,
+      true,
     );
+
+    // 是否有编辑已发布的文章的权限
+    if (post.status === PostStatus.Publish) {
+      await this.hasCapability(
+        post.type === PostType.Post ? UserCapability.EditPublishedPosts : UserCapability.EditPublishedPages,
+        requestUser,
+        true,
+      );
+    }
 
     // 是否有编辑别人文章的权限
     if (post.author !== requestUser.id) {
@@ -77,22 +88,55 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
         post.type === PostType.Post ? UserCapability.EditOthersPosts : UserCapability.EditOthersPages,
         requestUser,
       );
-    }
 
-    // 是否有编辑已发布的文章的权限
+      // 是否有编辑私有的(别人)文章权限
+      if (post.status === PostStatus.Private) {
+        await this.hasCapability(
+          post.type === PostType.Post ? UserCapability.EditPrivatePosts : UserCapability.EditPrivatePages,
+          requestUser,
+        );
+      }
+    }
+  }
+
+  /**
+   * 是否有删除权限，没有则会直接抛出异常
+   * @param post Post
+   * @param requestUser 登录用户
+   */
+  private async hasDeleteCapability(post: PostAttributes, requestUser: JwtPayload & { lang?: string }) {
+    // 是否有删除文章的权限
+    await this.hasCapability(
+      post.type === PostType.Post ? UserCapability.DeletePosts : UserCapability.DeletePages,
+      requestUser,
+      true,
+    );
+
+    // 是否有删除已发布的文章的权限
     if (post.status === PostStatus.Publish) {
       await this.hasCapability(
-        post.type === PostType.Post ? UserCapability.EditPublishedPosts : UserCapability.EditPublishedPages,
+        post.type === PostType.Post ? UserCapability.DeletePublishedPosts : UserCapability.DeletePublishedPages,
         requestUser,
+        true,
       );
     }
 
-    // 是否有编辑私有的文章权限
-    if (post.status === PostStatus.Private) {
+    // 是否有删除别人文章的权限
+    if (post.author !== requestUser.id) {
       await this.hasCapability(
-        post.type === PostType.Post ? UserCapability.EditPrivatePosts : UserCapability.EditPrivatePages,
+        post.type === PostType.Post ? UserCapability.DeleteOthersPosts : UserCapability.DeleteOthersPages,
         requestUser,
+        true,
       );
+
+      // 是否有删除私有的文章权限
+      if (post.status === PostStatus.Private) {
+        await this.hasCapability(
+          post.type === PostType.Post ? UserCapability.DeletePrivatePosts : UserCapability.DeletePrivatePages,
+          requestUser,
+          true,
+        );
+      }
     }
   }
 
@@ -176,127 +220,253 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access None
+   * @access Authorized?
    * @param id Post id
    * @param type 类型
    * @param fields 返回字段
+   * @param requestUser 请求的用户
    */
-  get(id: number, type: PostType, fields: string[]): Promise<PostModel | null> {
+  async get(
+    id: number,
+    type: PostType,
+    fields: string[],
+    requestUser?: JwtPayload & { lang?: string },
+  ): Promise<PostModel | null> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
       fields.push('id');
     }
 
-    return this.models.Posts.findOne({
-      attributes: this.filterFields(fields, this.models.Posts),
-      where: {
-        id,
-        type,
-      },
-    }).then((post) => post?.toJSON() as PostModel);
-  }
+    const where: WhereOptions<PostAttributes> = {
+      id,
+      type,
+    };
 
-  /**
-   * 获取文章/页面副本（用于编辑）
-   * @author Hubert
-   * @since 2020-10-01
-   * @version 0.0.1
-   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
-   * @param id Post id
-   * @param type 类型
-   * @param fields 返回字段
-   */
-  async getDuplicate(id: number, type: PostType, requestUser: JwtPayload): Promise<PostModel | null> {
-    const post = await this.models.Posts.findOne({
-      attributes: {
-        exclude: ['id'],
-      },
-      where: { id, type },
-    });
-    if (post) {
-      // 是否有编辑权限
-      await this.hasEditCapability(post, requestUser);
+    // 匿名用户只能查询 published 的内容
+    if (!requestUser) {
+      where['status'] = PostStatus.Publish;
+      return this.models.Posts.findOne({
+        attributes: this.filterFields(fields, this.models.Posts),
+        where,
+      }).then((post) => post?.toJSON() as PostModel);
+    } else {
+      const post = await this.models.Posts.findOne({
+        where,
+      });
+      if (post) {
+        // 是否有编辑权限
+        await this.hasEditCapability(post, requestUser);
 
-      const creationModel = post.toJSON() as PostAttributes;
-      creationModel.author = requestUser.id;
-      creationModel.name = `${id}-revision`;
-      creationModel.type = PostOperateType.Revision;
-      creationModel.status = PostOperateStatus.Inherit;
-      creationModel.parent = id;
-
-      const editPost = await this.models.Posts.create(creationModel);
-
-      return { ...editPost.toJSON(), status: post.status, type: post.type } as PostModel;
+        return post.toJSON() as PostModel;
+      }
+      return null;
     }
-    return null;
   }
 
   /**
    * 查询分页文章/页面列表
-   * 没有状态条件时，返回的结果不包含 Trash 状态
+   * 匿名访问只返回 Publish 状态的结果
+   * 没有状态条件时，结果不包含 Trash 状态的
+   * 没有编辑私有权限的，结果不包含别人私有的
+   * 没有发布权限的，结果不包含别人待发布的
+   * 如果categoryId是默认分类（无分类），结果包含所有没有分类的
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access None
+   * @access Authorized?
    * @param param 分页查询参数
    * @param type 类型
    * @param fields 返回字段
+   * @param requestUser 请求的用户
    */
-  getPaged(query: PagedPostArgs, type: PostType.Post, fields: string[]): Promise<PagedPostModel>;
-  getPaged(query: PagedPageArgs, type: PostType.Page, fields: string[]): Promise<PagedPostModel>;
-  getPaged(
+  async getPaged(
+    query: PagedPostArgs,
+    type: PostType.Post,
+    fields: string[],
+    requestUser?: JwtPayload,
+  ): Promise<PagedPostModel>;
+  async getPaged(
+    query: PagedPageArgs,
+    type: PostType.Page,
+    fields: string[],
+    requestUser?: JwtPayload,
+  ): Promise<PagedPostModel>;
+  async getPaged(
     { offset, limit, ...query }: PagedPostArgs | PagedPageArgs,
     type: PostType,
     fields: string[],
+    requestUser?: JwtPayload,
   ): Promise<PagedPostModel> {
-    const where: WhereOptions = {
+    // 主键(meta 查询)
+    if (!fields.includes('id')) {
+      fields.push('id');
+    }
+
+    const include: Includeable[] = [];
+    const andWhere: WhereOptions<PostAttributes>[] | WhereValue<PostAttributes>[] = [];
+    const where: WhereOptions<PostAttributes> = {
       type,
+      [this.Op.and]: andWhere,
     };
     if (query.keyword) {
-      where['title'] = {
-        [this.Op.like]: `%${query.keyword}%`,
-      };
+      andWhere.push({
+        title: {
+          [this.Op.like]: `%${query.keyword}%`,
+        },
+      });
     }
     if (query.author) {
-      where['author'] = query.author;
-    }
-    if (query.status) {
-      where['status'] = query.status;
-    } else {
-      // All 时排除 操作状态下的所有状态和 trash 状态
-      where['status'] = {
-        [this.Op.notIn]: [...Object.values(PostOperateStatus), PostStatus.Trash],
-      };
+      andWhere.push({
+        author: query.author,
+      });
     }
 
     if (query.date) {
-      // @ts-ignore
-      where[this.Op.and] = this.Sequelize.where(
-        this.Sequelize.fn(
-          'DATE_FORMAT',
-          this.col('createdAt', this.models.Posts),
-          query.date.length === 4 ? '%Y' : query.date.length === 6 ? '%Y%m' : '%Y%m%d',
+      andWhere.push(
+        this.Sequelize.where(
+          this.Sequelize.fn(
+            'DATE_FORMAT',
+            this.col('createdAt', this.models.Posts),
+            query.date.length === 4 ? '%Y' : query.date.length === 6 ? '%Y%m' : '%Y%m%d',
+          ),
+          query.date,
         ),
-        query.date,
       );
+    }
+
+    // 匿名用户只返回 published 的文章
+    if (!requestUser) {
+      andWhere.push({
+        status: PostStatus.Publish,
+      });
+    } else {
+      const hasEditPrivateCapability = await this.hasCapability(
+        type === PostType.Post ? UserCapability.EditPrivatePosts : UserCapability.EditPrivatePages,
+        requestUser,
+      );
+
+      if (query.status) {
+        // 如果查询私有状态，但没有权限。直接返回
+        if (query.status === PostStatus.Private && !hasEditPrivateCapability) {
+          return Promise.resolve({ rows: [], total: 0 });
+        } else {
+          andWhere.push({
+            status: query.status,
+          });
+        }
+      } else {
+        // All 时排除 操作状态下的所有状态和 trash 状态
+        andWhere.push({
+          status: {
+            [this.Op.notIn]: [...Object.values(PostOperateStatus), PostStatus.Trash],
+          },
+        });
+      }
+
+      // 如果没有编辑私有权限，则不返回非自己的私有的内容
+      if (!hasEditPrivateCapability) {
+        andWhere.push({
+          [this.Op.not]: {
+            status: PostStatus.Private,
+            author: {
+              [this.Op.ne]: requestUser.id,
+            },
+          },
+        });
+      }
+
+      // 如果没有发布权限的，不返回待发布的内容
+      const hasPublishCapability = await this.hasCapability(
+        type === PostType.Post ? UserCapability.PublishPosts : UserCapability.PublishPosts,
+        requestUser,
+      );
+      if (!hasPublishCapability) {
+        andWhere.push({
+          [this.Op.not]: {
+            status: PostStatus.Pending,
+            author: {
+              [this.Op.ne]: requestUser.id,
+            },
+          },
+        });
+      }
+    }
+
+    if (type === PostType.Post) {
+      const categoryId = (query as PagedPostArgs).categoryId;
+      const categoryName = (query as PagedPostArgs).categoryName;
+      const tagId = (query as PagedPostArgs).tagId;
+      const tagName = (query as PagedPostArgs).tagName;
+      if (categoryId || tagId) {
+        include.push(
+          ...[
+            {
+              model: this.models.TermRelationships,
+              as: 'TermRelationships',
+              include: [
+                {
+                  model: this.models.TermTaxonomy,
+                  as: 'TermTaxonomy',
+                  duplicating: false,
+                },
+              ],
+              duplicating: false,
+            },
+          ],
+        );
+        /** 如果是默认分类（未分类）的话，包含所有没有分类的内容 */
+        const defaultCategory = await this.getOption(OptionKeys.DefaultCategory);
+        andWhere.push({
+          [`$TermRelationships.TermTaxonomy.${this.field('termId', this.models.TermTaxonomy)}$`]: categoryId
+            ? defaultCategory === String(categoryId)
+              ? {
+                  [this.Op.or]: [categoryId, { [this.Op.is]: null }],
+                }
+              : categoryId
+            : tagId,
+        });
+      } else if (categoryName || tagName) {
+        include.push({
+          model: this.models.TermRelationships,
+          as: 'TermRelationships',
+          attributes: [],
+          include: [
+            {
+              model: this.models.TermTaxonomy,
+              as: 'TermTaxonomy',
+              attributes: [],
+              include: [
+                {
+                  model: this.models.Terms,
+                  as: 'Terms',
+                  attributes: [],
+                  duplicating: false,
+                },
+              ],
+              duplicating: false,
+            },
+          ],
+          duplicating: false,
+        });
+
+        andWhere.push({
+          [`$TermRelationships.TermTaxonomy.Terms.${this.field('name', this.models.Terms)}$`]: categoryName
+            ? categoryName
+            : tagName,
+          [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', this.models.TermTaxonomy)}$`]: categoryName
+            ? TermTaxonomy.Category
+            : TermTaxonomy.Tag,
+        });
+      }
     }
 
     return this.models.Posts.findAndCountAll({
       attributes: this.filterFields(fields, this.models.Posts),
-      include:
-        type === PostType.Post && (query as PagedPostArgs).categoryIds && (query as PagedPostArgs).categoryIds?.length
-          ? {
-              model: this.models.TermRelationships,
-              attributes: ['taxonomyId'],
-              where: {
-                taxonomyId: (query as PagedPostArgs).categoryIds,
-              },
-            }
-          : undefined,
-      where: { ...where },
+      include,
+      where,
       offset,
       limit,
-      order: [['createdAt', 'DESC']],
+      order: [['order', 'ASC']],
     }).then(({ rows, count: total }) => ({
       rows: rows as PagedPostModel['rows'],
       total,
@@ -308,20 +478,76 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access None
+   * @access Authorized
    * @param type 类型
+   * @param requestUser 请求的用户
    */
-  getCountByStatus(type: PostType) {
+  async getCountByStatus(type: PostType, requestUser: JwtPayload & { lang?: string }) {
+    const andWhere: WhereOptions<PostAttributes>[] | WhereValue<PostAttributes>[] = [];
+    const where: WhereOptions<PostAttributes> = {
+      type,
+      status: {
+        // 不包含所有的操作时的状态
+        [this.Op.notIn]: [...Object.values(PostOperateStatus)],
+      },
+      [this.Op.and]: andWhere,
+    };
+
+    // 如果没有编辑私有权限，则不返回非自己私有的内容
+    const hasEditPrivateCapability = await this.hasCapability(UserCapability.EditPrivatePosts, requestUser);
+    if (!hasEditPrivateCapability) {
+      andWhere.push({
+        [this.Op.not]: {
+          status: PostStatus.Private,
+          author: {
+            [this.Op.ne]: requestUser.id,
+          },
+        },
+      });
+    }
+
+    // 如果没有发布权限的，不返回待发布的内容
+    const hasPublishCapability = await this.hasCapability(
+      type === PostType.Post ? UserCapability.PublishPosts : UserCapability.PublishPosts,
+      requestUser,
+    );
+    if (!hasPublishCapability) {
+      andWhere.push({
+        [this.Op.not]: {
+          status: PostStatus.Pending,
+          author: {
+            [this.Op.ne]: requestUser.id,
+          },
+        },
+      });
+    }
+
     return this.models.Posts.count({
       attributes: ['status'],
+      where,
+      group: 'status',
+    });
+  }
+
+  /**
+   * 获取我的数量
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access Authorized
+   * @param type 类型
+   * @param requestUser 请求的用户
+   */
+  getCountBySelf(type: PostType, requestUser: JwtPayload & { lang?: string }) {
+    return this.models.Posts.count({
       where: {
         type,
         status: {
           // 不包含所有的操作时的状态
-          [this.Op.notIn]: Object.values(PostOperateStatus),
+          [this.Op.notIn]: [...Object.values(PostOperateStatus)],
         },
+        author: requestUser.id,
       },
-      group: 'status',
     });
   }
 
@@ -416,14 +642,20 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [CreatePosts/CreatePages]
+   * @access capabilities: [EditPosts/EditPages]
    * @param model 添加实体模型
    * @param type 类型
+   * @param requestUser 请求的用户
    */
-  async create(model: NewPostInput | NewPageInput, type: PostType, requestUser: JwtPayload): Promise<PostModel> {
+  async create(
+    model: NewPostInput | NewPageInput,
+    type: PostType,
+    requestUser: JwtPayload & { lang?: string },
+  ): Promise<PostModel> {
     await this.hasCapability(
-      type === PostType.Post ? UserCapability.CreatePosts : UserCapability.CreatePages,
+      type === PostType.Post ? UserCapability.EditPosts : UserCapability.EditPages,
       requestUser,
+      true,
     );
 
     const { name, title, metas, ...rest } = model;
@@ -433,13 +665,14 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       name: await this.fixName(name || title),
       author: requestUser.id,
       type,
+      excerpt: type == PostType.Post ? (model as NewPostInput).excerpt : '',
       status: PostOperateStatus.AutoDraft, // 默认为 auto draft
     };
 
     const defaultCommentStatus = await this.getOption<PostCommentStatus>(OptionKeys.DefaultCommentStatus);
 
     if (type === PostType.Post) {
-      creationModel.commentStatus = (model as NewPostInput).commentStatus || defaultCommentStatus;
+      creationModel.commentStatus = defaultCommentStatus;
     } else if (type === PostType.Page) {
       const pageComments = await this.getOption<'off' | 'on'>(OptionKeys.PageComments);
       // 如果 PageComments 开启，则状态根据 Option.DefaultCommentStatus 状态
@@ -479,51 +712,95 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   /**
    * 修改文章
    * name 没有值的话，通过 title 生成
-   * trash 状态下不可修改，先使用 restore 方法重置
-   * id 可是副本 post id(将会修改复本和原始值)
+   * trash 状态下不可修改(抛出 ForbiddenError)
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [EditPosts/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [
+   *  EditPosts/EditPages,
+   *  EditOthersPosts/EditOthersPages,
+   *  EditPublishedPosts/EditPublishedPages,
+   *  EditPrivatePosts/EditPrivatePages,
+   *  DeletePosts/DeletePages(model.status=>Trash),
+   *  DeleteOthersPosts/DeleteOthersPages(model.status=>Trash),
+   *  DeletePublishedPosts/DeletePublishedPages(model.status=>Trash),
+   *  DeletePrivatePosts/DeletePrivatePages(model.status=>Trash),
+   *  PublishPosts/PublishPages
+   * ]
    * @param id Post id/副本 post id
    * @param model 修改实体模型
+   * @param requestUser 请求的用户
    */
-  async update(id: number, model: UpdatePostInput | UpdatePageInput, requestUser: JwtPayload): Promise<boolean> {
-    let post = await this.models.Posts.findByPk(id);
-    if (post && post.parent) {
-      post = await this.models.Posts.findByPk(post.parent);
-    }
+  async update(
+    id: number,
+    model: UpdatePostInput | UpdatePageInput,
+    requestUser: JwtPayload & { lang?: string },
+  ): Promise<boolean> {
+    const post = await this.models.Posts.findByPk(id);
     if (post) {
-      // 是否有编辑权限
-      await this.hasEditCapability(post, requestUser);
-
       // 如果状态为 Trash, 不被允许修改，先使用 restore 统一处理状态逻辑
       // 需要恢复到移入Trash前的状态，并删除记录等逻辑
       if (post.status === PostStatus.Trash) {
-        throw new ValidationError('Cound not update from "trush" status, use "restore" function to update status!');
+        throw new ForbiddenError(await this.i18nService.t('update_trash_forbidden', { lang: requestUser.lang }));
+      }
+
+      // 是否有编辑权限
+      await this.hasEditCapability(post, requestUser);
+
+      // 是否有发布的权限
+      if (
+        (model.status === PostStatus.Publish || model.status === PostStatus.Private) &&
+        post.status !== model.status
+      ) {
+        await this.hasCapability(
+          post.type === PostType.Post ? UserCapability.PublishPosts : UserCapability.PublishPages,
+          requestUser,
+          true,
+        );
+      }
+
+      // 修改到 Trash 状态同删除权限一致
+      if (model.status === PostStatus.Trash) {
+        await this.hasDeleteCapability(post, requestUser);
       }
 
       const t = await this.sequelize.transaction();
       try {
         // 移到 Trash 之前记录状态
         if (model.status === PostStatus.Trash) {
-          await this.storeTrashStatus(post.id, post.status, t);
+          await this.storeTrashStatus(id, post.status, t);
         }
 
         await this.models.Posts.update(model, {
-          where: { id: post.id },
+          where: { id },
           transaction: t,
         });
 
-        // 修改副本信息
-        if (post.id !== id) {
-          // 副本状态不会悠
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { status, ...restModel } = model;
-          await this.models.Posts.update(restModel, {
-            where: { id },
-            transaction: t,
-          });
+        // 记录每一次的修改（undefined 是不会产生修改记录，需要区分 null 和 空）
+        const title = !isUndefined(model.title) && model.title !== post.title ? model.title! : false;
+        const content = !isUndefined(model.content) && model.content !== post.content ? model.content! : false;
+        const excerpt =
+          post.type === PostType.Post &&
+          !isUndefined((model as UpdatePostInput).excerpt) &&
+          (model as UpdatePostInput).excerpt !== post.excerpt
+            ? (model as UpdatePostInput).excerpt!
+            : false;
+        if (title || content || excerpt) {
+          await this.models.Posts.create(
+            {
+              title: title || post.title,
+              content: content || post.content,
+              excerpt: excerpt || post.excerpt,
+              author: requestUser.id,
+              name: `${id}-revision`,
+              type: PostOperateType.Revision,
+              status: PostOperateStatus.Inherit,
+              parent: id,
+              commentStatus: post.commentStatus,
+              commentCount: post.commentCount,
+            },
+            { transaction: t },
+          );
         }
 
         await t.commit();
@@ -541,11 +818,16 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [
+   *  EditPots/EditPages,
+   *  EditOthersPosts/EditOthersPages,
+   *  EditPublishedPosts/EditPublishedPages,
+   *  EditPrivatePosts/EditPrivatePages
+   * ]
    * @param id Post id
    * @param name 唯一标识
    */
-  async updateName(id: number, name: string, requestUser: JwtPayload): Promise<string | false> {
+  async updateName(id: number, name: string, requestUser: JwtPayload & { lang?: string }): Promise<string | false> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 是否有编辑权限
@@ -560,22 +842,29 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   }
 
   /**
-   * 修改状态
-   * trash 状态下不可以修改，先通过restore方法重置
+   * 修改状态（如果post id 不在在返回 false）
+   * trash 状态下不可以修改（抛出 ForbiddenError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [
+   *  EditPots/EditPages,
+   *  EditOthersPosts/EditOthersPages,
+   *  EditPublishedPosts/EditPublishedPages,
+   *  EditPrivatePosts/EditPrivatePages,
+   *  DeletePosts/DeletePages(status=>Trash),
+   *  DeleteOthersPosts/DeleteOthersPages(status=>Trash),
+   *  DeletePublishedPosts/DeletePublishedPages(status=>Trash),
+   *  DeletePrivatePosts/DeletePrivatePages(status=>Trash),
+   *  PublishPosts/PublishPages
+   * ]
    * @param id Post id
    * @param status 状态
    */
-  async updateStatus(id: number, status: PostStatus, requestUser: JwtPayload): Promise<boolean> {
+  async updateStatus(id: number, status: PostStatus, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
-      // 是否有编辑权限
-      await this.hasEditCapability(post, requestUser);
-
-      // 状态相同，无需修改
+      // 状态相同，忽略
       if (post.status === status) {
         return true;
       }
@@ -583,7 +872,24 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       // 如果状态为 Trash, 不被允许修改，先使用 restore 统一处理状态逻辑
       // 需要恢复到移入Trash前的状态等逻辑
       if (post.status === PostStatus.Trash) {
-        throw new ValidationError('Cound not update from "trush" status, use "restore" function to update status!');
+        throw new ForbiddenError(await this.i18nService.t('update_trash_forbidden', { lang: requestUser.lang }));
+      }
+
+      // 是否有编辑权限
+      await this.hasEditCapability(post, requestUser);
+
+      // 是否有发布的权限
+      if (status === PostStatus.Publish || status === PostStatus.Private) {
+        await this.hasCapability(
+          post.type === PostType.Post ? UserCapability.PublishPosts : UserCapability.PublishPages,
+          requestUser,
+          true,
+        );
+      }
+
+      // 修改到 Trash 状态同删除权限一致
+      if (status === PostStatus.Trash) {
+        await this.hasDeleteCapability(post, requestUser);
       }
 
       const t = await this.sequelize.transaction();
@@ -608,32 +914,67 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 批量修改状态
-   * trash 状态下不可以修改
+   * 任意一条是 trash 状态下不可以修改（抛出 ForbiddenError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized
+   * @access capabilities: [
+   *  EditPots/EditPages,
+   *  EditOthersPosts/EditOthersPages,
+   *  EditPublishedPosts/EditPublishedPages,
+   *  EditPrivatePosts/EditPrivatePages,
+   *  DeletePosts/DeletePages(status=>Trash),
+   *  DeleteOthersPosts/DeleteOthersPages(status=>Trash),
+   *  DeletePublishedPosts/DeletePublishedPages(status=>Trash),
+   *  DeletePrivatePosts/DeletePrivatePages(status=>Trash),
+   *  PublishPosts/PublishPages
+   * ]
    * @param ids Post ids
    * @param status 状态
    */
-  async blukUpdateStatus(ids: number[], status: PostStatus): Promise<boolean> {
-    // todo:  hasEditCapability
-
-    // trash 状态下不可以修改，使用 restore 重置
-    const trushedIds = await this.models.Posts.findAll({
-      attributes: ['id'],
+  async blukUpdateStatus(
+    ids: number[],
+    status: PostStatus,
+    requestUser: JwtPayload & { lang?: string },
+  ): Promise<true> {
+    const posts = await this.models.Posts.findAll({
       where: {
         id: ids,
-        status: PostStatus.Trash,
       },
     });
+
+    // trash 状态下不可以修改，使用 restore 重置
+    const trushedIds = posts.filter((post) => post.status === PostStatus.Trash).map((post) => post.id);
     if (trushedIds.length > 0) {
-      throw new ValidationError(
-        `Cound not update from "trush" status, use "restore" function to update status, ids: ${trushedIds
-          .map((item) => item.id)
-          .join(',')}!`,
+      throw new ForbiddenError(
+        await this.i18nService.t('update_trash_forbidden_with_ids', {
+          lang: requestUser.lang,
+          args: { ids: trushedIds.join(',') },
+        }),
       );
     }
+
+    // 权限判断
+    await Promise.all(
+      posts.map(async (post) => {
+        // 是否有编辑权限
+        await this.hasEditCapability(post, requestUser);
+
+        // 是否有发布的权限
+        if (status === PostStatus.Publish) {
+          await this.hasCapability(
+            post.type === PostType.Post ? UserCapability.PublishPosts : UserCapability.PublishPages,
+            requestUser,
+            true,
+          );
+        }
+
+        // 修改到 Trash 状态同删除权限一致
+        if (status === PostStatus.Trash) {
+          await this.hasDeleteCapability(post, requestUser);
+        }
+      }),
+    );
 
     const t = await this.sequelize.transaction();
     try {
@@ -663,15 +1004,20 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   }
 
   /**
-   * 重置Trash到之前状态
-   * 如果历史状态没有记录返回 false, 如果非 trash 状态抛出异常
+   * 重置Trash到之前状态（如果历史状态没有记录或 post id 不在在返回 false）
+   * 非 trash 状态不可重置（抛出 ForbiddenError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [
+   *  EditPots/EditPages,
+   *  EditOthersPosts/EditOthersPages,
+   *  EditPublishedPosts/EditPublishedPages,
+   *  EditPrivatePosts/EditPrivatePages
+   * ]
    * @param id Post id
    */
-  async restore(id: number, requestUser: JwtPayload): Promise<boolean> {
+  async restore(id: number, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
     const metaStatus = await this.models.PostMeta.findOne({
       attributes: ['metaValue'],
       where: {
@@ -683,13 +1029,15 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     if (metaStatus) {
       const post = await this.models.Posts.findByPk(id);
       if (post) {
-        // 是否有编辑权限
-        await this.hasEditCapability(post, requestUser);
-
         // 如果状态为非 Trash, 不被允许重置
         if (post.status !== PostStatus.Trash) {
-          throw new ValidationError('Cound not restore from not "trush" status！');
+          throw new ForbiddenError(
+            await this.i18nService.t('datasource.post.restore_without_trash_forbidden', { lang: requestUser.lang }),
+          );
         }
+
+        // 是否有编辑权限
+        await this.hasEditCapability(post, requestUser);
 
         const t = await this.sequelize.transaction();
         try {
@@ -714,17 +1062,49 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 批量重置
+   * 任意一条是非 trash 状态不可重置（抛出 ForbiddenError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access Authorized
+   * @access capabilities: [
+   *  EditPots/EditPages,
+   *  EditOthersPosts/EditOthersPages,
+   *  EditPublishedPosts/EditPublishedPages,
+   *  EditPrivatePosts/EditPrivatePages
+   * ]
    * @param ids Post ids
    */
-  async blukRestore(ids: number[]): Promise<true> {
-    // todo: hasEditCapability
+  async blukRestore(ids: number[], requestUser: JwtPayload & { lang?: string }): Promise<true> {
+    const posts = await this.models.Posts.findAll({
+      where: {
+        id: ids,
+      },
+    });
+
+    // 如果状态为非 Trash, 不被允许重置
+    const notWithTrushedIds = posts.filter((post) => post.status !== PostStatus.Trash).map((post) => post.id);
+    if (notWithTrushedIds.length > 0) {
+      throw new ForbiddenError(
+        await this.i18nService.t('datasource.post.restore_without_trash_forbidden_with_ids', {
+          lang: requestUser.lang,
+          args: {
+            ids: notWithTrushedIds.join(','),
+          },
+        }),
+      );
+    }
+
+    // 权限判断
+    await Promise.all(
+      posts.map(async (post) => {
+        // 是否有编辑权限
+        await this.hasEditCapability(post, requestUser);
+      }),
+    );
 
     const t = await this.sequelize.transaction();
     try {
+      // 注：只修改了有保存回收站之前状态的，其它忽略
       const metas = await this.models.PostMeta.findAll({
         attributes: ['postId', 'metaValue'],
         where: { postId: ids, metaKey: 'trash_meta_status' },
@@ -753,99 +1133,77 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   }
 
   /**
-   * 修改评论状态
-   * id 可是副本 post id(将会修改复本和原始值)
+   * 修改评论状态（如果post id 不在在返回 false）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [EditPots/EditPages, EditOthersPosts/EditOthersPages, EditPublishedPosts/EditPublishedPages, EditPrivatePosts/EditPrivatePages]
+   * @access capabilities: [
+   *  EditPots/EditPages,
+   *  EditOthersPosts/EditOthersPages,
+   *  EditPublishedPosts/EditPublishedPages,
+   *  EditPrivatePosts/EditPrivatePages
+   * ]
    * @param id Post id/副本 post id
    * @param status 状态
    */
-  async updateCommentStatus(id: number, commentStatus: PostCommentStatus, requestUser: JwtPayload): Promise<boolean> {
-    let post = await this.models.Posts.findByPk(id);
-    if (post && post.parent) {
-      post = await this.models.Posts.findByPk(post.parent);
-    }
+  async updateCommentStatus(
+    id: number,
+    commentStatus: PostCommentStatus,
+    requestUser: JwtPayload & { lang?: string },
+  ): Promise<boolean> {
+    const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 是否有编辑权限
       await this.hasEditCapability(post, requestUser);
 
       post.commentStatus = commentStatus;
       await post.save();
-
-      // 修改副本状态
-      if (post.id !== id) {
-        this.models.Posts.update(
-          { commentStatus },
-          {
-            where: { id },
-          },
-        );
-      }
       return true;
     }
     return false;
   }
 
   /**
-   * 根据 Id 删除
-   * 非 trash 状态下无法删除
+   * 根据 Id 删除（如果post id 不在在返回 false）
+   * 非 trash 状态下不可以删除（抛出 ForbiddenError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [DeletePots/DeletePages, DeleteOthersPosts/DeleteOthersPages, DeletePublishedPosts/DeletePublishedPages, DeletePrivatePosts/DeletePrivatePages]
+   * @access capabilities: [
+   *  DeletePots/DeletePages,
+   *  DeleteOthersPosts/DeleteOthersPages,
+   *  DeletePublishedPosts/DeletePublishedPages,
+   *  DeletePrivatePosts/DeletePrivatePages
+   * ]
    * @param id Post id
    */
-  async delete(id: number, requestUser: JwtPayload): Promise<boolean> {
+  async delete(id: number, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
-      // 是否有删除文章的权限
-      await this.hasCapability(
-        post.type === PostType.Post ? UserCapability.DeletePosts : UserCapability.DeletePages,
-        requestUser,
-      );
-
-      // 是否有删除别人文章的权限
-      if (post.author !== requestUser.id) {
-        await this.hasCapability(
-          post.type === PostType.Post ? UserCapability.DeleteOthersPosts : UserCapability.DeleteOthersPages,
-          requestUser,
-        );
-      }
-
-      // 是否有删除已发布的文章的权限
-      if (post.status === PostStatus.Publish) {
-        await this.hasCapability(
-          post.type === PostType.Post ? UserCapability.DeletePublishedPosts : UserCapability.DeletePublishedPages,
-          requestUser,
-        );
-      }
-
-      // 是否有删除私有的文章权限
-      if (post.status === PostStatus.Private) {
-        await this.hasCapability(
-          post.type === PostType.Post ? UserCapability.DeletePrivatePosts : UserCapability.DeletePrivatePages,
-          requestUser,
-        );
-      }
-
+      // 非 trash 状态下不可以删除
       if (post.status !== PostStatus.Trash) {
-        throw new ValidationError('Could not delete the status is not in "trash"');
+        throw new ForbiddenError(
+          await this.i18nService.t('datasource.post.delete_without_trash_forbidden', {
+            lang: requestUser.lang,
+          }),
+        );
       }
+
+      // 是否有删除文章的权限
+      await this.hasDeleteCapability(post, requestUser);
 
       const t = await this.sequelize.transaction();
 
       try {
         // 删除相关信息
-        this.models.PostMeta.destroy({
+        await this.models.PostMeta.destroy({
           where: {
             postId: post.id,
           },
           transaction: t,
         });
 
-        this.models.TermRelationships.destroy({
+        await this.models.TermRelationships.destroy({
           where: {
             objectId: post.id,
           },
@@ -862,5 +1220,80 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       }
     }
     return false;
+  }
+
+  /**
+   * 批量删除
+   * 任意一条是非 trash 状态下不可以删除（抛出 ForbiddenError）
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [
+   *  DeletePots/DeletePages,
+   *  DeleteOthersPosts/DeleteOthersPages,
+   *  DeletePublishedPosts/DeletePublishedPages,
+   *  DeletePrivatePosts/DeletePrivatePages
+   * ]
+   * @param id Post id
+   */
+  async blukDelete(ids: number[], requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+    const posts = await this.models.Posts.findAll({
+      where: {
+        id: ids,
+      },
+    });
+
+    // 如果状态为非 Trash, 不被允许删除
+    const notWithTrushedIds = posts.filter((post) => post.status !== PostStatus.Trash).map((post) => post.id);
+    if (notWithTrushedIds.length > 0) {
+      throw new ForbiddenError(
+        await this.i18nService.t('datasource.post.delete_without_trash_forbidden_with_ids', {
+          lang: requestUser.lang,
+          args: {
+            ids: notWithTrushedIds.join(','),
+          },
+        }),
+      );
+    }
+
+    // 判断权限
+    await Promise.all(
+      posts.map(async (post) => {
+        // 是否有删除文章的权限
+        await this.hasDeleteCapability(post, requestUser);
+      }),
+    );
+
+    const t = await this.sequelize.transaction();
+
+    try {
+      // 删除相关信息
+      await this.models.PostMeta.destroy({
+        where: {
+          postId: ids,
+        },
+        transaction: t,
+      });
+
+      await this.models.TermRelationships.destroy({
+        where: {
+          objectId: ids,
+        },
+        transaction: t,
+      });
+
+      await this.models.Posts.destroy({
+        where: {
+          id: ids,
+        },
+        transaction: t,
+      });
+
+      await t.commit();
+      return true;
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
   }
 }

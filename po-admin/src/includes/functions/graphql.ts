@@ -154,7 +154,7 @@ const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) 
 const client = new ApolloClient({
   link: from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache(),
-  ssrMode: true,
+  ssrMode: process.server, // set for ssr
   defaultOptions: {
     query: {
       fetchPolicy: 'no-cache',

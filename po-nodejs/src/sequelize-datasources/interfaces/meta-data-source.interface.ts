@@ -1,8 +1,8 @@
 import { NewMetaInput } from './meta.interface';
 
 export interface MetaDataSource<MetaReturnType, NewMetaInputType> {
-  getMeta(id: number): Promise<MetaReturnType | null>;
-  getMetaByKey(modelId: number, metaKey: string): Promise<MetaReturnType | null>;
+  getMeta(id: number, fields: string[]): Promise<MetaReturnType | null>;
+  getMetaByKey(modelId: number, metaKey: string, fields: string[]): Promise<MetaReturnType | null>;
   getMetas(modelId: number, metaKeys: string[] | undefined, fields: string[]): Promise<MetaReturnType[]>;
   isMetaExists(modelId: number, metaKey: string): Promise<boolean>;
   createMeta(model: NewMetaInputType): Promise<MetaReturnType>;

@@ -19,17 +19,17 @@ export type TermRelationship = {
 export type TermCreationModel = {
   name: string;
   slug?: string;
-  description?: string;
+  description: string;
   parentId?: string;
 };
+
+export type TermUpdateModel = Partial<TermCreationModel>;
 
 export type TermRelationshipCreationModel = {
   objectId: string;
   taxonomyId: string;
   order?: number;
 };
-
-export type TermUpdateModel = Partial<TermCreationModel>;
 
 export type TermQuery = {
   keyword?: string;

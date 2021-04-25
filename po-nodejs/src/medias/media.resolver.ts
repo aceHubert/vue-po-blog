@@ -3,6 +3,7 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { MediaDataSource } from '@/sequelize-datasources/datasources';
+import { Authorized } from '@/common/decorators/authorized.decorator';
 
 // Types
 import { PagedMediaArgs } from './dto/paged-media.args';
@@ -34,11 +35,13 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     );
   }
 
+  @Authorized()
   @Mutation((returns) => Media, { description: '添加媒体' })
   addMedia(@Args('model', { type: () => NewMediaInput }) model: NewMediaInput): Promise<Media> {
     return this.mediaDataSource.create(model);
   }
 
+  @Authorized()
   @Mutation((returns) => Boolean, { description: '删除媒体' })
   removeMedia(@Args('id', { type: () => ID!, description: 'Media id' }) id: number): Promise<boolean> {
     return this.mediaDataSource.delete(id);

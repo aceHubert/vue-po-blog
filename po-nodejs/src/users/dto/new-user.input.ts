@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsOptional, Length, MinLength, IsEmail, IsUrl } from 'class-validator';
-import { UserStatus, UserRole } from '@/common/helpers/enums';
+import { UserRole, UserStatus } from '../enums';
 
 @InputType({ description: '用户新建模型' })
 export class NewUserInput {

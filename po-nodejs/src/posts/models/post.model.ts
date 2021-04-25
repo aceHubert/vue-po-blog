@@ -1,7 +1,7 @@
 import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
-import { PostStatus, PostCommentStatus } from '@/common/helpers/enums';
 import { PagedResponse, Count } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
+import { PostStatus, PostCommentStatus } from '../enums';
 
 @ObjectType({ description: '文章模型' })
 export class Post {
@@ -14,8 +14,8 @@ export class Post {
   @Field({ description: '内容' })
   content!: string;
 
-  @Field({ nullable: true, description: '摘要' })
-  excerpt?: string;
+  @Field({ description: '摘要' })
+  excerpt!: string;
 
   @Field((type) => PostStatus, { description: '状态' })
   status!: PostStatus;
@@ -25,9 +25,6 @@ export class Post {
 
   @Field((type) => Int, { description: '评论数量' })
   commentCount!: number;
-
-  @Field((type) => ID, { nullable: true, description: 'Parent Id' })
-  parent?: number;
 
   @Field({ description: '修改时间' })
   updatedAt!: Date;

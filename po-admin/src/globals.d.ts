@@ -2,12 +2,25 @@ declare global {
   type Dictionary<T> = Record<string, T>;
   type ValueOf<T> = T[keyof T];
 
-  export type InitParams = {
+  type InitParams = {
     title: string;
     siteUrl: string;
     password: string;
     email: string;
     locale: string;
+  };
+
+  type TreeData = {
+    title: string;
+    key: string;
+    children?: TreeData[];
+  };
+
+  type SimpleModelTreeData = {
+    id: string | number;
+    pId?: string | number;
+    title: string;
+    value: string;
   };
 }
 
