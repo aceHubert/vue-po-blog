@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { OptionAutoload } from '../enums';
 
-@InputType({ description: '配置新建模型' })
+@InputType({ description: 'New option inpupt' })
 export class NewOptionInput {
   @Field({ description: 'Name' })
   optionName!: string;
@@ -12,7 +12,7 @@ export class NewOptionInput {
   @Field((type) => OptionAutoload, {
     nullable: true,
     defaultValue: OptionAutoload.No,
-    description: '程序启动自动加载项',
+    description: 'Autoload at the front-end apps (default: no)',
   })
   autoload?: OptionAutoload;
 }

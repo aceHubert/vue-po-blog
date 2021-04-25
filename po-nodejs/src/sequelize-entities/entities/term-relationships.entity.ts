@@ -18,19 +18,19 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
         primaryKey: true,
-        comment: '对象ID',
+        comment: 'Object id (Post, Link, ect...)',
       },
       taxonomyId: {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
         primaryKey: true,
-        comment: '分类ID',
+        comment: 'Taxonomy id',
       },
       order: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
-        comment: '排序',
+        comment: 'Sort (default: 0)',
       },
     },
     {
@@ -39,7 +39,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       indexes: [{ name: 'taxonomy_id', fields: ['taxonomy_id'] }],
       createdAt: false,
       updatedAt: false,
-      comment: '协议关系表',
+      comment: 'Term relationships',
     },
   );
 };

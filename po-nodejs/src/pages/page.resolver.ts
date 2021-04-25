@@ -19,7 +19,7 @@ import { PostStatusCount, PostDayCount, PostMonthCount, PostYearCount } from '..
 
 @Resolver(() => Page)
 export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMetaInput, PostDataSource, {
-  description: '页面',
+  descriptionName: 'page',
 }) {
   constructor(
     protected readonly moduleRef: ModuleRef,
@@ -29,17 +29,17 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
     super(moduleRef);
   }
 
-  @Query((returns) => Page, { nullable: true, description: '获取页面' })
+  @Query((returns) => Page, { nullable: true, description: 'Get page.' })
   page(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Fields() fields: ResolveTree,
-    @User() requestUser?: JwtPayload,
+    @User() requestUser?: JwtPayloadWithLang,
   ): Promise<Page | null> {
     return this.postDataSource.get(id, PostType.Page, this.getFieldNames(fields.fieldsByTypeName.Page), requestUser);
   }
 
-  @Query((returns) => PagedPage, { description: '获取分页页面列表' })
-  pages(@Args() args: PagedPageArgs, @Fields() fields: ResolveTree, @User() requestUser?: JwtPayload) {
+  @Query((returns) => PagedPage, { description: 'Get paged pages.' })
+  pages(@Args() args: PagedPageArgs, @Fields() fields: ResolveTree, @User() requestUser?: JwtPayloadWithLang) {
     return this.postDataSource.getPaged(
       args,
       PostType.Page,
@@ -49,35 +49,43 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
   }
 
   @Authorized()
-  @Query((returns) => [PostStatusCount], { description: '获取文章按状态分组数量' })
-  pageCountByStatus(@User() requestUser: JwtPayload) {
+  @Query((returns) => [PostStatusCount], {
+    description: "Get page count by status (include other's Pages, depends on your role).",
+  })
+  pageCountByStatus(@User() requestUser: JwtPayloadWithLang) {
     return this.postDataSource.getCountByStatus(PostType.Page, requestUser);
   }
 
-  @Query((returns) => [PostDayCount], { description: '获取文章按天分组数量' })
-  pageCountByDay(@Args('month', { description: '月份，格式：yyyyMM' }) month: string) {
+  @Authorized()
+  @Query((returns) => Int, { description: "Get yourself's page count" })
+  pageCountBySelf(@User() requestUser: JwtPayloadWithLang) {
+    return this.postDataSource.getCountBySelf(PostType.Page, requestUser);
+  }
+
+  @Query((returns) => [PostDayCount], { description: 'Get page count by day.' })
+  pageCountByDay(@Args('month', { description: 'month (format: yyyyMM)' }) month: string) {
     return this.postDataSource.getCountByDay(month, PostType.Page);
   }
 
-  @Query((returns) => [PostMonthCount], { description: '获取文章按月分组数量' })
+  @Query((returns) => [PostMonthCount], { description: 'Get page count by month.' })
   pageCountByMonth(
-    @Args('year', { nullable: true, description: '年份，格式：yyyy' }) year: string,
+    @Args('year', { nullable: true, description: 'year (format: yyyy)' }) year: string,
     @Args('months', {
       type: () => Int,
       nullable: true,
-      description: '从当前日期向前推多少个月，如果year有值则忽略，默认：12',
+      description: 'Latest number of months from current (default: 12)',
     })
     months: number,
   ) {
     return this.postDataSource.getCountByMonth({ year, months }, PostType.Page);
   }
 
-  @Query((returns) => [PostYearCount], { description: '获取文章按年分组数量' })
+  @Query((returns) => [PostYearCount], { description: 'Get page count by year.' })
   pageCountByYear() {
     return this.postDataSource.getCountByYear(PostType.Page);
   }
 
-  @ResolveField((returns) => SimpleUser, { nullable: true, description: '作者' })
+  @ResolveField((returns) => SimpleUser, { nullable: true, description: 'Author info' })
   author(
     @Parent() { author: authorId }: { author: number },
     @Fields() fields: ResolveTree,
@@ -86,20 +94,20 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
   }
 
   @Authorized()
-  @Mutation((returns) => Page, { description: '添加页面' })
+  @Mutation((returns) => Page, { description: 'Create a new page.' })
   createPage(
     @Args('model', { type: () => NewPageInput }) model: NewPageInput,
-    @User() requestUser: JwtPayload,
+    @User() requestUser: JwtPayloadWithLang,
   ): Promise<Page> {
     return this.postDataSource.create(model, PostType.Page, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '修改页面（Trash 状态下不支持修改）' })
+  @Mutation((returns) => Boolean, { description: 'Update page (not allow to update in "trash" status).' })
   updatePage(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Args('model', { type: () => UpdatePageInput }) model: UpdatePageInput,
-    @User() requestUser: JwtPayload,
+    @User() requestUser: JwtPayloadWithLang,
   ): Promise<boolean> {
     return this.postDataSource.update(id, model, requestUser);
   }

@@ -4,7 +4,7 @@ export interface TermMetaAttributes {
   id: number;
   termId: number;
   metaKey: string;
-  metaValue: string | null;
+  metaValue?: string;
 }
 
 export interface TermMetaCreationAttributes extends Optional<TermMetaAttributes, 'id'> {}

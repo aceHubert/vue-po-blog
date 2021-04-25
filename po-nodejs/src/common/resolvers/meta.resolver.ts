@@ -21,7 +21,7 @@ export type Options = {
   /**
    * resolverName 描述， 默认值为: resolverName 或  resolverType.name
    */
-  description?: string;
+  descriptionName?: string;
 };
 
 export function createMetaResolver<
@@ -33,7 +33,7 @@ export function createMetaResolver<
   metaReturnType: Type<MetaReturnType>,
   newMetaInputType: Type<NewMetaInputType>,
   metaDataSourceTypeOrToken: Type<MetaDataSourceType> | string | symbol,
-  { resolverName, description }: Options = {},
+  { resolverName, descriptionName }: Options = {},
 ) {
   @Resolver(() => resolverType, { isAbstract: true })
   abstract class MetaResolver extends BaseResolver implements OnModuleInit {
@@ -53,18 +53,18 @@ export function createMetaResolver<
      */
     @Query((returns) => [metaReturnType!], {
       name: `${lowerFirst(resolverName || resolverType.name)}Metas`,
-      description: `获取 ${description || resolverName || resolverType.name} 元数据`,
+      description: `Get ${descriptionName || resolverName || resolverType.name} metas.`,
     })
     getMetas(
       @Args(`${lowerFirst(resolverName || resolverType.name)}Id`, {
         type: () => ID,
-        description: `${description || resolverName || resolverType.name} Id`,
+        description: `${descriptionName || resolverName || resolverType.name} Id`,
       })
       modelId: number,
       @Args('metaKeys', {
         type: () => [String!],
         nullable: true,
-        description: 'meta keys(如果为null 或集合长度为0时，返回所有 metas)',
+        description: 'meta keys (return all mates if none value is provided)',
       })
       metaKeys: string[] | undefined,
       @Fields() fields: ResolveTree,
@@ -76,10 +76,16 @@ export function createMetaResolver<
       );
     }
 
-    @ResolveField((returns) => [Meta], { description: `${description || resolverName || resolverType.name} 元数据` })
+    @ResolveField((returns) => [Meta], {
+      description: `${descriptionName || resolverName || resolverType.name} metas.`,
+    })
     metas(
       @Parent() { id: modelId }: { id: number },
-      @Args('metaKeys', { type: () => [String!], nullable: true, description: 'Meta keys' })
+      @Args('metaKeys', {
+        type: () => [String!],
+        nullable: true,
+        description: 'Meta keys(return all mates if none value is provided)',
+      })
       metaKeys: string[] | undefined,
       @Fields() fields: ResolveTree,
     ) {
@@ -89,7 +95,7 @@ export function createMetaResolver<
     @Mutation((returns) => metaReturnType, {
       nullable: true,
       name: `create${resolverName || resolverType.name}Meta`,
-      description: `添加 ${description || resolverName || resolverType.name} 元数据`,
+      description: `Create a new ${descriptionName || resolverName || resolverType.name} meta.`,
     })
     createMeta(@Args('model', { type: () => newMetaInputType }) model: NewMetaInputType) {
       return this.metaDataSource.createMeta(model);
@@ -97,22 +103,22 @@ export function createMetaResolver<
 
     @Mutation((returns) => [metaReturnType!], {
       name: `create${resolverName || resolverType.name}Metas`,
-      description: `批量添加 ${description || resolverName || resolverType.name} 元数据`,
+      description: `Create bulk of ${descriptionName || resolverName || resolverType.name} metas.`,
     })
     createMetas(
-      @Args('id', { type: () => ID, description: `${description || resolverName || resolverType.name} Meta Id` })
+      @Args('id', { type: () => ID, description: `${descriptionName || resolverName || resolverType.name} id` })
       id: number,
-      @Args('models', { type: () => [NewMetaInput!] }) models: NewMetaInput[],
+      @Args('metas', { type: () => [NewMetaInput!] }) models: NewMetaInput[],
     ) {
-      return this.metaDataSource.blukCreateMeta(id, models);
+      return this.metaDataSource.bulkCreateMeta(id, models);
     }
 
     @Mutation((returns) => Boolean, {
       name: `update${resolverName || resolverType.name}Meta`,
-      description: `修改 ${description || resolverName || resolverType.name} 元数据`,
+      description: `Update ${descriptionName || resolverName || resolverType.name} meta.`,
     })
     updateMeta(
-      @Args('id', { type: () => ID, description: `${description || resolverName || resolverType.name} Meta Id` })
+      @Args('id', { type: () => ID, description: `${descriptionName || resolverName || resolverType.name} meta id` })
       id: number,
       @Args('metaValue') metaValue: string,
     ) {
@@ -121,12 +127,12 @@ export function createMetaResolver<
 
     @Mutation((returns) => Boolean, {
       name: `update${resolverName || resolverType.name}MetaByKey`,
-      description: `修改 ${description || resolverName || resolverType.name} 元数据`,
+      description: `Update ${descriptionName || resolverName || resolverType.name} meta by meta key.`,
     })
     updateMetaByKey(
       @Args(`${lowerFirst(resolverName || resolverType.name)}Id`, {
         type: () => ID,
-        description: `${description || resolverName || resolverType.name} Id`,
+        description: `${descriptionName || resolverName || resolverType.name} Id`,
       })
       modelId: number,
       @Args('metaKey', { description: 'Meta key' }) metaKey: string,
@@ -137,10 +143,10 @@ export function createMetaResolver<
 
     @Mutation((returns) => Boolean, {
       name: `delete${resolverName || resolverType.name}Meta`,
-      description: `删除 ${description || resolverName || resolverType.name} 元数据`,
+      description: `Delete ${descriptionName || resolverName || resolverType.name} meta`,
     })
     deleteMeta(
-      @Args('id', { type: () => ID, description: `${description || resolverName || resolverType.name} Meta Id` })
+      @Args('id', { type: () => ID, description: `${descriptionName || resolverName || resolverType.name} meta Id` })
       id: number,
     ) {
       return this.metaDataSource.deleteMeta(id);

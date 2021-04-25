@@ -1,7 +1,7 @@
 import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
 import { Meta } from '@/common/models/meta.model';
 
-@ObjectType({ description: '协议模型' })
+@ObjectType({ description: 'Term model (include taxonomy)' })
 export class TermTaxonomy {
   @Field(() => ID, { description: 'Term Id' })
   id!: number;
@@ -9,41 +9,41 @@ export class TermTaxonomy {
   @Field({ description: 'Name' })
   name!: string;
 
-  @Field({ description: '别名' })
+  @Field({ description: 'Slug' })
   slug!: string;
 
-  @Field((type) => Int, { description: '分组' })
+  @Field((type) => Int, { description: 'Group' })
   group!: number;
 
-  @Field(() => ID, { description: 'Taxonomy Id' })
+  @Field(() => ID, { description: 'Taxonomy id' })
   taxonomyId!: number;
 
-  @Field({ description: '类别' })
+  @Field({ description: 'Taxonomy name' })
   taxonomy!: string;
 
-  @Field({ description: '类别说明' })
+  @Field({ description: 'Taxonomy description' })
   description!: string;
 
-  @Field((type) => ID, { description: '父 Id（taxonomyId）' })
+  @Field((type) => ID, { description: 'Parent id（taxonomyId, default: 0）' })
   parentId!: number;
 
-  @Field((type) => Int, { description: '关联对象类别数量' })
+  @Field((type) => Int, { description: 'Count' })
   count!: number;
 }
 
-@ObjectType({ description: '协议关系模型' })
+@ObjectType({ description: 'Term relationship model' })
 export class TermRelationship {
-  @Field(() => ID, { description: 'Post/Link等对象 Id' })
+  @Field(() => ID, { description: 'Object id (Post, Link, etc...)' })
   objectId!: number;
 
-  @Field(() => ID, { description: 'Taxonomy Id' })
+  @Field(() => ID, { description: 'Taxonomy id' })
   taxonomyId!: number;
 
-  @Field((type) => Int, { description: '排序' })
+  @Field((type) => Int, { description: 'Order (default: 0)' })
   order!: number;
 }
 
-@ObjectType({ description: '协议元数据模型' })
+@ObjectType({ description: 'Term meta model' })
 export class TermMeta extends Meta {
   @Field((type) => ID, { description: 'Term Id' })
   termId!: number;

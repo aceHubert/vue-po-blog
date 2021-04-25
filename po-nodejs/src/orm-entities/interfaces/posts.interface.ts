@@ -30,7 +30,7 @@ export interface PostAttributes {
   type: PostType | PostOperateType;
   status: PostStatus | PostOperateStatus;
   order: number;
-  parent?: number;
+  parentId?: number;
   commentStatus: PostCommentStatus;
   commentCount: number;
   updatedAt: Date;
@@ -40,5 +40,5 @@ export interface PostAttributes {
 export interface PostCreationAttributes
   extends Optional<
     PostAttributes,
-    'id' | 'name' | 'type' | 'order' | 'parent' | 'status' | 'commentStatus' | 'commentCount'
+    'id' | 'name' | 'type' | 'order' | 'parentId' | 'status' | 'commentStatus' | 'commentCount'
   > {}

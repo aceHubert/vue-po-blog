@@ -2,36 +2,36 @@ import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { PagedResponse } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
 
-@ObjectType({ description: '媒体模型' })
+@ObjectType({ description: 'Media model' })
 export class Media {
-  @Field(() => ID, { description: 'Id' })
+  @Field(() => ID, { description: 'Media id' })
   id!: number;
 
-  @Field({ description: '文件名' })
+  @Field({ description: 'Finename' })
   fileName!: string;
 
-  @Field({ description: '原始文件名' })
+  @Field({ description: 'Original filename' })
   originalFileName!: string;
 
-  @Field({ description: '文件后缀' })
+  @Field({ description: 'File extention' })
   extention!: string;
 
-  @Field({ description: '媒体类型' })
+  @Field({ description: 'File mime type' })
   mimeType!: string;
 
-  @Field({ description: '相对路径' })
+  @Field({ description: 'File relative path' })
   path!: string;
 
-  @Field({ description: '创建时间' })
+  @Field({ description: 'Creation time' })
   createdAt!: Date;
 }
 
-@ObjectType({ description: '媒体分页模型' })
+@ObjectType({ description: 'Media paged model' })
 export class PagedMedia extends PagedResponse(Media) {
   // other fields
 }
 
-@ObjectType({ description: '媒体元数据模型' })
+@ObjectType({ description: 'Media meta model' })
 export class MediaMeta extends Meta {
   @Field((type) => ID, { description: 'Media Id' })
   mediaId!: number;

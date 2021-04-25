@@ -6,6 +6,6 @@ import { PagedArgs } from '@/common/models/general.model';
  */
 @ArgsType()
 export class PagedLinkArgs extends PagedArgs {
-  @Field({ nullable: true, description: '根据名称模糊搜索' })
-  name?: string;
+  @Field({ nullable: true, description: 'Search keyword (fuzzy searching from name)' })
+  keyword?: string;
 }

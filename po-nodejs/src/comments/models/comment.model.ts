@@ -21,7 +21,7 @@ export class Comment {
   authorUrl?: string;
 
   @Field({ nullable: true, description: '评论人客户端 IP' })
-  authorIP?: string;
+  authorIp?: string;
 
   @Field({ description: '评论内容' })
   content!: string;

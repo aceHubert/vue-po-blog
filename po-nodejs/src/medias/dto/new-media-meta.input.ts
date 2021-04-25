@@ -1,8 +1,8 @@
 import { Field, InputType, ID } from '@nestjs/graphql';
 import { NewMetaInput } from '@/common/models/meta.model';
 
-@InputType({ description: '媒体元数据新建模型' })
+@InputType({ description: 'New media meta input' })
 export class NewMediaMetaInput extends NewMetaInput {
-  @Field(() => ID, { description: 'Media Id' })
+  @Field(() => ID, { description: 'Media id' })
   mediaId!: number;
 }

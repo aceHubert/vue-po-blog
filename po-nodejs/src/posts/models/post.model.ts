@@ -3,67 +3,67 @@ import { PagedResponse, Count } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
 import { PostStatus, PostCommentStatus } from '../enums';
 
-@ObjectType({ description: '文章模型' })
+@ObjectType({ description: 'Post model' })
 export class Post {
-  @Field((type) => ID, { description: 'Id' })
+  @Field((type) => ID, { description: 'Post id' })
   id!: number;
 
-  @Field({ description: '标题' })
+  @Field({ description: 'Title' })
   title!: string;
 
-  @Field({ description: '内容' })
+  @Field({ description: 'Content' })
   content!: string;
 
-  @Field({ description: '摘要' })
+  @Field({ description: 'Excerpt' })
   excerpt!: string;
 
-  @Field((type) => PostStatus, { description: '状态' })
+  @Field((type) => PostStatus, { description: 'Post status' })
   status!: PostStatus;
 
-  @Field((type) => PostCommentStatus, { description: '评论状态' })
+  @Field((type) => PostCommentStatus, { description: 'Comment status' })
   commentStatus!: PostCommentStatus;
 
-  @Field((type) => Int, { description: '评论数量' })
+  @Field((type) => Int, { description: 'Comment count' })
   commentCount!: number;
 
-  @Field({ description: '修改时间' })
+  @Field({ description: 'Update time' })
   updatedAt!: Date;
 
-  @Field({ description: '创建时间' })
+  @Field({ description: 'Creation time' })
   createdAt!: Date;
 }
 
-@ObjectType({ description: '文章分页模型' })
+@ObjectType({ description: 'Paged post model' })
 export class PagedPost extends PagedResponse(Post) {
   // other fields
 }
 
-@ObjectType({ description: '文章按状态分组数量模型' })
+@ObjectType({ description: 'Post count by status' })
 export class PostStatusCount extends Count {
-  @Field((type) => PostStatus, { description: '文章状态' })
+  @Field((type) => PostStatus, { description: 'Post staus' })
   status!: PostStatus;
 }
 
-@ObjectType({ description: `文章按天分组数量模型` })
+@ObjectType({ description: `Post count by day` })
 export class PostDayCount extends Count {
-  @Field({ description: '日期，格式：yyyyMMdd' })
+  @Field({ description: 'Day (format: yyyyMMdd)' })
   day!: string;
 }
 
-@ObjectType({ description: `文章按月分组数量模型` })
+@ObjectType({ description: `Post count by month` })
 export class PostMonthCount extends Count {
-  @Field({ description: '日期，格式：yyyyMM' })
+  @Field({ description: 'Month (format: yyyyMM)' })
   month!: string;
 }
 
-@ObjectType({ description: `文章按年分组数量模型` })
+@ObjectType({ description: `Post count by year` })
 export class PostYearCount extends Count {
-  @Field({ description: '日期，格式：yyyy' })
+  @Field({ description: 'Year (format: yyyy)' })
   year!: string;
 }
 
-@ObjectType({ description: '文章元数据模型' })
+@ObjectType({ description: 'Post meta' })
 export class PostMeta extends Meta {
-  @Field((type) => ID, { description: 'Post Id' })
+  @Field((type) => ID, { description: 'Post id' })
   postId!: number;
 }

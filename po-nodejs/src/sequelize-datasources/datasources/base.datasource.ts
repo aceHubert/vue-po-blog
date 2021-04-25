@@ -153,18 +153,15 @@ export abstract class BaseDataSource implements OnModuleInit {
    * @param requestUser 请求的用户
    * @param callbackOrThrow 当为 function 时如果验证不过参数 error 将是 ForbiddenError，否则为null; 为 ture 时，验证不过则抛出异常
    */
+  protected async hasCapability(capability: UserCapability, requestUser: JwtPayloadWithLang): Promise<boolean>;
   protected async hasCapability(
     capability: UserCapability,
-    requestUser: JwtPayload & { lang?: string },
-  ): Promise<boolean>;
-  protected async hasCapability(
-    capability: UserCapability,
-    requestUser: JwtPayload & { lang?: string },
+    requestUser: JwtPayloadWithLang,
     callbackOrThrow: true | ((error: Error | null) => void),
   ): Promise<void>;
   protected async hasCapability(
     capability: UserCapability,
-    requestUser: JwtPayload & { lang?: string },
+    requestUser: JwtPayloadWithLang,
     callbackOrThrow?: true | ((error: Error | null) => void),
   ): Promise<boolean | void> {
     const userRoleCapabilities =

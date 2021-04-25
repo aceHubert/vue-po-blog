@@ -39,11 +39,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id 用户 Id（null 则查询请求用户，否则需要 EditUsers 权限）
    * @param fields 返回的字段
    */
-  async get(
-    id: number | null,
-    fields: string[],
-    requestUser: JwtPayload & { lang?: string },
-  ): Promise<UserModel | null> {
+  async get(id: number | null, fields: string[], requestUser: JwtPayloadWithLang): Promise<UserModel | null> {
     if (id) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     } else {
@@ -94,13 +90,13 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async getPaged(
     { offset, limit, ...query }: PagedUserArgs,
     fields: string[],
-    requestUser: JwtPayload & { lang?: string },
+    requestUser: JwtPayloadWithLang,
   ): Promise<PagedUserModel> {
     await this.hasCapability(UserCapability.ListUsers, requestUser, true);
 
     const where: WhereOptions<UserAttributes> = {};
     if (query.keyword) {
-      where['loginName'] = {
+      where['displayName'] = {
         [this.Op.like]: `%${query.keyword}%`,
       };
     }
@@ -252,7 +248,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewUserInput, requestUser: JwtPayload & { lang?: string }): Promise<UserModel> {
+  async create(model: NewUserInput, requestUser: JwtPayloadWithLang): Promise<UserModel> {
     await this.hasCapability(UserCapability.CreateUsers, requestUser, true);
 
     if (await this.isLoginNameExists(model.loginName)) {
@@ -297,27 +293,27 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         {
           userId: user.id,
           metaKey: UserMetaKeys.FirstName,
-          metaValue: firstName || null,
+          metaValue: firstName || '',
         },
         {
           userId: user.id,
           metaKey: UserMetaKeys.LastName,
-          metaValue: lastName || null,
+          metaValue: lastName || '',
         },
         {
           userId: user.id,
           metaKey: UserMetaKeys.Avator,
-          metaValue: avator || null,
+          metaValue: avator || '',
         },
         {
           userId: user.id,
           metaKey: UserMetaKeys.Description,
-          metaValue: description || null,
+          metaValue: description || '',
         },
         {
           userId: user.id,
           metaKey: UserMetaKeys.Locale,
-          metaValue: locale || null,
+          metaValue: locale || '',
         },
         {
           userId: user.id,
@@ -366,7 +362,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param model 修改实体模型
    * @param requestUser 请求的用户
    */
-  async update(id: number, model: UpdateUserInput, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async update(id: number, model: UpdateUserInput, requestUser: JwtPayloadWithLang): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
@@ -395,7 +391,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
         if (!isUndefined(userRole)) {
           await this.models.UserMeta.update(
-            { metaValue: userRole === 'none' ? null : userRole },
+            { metaValue: userRole === 'none' ? '' : userRole },
             {
               where: {
                 userId: id,
@@ -408,7 +404,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
         if (!isUndefined(locale)) {
           await this.models.UserMeta.update(
-            { metaValue: locale || null }, // "" => null
+            { metaValue: locale || '' },
             {
               where: {
                 userId: id,
@@ -512,7 +508,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param email Email
    * @param requestUser 请求的用户
    */
-  async updateEmail(id: number, email: string, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async updateEmail(id: number, email: string, requestUser: JwtPayloadWithLang): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
@@ -547,7 +543,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param mobile 手机号码
    * @param requestUser 请求的用户
    */
-  async updateMobile(id: number, mobile: string, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async updateMobile(id: number, mobile: string, requestUser: JwtPayloadWithLang): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
@@ -581,7 +577,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id 用户 Id
    * @param status 状态
    */
-  async updateStatus(id: number, status: UserStatus, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async updateStatus(id: number, status: UserStatus, requestUser: JwtPayloadWithLang): Promise<boolean> {
     await this.hasCapability(UserCapability.EditUsers, requestUser, true);
 
     return await this.models.Users.update(
@@ -603,7 +599,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access capabilities: [DeleteUsers]
    * @param id 用户 Id
    */
-  async delete(id: number, requestUser: JwtPayload & { lang?: string }): Promise<true> {
+  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     if (id === requestUser.id) {
@@ -640,7 +636,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access capabilities: [DeleteUsers]
    * @param id 用户 Id
    */
-  async blukDelete(ids: number[], requestUser: JwtPayload & { lang?: string }): Promise<true> {
+  async bulkDelete(ids: number[], requestUser: JwtPayloadWithLang): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     if (ids.includes(requestUser.id)) {
@@ -718,12 +714,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     let screct: string = '';
     let metaValue: Dictionary<{ name: string; value: string }> = {};
     if (screctMeta) {
-      metaValue = JSON.parse(screctMeta.metaValue);
+      metaValue = screctMeta.metaValue ? JSON.parse(screctMeta.metaValue) : {};
       screct = metaValue[deviceId]?.value;
       if (!screct) {
         const newScrect = this.genNewScrect(userId);
         screctMeta.metaValue = JSON.stringify({
-          ...JSON.parse(screctMeta.metaValue),
+          ...JSON.parse(screctMeta.metaValue || '{}'),
           [deviceId]: { name: device, value: newScrect },
         });
         await screctMeta.save();
@@ -764,7 +760,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     });
     if (screctMeta) {
       screctMeta.metaValue = JSON.stringify({
-        ...JSON.parse(screctMeta.metaValue),
+        ...JSON.parse(screctMeta.metaValue || '{}'),
         [deviceId]: { name: device, value: newScrect },
       });
       await screctMeta.save();
@@ -802,7 +798,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (device) {
       // 退出单个设备
       const deviceId = this.getDeviceId(userId, device);
-      const metaValue = JSON.parse(screctMeta.metaValue);
+      const metaValue = screctMeta.metaValue ? JSON.parse(screctMeta.metaValue) : {};
       if (metaValue[deviceId]) {
         delete metaValue[deviceId];
       }

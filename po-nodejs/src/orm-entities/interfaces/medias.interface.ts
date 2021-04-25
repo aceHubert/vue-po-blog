@@ -11,4 +11,4 @@ export interface MediaAttributes {
   createdAt: Date;
 }
 
-export interface MediaCreationAttributes extends Optional<MediaAttributes, 'id' | 'userId'> {}
+export interface MediaCreationAttributes extends Optional<MediaAttributes, 'id'> {}

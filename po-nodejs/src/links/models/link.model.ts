@@ -2,27 +2,27 @@ import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { PagedResponse } from '@/common/models/general.model';
 import { LinkTarget, LinkVisible } from '../enums';
 
-@ObjectType({ description: '链接模型' })
+@ObjectType({ description: 'Link model' })
 export class Link {
-  @Field(() => ID, { description: 'Id' })
+  @Field(() => ID, { description: 'Link id' })
   id!: number;
 
-  @Field({ description: 'Url' })
+  @Field({ description: 'URL address' })
   url!: string;
 
-  @Field({ description: '名称' })
+  @Field({ description: 'Name' })
   name!: string;
 
-  @Field({ description: '图片' })
+  @Field({ description: 'Image' })
   image!: string;
 
-  @Field((type) => LinkTarget, { description: '打开方式: "_blank","_self"' })
+  @Field((type) => LinkTarget, { description: 'Open window method' })
   target!: LinkTarget;
 
-  @Field({ description: '描述' })
+  @Field({ description: 'Description' })
   description!: string;
 
-  @Field((type) => LinkVisible, { description: '是否显示' })
+  @Field((type) => LinkVisible, { description: 'Visible' })
   visible!: LinkVisible;
 
   @Field({ nullable: true, description: 'rel' })
@@ -32,7 +32,7 @@ export class Link {
   rss?: string;
 }
 
-@ObjectType({ description: '链接分页模型' })
+@ObjectType({ description: 'Link paged model' })
 export class PagedLink extends PagedResponse(Link) {
   // other fields
 }

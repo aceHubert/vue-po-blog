@@ -27,29 +27,29 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
         unique: true,
-        comment: '协议ID',
+        comment: 'Term id',
       },
       taxonomy: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        comment: '分类',
+        comment: 'Taxonomy name',
       },
       description: {
         type: DataTypes.TEXT,
         allowNull: false,
-        comment: '说明',
+        comment: 'Description',
       },
       parentId: {
         type: DataTypes.BIGINT({ unsigned: true }),
         allowNull: false,
         defaultValue: 0,
-        comment: '父ID',
+        comment: 'Parent id (default: 0)',
       },
       count: {
         type: DataTypes.BIGINT,
         allowNull: false,
         defaultValue: 0,
-        comment: '统计数量',
+        comment: 'Count',
       },
     },
     {
@@ -61,7 +61,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       ],
       createdAt: false,
       updatedAt: false,
-      comment: '协议分类表',
+      comment: 'Term taxonomies',
     },
   );
 };

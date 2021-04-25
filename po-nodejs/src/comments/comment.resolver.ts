@@ -3,6 +3,7 @@ import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nest
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
+import { User } from '@/common/decorators/user.decorator';
 import { CommentDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
@@ -15,69 +16,78 @@ import { Comment, PagedComment, CommentMeta } from './models/comment.model';
 
 @Resolver(() => Comment)
 export class CommentResolver extends createMetaResolver(Comment, CommentMeta, NewCommentMetaInput, CommentDataSource, {
-  description: '文章评论',
+  descriptionName: 'comment',
 }) {
   constructor(
     protected readonly moduleRef: ModuleRef,
     private readonly commentDataSource: CommentDataSource,
-    private readonly userDataSoruce: UserDataSource,
+    private readonly userDataSource: UserDataSource,
   ) {
     super(moduleRef);
   }
 
-  @Query((returns) => Comment, { nullable: true, description: '获取评论' })
+  @Query((returns) => Comment, { nullable: true, description: 'Get comment.' })
   comment(@Args('id', { type: () => ID! }) id: number, @Fields() fields: ResolveTree): Promise<Comment | null> {
-    let fixFields = this.getFieldNames(fields.fieldsByTypeName.Comment);
-    if (fixFields.includes('user')) {
-      fixFields = ['userId'].concat(fixFields);
+    const _field = this.getFieldNames(fields.fieldsByTypeName.Comment);
+    // field resolve
+    if (_field.includes('user')) {
+      _field.push('userId');
     }
 
-    return this.commentDataSource.get(id, fixFields);
+    return this.commentDataSource.get(id, _field);
   }
 
-  @Query((returns) => PagedComment, { description: '获取评论分页列表' })
+  @Query((returns) => PagedComment, { description: 'Get paged comments.' })
   comments(@Args() args: PagedCommentArgs, @Fields() fields: ResolveTree) {
-    return this.commentDataSource.getPaged(
-      args,
-      this.getFieldNames(fields.fieldsByTypeName.PagedComment.rows.fieldsByTypeName.Comment),
-    );
+    const _field = this.getFieldNames(fields.fieldsByTypeName.PagedComment.rows.fieldsByTypeName.Comment);
+    // field resolve
+    if (_field.includes('user')) {
+      _field.push('userId');
+    }
+    return this.commentDataSource.getPaged(args, _field);
   }
 
-  @ResolveField((returns) => PagedComment, { description: '回复的评论（分页）' })
+  @ResolveField((returns) => PagedComment, { description: 'Get cascade paged comments.' })
   children(
     @Args() args: PagedCommentChildrenArgs,
     @Parent() { id: parentId }: { id: number },
     @Fields() fields: ResolveTree,
   ) {
-    return this.commentDataSource.getPaged(
-      { ...args, parentId },
-      this.getFieldNames(fields.fieldsByTypeName.PagedComment.rows.fieldsByTypeName.Comment),
-    );
+    const _field = this.getFieldNames(fields.fieldsByTypeName.PagedComment.rows.fieldsByTypeName.Comment);
+    // field resolve
+    if (_field.includes('user')) {
+      _field.push('userId');
+    }
+    return this.commentDataSource.getPaged({ ...args, parentId }, _field);
   }
 
-  @ResolveField((returns) => SimpleUser, { nullable: true, description: '评论用户' })
+  @ResolveField((returns) => SimpleUser, { nullable: true, description: 'User info' })
   user(@Parent() { userId }: { userId: number }, @Fields() fields: ResolveTree): Promise<SimpleUser | null> {
-    return this.userDataSoruce.getSimpleInfo(userId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
+    return this.userDataSource.getSimpleInfo(userId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
   }
 
   @Authorized()
-  @Mutation((returns) => Comment, { description: '添加评论' })
-  createComment(@Args('model', { type: () => NewCommentInput }) model: NewCommentInput): Promise<Comment> {
-    return this.commentDataSource.create(model);
+  @Mutation((returns) => Comment, { description: 'Create a new comment.' })
+  createComment(@Args('model') model: NewCommentInput, @User() requestUser: JwtPayloadWithLang): Promise<Comment> {
+    return this.commentDataSource.create(model, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '修改评论' })
+  @Mutation((returns) => Boolean, { description: 'Update comment' })
   updateComment(
     @Args('id', { type: () => ID, description: 'Comment id' }) id: number,
-    @Args('model', { type: () => UpdateCommentInput }) model: UpdateCommentInput,
+    @Args('model') model: UpdateCommentInput,
+    @User() requestUser: JwtPayloadWithLang,
   ): Promise<boolean> {
-    return this.commentDataSource.update(id, model);
+    return this.commentDataSource.update(id, model, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '删除评论' })
-  deleteComment(@Args('id', { type: () => ID, description: 'Comment id' }) id: number): Promise<boolean> {
-    return this.commentDataSource.delete(id);
+  @Mutation((returns) => Boolean, { description: 'Delete comment permanently.' })
+  deleteComment(
+    @Args('id', { type: () => ID, description: 'Comment id' }) id: number,
+    @User() requestUser: JwtPayloadWithLang,
+  ): Promise<boolean> {
+    return this.commentDataSource.delete(id, requestUser);
   }
 }

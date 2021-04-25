@@ -9,13 +9,18 @@ export interface MediaMetaModel extends MetaModel {
 }
 
 export interface PagedMediaArgs extends PagedArgs {
+  /**
+   * 根据 filename 模糊查询
+   */
+  keyword?: string;
   extention?: string;
   mimeType?: string;
 }
 
 export interface PagedMediaModel extends Paged<MediaModel> {}
 
-export interface NewMediaInput extends Omit<MediaCreationAttributes, 'id' | 'createdAt'> {
+export interface NewMediaInput
+  extends Pick<MediaCreationAttributes, 'fileName' | 'originalFileName' | 'extention' | 'mimeType' | 'path'> {
   /**
    * metaKey 不可以重复
    */

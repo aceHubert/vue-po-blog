@@ -1,26 +1,23 @@
-import { Field, InputType, ID } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { NewMetaInput } from '@/common/models/meta.model';
 
-@InputType({ description: '媒体新建模型' })
+@InputType({ description: 'New media input' })
 export class NewMediaInput {
-  @Field({ description: '文件名' })
+  @Field({ description: 'Filename' })
   fileName!: string;
 
-  @Field({ description: '原始文件名' })
+  @Field({ description: 'Original filename' })
   originalFileName!: string;
 
-  @Field({ description: '文件后缀' })
+  @Field({ description: 'File extention' })
   extention!: string;
 
-  @Field({ description: '媒体类型' })
+  @Field({ description: 'File mime type' })
   mimeType!: string;
 
-  @Field({ description: '相对路径' })
+  @Field({ description: 'File relative path' })
   path!: string;
 
-  @Field(() => ID, { nullable: true, description: '用户 Id' })
-  userId?: number;
-
-  @Field((type) => [NewMetaInput], { nullable: true, description: '媒体元数据' })
+  @Field((type) => [NewMetaInput], { nullable: true, description: 'Media metas' })
   metas?: NewMetaInput[];
 }

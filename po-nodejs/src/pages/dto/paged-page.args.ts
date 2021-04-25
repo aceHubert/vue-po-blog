@@ -7,15 +7,15 @@ import { PostStatus } from '@/posts/enums';
  */
 @ArgsType()
 export class PagedPageArgs extends PagedArgs {
-  @Field({ nullable: true, description: '搜索关键字（根据标题模糊查询）' })
+  @Field({ nullable: true, description: 'Search keyword (fuzzy searching from title)' })
   keyword?: string;
 
-  @Field({ nullable: true, description: '文章作者' })
+  @Field({ nullable: true, description: 'Author id' })
   author?: number;
 
-  @Field((type) => PostStatus, { nullable: true, description: '页面状态' })
+  @Field((type) => PostStatus, { nullable: true, description: 'Page status' })
   status?: PostStatus;
 
-  @Field({ nullable: true, description: '日期，格式：yyyy-MM' })
+  @Field({ nullable: true, description: 'Date (format: yyyyMM)' })
   date?: string;
 }

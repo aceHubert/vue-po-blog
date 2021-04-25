@@ -105,7 +105,7 @@ export class OptionDataSource extends BaseDataSource {
    * 新建 Options
    * @param model 新建模型
    */
-  async create(model: NewOptionInput, requestUser: JwtPayload & { lang?: string }): Promise<OptionModel> {
+  async create(model: NewOptionInput, requestUser: JwtPayloadWithLang): Promise<OptionModel> {
     await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
 
     if (await this.isExists(model.optionName)) {
@@ -126,7 +126,7 @@ export class OptionDataSource extends BaseDataSource {
    * @param id Options id
    * @param model 修改实体模型
    */
-  async update(id: number, model: UpdateOptionInput, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async update(id: number, model: UpdateOptionInput, requestUser: JwtPayloadWithLang): Promise<boolean> {
     await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
 
     const result = await this.models.Options.update(model, {
@@ -140,7 +140,7 @@ export class OptionDataSource extends BaseDataSource {
    * 删除 Options
    * @param id Option Id
    */
-  async delete(id: number, requestUser: JwtPayload & { lang?: string }): Promise<boolean> {
+  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
     await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
 
     const result = await this.models.Options.destroy({

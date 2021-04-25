@@ -31,6 +31,9 @@ export interface UserMetaModel extends MetaModel {
  * 用户分页查询条件
  */
 export interface PagedUserArgs extends PagedArgs {
+  /**
+   * 根据 displayName 模糊查询
+   */
   keyword?: string;
   status?: UserStatus;
   /**

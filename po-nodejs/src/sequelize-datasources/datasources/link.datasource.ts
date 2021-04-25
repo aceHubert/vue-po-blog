@@ -1,5 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
+import { UserCapability } from '@/common/helpers/user-capability';
 import { BaseDataSource } from './base.datasource';
 
 // Types
@@ -18,14 +19,14 @@ export class LinkDataSource extends BaseDataSource {
   }
 
   getPaged({ offset, limit, ...query }: PagedLinkArgs, fields: string[]): Promise<PagedLinkModel> {
-    const { name, ...restQuery } = query;
+    const { keyword, ...restQuery } = query;
     return this.models.Links.findAndCountAll({
       attributes: this.filterFields(fields, this.models.Links),
       where: {
-        ...(name
+        ...(keyword
           ? {
               name: {
-                [this.Op.like]: `%${name}%`,
+                [this.Op.like]: `%${keyword}%`,
               },
             }
           : null),
@@ -44,29 +45,58 @@ export class LinkDataSource extends BaseDataSource {
    * 添加链接
    * @param model 添加实体模型
    */
-  async create(model: NewLinkInput): Promise<LinkModel> {
-    const link = await this.models.Links.create(model);
+  async create(model: NewLinkInput, requestUser: JwtPayloadWithLang): Promise<LinkModel> {
+    const link = await this.models.Links.create({
+      ...model,
+      userId: requestUser.id,
+    });
     return link.toJSON() as LinkModel;
   }
 
   /**
    * 修改链接
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [ManageLinks (if not yours)]
    * @param id Link Id
    * @param model 修改实体模型
    */
-  update(id: number, model: UpdateLinkInput): Promise<boolean> {
-    return this.models.Links.update(model, {
-      where: { id },
-    }).then(([count]) => count > 0);
+  async update(id: number, model: UpdateLinkInput, requestUser: JwtPayloadWithLang): Promise<boolean> {
+    const link = await this.models.Links.findByPk(id, {
+      attributes: ['userId'],
+    });
+    if (link) {
+      if (link.userId !== requestUser.id) {
+        await this.hasCapability(UserCapability.ManageLinks, requestUser, true);
+      }
+
+      await this.models.Links.update(model, {
+        where: { id },
+      });
+      return true;
+    }
+    return false;
   }
 
   /**
    * 根据 Id 删除
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [ManageLinks (if not yours)]
    * @param id Link Id
    */
-  delete(id: number): Promise<boolean> {
-    return this.models.Links.destroy({
-      where: { id },
-    }).then((count) => count > 0);
+  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
+    const link = await this.models.Links.findByPk(id);
+    if (link) {
+      if (link.userId !== requestUser.id) {
+        await this.hasCapability(UserCapability.ManageLinks, requestUser, true);
+      }
+
+      await link.destroy();
+      return true;
+    }
+    return false;
   }
 }

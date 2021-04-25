@@ -6,10 +6,10 @@ import { PagedArgs } from '@/common/models/general.model';
  */
 @ArgsType()
 export class PagedCommentArgs extends PagedArgs {
-  @Field((type) => ID, { description: '文章 Id' })
+  @Field((type) => ID, { description: 'Post id' })
   postId!: number;
 
-  @Field((type) => ID, { nullable: true, defaultValue: 0, description: '父 Id' })
+  @Field((type) => ID, { nullable: true, defaultValue: 0, description: 'Pagent id' })
   parentId!: number;
 }
 

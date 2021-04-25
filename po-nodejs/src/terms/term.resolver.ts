@@ -18,7 +18,7 @@ import { Authorized } from '~/common/decorators/authorized.decorator';
 @Resolver(() => TermTaxonomy)
 export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, NewTermMetaInput, TermDataSource, {
   resolverName: 'Term',
-  description: 'Term',
+  descriptionName: 'term',
 }) {
   constructor(protected readonly moduleRef: ModuleRef, private readonly termDataSource: TermDataSource) {
     super(moduleRef);
@@ -48,7 +48,7 @@ export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, New
     );
   }
 
-  @ResolveField((returns) => [TermTaxonomy!], { description: 'Get term children (cascade).' })
+  @ResolveField((returns) => [TermTaxonomy!], { description: 'Get cascade terms.' })
   children(
     @Parent() { taxonomyId: parentId }: { taxonomyId: number },
     @Args('group', { type: () => Int, nullable: true, description: 'group' }) group: number,
@@ -63,19 +63,19 @@ export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, New
   }
 
   @Authorized()
-  @Mutation((returns) => TermTaxonomy, { description: 'Create new term.' })
+  @Mutation((returns) => TermTaxonomy, { description: 'Create a new term.' })
   createTerm(
     @Args('model', { type: () => NewTermInput }) model: NewTermInput,
-    @User() requestUser: JwtPayload,
+    @User() requestUser: JwtPayloadWithLang,
   ): Promise<TermTaxonomy> {
     return this.termDataSource.create(model, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => TermRelationship, { description: 'Create new term relationship.' })
+  @Mutation((returns) => TermRelationship, { description: 'Create a new term relationship.' })
   createTermRelationship(
     @Args('model', { type: () => NewTermRelationshipInput }) model: NewTermRelationshipInput,
-    @User() requestUser: JwtPayload,
+    @User() requestUser: JwtPayloadWithLang,
   ): Promise<TermRelationship> {
     return this.termDataSource.createRelationship(model, requestUser);
   }
@@ -90,23 +90,23 @@ export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, New
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '移除协议关系' })
-  deleteTermRelationship(
-    @Args('objectId', { type: () => ID, description: '关联对象 id' }) objectId: number,
-    @Args('taxonomyId', { type: () => ID, description: '类别 id' }) taxonomyId: number,
-  ): Promise<boolean> {
-    return this.termDataSource.deleteRelationship(objectId, taxonomyId);
-  }
-
-  @Authorized()
-  @Mutation((returns) => Boolean, { description: '移除协议(包括相关联协议关系)' })
+  @Mutation((returns) => Boolean, { description: 'Delete term permanently (include term relationship).' })
   deleteTerm(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<boolean> {
     return this.termDataSource.delete(id);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '批量移除协议(包括相关联协议关系)' })
-  blukRemoveTerms(@Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[]): Promise<boolean> {
-    return this.termDataSource.blukDelete(ids);
+  @Mutation((returns) => Boolean, { description: 'Delete termspermanently (include term relationship).' })
+  bulkDeleteTerms(@Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[]): Promise<boolean> {
+    return this.termDataSource.bulkDelete(ids);
+  }
+
+  @Authorized()
+  @Mutation((returns) => Boolean, { description: 'Delete term relationship permanently.' })
+  deleteTermRelationship(
+    @Args('objectId', { type: () => ID, description: 'Object id' }) objectId: number,
+    @Args('taxonomyId', { type: () => ID, description: 'Taxonomy id' }) taxonomyId: number,
+  ): Promise<boolean> {
+    return this.termDataSource.deleteRelationship(objectId, taxonomyId);
   }
 }

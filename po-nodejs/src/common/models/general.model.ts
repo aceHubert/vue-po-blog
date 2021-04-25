@@ -4,10 +4,10 @@ import { GraphQLScalarType } from 'graphql';
 
 @ArgsType()
 export class PagedArgs {
-  @Field((type) => Int, { nullable: true, defaultValue: 0, description: '分页偏移量' })
+  @Field((type) => Int, { nullable: true, defaultValue: 0, description: 'Page offset' })
   offset!: number;
 
-  @Field((type) => Int, { nullable: true, defaultValue: 10, description: '页大小' })
+  @Field((type) => Int, { nullable: true, defaultValue: 10, description: 'Page size' })
   limit!: number;
 
   // get startIndex(): number {
@@ -48,8 +48,8 @@ export function PagedResponse<TItemsFieldValue>(
   return PagedClass;
 }
 
-@ObjectType({ isAbstract: true, description: '分组数量模型' })
+@ObjectType({ isAbstract: true, description: 'Count model' })
 export abstract class Count {
-  @Field((type) => Int, { description: '分组数量' })
+  @Field((type) => Int, { description: 'count' })
   count!: number;
 }

@@ -1,28 +1,25 @@
-import { Field, InputType, ID } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { LinkTarget, LinkVisible } from '../enums';
 
-@InputType({ description: '链接新建模型' })
+@InputType({ description: 'New link input' })
 export class NewLinkInput {
-  @Field({ description: 'Url' })
+  @Field({ description: 'URL address' })
   url!: string;
 
-  @Field({ description: '名称' })
+  @Field({ description: 'Name' })
   name!: string;
 
-  @Field({ description: '图片' })
+  @Field({ description: 'Image' })
   image!: string;
 
-  @Field((type) => LinkTarget, { description: '打开方式: "_blank","_self"' })
+  @Field((type) => LinkTarget, { description: 'Open window method' })
   target!: LinkTarget;
 
-  @Field({ description: '描述' })
+  @Field({ description: 'Description' })
   description!: string;
 
-  @Field((type) => LinkVisible, { nullable: true, description: '是否显示' })
+  @Field((type) => LinkVisible, { nullable: true, description: 'Visible' })
   visible?: LinkVisible;
-
-  @Field(() => ID, { nullable: true, description: '用户 Id' })
-  userId?: number;
 
   @Field({ nullable: true, description: 'rel' })
   rel?: string;

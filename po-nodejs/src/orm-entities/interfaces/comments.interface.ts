@@ -7,7 +7,7 @@ export interface CommentAttributes {
   author: string;
   authorEmail: string;
   authorUrl: string;
-  authorIP: string;
+  authorIp: string;
   content: string;
   approved: boolean;
   edited: boolean;
@@ -22,5 +22,5 @@ export interface CommentAttributes {
 export interface CommentCreationAttributes
   extends Optional<
     CommentAttributes,
-    'id' | 'authorEmail' | 'authorUrl' | 'authorIP' | 'approved' | 'edited' | 'type' | 'agent' | 'parentId' | 'userId'
+    'id' | 'authorEmail' | 'authorUrl' | 'authorIp' | 'approved' | 'edited' | 'type' | 'agent' | 'parentId' | 'userId'
   > {}

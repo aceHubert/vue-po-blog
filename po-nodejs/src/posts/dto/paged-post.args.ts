@@ -7,27 +7,40 @@ import { PostStatus } from '../enums';
  */
 @ArgsType()
 export class PagedPostArgs extends PagedArgs {
-  @Field({ nullable: true, description: '搜索关键字（根据标题模糊查询）' })
+  @Field({ nullable: true, description: 'Search keyword (fuzzy searching from title)' })
   keyword?: string;
 
-  @Field({ nullable: true, description: '文章作者' })
+  @Field({ nullable: true, description: 'Author id' })
   author?: number;
 
-  @Field((type) => PostStatus, { nullable: true, description: '文章状态(如果为空，则搜索状态为非 Trash 的文章)' })
+  @Field((type) => PostStatus, {
+    nullable: true,
+    description: 'Post status (search for all not "trash" status posts if none value is provided)',
+  })
   status?: PostStatus;
 
-  @Field((type) => ID, { nullable: true, description: '类别 Id（termId），不可和标签同时出现在过滤条件' })
+  @Field((type) => ID, {
+    nullable: true,
+    description: 'Category id (termId, categoryId and tagId can not be in the condition at the same time)',
+  })
   categoryId?: number;
 
-  @Field({ nullable: true, description: '类别名称(不可和 categoryId 同时出现)' })
+  @Field({
+    nullable: true,
+    description: 'Category name (categoryId and categoryName can not be in the condition at the same time)',
+  })
   categoryName?: string;
 
-  @Field((type) => ID, { nullable: true, description: '标签 Id（termId），不可和类别同时出现在过滤条件，分类优先' })
+  @Field((type) => ID, {
+    nullable: true,
+    description:
+      'Tag id (termId, categoryId and tagId can not be in the condition at the same time. if so, categoryId will be the priority)',
+  })
   tagId?: number;
 
-  @Field({ nullable: true, description: '标签名称(不可和 tagId 同时出现)' })
+  @Field({ nullable: true, description: 'Tag name (tagId and tagName can not be in the condition at the same time)' })
   tagName?: string;
 
-  @Field({ nullable: true, description: '日期，格式：yyyy(年)、yyyyMM(月)、yyyyMMdd(日)' })
+  @Field({ nullable: true, description: 'Date (format: yyyy(year)、yyyyMM(month)、yyyyMMdd(day)' })
   date?: string;
 }

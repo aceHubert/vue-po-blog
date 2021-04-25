@@ -10,6 +10,10 @@ declare global {
     createdAt: Date;
   };
 
+  export type JwtPayloadWithLang = JwtPayload & {
+    lang?: string;
+  };
+
   export type GqlContext = Context<{
     user: JwtPayload | null;
   }>;

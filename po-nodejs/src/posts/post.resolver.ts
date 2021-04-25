@@ -28,7 +28,7 @@ import {
 
 @Resolver(() => Post)
 export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMetaInput, PostDataSource, {
-  description: '文章',
+  descriptionName: 'post',
 }) {
   constructor(
     protected readonly moduleRef: ModuleRef,
@@ -39,17 +39,17 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     super(moduleRef);
   }
 
-  @Query((returns) => Post, { nullable: true, description: '获取文章' })
+  @Query((returns) => Post, { nullable: true, description: 'Get post.' })
   post(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Fields() fields: ResolveTree,
-    @User() requestUser?: JwtPayload,
+    @User() requestUser?: JwtPayloadWithLang,
   ): Promise<Post | null> {
     return this.postDataSource.get(id, PostType.Post, this.getFieldNames(fields.fieldsByTypeName.Post), requestUser);
   }
 
-  @Query((returns) => PagedPost, { description: '获取分页文章列表' })
-  posts(@Args() args: PagedPostArgs, @Fields() fields: ResolveTree, @User() requestUser?: JwtPayload) {
+  @Query((returns) => PagedPost, { description: 'Get paged posts.' })
+  posts(@Args() args: PagedPostArgs, @Fields() fields: ResolveTree, @User() requestUser?: JwtPayloadWithLang) {
     return this.postDataSource.getPaged(
       args,
       PostType.Post,
@@ -58,7 +58,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     );
   }
 
-  @ResolveField((returns) => SimpleUser, { nullable: true, description: '作者' })
+  @ResolveField((returns) => SimpleUser, { nullable: true, description: 'Author info' })
   author(
     @Parent() { author: authorId }: { author: number },
     @Fields() fields: ResolveTree,
@@ -66,11 +66,15 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
   }
 
-  @ResolveField((returns) => [TermTaxonomy!], { description: '分类' })
+  @ResolveField((returns) => [TermTaxonomy!], { description: 'Categories' })
   categories(
-    @Args('parentId', { type: () => ID, nullable: true, description: '父Id（没有值则查询所有，0是根目录）' })
+    @Args('parentId', {
+      type: () => ID,
+      nullable: true,
+      description: 'Parent id (it will search for all if none value is provided, 0 is root parent id)',
+    })
     parentId: number | undefined,
-    @Args('desc', { type: () => Boolean, nullable: true, description: '排序（默认正序排列）' })
+    @Args('desc', { type: () => Boolean, nullable: true, description: 'Sort (default: asc)' })
     desc: boolean | undefined,
     @Parent() { id }: { id: number },
     @Fields() fields: ResolveTree,
@@ -81,9 +85,9 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     );
   }
 
-  @ResolveField((returns) => [TermTaxonomy!], { description: '分类' })
+  @ResolveField((returns) => [TermTaxonomy!], { description: 'Tags' })
   tags(
-    @Args('desc', { type: () => Boolean, nullable: true, description: '排序（默认正序排列）' })
+    @Args('desc', { type: () => Boolean, nullable: true, description: 'Sort (default: asc)' })
     desc: boolean | undefined,
     @Parent() { id }: { id: number },
     @Fields() fields: ResolveTree,
@@ -95,42 +99,44 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   }
 
   @Authorized()
-  @Query((returns) => [PostStatusCount], { description: '获取文章按状态分组数量' })
-  postCountByStatus(@User() requestUser: JwtPayload) {
+  @Query((returns) => [PostStatusCount], {
+    description: "Get post count by status (include other's Posts, depends on your role).",
+  })
+  postCountByStatus(@User() requestUser: JwtPayloadWithLang) {
     return this.postDataSource.getCountByStatus(PostType.Post, requestUser);
   }
 
   @Authorized()
-  @Query((returns) => Int, { description: '获取我的文章数量' })
-  postCountBySelf(@User() requestUser: JwtPayload) {
+  @Query((returns) => Int, { description: "Get yourself's post count" })
+  postCountBySelf(@User() requestUser: JwtPayloadWithLang) {
     return this.postDataSource.getCountBySelf(PostType.Post, requestUser);
   }
 
-  @Query((returns) => [PostDayCount], { description: '获取文章按天分组数量' })
-  postCountByDay(@Args('month', { description: '月份，格式：yyyyMM' }) month: string) {
+  @Query((returns) => [PostDayCount], { description: 'Get post count by day.' })
+  postCountByDay(@Args('month', { description: 'Month (format：yyyyMM)' }) month: string) {
     return this.postDataSource.getCountByDay(month, PostType.Post);
   }
 
-  @Query((returns) => [PostMonthCount], { description: '获取文章按月分组数量' })
+  @Query((returns) => [PostMonthCount], { description: 'Get post count by month.' })
   postCountByMonth(
-    @Args('year', { type: () => String, nullable: true, description: '年份，格式：yyyy' }) year: string | undefined,
+    @Args('year', { type: () => String, nullable: true, description: 'Year, (format：yyyy)' }) year: string | undefined,
     @Args('months', {
       type: () => Int,
       nullable: true,
-      description: '从当前日期向前推多少个月(如果year有值则忽略)，默认：12',
+      description: 'Latest number of months from current (default: 12)',
     })
     months: number | undefined,
   ) {
     return this.postDataSource.getCountByMonth({ year, months }, PostType.Post);
   }
 
-  @Query((returns) => [PostYearCount], { description: '获取文章按年分组数量' })
+  @Query((returns) => [PostYearCount], { description: 'Get post count by year.' })
   postCountByYear() {
     return this.postDataSource.getCountByYear(PostType.Post);
   }
 
   @Authorized()
-  @Mutation((returns) => Post, { description: '添加文章' })
+  @Mutation((returns) => Post, { description: 'Create a new post.' })
   createPost(
     @Args('model', { type: () => NewPostInput }) model: NewPostInput,
     @User() requestUser: JwtPayload,
@@ -139,7 +145,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '修改文章（Trash 状态下不支持修改）' })
+  @Mutation((returns) => Boolean, { description: 'Update post (not allow to update in "trash" status).' })
   updatePost(
     @Args('id', { type: () => ID, description: 'Post id/副本 Post id' }) id: number,
     @Args('model', { type: () => UpdatePostInput }) model: UpdatePostInput,
@@ -149,40 +155,40 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   }
 
   // Page 状共用以下方法
-  @Mutation((returns) => Boolean, { description: '修改文章或页面状态（Trash 状态下不支持修改）' })
-  updatePostOrPageStatus(
-    @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
-    @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
+  @Mutation((returns) => Boolean, { description: 'Update post stauts (not allow to update in "trash" status)' })
+  updatePostStatus(
+    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
+    @Args('status', { type: () => PostStatus, description: 'status' }) status: PostStatus,
     @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.updateStatus(id, status, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '批量修改文章或页面状态（Trash 状态下不支持修改）' })
-  blukModifyPostOrPageStatus(
+  @Mutation((returns) => Boolean, {
+    description: 'Update bulk of posts status (not allow to update in "trash" status)',
+  })
+  bulkModifyPostStatus(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
     @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
     @User() requestUser: JwtPayload,
   ): Promise<boolean> {
-    return this.postDataSource.blukUpdateStatus(ids, status, requestUser);
+    return this.postDataSource.bulkUpdateStatus(ids, status, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '修改文章或页面评论状态' })
-  updatePostOrPageCommentStatus(
-    @Args('id', { type: () => ID, description: 'Post id/副本 Post id' }) id: number,
-    @Args('status', { type: () => PostCommentStatus, description: '评论状态' }) status: PostCommentStatus,
+  @Mutation((returns) => Boolean, { description: 'Update comment status' })
+  updatePostCommentStatus(
+    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
+    @Args('status', { type: () => PostCommentStatus, description: 'Comment status' }) status: PostCommentStatus,
     @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.updateCommentStatus(id, status, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, {
-    description: '重置文章或页面成移入到 Trash 之前状态（历史状态不存在或数据结构异常，会造成重置不成功）',
-  })
-  restorePostOrPage(
+  @Mutation((returns) => Boolean, { description: 'Restore post from trash' })
+  restorePost(
     @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
     @User() requestUser: JwtPayload,
   ): Promise<boolean> {
@@ -190,31 +196,29 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, {
-    description: '批量重置文章或页面成移入到 Trash 之前状态',
-  })
-  blukRestorePostOrPage(
+  @Mutation((returns) => Boolean, { description: 'Restore bulk of post from trash' })
+  bulkRestorePost(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
     @User() requestUser: JwtPayload,
   ): Promise<boolean> {
-    return this.postDataSource.blukRestore(ids, requestUser);
+    return this.postDataSource.bulkRestore(ids, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '删除文章或页面（非 Trash 状态下无法删除）' })
-  deletePostOrPage(
-    @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
+  @Mutation((returns) => Boolean, { description: 'Delete post permanently (must be in "trash" status).' })
+  deletePost(
+    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @User() requestUser: JwtPayload,
   ): Promise<boolean> {
     return this.postDataSource.delete(id, requestUser);
   }
 
   @Authorized()
-  @Mutation((returns) => Boolean, { description: '删除文章或页面（非 Trash 状态下无法删除）' })
-  blukRemovePostOrPage(
-    @Args('ids', { type: () => [ID!], description: 'Post/Page id' }) ids: number[],
+  @Mutation((returns) => Boolean, { description: 'Delete bulk of posts permanently (must be in "trash" status).' })
+  bulkDeletePost(
+    @Args('ids', { type: () => [ID!], description: 'Post ids' }) ids: number[],
     @User() requestUser: JwtPayload,
   ): Promise<boolean> {
-    return this.postDataSource.blukDelete(ids, requestUser);
+    return this.postDataSource.bulkDelete(ids, requestUser);
   }
 }

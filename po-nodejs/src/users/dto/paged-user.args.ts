@@ -10,7 +10,7 @@ import { PagedUserArgs as IPagedUserArgs } from '@/sequelize-datasources/interfa
  */
 @ArgsType()
 export class PagedUserArgs extends PagedArgs implements IPagedUserArgs {
-  @Field({ nullable: true, description: 'Search keyword（from loginName）' })
+  @Field({ nullable: true, description: 'Search keyword (fuzzy searching from display name)' })
   keyword?: string;
 
   @Field((type) => UserStatus, { nullable: true, description: 'User status' })

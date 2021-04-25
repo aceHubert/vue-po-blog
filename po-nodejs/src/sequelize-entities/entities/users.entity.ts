@@ -44,7 +44,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        comment: '登录账号',
+        comment: 'Login name',
       },
       loginPwd: {
         type: DataTypes.STRING,
@@ -52,46 +52,46 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         set(value: string) {
           this.setDataValue('loginPwd', md5(value));
         },
-        comment: '登录密码',
+        comment: 'Login password',
       },
       niceName: {
         type: DataTypes.STRING(50),
         allowNull: false,
         unique: true,
-        comment: '友好显示在链接中等',
+        comment: 'Nice name (display at the URL address, must be unique)',
       },
       displayName: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        comment: '来前台显示出来的用户名字',
+        comment: 'Display name (display at the front-end apps)',
       },
       mobile: {
         type: DataTypes.STRING(50),
         unique: true,
-        comment: '手机号码',
+        comment: 'Mobile number',
       },
       email: {
         type: DataTypes.STRING(100),
         allowNull: false,
         unique: true,
-        comment: '邮箱',
+        comment: 'Email address',
       },
       url: {
         type: DataTypes.STRING(200),
-        comment: '客户端URL',
+        comment: 'Home URL address',
       },
       status: {
         type: DataTypes.TINYINT,
         allowNull: false,
         defaultValue: 1,
-        comment: '用户状态，0：禁用；1：启用',
+        comment: 'User status (0 for disabled or 1 for enable, default: 1)',
       },
     },
     {
       sequelize,
       tableName: `${prefix}users`,
       indexes: [{ name: 'nice_name', fields: ['nice_name'] }],
-      comment: '用户表',
+      comment: 'Users',
     },
   );
 };
