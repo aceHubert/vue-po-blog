@@ -59,4 +59,12 @@ export const associate: TableAssociateFunc = function associate(models) {
     constraints: false,
   });
   models.TermMeta.belongsTo(models.Terms, { foreignKey: 'termId', targetKey: 'id', constraints: false });
+
+  // Terms.id <--> TermTaxonomy.termId
+  models.Terms.hasOne(models.TermTaxonomy, {
+    foreignKey: 'termId',
+    sourceKey: 'id',
+    constraints: false,
+  });
+  models.TermTaxonomy.belongsTo(models.Terms, { foreignKey: 'termId', targetKey: 'id', constraints: false });
 };

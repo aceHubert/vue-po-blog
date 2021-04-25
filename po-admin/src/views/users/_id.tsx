@@ -1,7 +1,7 @@
 import { Vue, Component } from 'nuxt-property-decorator';
 import { camelCase } from 'lodash-es';
 import { gql, formatError } from '@/includes/functions';
-import { UserCapability } from '@/includes/datas';
+import { UserCapability } from '@/includes/datas/enums';
 import EditForm from './modules/EditForm';
 
 // Types
@@ -10,7 +10,6 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
   /* <router>
 {
   name:'users-edit',
-  path:':id/edit',
   meta:{
     title: 'Edit',
   }

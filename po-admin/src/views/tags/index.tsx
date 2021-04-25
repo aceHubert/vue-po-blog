@@ -2,7 +2,7 @@ import { Vue, Component, Watch, Ref, InjectReactive } from 'nuxt-property-decora
 import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm, TermEditForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { TermTaxonomy, UserCapability } from '@/includes/datas';
+import { TermTaxonomy, UserCapability } from '@/includes/datas/enums';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
@@ -27,7 +27,7 @@ enum BlukActions {
 @Component({
   name: 'Tags',
   meta: {
-    capabilities: [UserCapability.ManageTags],
+    capabilities: [UserCapability.EditPosts],
   },
 })
 export default class Tags extends Vue {
@@ -37,6 +37,7 @@ export default class Tags extends Vue {
   // type 定义
   selectedRowKeys!: string[];
   itemCount!: number;
+  searchQuery!: TermQuery;
   blukApplying!: boolean;
   formModelShown!: boolean;
   editModel?: Term;
@@ -45,6 +46,7 @@ export default class Tags extends Vue {
     return {
       selectedRowKeys: [],
       itemCount: 0,
+      searchQuery: {},
       blukApplying: false,
       formModelShown: false,
       editModel: undefined,
@@ -65,7 +67,7 @@ export default class Tags extends Vue {
   }
 
   // 批量操作
-  get blukActionOptions(): BlukAcitonOption[] {
+  get blukActionOptions(): BlukAcitonOption<BlukActions>[] {
     return [
       {
         value: BlukActions.Delete,
@@ -85,9 +87,6 @@ export default class Tags extends Vue {
 
   // 加载 table 数据
   loadData() {
-    const query: TermQuery = {
-      keyword: this.$route.query['keyword'] as string,
-    };
     return this.graphqlClient
       .query<{ terms: Term[] }, TermQuery>({
         query: gql`
@@ -101,7 +100,9 @@ export default class Tags extends Vue {
             }
           }
         `,
-        variables: query,
+        variables: {
+          ...this.searchQuery,
+        },
       })
       .then(({ data }) => {
         this.itemCount = data.terms.length;
@@ -174,12 +175,13 @@ export default class Tags extends Vue {
   }
 
   // keyword 的搜索按纽
-  handleSearch() {
+  handleSearch(query: { keyword?: string }) {
+    Object.assign(this.searchQuery, query);
     this.refreshTable();
   }
 
   // 批量操作
-  handleBlukApply(action: string | number) {
+  handleBlukApply(action: BlukActions) {
     if (!this.selectedRowKeys.length) {
       this.$message.warn({ content: this.$tv('tag.tips.bulkRowReqrired', 'Please choose a row!') as string });
       return;
@@ -187,8 +189,8 @@ export default class Tags extends Vue {
     if (action === BlukActions.Delete) {
       this.$confirm({
         content: this.$tv('tag.btnTips.blukDeletePopContent', 'Do you really want to delete these tags?'),
-        okText: this.$tv('tag.btnText.deletePopOkText', 'Ok') as string,
-        cancelText: this.$tv('tag.btnText.deletePopCancelText', 'No') as string,
+        okText: this.$tv('tag.btnText.deletePopOkBtn', 'Ok') as string,
+        cancelText: this.$tv('tag.btnText.deletePopCancelBtn', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
           this.graphqlClient
@@ -210,7 +212,7 @@ export default class Tags extends Vue {
                 this.$message.error(
                   this.$tv(
                     'tag.tips.blukDeleteFailed',
-                    'An error occurred while deleting tags, please try later again!',
+                    'An error occurred during deleting tags, please try later again!',
                   ) as string,
                 );
               }
@@ -248,7 +250,7 @@ export default class Tags extends Vue {
           this.$message.error(
             this.$tv(
               'tag.tips.deleteFailed',
-              'An error occurred while deleting tag, please try later again!',
+              'An error occurred during deleting tag, please try later again!',
             ) as string,
           );
         }
@@ -289,8 +291,8 @@ export default class Tags extends Vue {
         <a-divider type="vertical" />
         <a-popconfirm
           title={this.$tv('tag.btnTips.deletePopContent', 'Do you really want to delete this tag?')}
-          okText={this.$tv('tag.btnText.deletePopOkText', 'Ok')}
-          cancelText={this.$tv('tag.btnText.deletePopCancelText', 'No')}
+          okText={this.$tv('tag.btnText.deletePopOkBtn', 'Ok')}
+          cancelText={this.$tv('tag.btnText.deletePopCancelBtn', 'No')}
           onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
         >
           <a href="#none" title={this.$tv('tag.btnTips.delete', 'Delete this tag permanently') as string}>
@@ -348,6 +350,9 @@ export default class Tags extends Vue {
           itemCount={this.itemCount}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
+          onPreFilters={(query) => {
+            Object.assign(this.searchQuery, query);
+          }}
           onSearch={this.handleSearch.bind(this)}
           onBlukApply={this.handleBlukApply.bind(this)}
         >

@@ -1,20 +1,23 @@
-import { Vue, Component, Watch, Ref, InjectReactive } from 'nuxt-property-decorator';
+import { Vue, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
 import { lowerFirst } from 'lodash-es';
 import { trailingSlash } from '@/utils/path';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { PostCommentStatus, PostStatus, UserCapability } from '@/includes/datas';
+import { PostCommentStatus, PostStatus, UserCapability } from '@/includes/datas/enums';
 import { userStore } from '@/store/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
-import { Post, PostPagedQuery, PostPagedResponse, Term } from 'types/datas';
+import { PagerQuery, Post, PostPagerQuery, PostPagerResponse, Term } from 'types/datas';
 import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
 
+type QueryParams = Omit<PostPagerQuery, keyof PagerQuery<{}>> & { categoryId: string };
+
 enum BlukActions {
+  Edit = 'edit',
   MoveToTrash = 'moveToTrash',
   Restore = 'restore',
 }
@@ -31,17 +34,6 @@ enum BlukActions {
 </router> */
 }
 
-/**
- * query:{
- *  keywork,
- *  status,
- *  cid: categoryId,
- *  cname: categoryName, // cid, cname 不可以同时出现，cid优先
- *  tag: tagName,
- *  date: YYYYMM,
- *  author: authorId,
- * }
- */
 @Component<PostIndex>({
   name: 'PostIndex',
   meta: {
@@ -54,12 +46,10 @@ enum BlukActions {
         categories: Term[];
         statusCounts: Array<{ status: PostStatus; count: number }>;
         monthCounts: Array<{ month: string; count: number }>;
-        selfPostCount: number;
       }>({
         query: gql`
           query getFilters {
             categories: terms(taxonomy: "category") {
-              id
               taxonomyId
               name
               parentId
@@ -68,7 +58,6 @@ enum BlukActions {
               status
               count
             }
-            selfPostCount: postCountBySelf
             monthCounts: postCountByMonth {
               month
               count
@@ -79,7 +68,6 @@ enum BlukActions {
       .then(({ data }) => {
         return {
           statusCounts: data.statusCounts,
-          selfPostCount: data.selfPostCount,
           allCategories: data.categories,
           allMonths: data.monthCounts,
         };
@@ -100,24 +88,37 @@ export default class PostIndex extends Vue {
   // type 定义
   selectedRowKeys!: string[];
   statusCounts!: Array<{ status: PostStatus; count: number }>;
-  selfPostCount!: number;
   allCategories!: Term[];
   allMonths!: Array<{ month: string; count: number }>;
   itemCount!: number;
-  categoryId!: string;
-  date!: string;
+  searchQuery!: QueryParams;
   blukApplying!: boolean;
 
   data() {
     const query = this.$route.query as Dictionary<string | null>;
+    let categoryId = '';
+    let date = '';
+    let author = null;
+    try {
+      author = query.author ? parseInt(query.author) : null;
+      categoryId = query.cid ? query.cid : '';
+      // yyyyMM
+      date = query.d && query.d.length === 6 ? query.d : '';
+    } catch {
+      // ignore error
+    }
+
     return {
       selectedRowKeys: [],
+      searchQuery: {
+        categoryId,
+        author,
+        date,
+      },
       statusCounts: [],
-      selfPostCount: 0,
       allCategories: [],
+      categoryId,
       allMonths: [],
-      categoryId: query.cid ? query.cid : '',
-      date: query.d && query.d.length === 6 ? query.d : '', // yyyyMM
       itemCount: 0,
       blukApplying: false,
     };
@@ -136,55 +137,16 @@ export default class PostIndex extends Vue {
     return this.columns;
   }
 
-  // 从 URI 获取搜索状态，并判断值的正确性
-  get searchStatus() {
-    const status = this.$route.query['status'] as PostStatus | undefined;
-    return status && Object.values(PostStatus).includes(status) ? status : undefined;
-  }
-
-  // 从 URI 获取搜索条件，并判断值的正确性
-  get searchQuery() {
-    const query: Omit<PostPagedQuery, 'offset' | 'limit'> = {
-      keyword: this.$route.query['keyword'] as string,
-      status: this.searchStatus,
-    };
-    const author = this.$route.query['author'] as string | undefined;
-    const date = this.$route.query['date'] as string | undefined;
-    const categoryId = this.$route.query['cid'] as string | undefined;
-    const categoryName = this.$route.query['cname'] as string | undefined;
-    const tagName = this.$route.query['tag'] as string | undefined;
-    if (author) {
-      try {
-        query.author = parseInt(author);
-      } catch {
-        return undefined;
-      }
-    }
-    query.date = date?.length === 6 ? date : undefined;
-    if (categoryId) {
-      query.categoryId = categoryId;
-    } else if (categoryName) {
-      query.categoryName = categoryName;
-    } else if (tagName) {
-      query.tagName = tagName;
-    }
-    return query;
-  }
-
   // 状态选项 添加 All 选项
-  get statusOptions(): StatusOption[] {
-    // 总数不记录 trash 状态
-    const allCount = this.statusCounts.reduce((prev, curr) => {
-      return prev + (curr.status === PostStatus.Trash ? 0 : curr.count);
-    }, 0);
-
-    const trushCount = this.statusCounts.find((item) => item.status === PostStatus.Trash)?.count || 0;
-
-    const options: StatusOption[] = [
+  get statusOptions(): StatusOption<PostStatus | undefined>[] {
+    return [
       {
         value: undefined,
         label: this.$tv('post.status.all', 'All') as string,
-        count: allCount,
+        // 总数不记录 trash 状态
+        count: this.statusCounts.reduce((prev, curr) => {
+          return prev + (curr.status === PostStatus.Trash ? 0 : curr.count);
+        }, 0),
         keepStatusShown: true,
       },
       ...this.statusCounts.map(({ status, count }) => ({
@@ -193,15 +155,6 @@ export default class PostIndex extends Vue {
         count,
       })),
     ];
-
-    if (this.selfPostCount - trushCount !== allCount) {
-      options.splice(1, 0, {
-        value: { author: userStore.id! },
-        label: this.$tv('post.status.self', 'Mine') as string,
-        count: this.selfPostCount,
-      });
-    }
-    return options;
   }
 
   // a-tree-select treeData 同步加载, 添加 All 选项
@@ -213,10 +166,10 @@ export default class PostIndex extends Vue {
         title: this.$tv('post.search.allCategories', 'All Categories') as string,
         isLeaf: true,
       },
-      ...this.allCategories.map(({ id, taxonomyId, name, parentId }) => ({
+      ...this.allCategories.map(({ taxonomyId, name, parentId }) => ({
         id: taxonomyId,
         pId: parentId === '0' ? undefined : parentId,
-        value: id,
+        value: taxonomyId,
         title: name,
       })),
     ];
@@ -237,8 +190,8 @@ export default class PostIndex extends Vue {
   }
 
   // 批量操作
-  get blukActionOptions(): BlukAcitonOption[] {
-    return this.searchStatus === PostStatus.Trash
+  get blukActionOptions(): BlukAcitonOption<BlukActions>[] {
+    return this.searchQuery.status === PostStatus.Trash
       ? [
           {
             value: BlukActions.Restore,
@@ -247,33 +200,26 @@ export default class PostIndex extends Vue {
         ]
       : [
           {
+            value: BlukActions.Edit,
+            label: this.$tv('post.search.bulkEditAction', 'Edit') as string,
+          },
+          {
             value: BlukActions.MoveToTrash,
             label: this.$tv('post.search.bulkTrashAction', 'Move To Trash') as string,
           },
         ];
   }
 
-  @Watch('$route')
-  watchRoute() {
-    this.refreshTable();
-  }
-
   // 加载 table 数据
   loadData({ page, size }: Parameters<DataSourceFn>[0]) {
-    const query: PostPagedQuery = {
-      ...this.searchQuery,
-      offset: (page - 1) * size,
-      limit: size,
-    };
+    const { categoryId, ...restQuery } = this.searchQuery;
     return this.graphqlClient
-      .query<{ posts: PostPagedResponse }, PostPagedQuery>({
+      .query<{ posts: PostPagerResponse }, PostPagerQuery>({
         query: gql`
           query getPosts(
             $keyword: String
             $status: POST_STATUS
-            $categoryId: ID
-            $categoryName: String
-            $tagName: String
+            $categoryIds: [ID!]
             $date: String
             $limit: Int
             $offset: Int
@@ -281,9 +227,7 @@ export default class PostIndex extends Vue {
             posts(
               keyword: $keyword
               status: $status
-              categoryId: $categoryId
-              categoryName: $categoryName
-              tagName: $tagName
+              categoryIds: $categoryIds
               date: $date
               limit: $limit
               offset: $offset
@@ -299,21 +243,18 @@ export default class PostIndex extends Vue {
                   id
                   displayName
                 }
-                categories {
-                  id
-                  name
-                }
-                tags {
-                  id
-                  name
-                }
                 createTime: createdAt
               }
               total
             }
           }
         `,
-        variables: query,
+        variables: {
+          ...restQuery,
+          categoryIds: categoryId ? [categoryId] : [],
+          offset: (page - 1) * size,
+          limit: size,
+        },
       })
       .then(({ data }) => {
         this.itemCount = data.posts.total;
@@ -352,15 +293,6 @@ export default class PostIndex extends Vue {
     this.table.refresh();
   }
 
-  // 获取预览链接（草稿状态）
-  getPreviewUrl(id: string) {
-    if (process.client) {
-      return `${trailingSlash(this.$userOptions['home'])}/${id}`;
-    }
-    return '#none';
-  }
-
-  // 获取显示链接（发布状态）
   getViewUrl(id: string) {
     if (process.client) {
       return `${trailingSlash(this.$userOptions['home'])}/${id}`;
@@ -368,49 +300,23 @@ export default class PostIndex extends Vue {
     return '#none';
   }
 
-  // 编辑权限
-  hasEditCapability(post: Post) {
-    if (!this.hasCapability(UserCapability.EditOthersPosts) && post.author.id !== userStore.id) {
-      return false;
-    } else if (
-      !this.hasCapability(UserCapability.EditPublishedPosts) &&
-      (post.status === PostStatus.Publish || post.status === PostStatus.Private)
-    ) {
-      return false;
-    }
-    // UserCapability.EditPrivatePosts private 在接口返回时就过滤掉了
-    return true;
-  }
-
-  // 删除权限
-  hasDeleteCapability(post: Post) {
-    if (!this.hasCapability(UserCapability.DeleteOthersPosts) && post.author.id !== userStore.id) {
-      return false;
-    } else if (
-      !this.hasCapability(UserCapability.DeletePublishedPosts) &&
-      (post.status === PostStatus.Publish || post.status === PostStatus.Private)
-    ) {
-      return false;
-    }
-    // UserCapability.EditPrivatePosts private 在接口返回时就过滤掉了
-    return true;
+  // keyword 的搜索按纽
+  handleSearch(query: { keyword?: string; status?: PostStatus }) {
+    Object.assign(this.searchQuery, query);
+    this.refreshTable();
   }
 
   // filter 按纽
   handleFilter() {
-    this.updateRouteQuery(
-      {
-        cid: this.categoryId || undefined,
-        cname: undefined,
-        tag: undefined,
-        date: this.date || undefined,
-      },
-      { replace: true },
-    );
+    this.updateRouteQuery({
+      cid: this.searchQuery.categoryId ? String(this.searchQuery.categoryId) : undefined,
+      d: this.searchQuery.date,
+    });
+    this.refreshTable();
   }
 
   // 批量操作
-  handleBlukApply(action: string | number) {
+  handleBlukApply(action: BlukActions) {
     if (!this.selectedRowKeys.length) {
       this.$message.warn({ content: this.$tv('post.tips.bulkRowReqrired', 'Please choose a row!') as string });
       return;
@@ -449,10 +355,11 @@ export default class PostIndex extends Vue {
         .finally(() => {
           this.blukApplying = false;
         });
+    } else if (action === BlukActions.Edit) {
+      // todo
     }
   }
 
-  // 行选择
   handleSelectChange(selectedRowKeys: Array<string | number>) {
     this.selectedRowKeys = selectedRowKeys as any;
   }
@@ -543,97 +450,64 @@ export default class PostIndex extends Vue {
     };
 
     // 在全部状态下时区分每一条的状态显示
-    const getStatusText = (post: Post) => {
-      if (!this.searchStatus) {
-        if (post.status === PostStatus.Draft) {
+    const getStatusText = (record: Post) => {
+      if (!this.searchQuery.status) {
+        if (record.status === PostStatus.Draft) {
           return this.$tv('post.status.draft', 'Draft');
-        } else if (post.status === PostStatus.Trash) {
+        } else if (record.status === PostStatus.Trash) {
           return this.$tv('post.status.trash', 'Trash');
-        } else if (post.status === PostStatus.Private) {
+        } else if (record.status === PostStatus.Private) {
           return this.$tv('post.status.private', 'Private');
-        } else if (post.status === PostStatus.Pending) {
-          return post.author.id === userStore.id
-            ? this.$tv('post.status.review', 'Review')
-            : this.$tv('post.status.pending', 'Pending');
         }
       }
       return;
     };
 
-    // 行Checkbox状态
-    const getCheckboxProps = (record: Post) => {
-      return {
-        props: {
-          disabled: !this.hasEditCapability(record) || !this.hasDeleteCapability(record),
-        },
-      };
-    };
-
-    const renderActions = (record: Post) => {
-      const actions = (record.status === PostStatus.Trash
-        ? [
-            this.hasEditCapability(record) ? (
+    const renderActions = (record: Post) => (
+      <div class={classes.actions}>
+        {record.status === PostStatus.Trash
+          ? [
               <a
                 href="#none"
                 title={this.$tv('post.btnTips.restore', 'Restore this post') as string}
                 onClick={m.stop.prevent(this.handleRestore.bind(this, record.id))}
               >
                 {this.$tv('post.btnText.restore', 'Restore')}
-              </a>
-            ) : null,
-            this.hasDeleteCapability(record) ? (
+              </a>,
+              <a-divider type="vertical" />,
               <a-popconfirm
                 title={this.$tv('post.btnTips.deletePopContent', 'Do you really want to delete this post?')}
-                okText={this.$tv('post.btnText.deletePopOkText', 'Ok')}
-                cancelText={this.$tv('post.btnText.deletePopCancelText', 'No')}
+                okText={this.$tv('post.btnText.deletePopOkBtn', 'Ok')}
+                cancelText={this.$tv('post.btnText.deletePopCancelBtn', 'No')}
                 onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
               >
                 <a href="#none" title={this.$tv('post.btnTips.delete', 'Delete this post permanently') as string}>
                   {this.$tv('post.btnText.delete', 'Delete Permanently')}
                 </a>
-              </a-popconfirm>
-            ) : null,
-          ]
-        : [
-            this.hasEditCapability(record) ? (
+              </a-popconfirm>,
+            ]
+          : [
               <nuxt-link
                 to={{ name: 'posts-edit', params: { id: String(record.id) } }}
                 title={this.$tv('post.btnTips.edit', 'Edit') as string}
               >
                 {this.$tv('post.btnText.edit', 'Edit')}
-              </nuxt-link>
-            ) : null,
-            this.hasDeleteCapability(record) ? (
+              </nuxt-link>,
+              <a-divider type="vertical" />,
               <a
                 href="#none"
-                title={this.$tv('post.btnTips.moveToTrash', 'Move to trash') as string}
+                title={this.$tv('post.btnTips.trash', 'Move to trash') as string}
                 onClick={m.stop.prevent(this.handleModifyStatus.bind(this, record.id, PostStatus.Trash))}
               >
                 {this.$tv('post.btnText.moveToTrash', 'Trash')}
-              </a>
-            ) : null,
-            record.status === PostStatus.Draft ? (
-              this.hasEditCapability(record) ? (
-                <a
-                  href={this.getPreviewUrl(record.id)}
-                  title={this.$tv('post.btnTips.preview', 'Preview this post') as string}
-                >
-                  {this.$tv('post.btnText.preview', 'Preview')}
-                </a>
-              ) : null
-            ) : (
+              </a>,
+              <a-divider type="vertical" />,
               <a href={this.getViewUrl(record.id)} title={this.$tv('post.btnTips.view', 'View this post') as string}>
                 {this.$tv('post.btnText.view', 'View')}
-              </a>
-            ),
-          ]
-      ).filter(Boolean);
-      return (
-        <div class={classes.actions}>
-          {actions.map((item, index) => (index === actions.length - 1 ? item : [item, <a-divider type="vertical" />]))}
-        </div>
-      );
-    };
+              </a>,
+            ]}
+      </div>
+    );
 
     // $scopedSolts 不支持多参数类型定义
     const scopedSolts = () => {
@@ -662,18 +536,15 @@ export default class PostIndex extends Vue {
               <div class={[classes.content]} v-show={record.expand}>
                 <p>
                   <span>{getTitle('author') || 'Author'}: </span>
-                  {record.author ? (
-                    <nuxt-link
-                      to={{
-                        query: Object.assign(this.$route.query, { author: record.author.id }),
-                      }}
-                      title={this.$tv('post.btnTips.edit', 'Edit') as string}
-                    >
-                      {record.author.displayName}
-                    </nuxt-link>
-                  ) : (
-                    '-'
-                  )}
+                  <nuxt-link
+                    to={{
+                      name: 'users-profile',
+                      query: record.author.id === userStore.id ? {} : { id: String(record.author.id) },
+                    }}
+                    title={this.$tv('post.btnTips.edit', 'Edit') as string}
+                  >
+                    {record.author.displayName}
+                  </nuxt-link>
                 </p>
                 <p>
                   <span>{getTitle('commentCount') || 'Comment Count'}: </span>
@@ -688,44 +559,18 @@ export default class PostIndex extends Vue {
             {renderActions(record)}
           </div>
         ),
-        author: (text: Post['author']) =>
-          text ? (
-            <nuxt-link
-              to={{
-                query: { author: text.id },
-              }}
-              title={this.$tv('post.btnTips.edit', 'Edit') as string}
-            >
-              {text.displayName}
-            </nuxt-link>
-          ) : (
-            '-'
-          ),
+        author: (text: Post['author'], record: Post) => (
+          <nuxt-link
+            to={{
+              name: 'users-profile',
+              query: record.author.id === userStore.id ? {} : { id: String(record.author.id) },
+            }}
+            title={this.$tv('post.btnTips.edit', 'Edit') as string}
+          >
+            {text.displayName}
+          </nuxt-link>
+        ),
         commentCount: (text: string, record: Post) => (record.commentStatus === PostCommentStatus.Enable ? text : '-'),
-        categories: (text: Post['categories']) =>
-          text.length
-            ? text.map((item) => (
-                <nuxt-link
-                  to={{
-                    query: { cname: item.name },
-                  }}
-                >
-                  {item.name}
-                </nuxt-link>
-              ))
-            : '-',
-        tags: (text: Post['tags']) =>
-          text.length
-            ? text.map((item) => (
-                <nuxt-link
-                  to={{
-                    query: { tag: item.name },
-                  }}
-                >
-                  {item.name}
-                </nuxt-link>
-              ))
-            : '-',
         createTime: (text: string) => $filters.dateFormat(text),
       } as any;
     };
@@ -738,17 +583,21 @@ export default class PostIndex extends Vue {
           statusOptions={this.statusOptions}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
+          onPreFilters={(query) => {
+            Object.assign(this.searchQuery, query);
+          }}
+          onSearch={this.handleSearch.bind(this)}
           onBlukApply={this.handleBlukApply.bind(this)}
         >
           <template slot="filter">
             <a-select
-              vModel={this.date}
+              vModel={this.searchQuery.date}
               options={this.dateOptions}
               placeholder={this.$tv('post.search.chooseDate', 'Choose date')}
               style="min-width:100px;"
             ></a-select>
             <a-tree-select
-              vModel={this.categoryId}
+              vModel={this.searchQuery.categoryId}
               treeDataSimpleMode
               treeData={this.categoryOptions}
               placeholder={this.$tv('post.search.chooseCategory', 'Choose category')}
@@ -769,7 +618,6 @@ export default class PostIndex extends Vue {
           showPagination="auto"
           rowSelection={{
             selectedRowKeys: this.selectedRowKeys,
-            getCheckboxProps: getCheckboxProps.bind(this),
             onChange: this.handleSelectChange.bind(this),
           }}
           rowClassName={() => classes.tableRow}

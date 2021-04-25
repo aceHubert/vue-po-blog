@@ -1,6 +1,9 @@
 import { Model, DataTypes } from 'sequelize';
-import { OptionAutoload } from '@/options/enums';
-import { OptionAttributes, OptionCreationAttributes } from '@/orm-entities/interfaces/options.interface';
+import {
+  OptionAttributes,
+  OptionCreationAttributes,
+  OptionAutoload,
+} from '@/orm-entities/interfaces/options.interface';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
 export default class Options extends Model<OptionAttributes, OptionCreationAttributes> {

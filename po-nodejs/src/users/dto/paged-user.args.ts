@@ -1,6 +1,7 @@
 import { Field, ArgsType } from '@nestjs/graphql';
 import { PagedArgs } from '@/common/models/general.model';
-import { UserStatus, UserRoleWithNone, UserRole } from '../enums';
+import { UserStatus, UserRole } from '@/common/helpers/enums';
+import { UserRoleWithNone } from './update-user.input';
 
 // Types
 import { PagedUserArgs as IPagedUserArgs } from '@/sequelize-datasources/interfaces';

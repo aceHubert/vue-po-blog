@@ -51,7 +51,7 @@ export default class Logout extends Vue {
   render() {
     return (
       <div id="logout" class={classes.wrapper}>
-        {this.$tv('common.tips.logout', 'LogOut...')}
+        LogOut...
       </div>
     );
   }

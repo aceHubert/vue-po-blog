@@ -1,8 +1,8 @@
-import { Vue, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
+import { Vue, Component, Watch, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm, TermEditForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { TermTaxonomy, UserCapability } from '@/includes/datas';
+import { TermTaxonomy, UserCapability } from '@/includes/datas/enums';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
@@ -27,7 +27,7 @@ enum BlukActions {
 @Component({
   name: 'Categories',
   meta: {
-    capabilities: [UserCapability.ManageCategories],
+    capabilities: [UserCapability.EditPosts],
   },
 })
 export default class Categories extends Vue {
@@ -37,6 +37,7 @@ export default class Categories extends Vue {
   // type 定义
   selectedRowKeys!: string[];
   itemCount!: number;
+  searchQuery!: TermQuery;
   blukApplying!: boolean;
   formModelShown!: boolean;
   editModel?: Term;
@@ -45,6 +46,7 @@ export default class Categories extends Vue {
     return {
       selectedRowKeys: [],
       itemCount: 0,
+      searchQuery: {},
       blukApplying: false,
       formModelShown: false,
       editModel: undefined,
@@ -65,7 +67,7 @@ export default class Categories extends Vue {
   }
 
   // 批量操作
-  get blukActionOptions(): BlukAcitonOption[] {
+  get blukActionOptions(): BlukAcitonOption<BlukActions>[] {
     return [
       {
         value: BlukActions.Delete,
@@ -74,11 +76,17 @@ export default class Categories extends Vue {
     ];
   }
 
+  @Watch('formModelShown')
+  watchFormModelShown(val: boolean) {
+    // v-model 只是显示/隐藏, EditForm数据修改后没会刷新
+    // 每次显示时强制刷新一次
+    if (val) {
+      this.$forceUpdate();
+    }
+  }
+
   // 加载 table 数据
   loadData() {
-    const query: TermQuery = {
-      keyword: this.$route.query['keyword'] as string,
-    };
     return this.graphqlClient
       .query<{ terms: Term[] }, TermQuery>({
         query: gql`
@@ -94,13 +102,15 @@ export default class Categories extends Vue {
             }
           }
         `,
-        variables: query,
+        variables: {
+          ...this.searchQuery,
+        },
       })
       .then(({ data }) => {
         this.itemCount = data.terms.length;
         const rows: Array<Term & { displayName?: string }> = [];
         // 当有搜索条件时，嵌套会出现断层。直接显示即可
-        if (query.keyword) {
+        if (this.searchQuery.keyword) {
           // 根目录倒序
           rows.push(...data.terms.sort((a, b) => (a.id > b.id ? -1 : 1)));
         } else {
@@ -227,12 +237,13 @@ export default class Categories extends Vue {
   }
 
   // keyword 的搜索按纽
-  handleSearch() {
+  handleSearch(query: { keyword?: string }) {
+    Object.assign(this.searchQuery, query);
     this.refreshTable();
   }
 
   // 批量操作
-  handleBlukApply(action: string | number) {
+  handleBlukApply(action: BlukActions) {
     if (!this.selectedRowKeys.length) {
       this.$message.warn({ content: this.$tv('category.tips.bulkRowReqrired', 'Please choose a row!') as string });
       return;
@@ -240,8 +251,8 @@ export default class Categories extends Vue {
     if (action === BlukActions.Delete) {
       this.$confirm({
         content: this.$tv('category.btnTips.blukDeletePopContent', 'Do you really want to delete these categorys?'),
-        okText: this.$tv('category.btnText.deletePopOkText', 'Ok') as string,
-        cancelText: this.$tv('category.btnText.deletePopCancelText', 'No') as string,
+        okText: this.$tv('category.btnText.deletePopOkBtn', 'Ok') as string,
+        cancelText: this.$tv('category.btnText.deletePopCancelBtn', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
           this.graphqlClient
@@ -263,7 +274,7 @@ export default class Categories extends Vue {
                 this.$message.error(
                   this.$tv(
                     'category.tips.blukDeleteFailed',
-                    'An error occurred while deleting categorys, please try later again!',
+                    'An error occurred during deleting categorys, please try later again!',
                   ) as string,
                 );
               }
@@ -301,7 +312,7 @@ export default class Categories extends Vue {
           this.$message.error(
             this.$tv(
               'category.tips.deleteFailed',
-              'An error occurred while deleting category, please try later again!',
+              'An error occurred during deleting category, please try later again!',
             ) as string,
           );
         }
@@ -315,6 +326,15 @@ export default class Categories extends Vue {
       });
   }
 
+  // 行Checkbox状态
+  getCheckboxProps(record: Term) {
+    return {
+      props: {
+        disabled: record.id === this.$userOptions['default_category'],
+      },
+    };
+  }
+
   // 行选择
   handleSelectChange(selectedRowKeys: Array<string | number>) {
     this.selectedRowKeys = selectedRowKeys as any;
@@ -325,15 +345,6 @@ export default class Categories extends Vue {
       return (this.columns as Array<{ title: string; dataIndex: string }>).find(
         (column) => column.dataIndex === dataIndex,
       )?.title;
-    };
-
-    // 行Checkbox状态
-    const getCheckboxProps = (record: Term) => {
-      return {
-        props: {
-          disabled: record.id === this.$userOptions['default_category'],
-        },
-      };
     };
 
     const renderActions = (record: Term) => (
@@ -353,8 +364,8 @@ export default class Categories extends Vue {
               <a-divider type="vertical" />,
               <a-popconfirm
                 title={this.$tv('category.btnTips.deletePopContent', 'Do you really want to delete this category?')}
-                okText={this.$tv('category.btnText.deletePopOkText', 'Ok')}
-                cancelText={this.$tv('category.btnText.deletePopCancelText', 'No')}
+                okText={this.$tv('category.btnText.deletePopOkBtn', 'Ok')}
+                cancelText={this.$tv('category.btnText.deletePopCancelBtn', 'No')}
                 onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
               >
                 <a
@@ -417,6 +428,9 @@ export default class Categories extends Vue {
           itemCount={this.itemCount}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
+          onPreFilters={(query) => {
+            Object.assign(this.searchQuery, query);
+          }}
           onSearch={this.handleSearch.bind(this)}
           onBlukApply={this.handleBlukApply.bind(this)}
         >
@@ -443,7 +457,7 @@ export default class Categories extends Vue {
           showPagination={false}
           rowSelection={{
             selectedRowKeys: this.selectedRowKeys,
-            getCheckboxProps: getCheckboxProps.bind(this),
+            getCheckboxProps: this.getCheckboxProps.bind(this),
             onChange: this.handleSelectChange.bind(this),
           }}
           rowClassName={() => classes.tableRow}

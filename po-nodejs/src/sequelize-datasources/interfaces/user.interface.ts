@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from '@/users/enums';
+import { UserRole, UserStatus } from '@/common/helpers/enums';
 import { UserAttributes, UserCreationAttributes } from '@/orm-entities/interfaces/users.interface';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';

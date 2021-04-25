@@ -1,7 +1,6 @@
-import md5 from 'md5';
 import { Model, DataTypes } from 'sequelize';
-import { UserStatus } from '@/users/enums';
-import { UserAttributes, UserCreationAttributes } from '@/orm-entities/interfaces/users.interface';
+import md5 from 'md5';
+import { UserAttributes, UserCreationAttributes, UserStatus } from '@/orm-entities/interfaces/users.interface';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 

@@ -15,21 +15,26 @@ export class ConfigService {
     const envFileName = `${basename}.${process.env.NODE_ENV || 'development'}${ext}`;
 
     let filePath;
+    try {
+      // po-config.[env].json
+      const envFile = path.resolve(process.cwd(), envFileName);
+      fs.accessSync(envFile, fs.constants.R_OK);
+      filePath = envFile;
+    } catch (err) {
+      this.logger.warn(`Error to read config files from ${envFileName}, Error: ${err.message}`);
+    }
 
-    // po-config.[env].json / po-config.json
-    [envFileName, options.file].some((fileName) => {
+    if (!filePath) {
       try {
-        const file = path.resolve(process.cwd(), fileName);
+        // po-config.json
+        const file = path.resolve(process.cwd(), options.file);
         fs.accessSync(file, fs.constants.R_OK);
         filePath = file;
-        return true;
       } catch (err) {
-        this.logger.warn(`Error to read config files from ${envFileName}, ${err.message}`);
-        return false;
+        this.logger.warn(`Error to read config files from ${options.file}, Error: ${err.message}`);
       }
-    });
-
-    const config = filePath ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : {};
+    }
+    const config = filePath ? JSON.parse(fs.readFileSync(filePath).toString()) : {};
 
     this.config = Object.assign({}, getDefaultConfig(), config.backend);
   }

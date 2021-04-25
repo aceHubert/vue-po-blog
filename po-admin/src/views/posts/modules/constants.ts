@@ -33,20 +33,6 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'commentCount' },
     },
     {
-      title: i18nRender('post.column.category', 'Categories'),
-      align: 'center',
-      dataIndex: 'categories',
-      hideInMobile: true,
-      scopedSlots: { customRender: 'categories' },
-    },
-    {
-      title: i18nRender('post.column.tag', 'Tags'),
-      align: 'center',
-      dataIndex: 'tags',
-      hideInMobile: true,
-      scopedSlots: { customRender: 'tags' },
-    },
-    {
       title: i18nRender('post.column.createTime', 'CreateTime'),
       align: 'center',
       dataIndex: 'createTime',

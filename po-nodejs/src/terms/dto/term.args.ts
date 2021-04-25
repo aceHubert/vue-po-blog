@@ -5,7 +5,7 @@ import { Field, ArgsType, ID, Int } from '@nestjs/graphql';
  */
 @ArgsType()
 export class TermArgs {
-  @Field({ description: '类别名称' })
+  @Field({ description: '类别' })
   taxonomy!: string;
 
   @Field({ nullable: true, description: '搜索关键字（根据标题模糊查询）' })

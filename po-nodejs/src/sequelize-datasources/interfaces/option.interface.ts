@@ -1,4 +1,4 @@
-import { OptionAutoload } from '@/options/enums';
+import { OptionAutoload } from '@/common/helpers/enums';
 import { OptionAttributes, OptionCreationAttributes } from '@/orm-entities/interfaces/options.interface';
 
 export interface OptionModel extends OptionAttributes {}

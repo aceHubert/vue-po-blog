@@ -5,6 +5,7 @@ export interface PostMetaAttributes {
   postId: number;
   metaKey: string;
   metaValue: string | null;
+  private: 'yes' | 'no';
 }
 
-export interface PostMetaCreationAttributes extends Optional<PostMetaAttributes, 'id'> {}
+export interface PostMetaCreationAttributes extends Optional<PostMetaAttributes, 'id' | 'private'> {}

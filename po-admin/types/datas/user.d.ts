@@ -1,4 +1,4 @@
-import { PagedQuery, PagedResponse } from './paged';
+import { PagerQuery, PagerResponse } from './pager';
 import { UserStatus, UserRole } from 'src/includes/datas/enums';
 
 export type User = {
@@ -50,12 +50,12 @@ export type UserResponse = User & {
   metas: Array<{ key: string; value: string }>;
 };
 
-export type UserPagedQuery = PagedQuery<{
-  keyword?: string;
+export type UserPagerQuery = PagerQuery<{
+  keywords?: string;
   userRole?: UserRole;
 }>;
 
-export type UserPagedResponse = PagedResponse<
+export type UserPagerResponse = PagerResponse<
   UserWithRole & {
     metas: Array<{ key: string; value: string }>;
   }

@@ -40,9 +40,6 @@ export function handleScrollHeader(callback: (direction: 'up' | 'down') => void)
   );
 }
 
-/**
- * 是否是IE
- */
 export function isIE() {
   const bw = window.navigator.userAgent;
   const compare = (s: string) => bw.indexOf(s) >= 0;
@@ -63,20 +60,4 @@ export function removeLoadingAnimate(id = '', timeout = 1500) {
     const el = document.getElementById(id);
     el && document.body.removeChild(el);
   }, timeout);
-}
-
-/**
- * 获取 OverloadedRest 参数
- * <T>(value: Array<T>)
- * <T>(...value:Array<T>)
- * @param overloadedArray
- */
-export function getArrayFromOverloadedRest<T>(overloadedArray: Array<T | T[]>): T[] {
-  let items: T[];
-  if (Array.isArray(overloadedArray[0])) {
-    items = overloadedArray[0] as T[];
-  } else {
-    items = overloadedArray as T[];
-  }
-  return items;
 }

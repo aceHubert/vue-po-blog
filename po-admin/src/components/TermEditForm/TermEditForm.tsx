@@ -138,7 +138,6 @@ export default class TermEditForm extends Vue {
       onValuesChange: (props: any, values: any) => {
         this.changed = true;
         const pureValue = Object.assign({}, this.form.getFieldsValue(), values);
-        this.$emit('input', pureValue);
         this.$emit('change', pureValue);
       },
     });

@@ -1,5 +1,7 @@
 import { Optional } from './optional.interface';
-import { UserStatus } from '@/users/enums';
+import { UserStatus } from '@/common/helpers/enums';
+
+export { UserStatus };
 
 export interface UserAttributes {
   id: number;

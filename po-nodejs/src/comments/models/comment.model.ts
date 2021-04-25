@@ -1,7 +1,7 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
+import { CommentType } from '@/common/helpers/enums';
 import { PagedResponse } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
-import { CommentType } from '../enums';
 
 @ObjectType({ description: '评论模型' })
 export class Comment {

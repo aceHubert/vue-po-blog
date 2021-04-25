@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { isPlainObject } from 'lodash';
 import { Injectable, UnauthorizedException, CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
-import { I18nService } from 'nestjs-i18n';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@/config/config.service';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
@@ -15,32 +14,26 @@ export class AuthService {
 
   constructor(
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
-    private readonly configService: ConfigService,
-    private readonly i18nService: I18nService,
+    private readonly config: ConfigService,
     private readonly userDataSource: UserDataSource,
   ) {}
 
-  /**
-   * 获取 access_token cache key
-   * @param userId 用户Id
-   * @param drivceId 设备Id
-   */
-  private getScrectCacheKey(userId: number, deviceId: string) {
-    return `USER_SCRECT_${userId}_${deviceId}`;
+  private getScrectCacheKey(userId: number) {
+    return `USER_SCRECT_${userId}`;
   }
 
   /**
    * jwt 协议， 默认：HS256
    */
   get JwtAlgorithm() {
-    return this.configService.get('jwt_algorithm');
+    return this.config.get('jwt_algorithm');
   }
 
   /**
    * jwt access token 过期时间，默认：30 minutes
    */
   get jwtTokenExpiresIn() {
-    return this.configService.get('jwt_expiresIn');
+    return this.config.get('jwt_expiresIn');
   }
 
   /**
@@ -56,7 +49,7 @@ export class AuthService {
    * jwt refresh token 过期时间，默认：15 days
    */
   get jwtRefreshTokenExpiresIn() {
-    return this.configService.get('jwt_refresh_token_expiresIn') || '15d';
+    return this.config.get('jwt_refresh_token_expiresIn') || '15d';
   }
 
   /**
@@ -65,18 +58,16 @@ export class AuthService {
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
-   * @param userId 用户 Id
-   * @param device 设备名称
+   * @param userId User id
    * @param fromCache 优先从缓存中读取
    */
-  async getScrect(userId: number, device: string, fromCache: boolean = true): Promise<string> {
-    const deviceId = this.userDataSource.getDeviceId(userId, device);
-    const cacheKey = this.getScrectCacheKey(userId, deviceId);
+  async getScrect(userId: number, fromCache: boolean = true): Promise<string> {
+    const cacheKey = this.getScrectCacheKey(userId);
     let screct = fromCache ? await this.cache.get<string>(cacheKey) : null;
     if (!screct) {
-      screct = await this.userDataSource.getTokenScrect(userId, device);
+      screct = await this.userDataSource.getTokenScrect(userId);
       // 保存到缓存
-      this.cache.set(cacheKey, screct, { ttl: this.jwtTokenExpiresInSeconds }, (err) => {
+      await this.cache.set(cacheKey, screct, { ttl: this.jwtTokenExpiresInSeconds }, (err) => {
         err && this.logger.error(`Set cache error, ${err.message}`);
       });
     }
@@ -89,11 +80,10 @@ export class AuthService {
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
-   * @param userId 用户 Id
-   * @param device 设备名称
+   * @param userId User id
    */
-  getRefreshTokenScrect(userId: number, device: string): Promise<string> {
-    return this.userDataSource.getTokenScrect(userId, device, true);
+  getRefreshTokenScrect(userId: number): Promise<string> {
+    return this.userDataSource.getTokenScrect(userId, true);
   }
 
   /**
@@ -103,50 +93,28 @@ export class AuthService {
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
-   * @param userId 用户 Id
-   * @param device 设备名称
+   * @param userId User id
    */
-  async updateScrect(userId: number, device: string): Promise<string> {
-    const deviceId = this.userDataSource.getDeviceId(userId, device);
-    const cacheKey = this.getScrectCacheKey(userId, deviceId);
-    const screct = await this.userDataSource.updateTokenScrect(userId, device);
+  async updateScrect(userId: number): Promise<string> {
+    const screct = await this.userDataSource.updateTokenScrect(userId);
     // 修改到缓存
-    this.cache.set(cacheKey, screct, { ttl: this.jwtTokenExpiresInSeconds }, (err) => {
+    await this.cache.set(this.getScrectCacheKey(userId), screct, { ttl: this.jwtTokenExpiresInSeconds }, (err) => {
       err && this.logger.error(`Set cache error, ${err.message}`);
     });
     return screct;
   }
 
-  // 暂时没有场景需要修改 refresh token
-  // /**
-  //  * 修改 refresh token 的 screct
-  //  * 在登出，修改密码，忘记密码等场景中更新screct 来 Revoke 历史 refresh token
-  //  * @author Hubert
-  //  * @since 2020-10-01
-  //  * @version 0.0.1
-  //  * @access None
-  //  * @param userId 用户 Id
-  //  * @param device 设备名称
-  //  */
-  // updateRefreshTokenScrect(userId: number, device: string): Promise<string> {
-  //   return this.userDataSource.updateTokenScrect(userId, device, true);
-  // }
-
   /**
-   * 重置 access/refresh token 的 screct
-   * @param userId 用户 Id
-   * @param device 设备名称，为 null 时重置所有
+   * 修改 refresh token 的 screct
+   * 在登出，修改密码，忘记密码等场景中更新screct 来 Revoke 历史 refresh token
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access None
+   * @param userId User id
    */
-  async resetScrect(userId: number, device: string | null): Promise<void> {
-    const deviceIds = await this.userDataSource.resetTokenScrect(userId, device);
-    // 清除缓存
-    deviceIds.forEach((deviceId) => {
-      const cacheKey = this.getScrectCacheKey(userId, deviceId);
-      this.cache.del(cacheKey, (err) => {
-        err && this.logger.error(`Delete cache error, ${err.message}`);
-      });
-    });
-    await this.userDataSource.resetTokenScrect(userId, device, true);
+  updateRefreshTokenScrect(userId: number): Promise<string> {
+    return this.userDataSource.updateTokenScrect(userId, true);
   }
 
   /**
@@ -160,19 +128,18 @@ export class AuthService {
    * @param token access_token
    * @param options jwt.VerifyOptions
    */
-  async verifyToken(token: string, options?: jwt.VerifyOptions & { lang?: string }): Promise<JwtPayload> {
-    const { lang, ...jwtOptions } = options || {};
-    const payload = await this.decodeToken(token);
+  async verifyToken(token: string, options?: jwt.VerifyOptions): Promise<JwtPayload> {
+    const payload = this.decodeToken(token);
     if (payload && isPlainObject(payload) && payload.id) {
-      const screct = await this.getScrect(payload.id, payload.device);
+      const screct = await this.getScrect(payload.id);
       try {
-        jwt.verify(token, screct, jwtOptions);
+        jwt.verify(token, screct, options);
         return payload;
       } catch {
-        throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+        throw new UnauthorizedException('Invalid token!');
       }
     } else {
-      throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+      throw new UnauthorizedException('Invalid token!');
     }
   }
 
@@ -186,22 +153,18 @@ export class AuthService {
    * @param token refresh_token
    * @param options jwt.VerifyOptions
    */
-  async verifyRefreshToken(
-    refreshToken: string,
-    options?: jwt.VerifyOptions & { lang?: string },
-  ): Promise<Omit<JwtPayload, 'role'>> {
-    const { lang, ...jwtOptions } = options || {};
-    const payload = await this.decodeToken(refreshToken, { lang });
+  async verifyRefreshToken(token: string, options?: jwt.VerifyOptions): Promise<JwtPayload> {
+    const payload = this.decodeToken(token);
     if (payload && isPlainObject(payload) && payload.id) {
-      const screct = await this.getRefreshTokenScrect(payload.id, payload.device);
+      const screct = await this.getRefreshTokenScrect(payload.id);
       try {
-        jwt.verify(refreshToken, screct, jwtOptions);
+        jwt.verify(token, screct, options);
         return payload;
       } catch {
-        throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+        throw new UnauthorizedException('Invalid token!');
       }
     } else {
-      throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+      throw new UnauthorizedException('Invalid token!');
     }
   }
 
@@ -214,43 +177,36 @@ export class AuthService {
    * @access None
    * @param token token
    */
-  async decodeToken(token: string, options?: jwt.DecodeOptions & { lang?: string }): Promise<JwtPayload | null> {
-    const { lang, ...jwtOptions } = options || {};
+  decodeToken(token: string): JwtPayload | null {
     try {
-      return jwt.decode(token, { ...jwtOptions, json: true }) as JwtPayload | null;
+      return jwt.decode(token, { json: true }) as JwtPayload | null;
     } catch (err) {
-      throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+      throw new UnauthorizedException('Invalid token!');
     }
   }
 
   /**
    * 登录
    * 成功则返回token，否则返回 false
-   * refresh token 中不包含role
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
    * @param loginName 登录名/邮箱/手机号码
-   * @param password 登录密码
-   * @param device 设备名称
    */
-  async login(username: string, password: string, device: string): Promise<false | TokenResponse> {
-    const payload = await this.userDataSource.verifyUser(username, password, ['id', 'loginName', 'createdAt']);
+  async login(username: string, password: string): Promise<false | TokenResponse> {
+    const payload = await this.userDataSource.verifyUser(username, password);
     if (payload) {
-      const jwtScrect = await this.getScrect(payload.id, device, false);
-      const jwtRefreshTokenScrect = await this.getRefreshTokenScrect(payload.id, device);
-
-      // access token 设置角色
-      const role = await this.userDataSource.getRole(payload.id);
+      const jwtScrect = await this.getScrect(payload.id, false);
+      const jwtRefreshTokenScrect = await this.getRefreshTokenScrect(payload.id);
 
       return {
-        accessToken: jwt.sign({ ...payload, role, device }, jwtScrect, {
+        accessToken: jwt.sign(payload, jwtScrect, {
           algorithm: this.JwtAlgorithm,
           expiresIn: this.jwtTokenExpiresIn,
         }),
         expiresIn: this.jwtTokenExpiresInSeconds,
-        refreshToken: jwt.sign({ ...payload, device }, jwtRefreshTokenScrect, {
+        refreshToken: jwt.sign(payload, jwtRefreshTokenScrect, {
           algorithm: this.JwtAlgorithm,
           expiresIn: this.jwtRefreshTokenExpiresIn,
         }),
@@ -263,28 +219,26 @@ export class AuthService {
   /**
    * 通过 refreshToken 刷新 token
    * 如果 refresh token 无效, 会抛出 UnauthorizedException
-   * 会重新获取role
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
    * @param token refresh token
    */
-  async refreshToken(refreshToken: string, lang?: string): Promise<false | RefreshTokenResponse> {
-    const refreshTokenPayload = await this.verifyRefreshToken(refreshToken, { lang });
-    if (refreshTokenPayload && isPlainObject(refreshTokenPayload) && refreshTokenPayload.id) {
-      const jwtScrect = await this.updateScrect(refreshTokenPayload.id, refreshTokenPayload.device);
+  async refreshToken(token: string): Promise<false | RefreshTokenResponse> {
+    let payload = await this.verifyRefreshToken(token);
+    if (payload && isPlainObject(payload) && payload.id) {
+      // 角色(刷新时重新获取，以免在中途被修改)
+      const role = await this.userDataSource.getRole(payload.id);
 
-      // 重新获取一次 role
-      const role = await this.userDataSource.getRole(refreshTokenPayload.id);
-
-      const payload: JwtPayload = {
-        id: refreshTokenPayload.id,
-        loginName: refreshTokenPayload.loginName,
+      payload = {
+        id: payload.id,
+        loginName: payload.loginName,
         role,
-        device: refreshTokenPayload.device,
-        createdAt: refreshTokenPayload.createdAt,
+        createdAt: payload.createdAt,
       };
+
+      const jwtScrect = await this.updateScrect(payload.id);
 
       return {
         accessToken: jwt.sign(payload, jwtScrect, {
@@ -305,14 +259,12 @@ export class AuthService {
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
-   * @param userId 用户 Id
+   * @param userId User id
    * @param oldPwd 旧密码
    * @param newPwd 新密码
    */
-  async updatePwd(userId: number, oldPwd: string, newPwd: string): Promise<boolean> {
-    const result = await this.userDataSource.updateLoginPwd(userId, oldPwd, newPwd);
-    await this.resetScrect(userId, null);
-    return result;
+  updatePwd(userId: number, oldPwd: string, newPwd: string): Promise<boolean> {
+    return this.userDataSource.updateLoginPwd(userId, oldPwd, newPwd);
   }
 
   /**
@@ -321,10 +273,10 @@ export class AuthService {
    * @since 2020-10-01
    * @version 0.0.1
    * @access None
-   * @param userId 用户 Id
-   * @param device 设备名称
+   * @param userId User id
    */
-  async logout(userId: number, device: string | null): Promise<void> {
-    await this.resetScrect(userId, device);
+  async logout(userId: number): Promise<void> {
+    await this.updateScrect(userId);
+    await this.updateRefreshTokenScrect(userId);
   }
 }

@@ -30,8 +30,6 @@
   },
   "dependencies": {
     "@ant-design-vue/pro-layout": "^1.0.1",
-    "@ckeditor/ckeditor5-build-balloon": "^27.0.0",
-    "@ckeditor/ckeditor5-vue2": "^1.0.5",
     "@vue-async/module-loader": "^2.0.0",
     "@vue-async/utils": "^1.1.0",
     "ant-design-vue": "^1.7.2",
@@ -51,6 +49,7 @@
     "js-sha256": "^0.9.0",
     "jsonwebtoken": "^8.5.1",
     "lodash-es": "^4.17.21",
+    "mavon-editor": "^2.9.1",
     "moment": "^2.24.0",
     "nuxt": "^2.14.4",
     "nuxt-property-decorator": "^2.9.1",

@@ -1,5 +1,5 @@
+import { LinkTarget, LinkVisible } from '@/common/helpers/enums';
 import { LinkAttributes, LinkCreationAttributes } from '@/orm-entities/interfaces';
-import { LinkTarget, LinkVisible } from '@/links/enums';
 import { PagedArgs, Paged } from './paged.interface';
 
 export interface LinkModel extends LinkAttributes {}

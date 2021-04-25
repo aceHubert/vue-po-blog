@@ -2,7 +2,6 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { OptionDataSource } from '@/sequelize-datasources/datasources';
-import { Authorized } from '@/common/decorators/authorized.decorator';
 
 // Types
 import { OptionArgs } from './dto/option.args';
@@ -31,29 +30,22 @@ export class OptionResolver extends BaseResolver {
     return this.optionDataSource.getList(args, this.getFieldNames(fields.fieldsByTypeName.Option));
   }
 
-  @Authorized()
   @Mutation((returns) => Option, { description: '添加配置项' })
-  addOption(
-    @Args('model', { type: () => NewOptionInput }) model: NewOptionInput,
-    requestUser: JwtPayload,
-  ): Promise<Option> {
-    return this.optionDataSource.create(model, requestUser);
+  addOption(@Args('model', { type: () => NewOptionInput }) model: NewOptionInput): Promise<Option> {
+    return this.optionDataSource.create(model);
   }
 
-  @Authorized()
   @Mutation((returns) => Boolean, { description: '修改配置项' })
   modifyOption(
     @Args('id', { type: () => ID }) id: number,
     @Args('model', { type: () => UpdateOptionInput })
     model: UpdateOptionInput,
-    requestUser: JwtPayload,
   ): Promise<boolean> {
-    return this.optionDataSource.update(id, model, requestUser);
+    return this.optionDataSource.update(id, model);
   }
 
-  @Authorized()
   @Mutation((returns) => Boolean, { description: '删除配置项' })
-  removeOption(@Args('id', { type: () => ID }) id: number, requestUser: JwtPayload): Promise<boolean> {
-    return this.optionDataSource.delete(id, requestUser);
+  removeOption(@Args('id', { type: () => ID }) id: number): Promise<boolean> {
+    return this.optionDataSource.delete(id);
   }
 }

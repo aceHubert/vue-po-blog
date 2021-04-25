@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { OptionAutoload } from '../enums';
+import { OptionAutoload } from '@/common/helpers/enums';
 
 @InputType({ description: '配置修改模型' })
 export class UpdateOptionInput {

@@ -2,7 +2,6 @@ import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
-import { Authorized } from '@/common/decorators/authorized.decorator';
 import { CommentDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
@@ -60,13 +59,11 @@ export class CommentResolver extends createMetaResolver(Comment, CommentMeta, Ne
     return this.userDataSoruce.getSimpleInfo(userId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
   }
 
-  @Authorized()
   @Mutation((returns) => Comment, { description: '添加评论' })
   addComment(@Args('model', { type: () => NewCommentInput }) model: NewCommentInput): Promise<Comment> {
     return this.commentDataSource.create(model);
   }
 
-  @Authorized()
   @Mutation((returns) => Boolean, { description: '修改评论' })
   modifyComment(
     @Args('id', { type: () => ID, description: 'Comment id' }) id: number,
@@ -75,7 +72,6 @@ export class CommentResolver extends createMetaResolver(Comment, CommentMeta, Ne
     return this.commentDataSource.update(id, model);
   }
 
-  @Authorized()
   @Mutation((returns) => Boolean, { description: '删除评论' })
   removeComment(@Args('id', { type: () => ID, description: 'Comment id' }) id: number): Promise<boolean> {
     return this.commentDataSource.delete(id);

@@ -1,9 +1,10 @@
 import { Model, DataTypes } from 'sequelize';
-import { PostStatus, PostCommentStatus } from '@/posts/enums';
 import {
   PostAttributes,
   PostCreationAttributes,
   PostType,
+  PostStatus,
+  PostCommentStatus,
   PostOperateType,
   PostOperateStatus,
 } from '@/orm-entities/interfaces/posts.interface';
@@ -22,7 +23,6 @@ export default class Posts extends Model<
   public excerpt!: string;
   public type!: PostType | PostOperateType;
   public status!: PostStatus | PostOperateStatus;
-  public order!: number;
   public parent?: number;
   public commentStatus!: PostCommentStatus;
   public commentCount!: number;
@@ -62,7 +62,6 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       },
       excerpt: {
         type: DataTypes.TEXT,
-        allowNull: false,
         comment: '摘要',
       },
       type: {
@@ -76,12 +75,6 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         allowNull: false,
         defaultValue: 'publish',
         comment: '状态，如 draft：草稿；publish：发布；等',
-      },
-      order: {
-        type: DataTypes.BIGINT(),
-        allowNull: false,
-        defaultValue: 0,
-        comment: '排序',
       },
       parent: {
         type: DataTypes.BIGINT({ unsigned: true }),

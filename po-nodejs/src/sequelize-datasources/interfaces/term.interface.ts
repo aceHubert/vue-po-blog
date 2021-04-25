@@ -31,6 +31,14 @@ export interface TermTaxonomyModel extends TermAttributes, Omit<TermTaxonomyAttr
 export interface TermRelationshipModel extends TermRelationshipAttributes {}
 
 /**
+ * 协议关系（包含类别）
+ */
+export interface TermTaxonomyRelationshipModel
+  extends Omit<TermAttributes, 'id'>,
+    Omit<TermTaxonomyAttributes, 'id'>,
+    TermRelationshipModel {}
+
+/**
  * 协议（类别）搜索条件
  */
 export interface TermTaxonomyArgs {
@@ -40,20 +48,12 @@ export interface TermTaxonomyArgs {
   group?: number;
 }
 
-export interface ChildrenTermTaxonomyArgs {
-  parentId: number;
-  group?: number;
-}
-
 /**
  * 协议关系搜索条件
  */
-export interface TermTaxonomyByObjectIdArgs {
+export interface TermTaxonomyRelationshipArgs {
   objectId: number;
   taxonomy: string;
-  parentId?: number;
-  group?: number;
-  desc?: boolean;
 }
 
 /**

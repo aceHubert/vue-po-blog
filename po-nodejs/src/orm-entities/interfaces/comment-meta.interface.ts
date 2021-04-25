@@ -5,6 +5,7 @@ export interface CommentMetaAttributes {
   commentId: number;
   metaKey: string;
   metaValue: string | null;
+  private: 'yes' | 'no';
 }
 
-export interface CommentMetaCreationAttributes extends Optional<CommentMetaAttributes, 'id'> {}
+export interface CommentMetaCreationAttributes extends Optional<CommentMetaAttributes, 'id' | 'private'> {}

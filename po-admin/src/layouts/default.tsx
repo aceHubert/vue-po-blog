@@ -16,14 +16,8 @@ import { User, Actions } from '@/components/GlobalHeader/AvatarDropdown';
   name: 'DefaultLayout',
 })
 export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
-  get defaultMenus() {
-    return getDefaultMenus((key, fallback) => this.$tv(key, fallback) as string);
-  }
-
   get menus() {
     const routerReslove = this.$router.resolve.bind(this.$router);
-    const menus = this.menuRoleFilter(this.defaultMenus);
-
     return (function formatMenus(menus): RouteConfig[] {
       return menus.map(({ name, title, icon, children }) => ({
         name,
@@ -31,7 +25,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
         meta: { title, icon },
         children: children && children.length ? formatMenus(children) : undefined,
       }));
-    })(menus);
+    })(getDefaultMenus((key, fallback) => this.$tv(key, fallback) as string));
   }
 
   get currentUser() {

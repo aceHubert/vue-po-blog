@@ -5,6 +5,7 @@ export interface MediaMetaAttributes {
   mediaId: number;
   metaKey: string;
   metaValue: string | null;
+  private: 'yes' | 'no';
 }
 
-export interface MediaMetaCreationAttributes extends Optional<MediaMetaAttributes, 'id'> {}
+export interface MediaMetaCreationAttributes extends Optional<MediaMetaAttributes, 'id' | 'private'> {}

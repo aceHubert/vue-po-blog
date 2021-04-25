@@ -1,6 +1,9 @@
 import { Model, DataTypes } from 'sequelize';
-import { CommentType } from '@/comments/enums';
-import { CommentAttributes, CommentCreationAttributes } from '@/orm-entities/interfaces/comments.interface';
+import {
+  CommentAttributes,
+  CommentCreationAttributes,
+  CommentType,
+} from '@/orm-entities/interfaces/comments.interface';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 

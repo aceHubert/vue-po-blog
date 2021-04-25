@@ -1,7 +1,6 @@
 import { Vue, Component } from 'nuxt-property-decorator';
-import { UserCapability } from '@/includes/datas';
+import { UserCapability } from '@/includes/datas/enums';
 import { userStore } from '@/store/modules';
-import { getArrayFromOverloadedRest } from '@/utils/util';
 
 @Component
 export default class GlobalMixin extends Vue {
@@ -9,11 +8,8 @@ export default class GlobalMixin extends Vue {
    * 判断用户是否的操作的权限
    * @param capabilities 权限（任何一个即可）
    */
-  hasCapability(capabilities: UserCapability[]): boolean;
-  hasCapability(...capabilities: UserCapability[]): boolean;
-  hasCapability(...capabilitiesOrCapabilityArray: Array<UserCapability | UserCapability[]>): boolean {
+  hasCapability(...capabilities: UserCapability[]): boolean {
     if (userStore.role) {
-      const capabilities = getArrayFromOverloadedRest(capabilitiesOrCapabilityArray);
       return userStore.capabilities.some((capability) => capabilities.includes(capability));
     }
     return false;
@@ -24,14 +20,7 @@ export default class GlobalMixin extends Vue {
    * @param query
    * @param option
    */
-  updateRouteQuery(
-    query: Dictionary<string | undefined>,
-    {
-      replace = false,
-      onComplete,
-      onAbort,
-    }: { replace?: boolean; onComplete?: Function; onAbort?: (e: Error) => void } = {},
-  ): void {
+  updateRouteQuery(query: Dictionary<string | undefined>, { replace = false }: { replace?: boolean } = {}): void {
     const oldQuery = this.$route.query;
     const path = this.$route.path;
     // 对象的拷贝
@@ -44,9 +33,9 @@ export default class GlobalMixin extends Vue {
       }
     }
     if (replace) {
-      this.$router.replace({ path, query: newQuery }, onComplete, onAbort);
+      this.$router.replace({ path, query: newQuery });
     } else {
-      this.$router.push({ path, query: newQuery }, onComplete, onAbort);
+      this.$router.push({ path, query: newQuery });
     }
   }
 }

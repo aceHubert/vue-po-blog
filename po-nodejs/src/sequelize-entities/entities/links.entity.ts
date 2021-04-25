@@ -1,6 +1,10 @@
 import { Model, DataTypes } from 'sequelize';
-import { LinkTarget, LinkVisible } from '@/links/enums';
-import { LinkAttributes, LinkCreationAttributes } from '@/orm-entities/interfaces/links.interface';
+import {
+  LinkAttributes,
+  LinkCreationAttributes,
+  LinkTarget,
+  LinkVisible,
+} from '@/orm-entities/interfaces/links.interface';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 

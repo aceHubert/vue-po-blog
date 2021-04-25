@@ -1,9 +1,9 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int, Context } from '@nestjs/graphql';
+import { PostType } from '@/common/helpers/enums';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
-import { PostType } from '@/orm-entities/interfaces';
 import { PostDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
@@ -32,25 +32,22 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
   page(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Fields() fields: ResolveTree,
-    @Context('user') requestUser?: JwtPayload,
   ): Promise<Page | null> {
-    return this.postDataSource.get(id, PostType.Page, this.getFieldNames(fields.fieldsByTypeName.Page), requestUser);
+    return this.postDataSource.get(id, PostType.Page, this.getFieldNames(fields.fieldsByTypeName.Page));
   }
 
   @Query((returns) => PagedPage, { description: '获取分页页面列表' })
-  pages(@Args() args: PagedPageArgs, @Fields() fields: ResolveTree, @Context('user') requestUser?: JwtPayload) {
+  pages(@Args() args: PagedPageArgs, @Fields() fields: ResolveTree) {
     return this.postDataSource.getPaged(
       args,
       PostType.Page,
       this.getFieldNames(fields.fieldsByTypeName.PagedPage.rows.fieldsByTypeName.Page),
-      requestUser,
     );
   }
 
-  @Authorized()
   @Query((returns) => [PostStatusCount], { description: '获取文章按状态分组数量' })
-  pageCountByStatus(@Context('user') requestUser: JwtPayload) {
-    return this.postDataSource.getCountByStatus(PostType.Page, requestUser);
+  pageCountByStatus() {
+    return this.postDataSource.getCountByStatus(PostType.Page);
   }
 
   @Query((returns) => [PostDayCount], { description: '获取文章按天分组数量' })

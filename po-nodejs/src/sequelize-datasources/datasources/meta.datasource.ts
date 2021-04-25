@@ -1,4 +1,4 @@
-import { lowerFirst, flattenDeep } from 'lodash';
+import { lowerFirst } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { RuntimeError, ValidationError } from '@/common/utils/gql-errors.utils';
 import { BaseDataSource } from './base.datasource';
@@ -13,7 +13,6 @@ import { MetaDataSource as IMetaDataSource } from '../interfaces/meta-data-sourc
  * 如子类名为 PostDataSource, 则会查找 PostMeta 模型 及 postId 字段
  * 如需要指定模型及字段名，可在子类构造函数中进行修改
  * metaKey 不可以同时存在带有前缀的参数，如：po_locale 和 locale, 根据metaKey 修改的时候会被同时修改
- * metaKey 前缀为 $ 为关键字，无法操作，内部调用直接用原模型操作
  */
 export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaInputType extends NewMetaInput>
   extends BaseDataSource
@@ -37,42 +36,22 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
   }
 
   /**
-   * metaKey 前缀是$为私有的，返回值去掉$前缀
-   * @param key metaKey
-   */
-  private fixMetaKey(key: string) {
-    if (key.startsWith('$')) {
-      return key.substr(1);
-    }
-    return key;
-  }
-
-  /**
    * 获取元数据
    * @param id meta Id
    */
-  getMeta(id: number, fields: string[]): Promise<MetaReturnType | null> {
-    return this.metaModel
-      .findOne({
-        attributes: this.filterFields(fields, this.metaModel),
-        where: {
-          id,
-          metaKey: {
-            [this.Op.notLike]: '$%',
-          },
-        },
-      })
-      .then((meta) => {
-        if (meta) {
-          const { metaKey, ...rest } = meta.toJSON() as any;
-          return ({
-            ...rest,
-            metaKey:
-              metaKey && metaKey.startsWith(this.tablePrefix) ? metaKey.substr(this.tablePrefix.length) : metaKey,
-          } as unknown) as MetaReturnType;
-        }
-        return null;
-      });
+  getMeta(id: number): Promise<MetaReturnType | null> {
+    return this.metaModel.findByPk(id).then((meta) => {
+      if (meta) {
+        // 排除掉 private 字段
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { metaKey, private: p, ...rest } = meta.toJSON() as any;
+        return ({
+          ...rest,
+          metaKey: metaKey && metaKey.startsWith(this.tablePrefix) ? metaKey.substr(this.tablePrefix.length) : metaKey,
+        } as unknown) as MetaReturnType;
+      }
+      return null;
+    });
   }
 
   /**
@@ -80,18 +59,19 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * @param modelId 实体 id
    * @param metaKey metaKey
    */
-  getMetaByKey(modelId: number, metaKey: string, fields: string[]): Promise<MetaReturnType | null> {
+  getMetaByKey(modelId: number, metaKey: string): Promise<MetaReturnType | null> {
     return this.metaModel
       .findOne({
-        attributes: this.filterFields(fields, this.metaModel),
         where: {
           [this.metaModelIdFieldName]: modelId,
-          metaKey: this.fixMetaKey(metaKey),
+          metaKey,
         },
       })
       .then((meta) => {
         if (meta) {
-          const { metaKey, ...rest } = meta.toJSON() as any;
+          // 排除掉 private 字段
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { metaKey, private: p, ...rest } = meta.toJSON() as any;
           return ({
             ...rest,
             metaKey:
@@ -104,7 +84,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
 
   /**
    * 获取元数据
-   * 如果 metaKeys 为空或长度为0，则会返回所有非私有（$前缀）的的数据
+   * 如果 metaKeys 为空或长度为0，则会返回所有非 private 的数据
    * @param modelId 实体 Id
    * @param metaKeys 过滤的字段(不需要添加 table 前缀，会自动匹配到带有前缀的数据)
    * @param fields 返回字段
@@ -114,26 +94,27 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
       .findAll({
         attributes: this.filterFields(fields, this.metaModel),
         where: {
+          private: 'no',
           [this.metaModelIdFieldName]: modelId,
           ...(metaKeys && metaKeys.length
             ? {
-                metaKey: flattenDeep(
-                  metaKeys.map((metaKey) => [
-                    this.fixMetaKey(metaKey),
-                    `${this.tablePrefix}${this.fixMetaKey(metaKey)}`,
-                  ]),
-                ),
-              }
-            : {
                 metaKey: {
-                  [this.Op.notLike]: '$%',
+                  [this.Op.or]: [
+                    { [this.Op.in]: metaKeys },
+                    {
+                      [this.Op.in]: metaKeys.map((metaKey) => `${this.tablePrefix}${metaKey}`),
+                    },
+                  ],
                 },
-              }),
+              }
+            : null),
         },
       })
       .then((metas) =>
         metas.map((meta) => {
-          const { metaKey, ...rest } = meta.toJSON() as any;
+          // 排除掉 private 字段
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { metaKey, private: p, ...rest } = meta.toJSON() as any;
           return ({
             ...rest,
             metaKey:
@@ -157,7 +138,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
         (await this.metaModel.count({
           where: {
             [this.metaModelIdFieldName]: modelId,
-            metaKey: [this.fixMetaKey(metaKeys), `${this.tablePrefix}${this.fixMetaKey(metaKeys)}`],
+            metaKey: [metaKeys, `${this.tablePrefix}${metaKeys}`],
           },
         })) > 0
       );
@@ -168,7 +149,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
           [this.metaModelIdFieldName]: modelId,
           metaKey: Array.prototype.concat.apply(
             [],
-            metaKeys.map((metaKey) => [this.fixMetaKey(metaKey), `${this.tablePrefix}${this.fixMetaKey(metaKey)}`]),
+            metaKeys.map((metaKey) => [metaKey, `${this.tablePrefix}${metaKey}`]),
           ),
         },
       });
@@ -185,7 +166,6 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * @param model 元数据实体
    */
   async createMeta(model: NewMetaInputType): Promise<MetaReturnType> {
-    model.metaKey = this.fixMetaKey(model.metaKey);
     const isExists = await this.isMetaExists((model as any)[this.metaModelIdFieldName], model.metaKey);
 
     if (isExists) {
@@ -195,7 +175,8 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
     const meta = await this.metaModel.create(model);
     // 排除掉 private 字段
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return meta.toJSON() as MetaReturnType;
+    const { private: p, ...restMeta } = meta.toJSON() as any;
+    return restMeta as MetaReturnType;
   }
 
   /**
@@ -204,9 +185,6 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * @param models 元数据实体集合
    */
   async blukCreateMeta(modelId: number, models: NewMetaInput[]): Promise<MetaReturnType[]> {
-    models.forEach((model) => {
-      model.metaKey = this.fixMetaKey(model.metaKey);
-    });
     const falseOrMetaKeys = await this.isMetaExists(
       modelId,
       models.map((model) => model.metaKey),
@@ -221,7 +199,12 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
         ...model,
       })),
     );
-    return metas.map((meta) => meta.toJSON() as MetaReturnType);
+    return metas.map((meta) => {
+      // 排除掉 private 字段
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { private: p, ...restMeta } = meta.toJSON() as any;
+      return restMeta as MetaReturnType;
+    });
   }
 
   /**
@@ -235,12 +218,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
           metaValue,
         },
         {
-          where: {
-            id,
-            metaKey: {
-              [this.Op.notLike]: '$%',
-            },
-          },
+          where: { id },
         },
       )
       .then(([count]) => count > 0);
@@ -261,7 +239,9 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
         {
           where: {
             [this.metaModelIdFieldName]: modelId,
-            metaKey: [this.fixMetaKey(metaKey), `${this.tablePrefix}${this.fixMetaKey(metaKey)}`],
+            metaKey: {
+              [this.Op.or]: [metaKey, `${this.tablePrefix}${metaKey}`],
+            },
           },
         },
       )
@@ -275,12 +255,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
   deleteMeta(id: number): Promise<boolean> {
     return this.metaModel
       .destroy({
-        where: {
-          id,
-          metaKey: {
-            [this.Op.notLike]: '$%',
-          },
-        },
+        where: { id },
       })
       .then((count) => count > 0);
   }

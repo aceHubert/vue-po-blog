@@ -68,20 +68,10 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 
 // 关联
 export const associate: TableAssociateFunc = function associate(models) {
-  // TermTaxonomy.termId <--> Terms.id
-  models.TermTaxonomy.hasOne(models.Terms, {
-    foreignKey: 'id',
-    sourceKey: 'termId',
-    as: 'Terms',
-    constraints: false,
-  });
-  models.Terms.belongsTo(models.TermTaxonomy, { foreignKey: 'id', targetKey: 'termId', constraints: false });
-
   // TermTaxonomy.id <--> TermRelationships.taxonomyId
   models.TermTaxonomy.hasMany(models.TermRelationships, {
     foreignKey: 'taxonomyId',
     sourceKey: 'id',
-    as: 'TermRelationships',
     constraints: false,
   });
   models.TermRelationships.belongsTo(models.TermTaxonomy, {

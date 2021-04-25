@@ -11,16 +11,15 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const reflector = app.get(Reflector);
   const authService = app.get(AuthService);
+  const reflector = app.get(Reflector);
 
   // express-jwt middleware
   app.use(
     jwt({
       secret(req: Request, payload: JwtPayload, done: (err: any, secret?: secretType) => void) {
-        console.log(payload.device);
         authService
-          .getScrect(payload.id, payload.device)
+          .getScrect(payload.id)
           .then((secret) => done(null, secret))
           .catch(done);
       },

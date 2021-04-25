@@ -1,5 +1,5 @@
 import { Vue, Component } from 'nuxt-property-decorator';
-import { UserCapability } from '@/includes/datas';
+
 {
   /* <router>
 {
@@ -13,9 +13,6 @@ import { UserCapability } from '@/includes/datas';
 @Component({
   name: 'ThemeCustomize',
   layout: 'blank',
-  meta: {
-    capabilities: [UserCapability.Customize],
-  },
 })
 export default class ThemeCustomize extends Vue {
   render() {

@@ -9,8 +9,4 @@ export class UserLoginDto {
   @IsNotEmpty({ message: 'Password is required!' })
   @MinLength(6, { message: 'The password length must not be less than 6 characters!' })
   readonly password!: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'Device is required!' })
-  readonly device!: string;
 }

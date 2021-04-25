@@ -3,17 +3,19 @@ import { camelCase, lowerFirst } from 'lodash-es';
 import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
-import { UserRole, UserCapability } from '@/includes/datas';
+import { UserRole, UserCapability } from '@/includes/datas/enums';
 import { userStore } from '@/store/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
-import { UserWithRole, UserMetas, UserPagedQuery, UserPagedResponse } from 'types/datas';
+import { PagerQuery, UserWithRole, UserMetas, UserPagerQuery, UserPagerResponse } from 'types/datas';
 import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
 
 // import { Table } from 'types/constants';
+
+type QueryParams = Omit<UserPagerQuery, keyof PagerQuery<{}>>;
 
 enum BlukActions {
   Delete = 'delete',
@@ -84,12 +86,14 @@ export default class UserIndex extends Vue {
   selectedRowKeys!: string[];
   roleCounts!: Array<{ userRole: UserRole | 'None'; count: number }>;
   itemCount!: number;
+  searchQuery!: QueryParams;
   blukApplying!: boolean;
 
   data() {
     return {
       // columns: [],
       selectedRowKeys: [],
+      searchQuery: {},
       roleCounts: [],
       itemCount: 0,
       blukApplying: false,
@@ -112,7 +116,7 @@ export default class UserIndex extends Vue {
   }
 
   // 添加 All 选项
-  get roleOptions(): StatusOption[] {
+  get roleOptions(): StatusOption<UserRole | 'None' | undefined>[] {
     return [
       {
         value: undefined,
@@ -138,7 +142,7 @@ export default class UserIndex extends Vue {
   }
 
   // 批量操作
-  get blukActionOptions(): BlukAcitonOption[] {
+  get blukActionOptions(): BlukAcitonOption<BlukActions>[] {
     return [
       {
         value: BlukActions.Delete,
@@ -149,14 +153,8 @@ export default class UserIndex extends Vue {
 
   // 加载 table 数据
   loadData({ page, size }: Parameters<DataSourceFn>[0]) {
-    const query: UserPagedQuery = {
-      keyword: this.$route.query['keyword'] as string,
-      userRole: this.$route.query['role'] as UserRole,
-      offset: (page - 1) * size,
-      limit: size,
-    };
     return this.graphqlClient
-      .query<{ users: UserPagedResponse }, UserPagedQuery>({
+      .query<{ users: UserPagerResponse }, UserPagerQuery>({
         query: gql`
           query getUsers($keyword: String, $userRole: USER_ROLE_WITH_NONE, $limit: Int, $offset: Int) {
             users(keyword: $keyword, userRole: $userRole, limit: $limit, offset: $offset) {
@@ -178,7 +176,11 @@ export default class UserIndex extends Vue {
             }
           }
         `,
-        variables: query,
+        variables: {
+          ...this.searchQuery,
+          offset: (page - 1) * size,
+          limit: size,
+        },
       })
       .then(({ data }) => {
         this.itemCount = data.users.total;
@@ -231,12 +233,13 @@ export default class UserIndex extends Vue {
   }
 
   // keyword 的搜索按纽
-  handleSearch() {
+  handleSearch(query: { keyword?: string; role?: UserRole | 'None' }) {
+    Object.assign(this.searchQuery, query);
     this.refreshTable();
   }
 
   // 批量操作
-  handleBlukApply(action: string | number) {
+  handleBlukApply(action: BlukActions) {
     if (!this.selectedRowKeys.length) {
       this.$message.warn({ content: this.$tv('user.bulkRowReqrired', 'Please choose a row!') as string });
       return;
@@ -245,8 +248,8 @@ export default class UserIndex extends Vue {
     if (action === BlukActions.Delete) {
       this.$confirm({
         content: this.$tv('user.btnTips.blukDeletePopContent', 'Do you really want to delete these users?'),
-        okText: this.$tv('user.btnText.deletePopOkText', 'Ok') as string,
-        cancelText: this.$tv('user.btnText.deletePopCancelText', 'No') as string,
+        okText: this.$tv('user.btnText.deletePopOkBtn', 'Ok') as string,
+        cancelText: this.$tv('user.btnText.deletePopCancelBtn', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
           this.graphqlClient
@@ -268,7 +271,7 @@ export default class UserIndex extends Vue {
                 this.$message.error(
                   this.$tv(
                     'user.tips.blukDeleteFailed',
-                    'An error occurred while deleting users, please try later again!',
+                    'An error occurred during deleting users, please try later again!',
                   ) as string,
                 );
               }
@@ -306,7 +309,7 @@ export default class UserIndex extends Vue {
           this.$message.error(
             this.$tv(
               'user.tips.deleteFailed',
-              'An error occurred while deleting user, please try later again!',
+              'An error occurred during deleting user, please try later again!',
             ) as string,
           );
         }
@@ -349,8 +352,8 @@ export default class UserIndex extends Vue {
               <a-divider type="vertical" />,
               <a-popconfirm
                 title={this.$tv('user.btnTips.deletePopContent', 'Do you really want to delete this user?')}
-                okText={this.$tv('user.btnText.deletePopOkText', 'Ok')}
-                cancelText={this.$tv('user.btnText.deletePopCancelText', 'No')}
+                okText={this.$tv('user.btnText.deletePopOkBtn', 'Ok')}
+                cancelText={this.$tv('user.btnText.deletePopCancelBtn', 'No')}
                 onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
               >
                 <a href="#none" title={this.$tv('user.btnTips.delete', 'Delete this user permanently') as string}>
@@ -428,11 +431,14 @@ export default class UserIndex extends Vue {
       <a-card class="post-index" bordered={false}>
         <SearchForm
           keywordPlaceholder={this.$tv('user.search.keywordPlaceholder', 'Search Post') as string}
-          statusName="role"
+          statusName="userRole"
           itemCount={this.itemCount}
           statusOptions={this.roleOptions}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
+          onPreFilters={(query) => {
+            Object.assign(this.searchQuery, query);
+          }}
           onSearch={this.handleSearch.bind(this)}
           onBlukApply={this.handleBlukApply.bind(this)}
         ></SearchForm>

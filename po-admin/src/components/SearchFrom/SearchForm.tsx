@@ -1,41 +1,26 @@
-import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator';
+import { Vue, Component, Prop, Emit, Watch } from 'nuxt-property-decorator';
 import classes from './SearchForm.less?module';
 
 // Types
 import * as tsx from 'vue-tsx-support';
 import { Route } from 'vue-router';
 
-/**
- * 状态配置
- * 当 value 为 object 时，key 为 URI query key
- * 每一项是平等关系
- * 例如：
- * [
- * {value:1} // ?[statusName]=1
- * {value:{author:2,type:post}} // ?author=2&type=post
- * ]
- */
-export type StatusOption = {
-  value: string | number | undefined | Dictionary<string | number>;
+export type StatusOption<Value = any> = {
+  value: Value;
   label: string;
   count: number;
-  /** 一直显示当前状态(option.keepStatusShown, prop.keepStatusShown, count > 0 任一条件满足即显示)，默认：false */
-  keepStatusShown?: boolean;
+  keepStatusShown?: boolean; // 一直显示当前状态，默认在数量为 > 0 的时候才显示
 };
 
-/**
- * 批量操作配置
- */
-export type BlukAcitonOption = {
-  value: string | number;
+export type BlukAcitonOption<Value = any> = {
+  value: Value;
   label: string;
 };
 
 /**
- * 路由初始化参数
  * query:{
- *  [keyword]: keywrod,
- *  [status]: status
+ *  s: keywrod,
+ *  status: status
  * }
  */
 
@@ -59,10 +44,12 @@ export default class SearchFrom extends Vue {
     >
   > &
     tsx.DeclareOnEvents<{
-      /** 关键字输入框的查询或都状态（如有配置）点击之后 */
-      onSearch: (filters: Dictionary<string | number>) => void;
+      /** created 时从 router 获取的初始参数 */
+      onPreFilters: (filters: { keyword?: string; [status: string]: any }) => void;
+      /** 关键字输入框的查询 */
+      onSearch: (filters: { keyword?: string; [status: string]: any }) => void;
       /** 批量操作 */
-      onBlukApply: (action: string | number) => void;
+      onBlukApply: (action: BlukAcitonOption['value']) => void;
     }>;
 
   $scopedSlots!: tsx.InnerScopedSlots<{
@@ -76,13 +63,11 @@ export default class SearchFrom extends Vue {
 
   /**  keyword input placeholder */
   @Prop(String) keywordPlaceholder?: string;
-  /** 关键字名字，显示到 URI query 中的 key, 默认：keyword */
-  @Prop({ type: String, default: 'keyword' }) keywordName!: string;
-  /** 状态名字，显示到 URI query 中的 key, 默认：status */
+  /** 状态名字，显示到url query key 和 search 参数中 key, 默认：status */
   @Prop({ type: String, default: 'status' }) statusName!: string;
-  /** 左上角状态搜索链接配置 */
+  /**  默认选中值为 underfined 如果未能从 $route.query 中获取到选中参数 */
   @Prop({ type: Array, default: () => [] }) statusOptions!: StatusOption[];
-  /** 一直显示所有状态（statusOptions 中的配置会抵消），默认：count > 0 的时候才显示 */
+  /** 一直显示所有状态，默认在数量为 > 0 的时候才显示 */
   @Prop({ type: Boolean, default: false }) keepStatusShown!: boolean;
   /** 批量操作，如果没有选项则不显示 */
   @Prop({ type: Array, default: () => [] }) blukAcitonOptions!: BlukAcitonOption[];
@@ -106,61 +91,48 @@ export default class SearchFrom extends Vue {
   @Watch('$route', { immediate: true })
   watchRoute(val: Route) {
     const query = val.query as Dictionary<string>;
-    this.localeKeyword = query[this.keywordName] || '';
+    this.localeKeyword = query.s;
     this.localeStatus = query[this.statusName];
   }
 
   @Watch('localeStatus')
   watchLocalStatus() {
     this.$nextTick(() => {
-      this.$emit('search', {
-        [this.keywordName]: this.localeKeyword,
-        [this.statusName]: this.localeStatus,
-      });
+      this.handleSearch();
     });
   }
 
-  getStatusUrl(option: StatusOption) {
-    const query: Dictionary<string> = {};
-    if (typeof option.value === 'object') {
-      Object.entries(option.value).forEach(([key, value]) => {
-        query[key] = String(value);
-      });
-    } else if (option.value) {
-      query[this.statusName] = String(option.value);
-    }
-    return { query };
-  }
-
+  @Emit('search')
   handleSearch() {
-    const query: Dictionary<any> = {
-      [this.keywordName]: this.localeKeyword || undefined,
-    };
-
-    const oldQuery = this.$route.query;
-    const path = this.$route.path;
-    // 对象的拷贝
-    const newQuery = Object.assign(JSON.parse(JSON.stringify(oldQuery)), query);
-    // 移附 undefined 值
-    for (const key in newQuery) {
-      if (typeof newQuery[key] === 'undefined') {
-        delete newQuery[key];
-      }
-    }
-
-    // nuxtjs 重写了push 方法，无法调用Promise
-    this.$router.replace({ path, query: newQuery }, () => {
-      this.$emit('search', {
-        [this.keywordName]: this.localeKeyword,
+    if (this.$router) {
+      const query: Dictionary<any> = {
+        s: this.localeKeyword,
         [this.statusName]: this.localeStatus,
-      });
-    });
+      };
+
+      const oldQuery = this.$route.query;
+      const path = this.$route.path;
+      // 对象的拷贝
+      const newQuery = JSON.parse(JSON.stringify(oldQuery));
+      this.$router.push({ path, query: { ...newQuery, ...query } });
+    }
+    return {
+      keyword: this.localeKeyword,
+      [this.statusName]: this.localeStatus,
+    };
   }
 
   handleBlukAction() {
     if (this.blukAciton) {
       this.$emit('blukApply', this.blukAciton);
     }
+  }
+
+  created() {
+    this.$emit('preFilters', {
+      keyword: this.localeKeyword,
+      [this.statusName]: this.localeStatus,
+    });
   }
 
   render() {
@@ -171,7 +143,10 @@ export default class SearchFrom extends Vue {
             {this.statusOptions.map((option) =>
               option.keepStatusShown || this.keepStatusShown || option.count > 0 ? (
                 <li class={classes.subItem}>
-                  <nuxt-link to={this.getStatusUrl(option)} activeClass="" exactActiveClass="active" exact replace>
+                  <nuxt-link
+                    to={{ query: { ...this.$route.query, [this.statusName]: option.value } }}
+                    class={{ active: option.value === this.localeStatus }}
+                  >
                     {option.label}
                     {option.count > 0 ? <span>({option.count})</span> : null}
                   </nuxt-link>

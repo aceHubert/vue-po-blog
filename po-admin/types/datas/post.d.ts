@@ -1,4 +1,4 @@
-import { PagedQuery, PagedResponse } from './paged';
+import { PagerQuery, PagerResponse } from './pager';
 import { PostStatus, PostCommentStatus } from 'src/includes/datas/enums';
 
 export type Post = {
@@ -10,8 +10,7 @@ export type Post = {
   status: PostStatus;
   commentStatus: PostCommentStatus;
   commentCount: number;
-  categories: Array<{ id: string; name: string }>;
-  tags: Array<{ id: string; name: string }>;
+  parent?: string;
   createTime: Date;
 };
 
@@ -25,24 +24,20 @@ export type PostCreationModel = {
 };
 
 export type PostUpdateModel = Partial<
-  PostCreationModel & {
-    author: string;
+  Omit<PostCreationModel, 'author'> & {
     status: PostStatus;
   }
 >;
 
-export type PostPagedQuery = PagedQuery<{
-  keyword?: string;
+export type PostPagerQuery = PagerQuery<{
+  keywords?: string;
   author?: number;
   status?: PostStatus;
-  categoryId?: string;
-  categoryName?: string;
-  tagId?: string;
-  tagName?: string;
+  categoryIds?: string[];
   date?: string; // yyyyMM
 }>;
 
-export type PostPagedResponse = PagedResponse<PostWithoutContent>;
+export type PostPagerResponse = PagerResponse<PostWithoutContent>;
 
 export type PostArchive = {
   date: Date;
