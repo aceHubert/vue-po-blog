@@ -7,24 +7,15 @@ const host = process.env.HOST || 'localhost';
 const https = false;
 const baseUrl = `http${https ? 's' : ''}://${host}:${port}`;
 // 从执行根目录下读取
-const configPath = path.resolve(process.cwd(), 'po-config.json');
+const configPath = path.resolve(process.cwd(), 'po-config.client.json');
 
-const configs = {
-  frontend: {
-    baseUrl,
-  },
-  backend: {},
+const publicRuntimeConfig = {
+  baseUrl,
 };
 
 try {
-  fs.accessSync(configPath, fs.constants.R_OK);
-  const _configs = require(configPath);
-  if (_configs.frontend) {
-    configs.frontend = Object.assign(configs.frontend, _configs.frontend);
-  }
-  if (_configs.backend) {
-    configs.backend = Object.assign(configs.backend, _configs.backend);
-  }
+  const options = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  Object.assign(publicRuntimeConfig, options);
 } catch (err) {
   // eslint-disable-next-line no-console
   console.log(err.message);
@@ -45,10 +36,10 @@ module.exports = (configContext) => {
     },
     publicRuntimeConfig: Object.assign(
       {},
-      configs.frontend,
+      publicRuntimeConfig,
       configContext.dev ? { baseUrl } : {}, // 在dev模式下启用代理解决跨域问题
     ),
-    privateRuntimeConfig: configs.backend,
+    privateRuntimeConfig: {},
     ssr: true,
     srcDir: 'src/',
     dir: {
@@ -103,10 +94,10 @@ module.exports = (configContext) => {
       ...(configContext.dev
         ? {
             '/api': {
-              target: configs.frontend.baseUrl,
+              target: publicRuntimeConfig.baseUrl,
             },
             '/graphql': {
-              target: configs.frontend.baseUrl,
+              target: publicRuntimeConfig.baseUrl,
             },
           }
         : null),
