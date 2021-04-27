@@ -1,7 +1,4 @@
 {
-
-  "no_capability": "拒绝访问，您没有\"{capability}\"权限！",
-    "no_role_permission": "拒绝访问，需要\"{role}\"角色权限！",
   "login": {
     "faild": "用户名或密码不正确!",
     "success": "登录成功!"
@@ -12,8 +9,5 @@
   "update_pwd": {
     "old_pwd_incorrect": "旧密码不正确!",
     "success": "修改密码成功!"
-  },
-  "token": {
-    "invalid": "无效的token!"
   }
 }
