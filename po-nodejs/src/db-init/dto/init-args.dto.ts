@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import { IsNotEmpty, MinLength, IsLocale, IsUrl, IsEmail } from 'class-validator';
 
 export class InitArgs {
@@ -13,7 +14,10 @@ export class InitArgs {
   locale!: string;
 
   @IsNotEmpty({ message: 'field $property is required' })
-  // eslint-disable-next-line @typescript-eslint/camelcase
+  @IsUrl({ require_tld: false }, { message: 'field $property must be a URL address' })
+  homeUrl!: string;
+
+  @IsNotEmpty({ message: 'field $property is required' })
   @IsUrl({ require_tld: false }, { message: 'field $property must be a URL address' })
   siteUrl!: string;
 

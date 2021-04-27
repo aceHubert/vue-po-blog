@@ -1,5 +1,6 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { GqlContextType } from '@nestjs/graphql';
+import { I18nService } from 'nestjs-i18n';
 import { Request, Response } from 'express';
 import { UnauthorizedError } from 'express-jwt';
 import { JsonWebTokenError } from 'jsonwebtoken';
@@ -11,25 +12,26 @@ import {
   UserInputError,
   ApolloError,
   toApolloError,
-} from '../utils/gql-errors.utils';
+} from '../utils/gql-errors.util';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
-  catch(exception: Error, host: ArgumentsHost) {
+  constructor(private readonly i18nService: I18nService) {}
+
+  async catch(exception: Error, host: ArgumentsHost) {
     const type = host.getType<GqlContextType>();
     if (type === 'http') {
       const http = host.switchToHttp();
 
-      const request = http.getRequest<Request>();
+      const request = http.getRequest<Request & { i18nLang?: string }>();
       const response = http.getResponse<Response>();
-
       const status = this.getHttpCodeFromError(exception);
-      const description = this.getHttpDescriptionFromError(exception);
+      const description = await this.getHttpDescriptionFromError(exception, request.i18nLang);
 
       // @ts-ignore
       if (exception instanceof DatabaseError && exception.original.code === 'ER_NO_SUCH_TABLE') {
         // 当出现表不存在错误时，提示要初始化数据库， 并设置 response.dbInitRequired = true
-        description.message = 'No such table!';
+        description.message = await this.i18nService.t('error.no_such_table', { lang: request.i18nLang });
         description.dbInitRequired = true;
       }
 
@@ -110,11 +112,11 @@ export class AllExceptionFilter implements ExceptionFilter {
    * 获取 http 的 response 对象
    * @param exception Error
    */
-  private getHttpDescriptionFromError(exception: Error): Dictionary<any> {
+  private async getHttpDescriptionFromError(exception: Error, lang?: string): Promise<Dictionary<any>> {
     const description =
       exception instanceof UnauthorizedError // express-jwt UnauthorizedError
         ? exception.inner instanceof JsonWebTokenError // jwt verify error
-          ? 'invalid token!'
+          ? await this.i18nService.t('error.invalid_token', { lang })
           : exception.message
         : exception instanceof HttpException
         ? exception.getResponse()

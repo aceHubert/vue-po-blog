@@ -5,7 +5,7 @@ import { Sequelize, Options } from 'sequelize';
 import { Models } from './interfaces/models.interface';
 import { TableInitFunc } from './interfaces/table-init-func.interface';
 import { TableAssociateFunc } from './interfaces/table-associate-func.interface';
-import { EntityModuleOptions } from './interfaces/entity-options.interface';
+import { EntityModuleOptions } from './interfaces/entity-module-options.interface';
 import { SEQUELIZE_ENTITY_OPTIONS } from './constants';
 
 @Injectable()

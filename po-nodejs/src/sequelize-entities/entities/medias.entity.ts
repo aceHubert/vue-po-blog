@@ -10,7 +10,7 @@ export default class Medias extends Model<
   public id!: number;
   public fileName!: string;
   public originalFileName!: string;
-  public extention!: string;
+  public extension!: string;
   public mimeType!: string;
   public path!: string;
   public userId?: number;
@@ -37,13 +37,13 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         allowNull: false,
         comment: 'Original file name',
       },
-      extention: {
+      extension: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        comment: 'File extention',
+        comment: 'File extension',
       },
       mimeType: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: false,
         comment: 'File mime type',
       },
@@ -63,7 +63,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       sequelize,
       tableName: `${prefix}medias`,
       indexes: [
-        { name: 'extention', fields: ['extention'] },
+        { name: 'extension', fields: ['extension'] },
         { name: 'mime_type', fields: ['mime_type'] },
         { name: 'user_id', fields: ['user_id'] },
       ],

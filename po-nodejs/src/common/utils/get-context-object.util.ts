@@ -1,13 +1,13 @@
-/* eslint-disable no-console */
+/* eslint-disable no-case-declarations */
 import { ExecutionContext } from '@nestjs/common';
-import { GqlContextType, GqlExecutionContext } from '@nestjs/graphql';
 
 export function getContextObject(context: ExecutionContext): any {
-  switch (context.getType<GqlContextType>()) {
+  switch (context.getType<string>()) {
     case 'http':
       return context.switchToHttp().getRequest();
     case 'graphql':
-      return GqlExecutionContext.create(context).getContext();
+      const [, , cxt] = context.getArgs();
+      return cxt;
     case 'rpc':
       return context.switchToRpc().getContext();
     default:

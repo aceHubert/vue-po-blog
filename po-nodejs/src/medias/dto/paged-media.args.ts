@@ -6,8 +6,8 @@ import { PagedArgs } from '@/common/models/general.model';
  */
 @ArgsType()
 export class PagedMediaArgs extends PagedArgs {
-  @Field({ nullable: true, description: 'File extention' })
-  extention?: string;
+  @Field({ nullable: true, description: 'File extension' })
+  extension?: string;
 
   @Field({ nullable: true, description: 'File mime type' })
   mimeType?: string;

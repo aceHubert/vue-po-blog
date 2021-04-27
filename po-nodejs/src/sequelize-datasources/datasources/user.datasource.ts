@@ -2,10 +2,10 @@ import md5 from 'md5';
 import { isUndefined } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ForbiddenError, ValidationError } from '@/common/utils/gql-errors.utils';
-import { UserCapability } from '@/common/helpers/user-capability';
-import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
-import { uuid } from '@/common/utils/uuid.utils';
+import { ForbiddenError, ValidationError } from '@/common/utils/gql-errors.util';
+import { UserCapability } from '@/common/utils/user-capability.util';
+import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/utils/user-meta-keys.util';
+import { uuid } from '@/common/utils/uuid.util';
 import { UserRole, UserStatus } from '@/users/enums';
 import { MetaDataSource } from './meta.datasource';
 

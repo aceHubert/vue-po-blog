@@ -8,7 +8,7 @@ import {
   EntityModuleOptions,
   EntityModuleAsyncOptions,
   EntityOptionsFactory,
-} from './interfaces/entity-options.interface';
+} from './interfaces/entity-module-options.interface';
 
 @Module({
   providers: [EntityService],

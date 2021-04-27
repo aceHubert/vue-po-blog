@@ -1,4 +1,4 @@
-import path from 'path';
+import * as path from 'path';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { I18nModule, QueryResolver, HeaderResolver, AcceptLanguageResolver, CookieResolver } from 'nestjs-i18n';
@@ -9,6 +9,7 @@ import { I18nValidationPipe } from '@/common/pipes/i18n-validation.pipe';
 import { ConfigModule } from '@/config/config.module';
 import { GlobalCacheModule } from '@/global-cache/global-cache.module';
 import { DataSourceModule } from '@/sequelize-datasources/datasource.module';
+import { FileManageModule } from '@/file-manage/file-manage.module';
 import { AuthModule } from '@/auth/auth.module';
 import { DbInitModule } from '@/db-init/db-init.module';
 
@@ -24,12 +25,12 @@ import { TermModule } from '@/terms/term.module';
 import { UserModule } from '@/users/user.module';
 
 const isProduction = process.env.NODE_ENV === 'production';
-const contentPath = path.join(__dirname, '../../po-content');
+const contentPath = isProduction ? path.join(process.cwd(), 'po-content') : path.join(__dirname, '../../po-content');
 
 @Module({
   imports: [
     GlobalCacheModule,
-    ConfigModule.register({ file: 'po-config.json' }),
+    ConfigModule.register({ path: path.join(process.cwd(), 'po-config.server.json') }),
     I18nModule.forRootAsync({
       useFactory: () => {
         return {
@@ -48,11 +49,14 @@ const contentPath = path.join(__dirname, '../../po-content');
       },
       parser: I18nJsonParser,
       resolvers: [
-        { use: QueryResolver, options: ['lang', 'locale', 'l'] },
+        new QueryResolver(['lang', 'locale', 'l']),
         new HeaderResolver(['x-custom-lang', 'x-custom-locale']),
         new CookieResolver(['lang', 'locale', 'l']),
         AcceptLanguageResolver,
       ],
+    }),
+    FileManageModule.register({
+      dest: path.join(contentPath, 'uploads'),
     }),
     DataSourceModule,
     AuthModule,

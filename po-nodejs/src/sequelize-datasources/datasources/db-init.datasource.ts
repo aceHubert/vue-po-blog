@@ -1,8 +1,8 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { UserRoles } from '@/common/helpers/user-roles';
-import { OptionKeys, OptionTablePrefixKeys } from '@/common/helpers/option-keys';
-import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
+import { UserRoles } from '@/common/utils/user-roles.util';
+import { OptionKeys, OptionTablePrefixKeys } from '@/common/utils/option-keys.util';
+import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/utils/user-meta-keys.util';
 import { UserRole } from '@/users/enums';
 import { PostCommentStatus } from '@/posts/enums';
 import { BaseDataSource } from './base.datasource';
@@ -193,7 +193,7 @@ export class DbInitDataSource extends BaseDataSource {
       await this.models.Options.bulkCreate(
         [
           { optionName: OptionKeys.SiteUrl, optionValue: initArgs.siteUrl },
-          { optionName: OptionKeys.Home, optionValue: initArgs.siteUrl },
+          { optionName: OptionKeys.Home, optionValue: initArgs.homeUrl },
           { optionName: OptionKeys.BlogName, optionValue: initArgs.title },
           { optionName: OptionKeys.BlogDescription, optionValue: 'A simple and light blog system' },
           { optionName: OptionKeys.AdminEmail, optionValue: initArgs.email },

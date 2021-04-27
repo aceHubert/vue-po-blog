@@ -6,7 +6,8 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Forbi
 import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
 import { GraphQLResolveInfo, GraphQLOutputType, isObjectType, isInterfaceType, isWrappingType } from 'graphql';
 import { FieldsByTypeName, parse } from 'graphql-parse-resolve-info';
-import { getContextObject } from '../utils/get-context-object.utils';
+import { I18nService } from 'nestjs-i18n';
+import { getContextObject } from '../utils/get-context-object.util';
 import { ROLES_KEY } from '../constants';
 
 // Types
@@ -14,7 +15,7 @@ import { UserRole } from '@/users/enums';
 
 @Injectable()
 export class AuthorizedGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector, private readonly i18nService: I18nService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = getContextObject(context);
@@ -24,6 +25,7 @@ export class AuthorizedGuard implements CanActivate {
 
     const type = context.getType<GqlContextType>();
     const user: JwtPayload | null = ctx.user;
+    const lang: string | undefined = ctx.i18nLang;
 
     // graphql 判断返回实体字段是否有权限
     if (type === 'graphql') {
@@ -37,12 +39,14 @@ export class AuthorizedGuard implements CanActivate {
       const fieldRoles = this.resolveGraphqlOutputFieldsRoles(info);
       if (Object.keys(fieldRoles).length && !user) {
         // 没有的提供 token, return 401
-        throw new UnauthorizedException(`Access denied, You don't permission for this action!`);
+        throw new UnauthorizedException(await this.i18nService.t('error.unauthorized', { lang }));
       }
-      for (const key in fieldRoles) {
-        if (!this.hasPermission(user!, fieldRoles[key])) {
+      for (const field in fieldRoles) {
+        if (!this.hasPermission(user!, fieldRoles[field])) {
           // false return 403
-          throw new ForbiddenException(`Access denied, You don't role capability for field "${key}"!`);
+          throw new ForbiddenException(
+            await this.i18nService.t('error.forbidden_field', { lang, args: { field, userRole: user!.role } }),
+          );
         }
       }
     }
@@ -57,10 +61,10 @@ export class AuthorizedGuard implements CanActivate {
 
     if (!user) {
       // 没有的提供 token, return 401
-      throw new UnauthorizedException(`Access denied, You don't permission for this action!`);
+      throw new UnauthorizedException(await this.i18nService.t('error.unauthorized', { lang }));
     } else if (!this.hasPermission(user, roles)) {
       // false return 403
-      throw new ForbiddenException(`Access denied, You don't role capability for this action!`);
+      throw new ForbiddenException(await this.i18nService.t('error.forbidden', { lang }));
     }
     return true;
   }

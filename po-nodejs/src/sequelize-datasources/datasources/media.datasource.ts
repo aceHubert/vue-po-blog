@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError } from '@/common/utils/gql-errors.utils';
+import { ValidationError } from '@/common/utils/gql-errors.util';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
@@ -36,6 +36,26 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
   }
 
   /**
+   * 根据文件名获取媒体
+   * @param fileName 文件名 (通常文件名为 md5 用于判断唯一)
+   * @param fields 返回的字段
+   * @returns
+   */
+  getByName(fileName: string, fields: string[]): Promise<MediaModel | null> {
+    // 主键(meta 查询)
+    if (!fields.includes('id')) {
+      fields.push('id');
+    }
+
+    return this.models.Medias.findOne({
+      attributes: this.filterFields(fields, this.models.Medias),
+      where: {
+        fileName,
+      },
+    }).then((media) => media?.toJSON() as MediaModel);
+  }
+
+  /**
    * 获取媒体分页
    * @param param 查询条件
    * @param fields 返回的字段
@@ -64,8 +84,8 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
   }
 
   /**
-   * 判断文件名是否在在 (通常文件名为 md5 用于判断唯一)
-   * @param fileName 文件名
+   * 判断文件名是否在在
+   * @param fileName 文件名 (通常文件名为 md5 用于判断唯一)
    */
   async isExists(fileName: string): Promise<boolean> {
     return (
@@ -82,7 +102,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewMediaInput, requestUser: JwtPayloadWithLang): Promise<MediaModel> {
+  async create(model: NewMediaInput, requestUser?: JwtPayloadWithLang): Promise<MediaModel> {
     if (await this.isExists(model.fileName)) {
       throw new ValidationError(`The media filename "${model.fileName}" has existed!`);
     }
@@ -93,7 +113,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       const media = await this.models.Medias.create(
         {
           ...rest,
-          userId: requestUser.id,
+          userId: requestUser?.id || 0,
         },
         { transaction: t },
       );

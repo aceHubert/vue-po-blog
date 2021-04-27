@@ -1,2 +1,4 @@
-/po-config.json
+/dist
+
+/po-config.*.json
 /src/schema.gql

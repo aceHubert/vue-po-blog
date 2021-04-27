@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { UserCapability } from '@/common/helpers/user-capability';
+import { UserCapability } from '@/common/utils/user-capability.util';
 import { BaseDataSource } from './base.datasource';
 
 // Types

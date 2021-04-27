@@ -1,3 +1,4 @@
+import '@types/multer';
 import { Context } from 'apollo-server-core';
 import { UserRole } from '@/users/enums';
 

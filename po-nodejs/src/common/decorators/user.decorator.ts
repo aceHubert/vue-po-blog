@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { getContextObject } from '../utils/get-context-object.utils';
+import { getContextObject } from '../utils/get-context-object.util';
 
 /**
  * 当前请求的 JwtPayload & lang
