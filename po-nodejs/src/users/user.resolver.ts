@@ -7,7 +7,7 @@ import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
 import { User as RequestUser } from '@/common/decorators/user.decorator';
 import { ArgValidateByPipe } from '@/common/pipes/arg-valitate-by.pipe';
-import { ForbiddenError } from '@/common/utils/gql-errors.utils';
+import { ForbiddenError } from '@/common/utils/gql-errors.util';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
 import { UserRole } from './enums/user-role.enum';
 import { UserStatus } from './enums/user-status.enum';
@@ -126,9 +126,10 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   ): Promise<boolean> {
     if (model.userRole && requestUser.role !== UserRole.Administrator) {
       throw new ForbiddenError(
-        await i18n.t('auth.no_role_permission', {
+        await i18n.t('error.forbidden_role', {
           args: {
-            role: UserRole.Administrator,
+            userRole: requestUser.role,
+            requiredRole: UserRole.Administrator,
           },
         }),
       );

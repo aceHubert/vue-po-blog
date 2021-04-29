@@ -1,7 +1,7 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { isUndefined } from 'lodash';
-import { ValidationError } from '@/common/utils/gql-errors.utils';
+import { ValidationError } from '@/common/utils/gql-errors.util';
 import { MetaDataSource } from './meta.datasource';
 
 // Types

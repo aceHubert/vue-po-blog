@@ -169,10 +169,10 @@ export class AuthService {
         jwt.verify(token, screct, jwtOptions);
         return payload;
       } catch {
-        throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+        throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
       }
     } else {
-      throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+      throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
     }
   }
 
@@ -198,10 +198,10 @@ export class AuthService {
         jwt.verify(refreshToken, screct, jwtOptions);
         return payload;
       } catch {
-        throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+        throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
       }
     } else {
-      throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+      throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
     }
   }
 
@@ -219,7 +219,7 @@ export class AuthService {
     try {
       return jwt.decode(token, { ...jwtOptions, json: true }) as JwtPayload | null;
     } catch (err) {
-      throw new UnauthorizedException(await this.i18nService.t('auth.token.invalid', { lang }));
+      throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
     }
   }
 

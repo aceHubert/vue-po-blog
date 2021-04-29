@@ -1,2 +1,2 @@
-export * from './entity-options.interface';
+export * from './entity-module-options.interface';
 export * from './models.interface';

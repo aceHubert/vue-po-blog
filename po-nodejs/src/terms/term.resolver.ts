@@ -13,7 +13,7 @@ import { NewTermMetaInput } from './dto/new-term-meta.input';
 import { NewTermRelationshipInput } from './dto/new-term-relationship.input';
 import { UpdateTermInput } from './dto/update-term.input';
 import { TermTaxonomy, TermRelationship, TermMeta } from './models/term.model';
-import { Authorized } from '~/common/decorators/authorized.decorator';
+import { Authorized } from '@/common/decorators/authorized.decorator';
 
 @Resolver(() => TermTaxonomy)
 export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, NewTermMetaInput, TermDataSource, {

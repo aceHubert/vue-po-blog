@@ -1,6 +1,6 @@
 import { SetMetadata, CustomDecorator } from '@nestjs/common';
 import { Extensions } from '@nestjs/graphql';
-import { getArrayFromOverloadedRest } from '../helpers/decorators';
+import { getArrayFromOverloadedRest } from '../utils/array-overload.util';
 import { ROLES_KEY } from '../constants';
 
 // Types

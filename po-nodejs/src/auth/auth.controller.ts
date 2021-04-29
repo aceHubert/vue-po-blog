@@ -40,7 +40,7 @@ export class AuthController extends BaseController {
       if (newToken) {
         return this.success(newToken);
       } else {
-        return this.faild(await i18n.t('auth.token.invalid'));
+        return this.faild(await i18n.t('error.invalid_token'));
       }
     } catch (err) {
       return this.faild(err.message);

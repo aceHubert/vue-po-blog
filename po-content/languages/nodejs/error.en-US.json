@@ -1,0 +1,18 @@
+{
+  "unauthorized": "Access denied, You don't permission for this action!",
+  "forbidden_field": "Access denied, You don't capability for field \"{field}\"!",
+  "forbidden_capability": "Access denied, You don't have capability \"{requiredCapability}\" for this action!",
+  "forbidden_role": "Access denied, You don't have permission (role \"{requiredRole}\" required) for this action!",
+  "forbidden": "Access denied, You don't capability for this action!",
+  "invalid_token": "Invalid token!",
+  "no_such_table": "No such table!",
+  "file": {
+    "limit_part_count": "Too many parts!",
+    "limit_file_size": "File too large!",
+    "limit_file_count": "Too many files!",
+    "limit_field_key": "Field name too long!",
+    "limit_field_value": "Field value too long!",
+    "limit_field_count": "Too many fields!",
+    "limit_unexpected_field": "Unexpected field"
+  }
+}

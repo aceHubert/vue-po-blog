@@ -9,8 +9,8 @@ export class NewMediaInput {
   @Field({ description: 'Original filename' })
   originalFileName!: string;
 
-  @Field({ description: 'File extention' })
-  extention!: string;
+  @Field({ description: 'File extension' })
+  extension!: string;
 
   @Field({ description: 'File mime type' })
   mimeType!: string;

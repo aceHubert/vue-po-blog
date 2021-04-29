@@ -1,8 +1,8 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { UserRoles } from '@/common/helpers/user-roles';
-import { OptionKeys, OptionTablePrefixKeys } from '@/common/helpers/option-keys';
-import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/helpers/user-meta-keys';
+import { UserRoles } from '@/common/utils/user-roles.util';
+import { OptionKeys, OptionTablePrefixKeys } from '@/common/utils/option-keys.util';
+import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/utils/user-meta-keys.util';
 import { UserRole } from '@/users/enums';
 import { PostCommentStatus } from '@/posts/enums';
 import { BaseDataSource } from './base.datasource';
@@ -193,7 +193,7 @@ export class DbInitDataSource extends BaseDataSource {
       await this.models.Options.bulkCreate(
         [
           { optionName: OptionKeys.SiteUrl, optionValue: initArgs.siteUrl },
-          { optionName: OptionKeys.Home, optionValue: initArgs.siteUrl },
+          { optionName: OptionKeys.Home, optionValue: initArgs.homeUrl },
           { optionName: OptionKeys.BlogName, optionValue: initArgs.title },
           { optionName: OptionKeys.BlogDescription, optionValue: 'A simple and light blog system' },
           { optionName: OptionKeys.AdminEmail, optionValue: initArgs.email },
@@ -210,14 +210,23 @@ export class DbInitDataSource extends BaseDataSource {
           { optionName: OptionKeys.DefaultCategory, optionValue: String(defaultCategoryTaxonomy.id) },
           { optionName: OptionKeys.DefaultCommentStatus, optionValue: PostCommentStatus.Enable },
           { optionName: OptionKeys.ShowOnFront, optionValue: 'post' },
-          { optionName: OptionKeys.PageForPosts, optionValue: '0' },
           { optionName: OptionKeys.PageOnFront, optionValue: '0' },
+          { optionName: OptionKeys.PageForPosts, optionValue: '0' },
           { optionName: OptionKeys.PageComments, optionValue: 'off' },
           { optionName: OptionKeys.PostsPerPage, optionValue: '10' },
-          { optionName: OptionKeys.CommentsPerPage, optionValue: '10' },
+          { optionName: OptionKeys.CommentsPerPage, optionValue: '5' },
           { optionName: OptionKeys.CommentsOrder, optionValue: 'asc' },
           { optionName: OptionKeys.CommentsNested, optionValue: 'on' },
-          { optionName: OptionKeys.CommentsNestedDepth, optionValue: '5' },
+          { optionName: OptionKeys.CommentsNestedDepth, optionValue: '2' },
+          { optionName: OptionKeys.ThumbnailSizeWidth, optionValue: '150' },
+          { optionName: OptionKeys.ThumbnailSizeHeight, optionValue: '150' },
+          { optionName: OptionKeys.ThumbnailCrop, optionValue: '1' },
+          { optionName: OptionKeys.MediumSizeWidth, optionValue: '300' },
+          { optionName: OptionKeys.MediumSizeHeight, optionValue: '300' },
+          { optionName: OptionKeys.MediumLargeSizeWidth, optionValue: '768' },
+          { optionName: OptionKeys.MediumLargeSizeHeight, optionValue: '0' },
+          { optionName: OptionKeys.LargeSizeWidth, optionValue: '1200' },
+          { optionName: OptionKeys.LargeSizeHeight, optionValue: '1200' },
           { optionName: OptionKeys.CurrentTheme, optionValue: 'beautify_theme' },
           { optionName: OptionKeys.ActivePlugins, optionValue: '{}' },
           { optionName: OptionKeys.DefaultRole, optionValue: UserRole.Subscriber },

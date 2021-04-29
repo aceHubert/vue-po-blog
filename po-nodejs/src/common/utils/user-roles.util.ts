@@ -1,5 +1,5 @@
 import { UserRole } from '@/users/enums';
-import { UserCapability } from './user-capability';
+import { UserCapability } from './user-capability.util';
 
 export type UserRoles = {
   [role: string]: {

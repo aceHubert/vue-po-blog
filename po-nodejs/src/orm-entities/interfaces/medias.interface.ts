@@ -4,7 +4,7 @@ export interface MediaAttributes {
   id: number;
   fileName: string;
   originalFileName: string;
-  extention: string;
+  extension: string;
   mimeType: string;
   path: string;
   userId: number;

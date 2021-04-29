@@ -1,0 +1,6 @@
+{
+  /** back-end request base url*/
+  "base_url": "http://localhost:5010/",
+  /** font-end server port */
+  "port": 5009
+}

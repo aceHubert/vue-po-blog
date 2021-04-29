@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
-import { TermTaxonomy as TermTaxonomyEnum } from '@/common/helpers/term-taxonomy';
+import { TermTaxonomy as TermTaxonomyEnum } from '@/common/utils/term-taxonomy.util';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';

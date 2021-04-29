@@ -5,15 +5,15 @@ import { I18nService } from 'nestjs-i18n';
 import { ConfigService } from '@/config/config.service';
 import { EntityService } from '@/sequelize-entities/entity.service';
 import { kebabCase, isUndefined } from 'lodash';
-import { ForbiddenError } from '@/common/utils/gql-errors.utils';
-import { UserCapability } from '@/common/helpers/user-capability';
+import { ForbiddenError } from '@/common/utils/gql-errors.util';
+import { UserCapability } from '@/common/utils/user-capability.util';
 
 import { OptionAutoload } from '@/options/enums';
 
 // Types
 import { ProjectionAlias } from 'sequelize';
-import { Config } from '@/config/interfaces';
-import { UserRoles } from '@/common/helpers/user-roles';
+import { ConfigOptions } from '@/config/interfaces';
+import { UserRoles } from '@/common/utils/user-roles.util';
 
 export abstract class BaseDataSource implements OnModuleInit {
   private __AUTOLOAD_OPTIONS__: Dictionary<string> | null = null;
@@ -97,7 +97,7 @@ export abstract class BaseDataSource implements OnModuleInit {
   /**
    * 获取配置
    */
-  protected getConfig(key: keyof Config) {
+  protected getConfig(key: keyof ConfigOptions) {
     return this.configService.get(key);
   }
 
@@ -182,9 +182,9 @@ export abstract class BaseDataSource implements OnModuleInit {
       return callback(
         !result
           ? new ForbiddenError(
-              await this.i18nService.t('auth.no_capability', {
+              await this.i18nService.t('error.forbidden_capability', {
                 lang: requestUser.lang,
-                args: { capability: kebabCase(capability) },
+                args: { requiredCapability: kebabCase(capability) },
               }),
             )
           : null,
@@ -195,13 +195,13 @@ export abstract class BaseDataSource implements OnModuleInit {
   }
 
   /**
-   * 获取 option value
-   * @param optionName optionName
+   * 获取 option value (autoload option 有缓存)
+   * @param optionName optionName（如有前缀需要输入全称）
    */
-  protected async getOption<R extends string>(optionName: string): Promise<R | undefined> {
+  public async getOption<R extends string>(optionName: string): Promise<R | undefined> {
     let value = (await this.autoloadOptions)[optionName] as R | undefined;
+    // 如果没有在autoload中时，从数据库查询
     if (isUndefined(value)) {
-      // 如果没有在autoload中时，从数据库查询
       const option = await this.models.Options.findOne({
         attributes: ['optionValue'],
         where: {
@@ -209,7 +209,7 @@ export abstract class BaseDataSource implements OnModuleInit {
           autoload: OptionAutoload.No,
         },
       });
-      value = option ? (option.optionValue as R) : undefined;
+      value = option?.optionValue as R;
     }
     return value;
   }
