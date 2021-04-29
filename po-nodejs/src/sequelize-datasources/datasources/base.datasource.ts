@@ -195,13 +195,13 @@ export abstract class BaseDataSource implements OnModuleInit {
   }
 
   /**
-   * 获取 option value
-   * @param optionName optionName
+   * 获取 option value (autoload option 有缓存)
+   * @param optionName optionName（如有前缀需要输入全称）
    */
   public async getOption<R extends string>(optionName: string): Promise<R | undefined> {
     let value = (await this.autoloadOptions)[optionName] as R | undefined;
+    // 如果没有在autoload中时，从数据库查询
     if (isUndefined(value)) {
-      // 如果没有在autoload中时，从数据库查询
       const option = await this.models.Options.findOne({
         attributes: ['optionValue'],
         where: {
@@ -209,7 +209,7 @@ export abstract class BaseDataSource implements OnModuleInit {
           autoload: OptionAutoload.No,
         },
       });
-      value = option ? (option.optionValue as R) : undefined;
+      value = option?.optionValue as R;
     }
     return value;
   }

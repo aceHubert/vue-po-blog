@@ -5,7 +5,7 @@ import { ForbiddenError } from '@/common/utils/gql-errors.util';
 import { TermTaxonomy } from '@/common/utils/term-taxonomy.util';
 import { UserCapability } from '@/common/utils/user-capability.util';
 import { OptionKeys } from '@/common/utils/option-keys.util';
-import { PostMetaKeys } from '@/common/utils/post-meta-keys';
+import { PostMetaKeys } from '@/common/utils/post-meta-keys.util';
 import { PostStatus, PostCommentStatus } from '@/posts/enums';
 import { MetaDataSource } from './meta.datasource';
 

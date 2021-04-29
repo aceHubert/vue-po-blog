@@ -1,5 +1,6 @@
 export * from './init-args.interface';
 export * from './meta-data-source.interface';
+export * from './meta.interface';
 export * from './media.interface';
 export * from './paged.interface';
 export * from './comment.interface';

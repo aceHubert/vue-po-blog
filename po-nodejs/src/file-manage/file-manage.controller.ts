@@ -18,7 +18,7 @@ export class FileManageController extends BaseController {
     @I18n() i18n: I18nContext,
     @User() requestUser?: JwtPayloadWithLang,
   ) {
-    const content = await this.fileService.uploadFile(
+    const result = await this.fileService.uploadFile(
       {
         file: file.path || file.buffer,
         originalName: file.originalname,
@@ -26,7 +26,15 @@ export class FileManageController extends BaseController {
       },
       requestUser,
     );
-    return this.success(content);
+    const resp = await Object.keys(result).reduce(async (prev, key) => {
+      const _prev = await prev;
+      _prev[key] = {
+        filename: result[key].fileName,
+        url: await this.fileService.getNormalizedPath(result[key].path),
+      };
+      return _prev;
+    }, Promise.resolve({}) as Promise<Dictionary<any>>);
+    return this.success(resp);
   }
 
   @Post('upload-multi')
@@ -36,7 +44,7 @@ export class FileManageController extends BaseController {
     @I18n() i18n: I18nContext,
     @User() requestUser?: JwtPayloadWithLang,
   ) {
-    const content = await Promise.all(
+    const result = await Promise.all(
       files.map((file) =>
         this.fileService.uploadFile(
           {
@@ -48,6 +56,18 @@ export class FileManageController extends BaseController {
         ),
       ),
     );
-    return this.success({ files: content });
+    const resp = await Promise.all(
+      result.map((item) =>
+        Object.keys(item).reduce(async (prev, key) => {
+          const _prev = await prev;
+          _prev[key] = {
+            filename: item[key].fileName,
+            url: await this.fileService.getNormalizedPath(item[key].path),
+          };
+          return _prev;
+        }, Promise.resolve({}) as Promise<Dictionary<any>>),
+      ),
+    );
+    return this.success({ files: resp });
   }
 }
