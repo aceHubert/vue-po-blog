@@ -179,8 +179,8 @@ export default class Categories extends Vue {
     return this.graphqlClient
       .mutate<{ term: Term }, { model: TermCreationModel & { taxonomy: 'category' } }>({
         mutation: gql`
-          mutation addTerm($model: NewTermInput!) {
-            term: addTerm(model: $model) {
+          mutation createTerm($model: NewTermInput!) {
+            term: createTerm(model: $model) {
               id
             }
           }
@@ -207,8 +207,8 @@ export default class Categories extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string; model: TermUpdateModel }>({
         mutation: gql`
-          mutation modifyTerm($id: ID!, $model: UpdateTermInput!) {
-            result: modifyTerm(id: $id, model: $model)
+          mutation updateTerm($id: ID!, $model: UpdateTermInput!) {
+            result: updateTerm(id: $id, model: $model)
           }
         `,
         variables: {
@@ -247,8 +247,8 @@ export default class Categories extends Vue {
           this.graphqlClient
             .mutate<{ result: boolean }, { ids: string[] }>({
               mutation: gql`
-                mutation blukRemove($ids: [ID!]!) {
-                  result: blukRemoveTerms(ids: $ids)
+                mutation bulkDelete($ids: [ID!]!) {
+                  result: bulkDeleteTerms(ids: $ids)
                 }
               `,
               variables: {
@@ -286,8 +286,8 @@ export default class Categories extends Vue {
     this.graphqlClient
       .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
-          mutation remove($id: ID!) {
-            result: removeTerm(id: $id)
+          mutation delete($id: ID!) {
+            result: deleteTerm(id: $id)
           }
         `,
         variables: {

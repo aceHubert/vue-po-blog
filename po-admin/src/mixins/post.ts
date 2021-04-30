@@ -16,8 +16,8 @@ export default class PostMixin extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string; status: PostStatus }>({
         mutation: gql`
-          mutation modifyStatus($id: ID!, $status: POST_STATUS!) {
-            result: modifyPostOrPageStatus(id: $id, status: $status)
+          mutation updateStatus($id: ID!, $status: POST_STATUS!) {
+            result: updatePostOrPageStatus(id: $id, status: $status)
           }
         `,
         variables: {
@@ -56,8 +56,8 @@ export default class PostMixin extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string; status: PostCommentStatus }>({
         mutation: gql`
-          mutation modifyPostCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
-            result: modifyPostCommentStatus(id: $id, status: $status)
+          mutation updatePostCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
+            result: updatePostCommentStatus(id: $id, status: $status)
           }
         `,
         variables: {
@@ -115,7 +115,7 @@ export default class PostMixin extends Vue {
       .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
           mutation deletePost($id: ID!) {
-            result: removePostOrPage(id: $id)
+            result: deletePostOrPage(id: $id)
           }
         `,
         variables: {
@@ -134,7 +134,7 @@ export default class PostMixin extends Vue {
       .mutate<{ result: boolean }, { ids: string[] }>({
         mutation: gql`
           mutation deletePost($id: [ID!]) {
-            result: blukRemovePostOrPage(ids: $ids)
+            result: bulkDeletePostOrPage(ids: $ids)
           }
         `,
         variables: {

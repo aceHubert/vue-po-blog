@@ -53,7 +53,7 @@ export default {
    * multiTab - 多 tab 页模式： boolean
    */
   settings: {
-    title: 'Polumemo Admin',
+    title: 'Plumemo Admin',
     logo: LogoSvg,
     layout: Layout.sideMenu,
     theme: Theme.Dark,

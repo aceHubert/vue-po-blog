@@ -11,7 +11,7 @@
     "types"
   ],
   "scripts": {
-    "serve": "node --max-old-space-size=4096 node_modules/nuxt/bin/nuxt.js dev",
+    "serve": "nuxt dev",
     "build": "nuxt build",
     "build:devtools": "node ./scripts/copyToDevtools.js",
     "start": "nuxt start",

@@ -54,8 +54,8 @@ import { Page, PageCreationModel, PageUpdateModel } from 'types/datas/page';
       promisify = graphqlClient
         .mutate<{ page: Page }, { model: PageCreationModel }>({
           mutation: gql`
-            mutation addPage($model: NewPageInput!) {
-              page: addPage(model: $model) {
+            mutation createPage($model: NewPageInput!) {
+              page: createPage(model: $model) {
                 id
                 title
                 content
@@ -122,8 +122,8 @@ export default class PageEditMixin extends mixins(postMixin, termMixin) {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string; model: PageUpdateModel }>({
         mutation: gql`
-          mutation modifyPage($id: ID!, $model: UpdatePageInput!) {
-            result: modifyPage(id: $id, model: $model)
+          mutation updatePage($id: ID!, $model: UpdatePageInput!) {
+            result: updatePage(id: $id, model: $model)
           }
         `,
         variables: {
@@ -193,8 +193,8 @@ export default class PageEditMixin extends mixins(postMixin, termMixin) {
     this.graphqlClient
       .mutate<{ result: boolean }, { id: string; status: PostCommentStatus }>({
         mutation: gql`
-          mutation modifyPageCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
-            result: modifyPostOrPageCommentStatus(id: $id, status: $status)
+          mutation updatePageCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
+            result: updatePostOrPageCommentStatus(id: $id, status: $status)
           }
         `,
         variables: {

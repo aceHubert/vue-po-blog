@@ -158,7 +158,7 @@ export async function Initializer(...params: Parameters<Plugin>) {
     // 设置用户角色配置
     let userRoles;
     if ((userRoles = autoloadOptions['user_roles'])) {
-      userStore.setUserRoles(JSON.parse(userRoles));
+      userStore.setRoleCapabilities(JSON.parse(userRoles));
     }
 
     // 个人站点配置
@@ -171,7 +171,7 @@ export async function Initializer(...params: Parameters<Plugin>) {
       siteLocale = localeFromCookie;
     }
     await userStore
-      .getUserMetas()
+      .getUserInfo()
       .then(() => {
         if (userStore.info.locale) {
           siteLocale = userStore.info.locale;

@@ -114,16 +114,13 @@ export class AuthorizedGuard implements CanActivate {
       if (isObjectType(returnType) || isInterfaceType(returnType)) {
         for (const key in fieldsByTypeName[returnType.name]) {
           const fields = returnType.getFields();
-          if (fields[key].extensions?.roles) {
-            fieldRoles[`${parentTypeName ? parentTypeName + '.' : ''}${key}`] = fields[key].extensions?.roles;
+          const field = fieldsByTypeName[returnType.name][key];
+          if (fields[field.name]?.extensions?.roles) {
+            fieldRoles[`${parentTypeName ? parentTypeName + '.' : ''}${field.name}`] =
+              fields[field.name].extensions?.roles;
           }
-          Object.keys(fieldsByTypeName[returnType.name][key].fieldsByTypeName).length &&
-            resolveFields(
-              fieldsByTypeName[returnType.name][key].fieldsByTypeName,
-              fields[key].type,
-              fieldsByTypeName[returnType.name][key].name,
-              fieldRoles,
-            );
+          Object.keys(field.fieldsByTypeName).length &&
+            resolveFields(field.fieldsByTypeName, fields[field.name].type, field.name, fieldRoles);
         }
       }
       return fieldRoles;

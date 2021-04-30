@@ -36,11 +36,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers(optional)]
-   * @param id 用户 Id（null 则查询请求用户，否则需要 EditUsers 权限）
+   * @param id 用户 Id（null 则查询请求用户，否则 id 不是自己时需要 EditUsers 权限）
    * @param fields 返回的字段
    */
   async get(id: number | null, fields: string[], requestUser: JwtPayloadWithLang): Promise<UserModel | null> {
-    if (id) {
+    // 查询非自己时，需要权限验证
+    if (id && id !== requestUser.id) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     } else {
       id = requestUser.id;

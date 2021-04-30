@@ -39,7 +39,11 @@ instance.interceptors.request.use((config: AxiosRequestConfig) => {
       }
       const token = userStore.accessToken;
       if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`; // 让每个请求携带自定义 token 请根据实际情况自行修改
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
+      const locale = appStore.locale;
+      if (locale) {
+        config.headers['x-custom-locale'] = locale;
       }
       return config;
     });
@@ -121,10 +125,10 @@ instance.interceptors.response.use(
           }
         }
         // Compatible server-side custom error
-        if (!err.isAxiosError) {
-          const error = (err.response && err.response.data) || {};
-          err.code = error.statusCode || 500;
-          err.message = error.message || err.message || 'net::ERR_CONNECTION_REFUSED';
+        if (err.isAxiosError) {
+          const data = (err.response && err.response.data) || {};
+          err.code = data.statusCode || 500;
+          err.message = data.message || data.error || err.message || 'net::ERR_CONNECTION_REFUSED';
         }
         return Promise.reject(err);
       });

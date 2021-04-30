@@ -462,8 +462,8 @@ export default class PostIndex extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string; status: PostStatus }>({
         mutation: gql`
-          mutation modifyStatus($id: ID!, $status: POST_STATUS!) {
-            result: modifyPostOrPageStatus(id: $id, status: $status)
+          mutation updateStatus($id: ID!, $status: POST_STATUS!) {
+            result: updatePostOrPageStatus(id: $id, status: $status)
           }
         `,
         variables: {
@@ -514,7 +514,7 @@ export default class PostIndex extends Vue {
       .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
           mutation deletePost($id: ID!) {
-            result: removePostOrPage(id: $id)
+            result: deletePostOrPage(id: $id)
           }
         `,
         variables: {

@@ -68,7 +68,7 @@ export default class Login extends Vue {
         .then(() => {
           // 登录后要重新设置站点的个人配置
           return userStore
-            .getUserMetas()
+            .getUserInfo()
             .then(() => {
               let siteLocale = this.$userOptions.locale;
               if (userStore.info.locale) {

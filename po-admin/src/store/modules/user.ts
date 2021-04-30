@@ -10,8 +10,9 @@ import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/config/proLayoutConfigs';
 
 // Types
 import { Context } from '@nuxt/types';
+import { User, Meta } from 'types/datas';
 
-export type UserRoles = {
+export type RoleCapabilities = {
   [role in UserRole]: {
     name: string;
     capabilities: UserCapability[];
@@ -37,17 +38,21 @@ export type RefreshTokenResponse = {
 @Module({ store, name: 'user', namespaced: true, dynamic: true, stateFactory: true })
 class UserStore extends VuexModule {
   id: string | null = null; // 用户Id， graphql ID 是序列化成string
-  name = 'User';
+  loginName = 'User';
   info: Dictionary<any> = {}; // 用户基本信息及 metas
   accessToken: string | null = null;
-  role: UserRole | null = null; // 当前用户角色
 
-  userRoles: UserRoles | null = null; // 用户角色
+  roleCapabilities: RoleCapabilities | null = null; // 用户角色权限
+
+  // 用户角色
+  get role() {
+    return this.info.role;
+  }
 
   // 当前用户权限
   get capabilities() {
-    if (this.userRoles && this.role) {
-      return this.userRoles[this.role].capabilities;
+    if (this.roleCapabilities && this.role) {
+      return this.roleCapabilities[this.role as UserRole].capabilities;
     }
     return [];
   }
@@ -66,19 +71,17 @@ class UserStore extends VuexModule {
       try {
         const payload = jwt.decode(token, { json: true });
 
-        const { id, loginName, role, ...rest } = payload as Dictionary<any>;
+        const { id, loginName, ...rest } = payload as Dictionary<any>;
         this.id = String(id);
-        this.name = loginName;
+        this.loginName = loginName;
         this.info = Object.assign({}, this.info, rest);
-        this.role = role;
       } catch {
         // ate by dog
       }
     } else {
       this.id = null;
-      this.name = 'User';
+      this.loginName = 'User';
       this.info = {};
-      this.role = null;
     }
   }
 
@@ -88,8 +91,8 @@ class UserStore extends VuexModule {
   }
 
   @VuexMutation
-  setUserRoles(userRoles: UserRoles) {
-    this.userRoles = userRoles;
+  setRoleCapabilities(roleCapabilities: RoleCapabilities) {
+    this.roleCapabilities = roleCapabilities;
   }
 
   /**
@@ -103,7 +106,11 @@ class UserStore extends VuexModule {
     const Cookie = process.client ? cookie.clientCookie : cookie.serverCookie(req, res);
 
     return httpClient
-      .post<LoginResponse>('/auth/login', { username: loginQuery.username, password: loginQuery.password })
+      .post<LoginResponse>('/auth/login', {
+        username: loginQuery.username,
+        password: loginQuery.password,
+        device: 'Web', // todo: 多设备登录
+      })
       .then((model) => {
         if (model.success) {
           Cookie.set(ACCESS_TOKEN, model.accessToken, {
@@ -156,33 +163,44 @@ class UserStore extends VuexModule {
   }
 
   /**
-   * 获取 user metas(需要权限验证)
+   * 获取用户信息，包括meta(需要权限验证)
    * 可以通过些方法加载不在 token payload 中的数据
    * 返回 meta values 会自动合并到 store info 中
    * @param metaKeys 需要获取的meta keys
    */
   @VuexAction({ rawError: true, commit: 'setInfo' })
-  getUserMetas(metaKeys?: string[]) {
+  getUserInfo(metaKeys?: string[]) {
     if (!this.accessToken) return Promise.reject();
 
     return graphqlClient
-      .query<{ result: Array<{ metaKey: string; metaValue: string }> }, { userId: string; metaKeys?: string[] }>({
+      .query<{ result: User & { metas: Meta[] } }, { metaKeys?: string[] }>({
         query: gql`
-          query getUserMetas($userId: ID!, $metaKeys: [String!]) {
-            result: userMetas(userId: $userId, metaKeys: $metaKeys) {
-              metaKey
-              metaValue
+          query getUser($metaKeys: [String!]) {
+            result: user {
+              displayName
+              email
+              mobile
+              url
+              metas(metaKeys: $metaKeys) {
+                metaKey
+                metaValue
+              }
             }
           }
         `,
         variables: {
-          userId: this.id!,
           metaKeys,
         },
       })
       .then(({ data }) => {
-        return data.result.reduce((prev, curr) => {
-          prev[curr.metaKey] = curr.metaValue;
+        return Object.keys(data.result).reduce((prev, key) => {
+          if (key === 'metas') {
+            data.result.metas.forEach((meta) => {
+              prev[meta.metaKey] = meta.metaValue;
+            });
+          } else {
+            prev[key] = data.result[key as keyof User];
+          }
           return prev;
         }, {} as Dictionary<any>);
       });

@@ -38,10 +38,8 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
     if (userStore.id) {
       return {
         id: userStore.id,
-        name: userStore.name,
-        photo:
-          userStore.info.avatar ||
-          `https://ui-avatars.com/api/?name=${userStore.name.substr(0, 1)}&rounded=true&background=f67280&color=fff`,
+        name: userStore.info.displayName || userStore.loginName,
+        photo: userStore.info.avatar,
       } as User;
     }
     return undefined;
@@ -152,7 +150,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
 
   handleAction(key: Actions) {
     if (key === Actions.Profile) {
-      this.$router.push({ name: 'users-profile' });
+      this.$router.push({ name: 'profile' });
     } else if (key === Actions.Settings) {
       this.$router.push({ name: 'settings-general' });
     } else if (key === Actions.Logout) {

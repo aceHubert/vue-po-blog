@@ -6,7 +6,7 @@ import * as tsx from 'vue-tsx-support';
 
 export type User = {
   name: string;
-  photo: string;
+  photo?: string;
 };
 
 export enum Actions {
@@ -49,7 +49,17 @@ export default class AvatarDropdown extends Vue {
     return this.user ? (
       <a-dropdown placement="bottomRight">
         <span class="ant-pro-account-avatar">
-          <a-avatar size="small" class="antd-pro-global-header-index-avatar" src={this.user.photo} />
+          {this.user.photo ? (
+            <a-avatar size="small" class="antd-pro-global-header-index-avatar" src={this.user.photo} />
+          ) : (
+            <a-avatar
+              size="small"
+              class="antd-pro-global-header-index-avatar"
+              style="color: #fff; backgroundColor: #f67280"
+            >
+              {this.user.name.substr(0, 1)}
+            </a-avatar>
+          )}
           <span class={classes.name}>{this.user.name}</span>
         </span>
         <template slot="overlay">

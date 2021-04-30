@@ -55,8 +55,8 @@ import { Term } from 'types/datas/term';
       promisify = graphqlClient
         .mutate<{ post: Post }, { model: PostCreationModel }>({
           mutation: gql`
-            mutation addPost($model: NewPostInput!) {
-              post: addPost(model: $model) {
+            mutation createPost($model: NewPostInput!) {
+              post: createPost(model: $model) {
                 id
                 title
                 content
@@ -188,8 +188,8 @@ export default class PostEditMixin extends mixins(postMixin, termMixin) {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string; model: PostUpdateModel }>({
         mutation: gql`
-          mutation modifyPost($id: ID!, $model: UpdatePostInput!) {
-            result: modifyPost(id: $id, model: $model)
+          mutation updatePost($id: ID!, $model: UpdatePostInput!) {
+            result: updatePost(id: $id, model: $model)
           }
         `,
         variables: {
@@ -305,8 +305,8 @@ export default class PostEditMixin extends mixins(postMixin, termMixin) {
     this.graphqlClient
       .mutate<{ result: boolean }, { id: string; status: PostCommentStatus }>({
         mutation: gql`
-          mutation modifyPostCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
-            result: modifyPostOrPageCommentStatus(id: $id, status: $status)
+          mutation updatePostCommentStatus($id: ID!, $status: POST_COMMENT_STATUS!) {
+            result: updatePostOrPageCommentStatus(id: $id, status: $status)
           }
         `,
         variables: {

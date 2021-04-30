@@ -87,19 +87,15 @@ const httpLink = new HttpLink({
   fetch,
 });
 
-// 忽略在头部加Authorization Token
-const IgnoreHeaderTokenOperationNames = ['IntrospectionQuery', 'initCheck', 'initDB', 'getAutoloadOptions'];
-
 // set Authorization header
 const authLink = setContext((operation, { headers, ...context }) => {
   const token = userStore.accessToken;
-
+  const locale = appStore.locale;
   return {
     headers: {
       ...headers,
-      ...(!(operation.operationName && IgnoreHeaderTokenOperationNames.includes(operation.operationName)) && token
-        ? { Authorization: `Bearer ${token}` }
-        : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(locale ? { 'x-custom-locale': locale } : {}),
     },
     ...context,
   };
