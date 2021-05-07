@@ -1,6 +1,8 @@
 {
+  /** front-end web server port */
+  "web_server_port": 5008,
+  /** front-end admin server port */
+  "admin_server_port": 5009,
   /** back-end request base url*/
-  "base_url": "http://localhost:5010/",
-  /** font-end server port */
-  "port": 5009
+  "server_url": "http://localhost:5010/"
 }

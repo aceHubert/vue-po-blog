@@ -2,21 +2,21 @@
   /** back-end server port */
   "server_port": 5010,
   /** The name of the database */
-  "DB_NAME": "po-blog",
+  "db_name": "po-blog",
   /** database username */
-  "DB_USER": "username",
+  "db_user": "username",
   /** database password */
-  "DB_PASSWORD": "password",
+  "db_password": "password",
   /** hostname */
-  "DB_HOST": "localhost",
+  "db_host": "localhost",
   /** port */
-  "DB_PORT": 3306,
+  "db_port": 3306,
   /** Database Charset to use in creating database tables. */
-  "DB_CHARSET": "utf8",
+  "db_charset": "utf8",
   /** The Database type. */
-  "DB_DIALECT": "mysql",
+  "db_dialect": "mysql",
   /** The Database Collate type. Don't change this if in doubt. */
-  "DB_COLLATE": "",
+  "db_collate": "",
   /** table prefix */
   "table_prefix": "po_",
   /** jwt screct */

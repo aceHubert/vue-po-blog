@@ -1,4 +1,7 @@
+/* eslint-disable no-console */
 /* eslint-disable prettier/prettier */
+const path = require('path');
+const fs = require('fs');
 
 const isProd = process.env.NOEW_ENV === 'production';
 
@@ -23,27 +26,54 @@ const assetsCDN = {
   ],
 };
 
+// 默认：http://localhost:5008/
 const port = process.env.PORT || 5008;
 const host = process.env.HOST || 'localhost';
+const https = false;
+
+const publicConfig = {
+  web_server_port: port,
+  server_host: host,
+  server_https: https,
+  server_url: `http${https ? 's' : ''}://${host}:${port}/`,
+};
+
+// 从执行根目录下读取
+const configPath = path.resolve(process.cwd(), 'po-config.client.json');
+try {
+  const options = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  Object.assign(publicConfig, options);
+} catch (err) {
+  console.log(err.message);
+}
 
 module.exports = (configContext) => {
   return {
     vue: {
       config: {
         productionTip: false,
-        devtools: !isProd,
+        devtools: configContext.dev,
       },
     },
     server: {
-      port, // default: 3000
-      host, // default: localhost,
-      https: false,
+      port: publicConfig.web_server_port,
+      host: publicConfig.server_host,
+      https: publicConfig.server_https,
     },
-    env: {
-      // axios baseUrl (服务端 axios 请求时必须有前缀)
-      baseUrl: process.env.BASE_URL || `http://${host}:${port}`,
-    },
-    ssr: false,
+    publicRuntimeConfig: Object.assign(
+      {},
+      publicConfig,
+      configContext.dev
+        ? {
+            // 在dev模式下启用代理解决跨域问题
+            server_url: `http${publicConfig.server_https ? 's' : ''}://${publicConfig.server_host}:${
+              publicConfig.web_server_port
+            }/`,
+          }
+        : {},
+    ),
+    privateRuntimeConfig: {},
+    ssr: true,
     srcDir: 'src/',
     dir: {
       pages: 'views',
@@ -64,42 +94,44 @@ module.exports = (configContext) => {
     loading: '~/components/PageLoading',
     modules: ['@nuxtjs/proxy'],
     proxy: {
-      // 在 devtools 时调试主题模块代理
-      ...(configContext.devProxyThemeTarget
+      // // 在 devtools 时调试主题模块代理
+      // ...(configContext.devProxyThemeTarget
+      //   ? {
+      //       '/api': {
+      //         target: configContext.devProxyThemeTarget,
+      //         changeOrigin: false,
+      //         ws: false,
+      //       },
+      //       '/graphql': {
+      //         target: configContext.devProxyThemeTarget,
+      //         changeOrigin: false,
+      //         ws: false,
+      //       },
+      //     }
+      //   : null),
+      // // 在 devtools 时调试插件模块代理
+      // ...(configContext.devProxyPluginTarget
+      //   ? {
+      //       '/api': {
+      //         target: configContext.devProxyPluginTarget,
+      //         changeOrigin: false,
+      //         ws: false,
+      //       },
+      //       '/graphql': {
+      //         target: configContext.devProxyPluginTarget,
+      //         changeOrigin: false,
+      //         ws: false,
+      //       },
+      //     }
+      //   : null),
+      // 在 dev 模式下启动代理解决跨域问题
+      ...(configContext.dev
         ? {
-            '/api/plumemo-service/v1/modules/theme': {
-              target: configContext.devProxyThemeTarget,
-              changeOrigin: false,
-              ws: false,
-              pathRewrite: {
-                '^/api/plumemo-service/v1/modules/theme': '',
-              },
+            '/api': {
+              target: publicConfig.server_url,
             },
-          }
-        : null),
-      // 在 devtools 时调试插件模块代理
-      ...(configContext.devProxyPluginTarget
-        ? {
-            '/api/plumemo-service/v1/modules/plugins': {
-              target: configContext.devProxyPluginTarget,
-              changeOrigin: false,
-              ws: false,
-              pathRewrite: {
-                '^/api/plumemo-service/v1/modules/plugins': '',
-              },
-            },
-          }
-        : null),
-      // 在 dev 或 devtools 模式下接口代理(此代理在 BASE_URL 被设置成跨域后无效, 请在 dev 模式下不要设置此环境变量)
-      ...((configContext.dev && process.env.PROXYAPI_URL) || configContext.devProxyApiTarget
-        ? {
-            '/api/plumemo-service': {
-              /**
-               * devProxyApiTarget: 在 devtools 自定义接口地址
-               * PROXYAPI_URL: 在 scripts serve 自定义环境变量接口地址
-               * fallback 到当前 domain
-               */
-              target: configContext.devProxyApiTarget || process.env.PROXYAPI_URL || '/',
+            '/graphql': {
+              target: publicConfig.server_url,
             },
           }
         : null),

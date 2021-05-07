@@ -1,23 +1,26 @@
+/* eslint-disable no-console */
 /* eslint-disable prettier/prettier */
 const path = require('path');
 const fs = require('fs');
 
+// 默认：http://localhost:5009/
 const port = process.env.PORT || 5009;
 const host = process.env.HOST || 'localhost';
 const https = false;
-const baseUrl = `http${https ? 's' : ''}://${host}:${port}`;
-// 从执行根目录下读取
-const configPath = path.resolve(process.cwd(), 'po-config.client.json');
 
-const publicRuntimeConfig = {
-  baseUrl,
+const publicConfig = {
+  admin_server_port: port,
+  server_host: host,
+  server_https: https,
+  server_url: `http${https ? 's' : ''}://${host}:${port}/`,
 };
 
+// 从执行根目录下读取
+const configPath = path.resolve(process.cwd(), 'po-config.client.json');
 try {
   const options = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  Object.assign(publicRuntimeConfig, options);
+  Object.assign(publicConfig, options);
 } catch (err) {
-  // eslint-disable-next-line no-console
   console.log(err.message);
 }
 
@@ -30,14 +33,21 @@ module.exports = (configContext) => {
       },
     },
     server: {
-      port, // default: 3000
-      host, // default: localhost,
-      https,
+      port: publicConfig.admin_server_port,
+      host: publicConfig.server_host,
+      https: publicConfig.server_https,
     },
     publicRuntimeConfig: Object.assign(
       {},
-      publicRuntimeConfig,
-      configContext.dev ? { baseUrl } : {}, // 在dev模式下启用代理解决跨域问题
+      publicConfig,
+      configContext.dev
+        ? {
+            // 在dev模式下启用代理解决跨域问题
+            server_url: `http${publicConfig.server_https ? 's' : ''}://${publicConfig.server_host}:${
+              publicConfig.admin_server_port
+            }/`,
+          }
+        : {},
     ),
     privateRuntimeConfig: {},
     ssr: true,
@@ -69,7 +79,7 @@ module.exports = (configContext) => {
       //         ws: false,
       //       },
       //       '/graphql': {
-      //         target: configContext.devProxyApiTarget,
+      //         target: configContext.devProxyModuleTarget,
       //         changeOrigin: false,
       //         ws: false,
       //       },
@@ -94,10 +104,10 @@ module.exports = (configContext) => {
       ...(configContext.dev
         ? {
             '/api': {
-              target: publicRuntimeConfig.baseUrl,
+              target: publicConfig.server_url,
             },
             '/graphql': {
-              target: publicRuntimeConfig.baseUrl,
+              target: publicConfig.server_url,
             },
           }
         : null),
