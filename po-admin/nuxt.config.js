@@ -50,7 +50,7 @@ module.exports = (configContext) => {
         : {},
     ),
     privateRuntimeConfig: {},
-    ssr: true,
+    ssr: false,
     srcDir: 'src/',
     dir: {
       pages: 'views',
@@ -67,7 +67,7 @@ module.exports = (configContext) => {
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
       style: [],
     },
-    css: ['~/assets/styles/index.less'],
+    css: ['~/assets/styles/index.less', '~/assets/styles/antd/themes/light/index.less'],
     modules: ['@nuxtjs/proxy'],
     proxy: {
       // // 在 devtools 时调试后台模块代理
@@ -170,13 +170,13 @@ module.exports = (configContext) => {
           lessOptions: {
             javascriptEnabled: true,
             modifyVars: {
-              hack: 'true;@import "./src/assets/styles/fn.less"',
+              hack: 'true;@import "./src/assets/styles/fn.less";',
             },
           },
         },
         cssModules: {
           modules: {
-            localIdentName: configContext.dev ? '[hash:base64]' : '[path]_[name]_[local]_[hash:base64:5]',
+            localIdentName: !configContext.dev ? '[hash:base64]' : '[path]_[name]_[local]_[hash:base64:5]',
           },
           localsConvention: 'camelCaseOnly',
         },

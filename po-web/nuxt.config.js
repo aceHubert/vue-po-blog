@@ -3,8 +3,6 @@
 const path = require('path');
 const fs = require('fs');
 
-const isProd = process.env.NOEW_ENV === 'production';
-
 // eslint-disable-next-line no-unused-vars
 const assetsCDN = {
   externals: {
@@ -194,7 +192,7 @@ module.exports = (configContext) => {
         },
         cssModules: {
           modules: {
-            localIdentName: isProd ? '[hash:base64]' : '[path]_[name]_[local]_[hash:base64:5]',
+            localIdentName: !configContext.dev ? '[hash:base64]' : '[path]_[name]_[local]_[hash:base64:5]',
           },
           localsConvention: 'camelCaseOnly',
         },
