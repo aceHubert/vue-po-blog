@@ -10,14 +10,14 @@ const providers = Object.values(DataSources);
   imports: [
     EntityModule.registerAsync({
       useFactory: (config: ConfigService) => ({
-        host: config.get('DB_HOST') || '127.0.0.1',
-        port: config.get('DB_PORT') || 3306,
-        dialect: config.get('DB_DIALECT') || 'mysql',
-        charset: config.get('DB_CHARSET') || 'utf8',
-        collate: config.get('DB_COLLATE') || '',
-        database: config.get('DB_NAME') || '',
-        username: config.get('DB_USER') || '',
-        password: config.get('DB_PASSWORD') || '',
+        host: config.get('db_host') || '127.0.0.1',
+        port: config.get('db_port') || 3306,
+        dialect: config.get('db_dialect') || 'mysql',
+        charset: config.get('db_charset') || 'utf8',
+        collate: config.get('db_collate') || '',
+        database: config.get('db_name') || '',
+        username: config.get('db_user') || '',
+        password: config.get('db_password') || '',
         tablePrefix: config.get('table_prefix') || 'po_',
       }),
       inject: [ConfigService],

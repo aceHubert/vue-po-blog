@@ -61,7 +61,7 @@ export class DbInitDataSource extends BaseDataSource {
    * @access None
    */
   haveTables(): Promise<boolean> {
-    const dialect = this.getConfig('DB_DIALECT');
+    const dialect = this.getConfig('db_dialect');
     if (dialect === 'mysql') {
       return this.sequelize
         .query(
@@ -74,7 +74,7 @@ export class DbInitDataSource extends BaseDataSource {
     } else {
       // todo: 其它数据库
       this.logger.warn(`${dialect} is not supported!`);
-      return Promise.resolve(false);
+      return Promise.resolve(true);
     }
   }
 
@@ -197,6 +197,7 @@ export class DbInitDataSource extends BaseDataSource {
           { optionName: OptionKeys.BlogName, optionValue: initArgs.title },
           { optionName: OptionKeys.BlogDescription, optionValue: 'A simple and light blog system' },
           { optionName: OptionKeys.AdminEmail, optionValue: initArgs.email },
+          { optionName: OptionKeys.AdminLayout, optionValue: '{}' },
           { optionName: OptionKeys.UsersCanRegister, optionValue: 'off' },
           { optionName: OptionKeys.MailServerUrl, optionValue: 'mail.example.com' },
           { optionName: OptionKeys.MailServerLogin, optionValue: 'user@example.com' },

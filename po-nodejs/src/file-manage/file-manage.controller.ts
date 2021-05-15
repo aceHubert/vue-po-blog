@@ -30,7 +30,7 @@ export class FileManageController extends BaseController {
       const _prev = await prev;
       _prev[key] = {
         filename: result[key].fileName,
-        url: await this.fileService.getNormalizedPath(result[key].path),
+        url: await this.fileService.getURI(result[key].path),
       };
       return _prev;
     }, Promise.resolve({}) as Promise<Dictionary<any>>);
@@ -62,7 +62,7 @@ export class FileManageController extends BaseController {
           const _prev = await prev;
           _prev[key] = {
             filename: item[key].fileName,
-            url: await this.fileService.getNormalizedPath(item[key].path),
+            url: await this.fileService.getURI(item[key].path),
           };
           return _prev;
         }, Promise.resolve({}) as Promise<Dictionary<any>>),

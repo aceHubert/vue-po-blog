@@ -13,9 +13,9 @@ import { FileManageModuleOptions } from './interfaces';
 import { FILE_MANAGE_MODULE_OPTIONS } from './constants';
 
 // Types
-import { NewMetaInput, MediaMetaModel } from '@/sequelize-datasources/interfaces';
+import { MediaMetaModel } from '@/sequelize-datasources/interfaces';
 import { FileUploadOptions } from './interfaces/file-upload-options.interface';
-import { ImageMetadata } from './interfaces/image-metadata.interface';
+import { ImageScaleData } from './interfaces/image-metadata.interface';
 
 const stat = promisify(fs.stat);
 const mkdir = promisify(fs.mkdir);
@@ -95,20 +95,27 @@ export class FileManageService {
   }
 
   /**
+   * 是否是图片
+   */
+  private isImage(mimeType: string) {
+    return mimeType.startsWith('image/');
+  }
+
+  /**
    * 是否支持缩放（图片）
    */
-  isScaleable(mimeType: string) {
+  private isImageScaleable(mimeType: string) {
     return ['image/jpeg', 'image/png'].includes(mimeType);
   }
 
   /**
-   * 添加 siteUrl 和 staticPrefix 前缀
+   * 显示到前端的Url地址（siteUrl/staticPrefix/path）
    */
-  async getNormalizedPath(path: string) {
+  async getURI(path: string) {
     const siteUrl = await this.mediaDataSource.getOption(OptionKeys.SiteUrl);
     return (
       (siteUrl ? stripEndingSlash(siteUrl) : '') +
-      stripEndingSlash(this.options.staticPrefix) +
+      (this.options.staticPrefix ? stripEndingSlash(this.options.staticPrefix) : '') +
       normalizeRoutePath(path)
     );
   }
@@ -131,7 +138,7 @@ export class FileManageService {
       const originalFileName = path.basename(options.originalName, extension);
       const dest = await this.getDest();
       const filePath = path.join(dest, `${md5}${extension}`);
-      const newMetaInputs: NewMetaInput[] = [];
+
       // 文件不在在
       if (!(await this.isExists(filePath))) {
         if (typeof options.file === 'string') {
@@ -140,16 +147,40 @@ export class FileManageService {
         } else {
           await writeFile(filePath, options.file, 'utf8');
         }
+      }
 
-        // this.mediaDataSource.createMeta();
+      const fileStat = await stat(filePath);
 
-        if (this.isScaleable(options.mimeType)) {
-          const imageMetadatas: ImageMetadata[] = [];
-          const thumbnail = await this.scaleToThumbnail(filePath, 50);
-          imageMetadatas.push({ ...thumbnail, name: 'thumbnail' });
-          const scaled = await this.scaleImage(filePath, 2560, 1440, 'scaled', 90);
-          scaled && imageMetadatas.push({ ...scaled, name: 'scaled' });
+      const metaDatas: Dictionary<any> = {
+        fileSize: fileStat.size,
+      };
 
+      if (this.isImage(options.mimeType)) {
+        const image = await Jimp.create(filePath);
+        metaDatas.width = image.getWidth();
+        metaDatas.height = image.getHeight();
+
+        if (this.isImageScaleable(options.mimeType)) {
+          const imageScaleDatas: ImageScaleData[] = [];
+          // thumbnail
+          const thumbnail = await this.scaleToThumbnail(
+            image,
+            (imgOptions) => this.getImageDestWithSuffix(filePath, `${imgOptions.width}x${imgOptions.height}`),
+            50,
+          );
+          imageScaleDatas.push({ ...thumbnail, name: 'thumbnail' });
+
+          // scaled
+          const scaled = await this.scaleImage(
+            filePath,
+            () => this.getImageDestWithSuffix(filePath, 'scaled'),
+            2560,
+            1440,
+            80,
+          );
+          scaled && imageScaleDatas.push({ ...scaled, name: 'scaled' });
+
+          // other sizes
           const mediumWidth = parseInt((await this.mediaDataSource.getOption(OptionKeys.MediumSizeWidth))!);
           const mediumHeight = parseInt((await this.mediaDataSource.getOption(OptionKeys.MediumSizeHeight))!);
           const largeWidth = parseInt((await this.mediaDataSource.getOption(OptionKeys.LargeSizeWidth))!);
@@ -161,9 +192,21 @@ export class FileManageService {
             { name: 'medium-large', width: mediumLargeWidth, height: mediumLargeHeight, quality: 70 },
             { name: 'medium', width: mediumWidth, height: mediumHeight, quality: 50 },
           ];
-          const scales = await this.scaleImage(filePath, resizeArr);
-          scales.length && imageMetadatas.push(...scales);
-          newMetaInputs.push({ metaKey: MediaMetaKeys.Matedata, metaValue: JSON.stringify({ image: imageMetadatas }) });
+
+          await Promise.all(
+            resizeArr.map(async (item) => {
+              const scale = await this.scaleImage(
+                filePath,
+                (imgOptions) => this.getImageDestWithSuffix(filePath, `${imgOptions.width}x${imgOptions.height}`),
+                item.width,
+                item.height,
+                item.quality,
+              );
+              scale && imageScaleDatas.push({ ...scale, name: item.name });
+            }),
+          );
+
+          metaDatas.imageScales = imageScaleDatas;
         }
       }
 
@@ -178,10 +221,13 @@ export class FileManageService {
         requestUser,
       );
 
-      if (newMetaInputs.length) {
-        mediaMetas = await this.mediaDataSource.bulkCreateMeta(media.id, newMetaInputs);
-      }
-    } else if (this.isScaleable(media.mimeType)) {
+      mediaMetas = await this.mediaDataSource.bulkCreateMeta(media.id, [
+        {
+          metaKey: MediaMetaKeys.Matedata,
+          metaValue: JSON.stringify(metaDatas),
+        },
+      ]);
+    } else if (this.isImageScaleable(media.mimeType)) {
       mediaMetas = await this.mediaDataSource.getMetas(media.id, [MediaMetaKeys.Matedata], ['metaKey', 'metaValue']);
     }
     const fileName = `${media.originalFileName}${media.extension}`;
@@ -194,13 +240,15 @@ export class FileManageService {
         ? mediaMetas.reduce((prev, meta) => {
             if (meta.metaKey === MediaMetaKeys.Matedata) {
               const metadatas = JSON.parse(meta.metaValue!) as Dictionary<any>;
-              metadatas.image &&
-                (metadatas.image as ImageMetadata[]).forEach((item) => {
+              // resized 图片
+              metadatas.imageScales &&
+                (metadatas.imageScales as ImageScaleData[]).forEach((item) => {
                   prev[item.name] = {
                     fileName,
                     path: item.path,
                   };
                 });
+              // some else type properties
             }
 
             return prev;
@@ -213,11 +261,21 @@ export class FileManageService {
    * 生成略缩图
    * @param imagePath 源图片路径
    */
-  async scaleToThumbnail(imagePath: string, quality: number = 100): Promise<Omit<ImageMetadata, 'name'>> {
+  async scaleToThumbnail(
+    image: string | Jimp,
+    dest: string | ((opts: { width: number; height: number }) => string),
+    quality: number = 70,
+  ): Promise<Omit<ImageScaleData, 'name'>> {
     const width = parseInt((await this.mediaDataSource.getOption(OptionKeys.ThumbnailSizeWidth)) || '150');
     const height = parseInt((await this.mediaDataSource.getOption(OptionKeys.ThumbnailSizeHeight)) || '150');
     const crop = await this.mediaDataSource.getOption<'0' | '1'>(OptionKeys.ThumbnailCrop);
-    const image = await Jimp.read(imagePath);
+    if (typeof image === 'string') {
+      image = await Jimp.create(image);
+    } else {
+      // 后面的操作会改变Jimp对象，这里使用clone的对象处理
+      image = image.clone();
+    }
+
     if (crop) {
       image.cover(width, height);
     } else {
@@ -225,12 +283,14 @@ export class FileManageService {
     }
     const imageWidth = image.getWidth();
     const imageHeight = image.getHeight();
-    const newPath = this.getImageDestWithSuffix(imagePath, `${imageWidth}x${imageHeight}`);
-    await image.quality(quality || 100).write(newPath);
+    if (typeof dest === 'function') {
+      dest = dest({ width: imageWidth, height: imageHeight });
+    }
+    await image.quality(quality || 100).write(dest);
     return {
       width: imageWidth,
       height: imageHeight,
-      path: addStartingSlash(path.relative(this.options.dest, newPath)),
+      path: addStartingSlash(path.relative(this.options.dest, dest)),
     };
   }
 
@@ -242,53 +302,36 @@ export class FileManageService {
    * @param suffix 图片名称后缀，如果为空则是以 {width}x{height} 作为后缀
    */
   async scaleImage(
-    imagePath: string,
-    args: Array<{ name: number | string; width: number; height: number; suffix?: string; quality?: number }>,
-  ): Promise<Array<ImageMetadata>>;
-  async scaleImage(
-    imagePath: string,
+    image: string | Jimp,
+    dest: string | ((args: { width: number; height: number }) => string),
     width: number,
     height: number,
-    suffix?: string,
-    quality?: number,
-  ): Promise<Omit<ImageMetadata, 'name'> | undefined>;
-  async scaleImage(
-    imagePath: string,
-    widthOrArrayArgs: number | Array<{ name: number | string; width: number; height: number; suffix?: string }>,
-    height?: number,
-    suffix?: string,
-  ): Promise<Array<ImageMetadata> | Omit<ImageMetadata, 'name'> | undefined> {
-    const destDir = this.options.dest;
-    const getImageDest = this.getImageDestWithSuffix;
-    const image = await Jimp.create(imagePath);
-    if (Array.isArray(widthOrArrayArgs)) {
-      const args = widthOrArrayArgs;
-      return args
-        .map((item) => ({ ...resize(image.clone(), item.width, item.height, item.suffix), name: item.name }))
-        .filter(Boolean) as ImageMetadata[];
+    quality: number = 70,
+  ): Promise<Omit<ImageScaleData, 'name'> | undefined> {
+    if (typeof image === 'string') {
+      image = await Jimp.create(image);
     } else {
-      const width = widthOrArrayArgs;
-      return resize(image, width, height!, suffix);
+      // 后面的操作会改变Jimp对象，这里使用clone的对象处理
+      image = image.clone();
     }
-
-    function resize(image: Jimp, width: number, height: number, suffix?: string, quality: number = 100) {
-      if (image.getWidth() > width || image.getHeight() > height) {
-        if (width === 0 || height === 0) {
-          image.resize(width || Jimp.AUTO, height || Jimp.AUTO);
-        } else {
-          image.scaleToFit(width, height);
-        }
-        const imageWidth = image.getWidth();
-        const imageHeight = image.getHeight();
-        const newPath = getImageDest(imagePath, suffix || `${imageWidth}x${imageHeight}`);
-        image.quality(quality).write(newPath);
-        return {
-          width: imageWidth,
-          height: imageHeight,
-          path: addStartingSlash(path.relative(destDir, newPath)),
-        };
+    const imageWidth = image.getWidth();
+    const imageHeight = image.getHeight();
+    if (imageWidth > width || imageHeight > height) {
+      if (width === 0 || height === 0) {
+        image.resize(width || Jimp.AUTO, height || Jimp.AUTO);
+      } else {
+        image.scaleToFit(width, height);
       }
-      return;
+      if (typeof dest === 'function') {
+        dest = dest({ width: image.getWidth(), height: image.getHeight() });
+      }
+      image.quality(quality).write(dest);
+      return {
+        width: imageWidth,
+        height: imageHeight,
+        path: addStartingSlash(path.relative(this.options.dest, dest)),
+      };
     }
+    return;
   }
 }

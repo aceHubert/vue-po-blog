@@ -18,10 +18,6 @@ export class InitArgs {
   homeUrl!: string;
 
   @IsNotEmpty({ message: 'field $property is required' })
-  @IsUrl({ require_tld: false }, { message: 'field $property must be a URL address' })
-  siteUrl!: string;
-
-  @IsNotEmpty({ message: 'field $property is required' })
   @IsEmail({}, { message: 'field $property must be an email' })
   email!: string;
 }
