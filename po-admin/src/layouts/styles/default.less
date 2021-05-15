@@ -1,47 +1,255 @@
-.content-wrapper {
-  min-height: 0;
-  position: relative;
+.layout-wrapper {
+  &:not('.is-mobile') {
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 3px;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.08);
+    }
+    /* 滚动条滑块 */
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 3px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+  }
 }
 
-:global {
-  .ant-pro-basicLayout {
-    &-content {
-      margin: 12px;
+:global(.theme-light) {
+  .layout-header {
+    .header-logo h1 {
+      color: #333;
+    }
+  }
+
+  .layout-sider {
+    .sider-logo h1 {
+      color: #333;
+    }
+  }
+}
+
+:global(.theme-dark) {
+  .layout-header {
+    .header-logo h1 {
+      color: #fff;
     }
 
-    .ant-pro-global-header-trigger {
-      padding: 0 12px;
-    }
+    &.has-top-menu {
+      color: #fff;
+      background: #333;
 
-    .ant-pro-global-header-index-right {
-      margin-right: 12px;
-
-      &.ant-pro-global-header-index-dark {
-        .ant-pro-global-header-index-action {
-          color: hsla(0, 0%, 100%, 0.85);
-
-          &:hover {
-            background: #1890ff;
-          }
-        }
-      }
-
-      .ant-pro-account-avatar {
-        .antd-pro-global-header-index-avatar {
-          color: @primary-color;
-          background: rgba(255, 255, 255, 0.85);
-        }
-      }
-
-      .menu {
-        .anticon {
-          margin-right: 8px;
-        }
-
-        .ant-dropdown-menu-item {
-          min-width: 100px;
-        }
+      .top-menu {
+        background: transparent;
       }
     }
   }
+
+  .layout-sider {
+    color: #fff;
+    background: #212121;
+
+    .sider-menu {
+      background: transparent;
+    }
+
+    .sider-logo h1 {
+      color: #fff;
+    }
+  }
+}
+
+:global(.theme-realdark) {
+  .layout-header {
+    color: #fff;
+    background: #333;
+
+    .top-menu {
+      background: transparent;
+    }
+
+    .header-logo h1 {
+      color: #fff;
+    }
+  }
+
+  .layout-sider {
+    color: #fff;
+    background: #212121;
+
+    .sider-menu {
+      background: transparent;
+    }
+
+    .sider-logo h1 {
+      color: #fff;
+    }
+  }
+
+  .layout-content,
+  .layout-footer {
+    color: #fff;
+    background: #212121;
+  }
+}
+
+.layout-sider {
+  min-height: 100vh;
+  position: relative;
+  box-shadow: 2px 0 8px rgba(29, 35, 41, 0.5);
+  z-index: 10;
+
+  &--fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+
+  .layout-sider-drawer & {
+    box-shadow: none;
+
+    :global(.ant-drawer-open)& {
+      box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
+    }
+  }
+
+  .sider-logo {
+    padding-left: 24px;
+    height: 64px;
+    line-height: 64px;
+    display: block;
+    overflow: hidden;
+    transition: all 0.3s;
+    position: relative;
+
+    :global {
+      .logo,
+      h1 {
+        vertical-align: middle;
+        display: inline-block;
+      }
+
+      .logo {
+        height: 32px;
+        width: 32px;
+      }
+
+      h1 {
+        font-size: 20px;
+        margin: 0 0 0 12px;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.layout-header {
+  width: 100%;
+  background: #fff;
+  transition: width 0.2s;
+  z-index: 9;
+
+  &__wrapper {
+    padding: 0 16px;
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    &.content-width-fixed {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  }
+
+  &--fixed {
+    position: fixed;
+    top: 0;
+  }
+
+  .action(@padding: 0 12px) {
+    padding: @padding;
+    display: inline-block;
+    cursor: pointer;
+    transition: color 0.3s;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.025);
+    }
+  }
+
+  .header-logo {
+    height: 100%;
+    vertical-align: top;
+    cursor: pointer;
+
+    :global {
+      .logo,
+      h1 {
+        vertical-align: middle;
+        display: inline-block;
+      }
+
+      .logo {
+        height: 28px;
+        width: auto;
+      }
+
+      h1 {
+        font-size: 16px;
+        margin: 0 0 0 12px;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .trigger {
+    .action(0 0 0 16px);
+
+    :global(.anticon) {
+      font-size: 20px;
+      vertical-align: -0.225em;
+    }
+  }
+
+  .ant-menu {
+    height: 100%;
+    border: none;
+  }
+
+  .content-right {
+    margin-left: auto;
+    height: 100%;
+    display: flex;
+    float: right;
+    overflow: hidden;
+
+    &__action {
+      .action();
+    }
+  }
+}
+
+.layout-content {
+  &__wrapper {
+    padding: 24px 24px 0;
+    width: 100%;
+    min-height: 100%;
+    transition: 0.3s;
+    position: relative;
+
+    &.content-width-fixed {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  }
+}
+
+.layout-footer {
+  text-align: center;
 }

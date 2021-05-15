@@ -1,7 +1,7 @@
 import { Component, mixins } from 'nuxt-property-decorator';
 import { PostStatus, PostVisibility, UserCapability } from '@/includes/datas';
 import { PostEditForm } from '@/components';
-import PostEditMixin from './modules/edit-mixin';
+import { PostEditMixin } from './modules';
 
 {
   /* <router>

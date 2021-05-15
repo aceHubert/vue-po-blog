@@ -29,7 +29,6 @@
     "url": "https://github.com/aceHubert/vue-po-blog/issues"
   },
   "dependencies": {
-    "@ant-design-vue/pro-layout": "^1.0.1",
     "@ckeditor/ckeditor5-build-balloon": "^27.0.0",
     "@ckeditor/ckeditor5-vue2": "^1.0.5",
     "@vue-async/module-loader": "^2.0.0",

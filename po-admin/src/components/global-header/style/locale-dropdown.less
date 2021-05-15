@@ -1,0 +1,17 @@
+@locale-dropdown-prefix-cls: ~'@{po-prefix}-locale-dropdown';
+
+.@{locale-dropdown-prefix-cls}{
+  &__name {
+    margin-left: 5px;
+  }
+
+  &__menu {
+    .ant-dropdown-menu-item {
+      min-width: 100px;
+
+      span[role='icon'] {
+        margin-right: 5px;
+      }
+    }
+  }
+}

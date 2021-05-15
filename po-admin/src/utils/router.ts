@@ -7,7 +7,7 @@ import { kebabCase } from 'lodash-es';
 import { trailingSlash } from '@/utils/path';
 
 // Types
-import { LangConfig } from 'types/locale';
+import { LangConfig } from 'types/configs/locale';
 
 /**
  * layouts

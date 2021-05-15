@@ -1,5 +1,5 @@
 // Types
-import { Table } from 'types/constants';
+import { Table } from 'types/datas/table';
 
 // 表格列信息
 const table: Table = ({ i18nRender }) => ({

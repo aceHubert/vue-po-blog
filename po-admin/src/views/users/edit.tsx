@@ -1,8 +1,9 @@
 import { Vue, Component } from 'nuxt-property-decorator';
 import { camelCase } from 'lodash-es';
+import { userStore } from '@/store/modules';
 import { gql, formatError } from '@/includes/functions';
 import { UserCapability } from '@/includes/datas';
-import EditForm from './modules/EditForm';
+import { UserEditForm } from './modules';
 
 // Types
 import { User, UserMetas, UserResponse } from 'types/datas/user';
@@ -10,7 +11,11 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
   /* <router>
 {
   name:'users-edit',
-  path:':id/edit',
+  path:':id(\\d+)/edit',
+  alias:[{
+    name: 'profile-edit',
+    path:'/profile/edit',
+  }],
   meta:{
     title: 'Edit',
   }
@@ -28,7 +33,10 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
       title: this.$tv('pageTitle.user.edit', 'Edit User') as string,
     };
   },
-  asyncData: async ({ error, route, graphqlClient }) => {
+  asyncData: async ({ error, redirect, route, graphqlClient }) => {
+    if (route.params.id === userStore.id) {
+      return redirect('/profile/edit');
+    }
     return graphqlClient
       .query<{ user: UserResponse }, { id: string }>({
         query: gql`
@@ -41,6 +49,7 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
               displayName
               url
               status
+              createTime: createdAt
               metas {
                 key: metaKey
                 value: metaValue
@@ -49,7 +58,7 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
           }
         `,
         variables: {
-          id: route.params.id,
+          id: route.params.id || userStore.id!,
         },
       })
       .then(({ data }) => {
@@ -80,11 +89,27 @@ export default class UserEdit extends Vue {
     };
   }
 
+  get isYourself() {
+    return !this.$route.params.id;
+  }
+
   render() {
     return (
-      <div style="max-width:900px;">
-        <EditForm editModel={this.editModel} />
-      </div>
+      <a-card class="user-edit" bordered={false}>
+        <UserEditForm
+          editModel={this.editModel}
+          btnTitle={
+            this.isYourself
+              ? (this.$tv('user.btnTips.updateProfile', 'Update Profile') as string)
+              : (this.$tv('user.btnTips.updateUser', 'Update User') as string)
+          }
+          btnText={
+            this.isYourself
+              ? (this.$tv('user.btnText.updateProfile', 'Update Profile') as string)
+              : (this.$tv('user.btnText.updateUser', 'Update User') as string)
+          }
+        />
+      </a-card>
     );
   }
 }

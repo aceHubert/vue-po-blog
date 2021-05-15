@@ -94,8 +94,8 @@ export default class UserCreate extends Vue {
           { model: Omit<UserCreationModel, 'username' | 'password'> & { loginName: string; loginPwd: string } }
         >({
           mutation: gql`
-            mutation addUser($model: NewUserInput!) {
-              user: addUser(model: $model) {
+            mutation createUser($model: NewUserInput!) {
+              user: createUser(model: $model) {
                 id
                 loginName
               }
@@ -110,7 +110,7 @@ export default class UserCreate extends Vue {
           },
         })
         .then(({ data }) => {
-          this.$router.replace({ name: 'users-profile', query: { id: data!.user.id } });
+          this.$router.replace({ name: 'users-edit', query: { id: data!.user.id } });
         })
         .catch((err) => {
           const { message } = formatError(err);
@@ -235,7 +235,7 @@ export default class UserCreate extends Vue {
 
   render() {
     return (
-      <div>
+      <a-card class="user-create" bordered={false}>
         <a-form
           form={this.form}
           label-col={{ xs: { span: 24 }, sm: { span: 5 } }}
@@ -344,7 +344,7 @@ export default class UserCreate extends Vue {
             </a-button>
           </a-form-item>
         </a-form>
-      </div>
+      </a-card>
     );
   }
 }

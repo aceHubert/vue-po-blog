@@ -1,28 +1,13 @@
-import Vue from 'vue';
 import { VuexModule, Module, VuexMutation, VuexAction, getModule } from 'nuxt-property-decorator';
 import { store } from '@/store';
 import { httpClient, graphqlClient, gql } from '@/includes/functions';
+import { defaultSettings, LOCALE } from '@/configs/settings.config';
 import cookie from '@/utils/cookie';
-import config, {
-  SET_LAYOUT,
-  SET_THEME,
-  SET_PRIMARY_COLOR,
-  SET_CONTENT_WIDTH,
-  TOGGLE_SIDE_COLLAPSED,
-  TOGGLE_FIXED_HEADER,
-  TOGGLE_FIX_SIDEBAR,
-  TOGGLE_AUTO_HIDE_HEADER,
-  TOGGLE_COLOR_WEAK,
-  TOGGLE_MULTI_TAB,
-  Layout,
-  Theme,
-  ContentWidth,
-  LOCALE,
-} from '@/config/proLayoutConfigs';
 
 // Types
 import { Context } from '@nuxt/types';
-import { LangConfig } from 'types/locale';
+import { LangConfig } from 'types/configs/locale';
+import { LayoutConfig } from 'types/configs/layout';
 
 export type CheckResponse = {
   dbInitRequired: boolean;
@@ -30,92 +15,21 @@ export type CheckResponse = {
 
 @Module({ store, name: 'app', namespaced: true, dynamic: true, stateFactory: true })
 class AppStore extends VuexModule {
-  layout: Layout = config.settings.layout;
-  theme: Theme = config.settings.theme;
-  primaryColor = config.settings.primaryColor;
-  contentWidth: ContentWidth = config.settings.contentWidth;
-  fixedHeader = config.settings.fixedHeader;
-  fixSidebar = config.settings.fixSiderbar;
-  sideCollapsed = config.settings.sideCollapsed;
-  colorWeak = config.settings.colorWeak;
-  // 下面两个暂时没有用
-  autoHideHeader = config.settings.autoHideHeader;
-  multiTab: boolean = config.settings.multiTab;
+  // 布局（主题色，标题，Logo等）
+  layout: LayoutConfig = defaultSettings.layout;
 
   // 语言
-  locale: string = config.locale.default;
-  supportLanguages: LangConfig[] = config.locale.supportLanguages;
-
-  get isDark() {
-    return this.theme === Theme.Dark;
-  }
-
-  get isLight() {
-    return !this.isDark;
-  }
+  locale: string = defaultSettings.locale.default;
+  supportLanguages: LangConfig[] = defaultSettings.locale.supportLanguages;
 
   @VuexMutation
-  setLayout(mode: Layout) {
-    this.layout = mode;
-    Vue.ls.set(SET_LAYOUT, mode);
-  }
-
-  @VuexMutation
-  setTheme(theme: Theme) {
-    this.theme = theme;
-    Vue.ls.set(SET_THEME, theme);
-  }
-
-  @VuexMutation
-  setPrimaryColor(color: string) {
-    this.primaryColor = color;
-    Vue.ls.set(SET_PRIMARY_COLOR, color);
-  }
-
-  @VuexMutation
-  setContentWidth(type: ContentWidth) {
-    this.contentWidth = type;
-    Vue.ls.set(SET_CONTENT_WIDTH, type);
-  }
-
-  @VuexMutation
-  toggleFixedHeader(mode: boolean) {
-    this.fixedHeader = mode;
-    Vue.ls.set(TOGGLE_FIXED_HEADER, mode);
-  }
-
-  @VuexMutation
-  toggleFixSidebar(mode: boolean) {
-    this.fixSidebar = mode;
-    Vue.ls.set(TOGGLE_FIX_SIDEBAR, mode);
-  }
-
-  @VuexMutation
-  toggleSideCollapsed(mode: boolean) {
-    this.sideCollapsed = mode;
-    Vue.ls.set(TOGGLE_SIDE_COLLAPSED, mode);
-  }
-
-  @VuexMutation
-  toggleColorWeak(mode: boolean) {
-    this.colorWeak = mode;
-    Vue.ls.set(TOGGLE_COLOR_WEAK, mode);
-  }
-
-  @VuexMutation
-  toggleAutoHideHeader(mode: boolean) {
-    this.autoHideHeader = mode;
-    Vue.ls.set(TOGGLE_AUTO_HIDE_HEADER, mode);
-  }
-
-  @VuexMutation
-  toggleMultiTab(mode: boolean) {
-    this.multiTab = mode;
-    Vue.ls.set(TOGGLE_MULTI_TAB, mode);
+  setAdminLayout(layout: LayoutConfig) {
+    this.layout = { ...defaultSettings.layout, ...layout };
+    // do something else
   }
 
   /**
-   * 获取语言
+   * 设置语言
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
@@ -144,8 +58,9 @@ class AppStore extends VuexModule {
    * @version 0.0.1
    * 添加支持语言列表
    */
-  addSupportLanguages(languages: LangConfig[]) {
-    this.supportLanguages = this.supportLanguages.concat(languages);
+  @VuexMutation
+  setSupportLanguages(languages: LangConfig[]) {
+    this.supportLanguages = defaultSettings.locale.supportLanguages.concat(languages);
   }
 
   /**

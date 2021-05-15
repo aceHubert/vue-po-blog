@@ -8,8 +8,8 @@ import classes from './styles/index.less?module';
 
 // Types
 import { Term, TermQuery, TermCreationModel, TermUpdateModel } from 'types/datas';
-import { BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
-import { TreeData } from '@/components/TermEditForm/TermEditForm';
+import { BlukAcitonOption } from '@/components/search-from/SearchForm';
+import { TreeData } from '@/components/term-edit-form/TermEditForm';
 
 enum BlukActions {
   Delete = 'delete',

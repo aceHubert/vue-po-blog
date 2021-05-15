@@ -1,5 +1,6 @@
 import { mixins, Component } from 'nuxt-property-decorator';
 import { appMixin, deviceMixin } from '@/mixins';
+import { GlobalFooter } from '@/components';
 import classes from './styles/user.less?module';
 
 @Component<UserLayout>({
@@ -12,14 +13,13 @@ export default class UserLayout extends mixins(appMixin, deviceMixin) {
         <div class={classes.container}>
           <nuxt class={this.device} />
         </div>
-        <div class={classes.footer}>
-          <div class={classes.links}>
+        <GlobalFooter class={classes.footer}>
+          <template slot="links">
             <a href="_self">帮助</a>
             <a href="_self">隐私</a>
             <a href="_self">条款</a>
-          </div>
-          <div class={classes.copyright}>Copyright &copy; 2020 Plomemo</div>
-        </div>
+          </template>
+        </GlobalFooter>
       </div>
     );
   }

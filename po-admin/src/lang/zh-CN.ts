@@ -132,6 +132,31 @@ const locale = {
     update: '@:breadcrumb.edit',
   },
 
+  // 初始化
+  init: {
+    title: '开始使用Plumemo博客系统',
+    localePlaceholder: '使用语言',
+    localeDescription: '管理员账号使用语言',
+    localeRequired: '请选择使用语言',
+    titlePlaceholder: '标题',
+    titleDescription: '博客标题',
+    titleRequired: '请输入博客标题',
+    titleInitValue: '这是博客的标题',
+    homeUrlPlaceholder: '博客域名地址',
+    homeUrlDescription: '如果与管理平台绑定在不同的域名下，请输入您设置的域名地址',
+    homeUrlRequired: '请输入博客域名地址',
+    homeUrlFormatValidation: '请输入正确博客域名地址格式',
+    passwordPlaceholder: '登录密码',
+    passwordDescription: '管理员账号的登录密码',
+    passwordRequired: '请输入登录密码',
+    passwordLengthVaildation: '登录密码长度不可小于{length}位',
+    emailPlaceholder: '电子邮箱',
+    emailDescription: '管理员账号电子邮箱',
+    emailRequired: '请输入电子邮箱',
+    emailFormatValidation: '请输入正确的电子邮箱格式',
+    btnInit: '开始',
+  },
+
   // 登录
   login: {
     title: '欢迎登录Plumemo管理平台',

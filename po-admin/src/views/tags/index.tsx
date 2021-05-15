@@ -8,7 +8,7 @@ import classes from './styles/index.less?module';
 
 // Types
 import { Term, TermQuery, TermCreationModel, TermUpdateModel } from 'types/datas';
-import { BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
+import { BlukAcitonOption } from '@/components/search-from/SearchForm';
 
 enum BlukActions {
   Delete = 'delete',

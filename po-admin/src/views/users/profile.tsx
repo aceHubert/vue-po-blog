@@ -1,7 +1,7 @@
 import { Vue, Component } from 'nuxt-property-decorator';
 import { camelCase } from 'lodash-es';
+import { userStore } from '@/store/modules';
 import { gql, formatError } from '@/includes/functions';
-import EditForm from './modules/EditForm';
 
 // Types
 import { User, UserMetas, UserResponse } from 'types/datas/user';
@@ -9,7 +9,11 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
 {
   /* <router>
 {
-  path:'/profile',
+  path:':id(\\d+)/profile',
+  alias:[{
+    name: 'profile',
+    path:'/profile',
+  }],
   meta:{
     title: 'Profile',
   }
@@ -24,61 +28,38 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
       title: this.$tv('pageTitle.user.profile', 'Profile') as string,
     };
   },
-  asyncData: async ({ route, error, graphqlClient }) => {
-    let promisify;
-    if (route.query.id) {
-      promisify = graphqlClient
-        .query<{ user: UserResponse }, { id: string }>({
-          query: gql`
-            query getUser($id: ID!) {
-              user: userById(id: $id) {
-                id
-                username: loginName
-                email
-                mobile
-                displayName
-                url
-                status
-                metas {
-                  key: metaKey
-                  value: metaValue
-                }
-              }
-            }
-          `,
-          variables: {
-            id: route.query.id as string,
-          },
-        })
-        .then(({ data }) => data.user);
-    } else {
-      promisify = graphqlClient
-        .query<{ user: UserResponse }>({
-          query: gql`
-            query getUser {
-              user {
-                id
-                username: loginName
-                email
-                mobile
-                displayName
-                url
-                status
-                metas {
-                  key: metaKey
-                  value: metaValue
-                }
-              }
-            }
-          `,
-        })
-        .then(({ data }) => data.user);
+  asyncData: async ({ route, error, redirect, graphqlClient }) => {
+    if (route.params.id === userStore.id) {
+      return redirect('/profile');
     }
-    return promisify
-      .then((user) => {
-        const { metas, ...rest } = user;
+    return graphqlClient
+      .query<{ user: UserResponse }, { id: string }>({
+        query: gql`
+          query getUser($id: ID!) {
+            user: userById(id: $id) {
+              id
+              username: loginName
+              email
+              mobile
+              displayName
+              url
+              status
+              createTime: createdAt
+              metas(metaKeys: ["first_name", "last_name", "nick_name", "avator", "description"]) {
+                key: metaKey
+                value: metaValue
+              }
+            }
+          }
+        `,
+        variables: {
+          id: route.params.id || userStore.id!,
+        },
+      })
+      .then(({ data }) => {
+        const { metas, ...rest } = data.user;
         return {
-          editModel: Object.assign(
+          user: Object.assign(
             {},
             rest,
             metas.reduce((prev, curr) => {
@@ -95,23 +76,129 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
   },
 })
 export default class Profile extends Vue {
-  editModel!: User & Partial<UserMetas>;
+  user!: User & Partial<UserMetas>;
 
   data() {
     return {
-      editModel: null,
+      user: null,
     };
+  }
+
+  get isYourself() {
+    return !this.$route.params.id;
   }
 
   render() {
     return (
-      <div style="max-width:900px;">
-        <EditForm
-          editModel={this.editModel}
-          btnTitle={this.$tv('user.btnTips.updateProfile', 'Update Profile') as string}
-          btnText={this.$tv('user.btnText.updateProfile', 'Update Profile') as string}
-        />
-      </div>
+      <a-card class="user-profile" bordered={false}>
+        {/* Name */}
+        <a-row gutter={[8, 8]}>
+          <a-col xs={24} sm={{ span: 18, offset: 6 }}>
+            <h1>{this.$tv('user.form.groupName', 'Name')}</h1>
+          </a-col>
+        </a-row>
+        <a-row gutter={[8, 24]}>
+          <a-col xs={24} sm={6} class="text-right">
+            <strong>{this.$tv('user.form.username', 'Username')}: </strong>
+          </a-col>
+          <a-col xs={24} sm={18}>
+            {this.user.username}
+          </a-col>
+        </a-row>
+        <a-row gutter={[8, 24]}>
+          <a-col xs={24} sm={6} class="text-right">
+            <strong>{this.$tv('user.form.firstName', 'First Name')}: </strong>
+          </a-col>
+          <a-col xs={24} sm={18}>
+            {this.user.firstName}
+          </a-col>
+        </a-row>
+        <a-row gutter={[8, 24]}>
+          <a-col xs={24} sm={6} class="text-right">
+            <strong>{this.$tv('user.form.lastName', 'Last Name')}: </strong>
+          </a-col>
+          <a-col xs={24} sm={18}>
+            {this.user.lastName}
+          </a-col>
+        </a-row>
+        <a-row gutter={[8, 24]}>
+          <a-col xs={24} sm={6} class="text-right">
+            <strong>{this.$tv('user.form.nickname', 'Nickname')}: </strong>
+          </a-col>
+          <a-col xs={24} sm={18}>
+            {this.user.nickName}
+          </a-col>
+        </a-row>
+        <a-row gutter={[8, 24]}>
+          <a-col xs={24} sm={6} class="text-right">
+            <strong>{this.$tv('user.form.displayName', 'Display name for public as')}: </strong>
+          </a-col>
+          <a-col xs={24} sm={18}>
+            {this.user.displayName}
+          </a-col>
+        </a-row>
+        {/* Contact Info */}
+        <a-row gutter={[8, 8]}>
+          <a-col xs={24} sm={{ span: 18, offset: 6 }}>
+            <h1>{this.$tv('user.form.groupContactInfo', 'Contact Info')}</h1>
+          </a-col>
+        </a-row>
+        <a-row gutter={[8, 24]}>
+          <a-col xs={24} sm={6} class="text-right">
+            <strong>{this.$tv('user.form.email', 'Email')}: </strong>
+          </a-col>
+          <a-col xs={24} sm={18}>
+            {this.user.email}
+          </a-col>
+        </a-row>
+        <a-row gutter={[8, 24]}>
+          <a-col xs={24} sm={6} class="text-right">
+            <strong>{this.$tv('user.form.website', 'Website')}: </strong>
+          </a-col>
+          <a-col xs={24} sm={18}>
+            {this.user.url}
+          </a-col>
+        </a-row>
+        {/* About Yourself */}
+        <a-row gutter={[8, 8]}>
+          <a-col xs={24} sm={{ span: 18, offset: 6 }}>
+            <h1>{this.$tv('user.form.groupAboutYourself', 'About Yourself')}</h1>
+          </a-col>
+        </a-row>
+        <a-row gutter={[8, 24]}>
+          <a-col xs={24} sm={6} class="text-right">
+            <strong style="line-height:64px">{this.$tv('user.form.avator', 'Profile Picture')}: </strong>
+          </a-col>
+          <a-col xs={24} sm={18}>
+            {this.user.avatar ? (
+              <a-avatar shape="square" size={64} url={this.user.avatar}></a-avatar>
+            ) : (
+              <a-avatar shape="square" size={64} icon="user" />
+            )}
+          </a-col>
+        </a-row>
+        <a-row gutter={[8, 24]}>
+          <a-col xs={24} sm={6} class="text-right">
+            <strong>{this.$tv('user.form.description', 'Biographical Info')}: </strong>
+          </a-col>
+          <a-col xs={24} sm={18}>
+            {this.user.description}
+          </a-col>
+        </a-row>
+        {this.isYourself ? (
+          <a-row gutter={[8, 24]}>
+            <a-col xs={24} sm={{ span: 18, offset: 6 }}>
+              <a-button
+                type="primary"
+                title={this.$tv('user.btnTips.editProfile', 'Edit Profile')}
+                onClick={() => this.$router.push({ name: 'profile-edit' })}
+              >
+                {this.$tv('user.btnText.editProfile', 'Edit Profile')}
+              </a-button>
+            </a-col>
+          </a-row>
+        ) : null}
+      </a-card>
     );
   }
 }

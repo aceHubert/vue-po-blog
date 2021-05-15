@@ -5,7 +5,10 @@ import { HookFunction, HttpInstance, SettingsFunctions } from './functions';
 import { UserCapability } from 'src/includes/datas';
 
 export interface VueExtraPrototypes
-  extends Pick<SettingsFunctions, 'getBaseUrl' | 'getGraphqlPath' | 'getGraphqlWsPath' | 'getApiPath'> {
+  extends Pick<
+    SettingsFunctions,
+    'getServerUrl' | 'getBasePath' | 'getGraphqlPath' | 'getGraphqlWsPath' | 'getApiPath'
+  > {
   hook: HookFunction;
 }
 

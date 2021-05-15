@@ -10,8 +10,8 @@ import classes from './styles/index.less?module';
 
 // Types
 import { UserWithRole, UserMetas, UserPagedQuery, UserPagedResponse } from 'types/datas';
-import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
-import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
+import { DataSourceFn } from '@/components/async-table/AsyncTable';
+import { StatusOption, BlukAcitonOption } from '@/components/search-from/SearchForm';
 
 // import { Table } from 'types/constants';
 
@@ -252,8 +252,8 @@ export default class UserIndex extends Vue {
           this.graphqlClient
             .mutate<{ result: boolean }, { ids: string[] }>({
               mutation: gql`
-                mutation blukRemove($ids: [ID!]!) {
-                  result: blukRemoveUsers(ids: $ids)
+                mutation bulkDelete($ids: [ID!]!) {
+                  result: bulkDeleteUsers(ids: $ids)
                 }
               `,
               variables: {
@@ -290,8 +290,8 @@ export default class UserIndex extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
-          mutation remove($id: ID!) {
-            result: removeUser(id: $id)
+          mutation delete($id: ID!) {
+            result: deleteUser(id: $id)
           }
         `,
         variables: {
@@ -336,7 +336,7 @@ export default class UserIndex extends Vue {
         <nuxt-link
           to={
             userStore.id === record.id
-              ? { name: 'users-profile' }
+              ? { name: 'profile-edit' }
               : { name: 'users-edit', params: { id: String(record.id) } }
           }
           title={this.$tv('user.btnTips.edit', 'Edit') as string}
@@ -425,7 +425,7 @@ export default class UserIndex extends Vue {
     };
 
     return (
-      <a-card class="post-index" bordered={false}>
+      <a-card class="user-index" bordered={false}>
         <SearchForm
           keywordPlaceholder={this.$tv('user.search.keywordPlaceholder', 'Search Post') as string}
           statusName="role"

@@ -22,6 +22,11 @@ declare global {
     title: string;
     value: string;
   };
+
+  type GlobalSettings = {
+    serverUrl: string;
+    basePath: string;
+  };
 }
 
 declare module 'axios' {

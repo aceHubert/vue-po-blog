@@ -11,8 +11,8 @@ import classes from './styles/index.less?module';
 
 // Types
 import { PagedQuery, Page, PagePagedQuery, PagePagedResponse } from 'types/datas';
-import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
-import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
+import { DataSourceFn } from '@/components/async-table/AsyncTable';
+import { StatusOption, BlukAcitonOption } from '@/components/search-from/SearchForm';
 
 type QueryParams = Omit<PagePagedQuery, keyof PagedQuery<{}>>;
 

@@ -14,7 +14,7 @@ import { genLocaleConfig } from '@/utils/router';
 // Types
 import { Route } from 'vue-router';
 import { Plugin } from '@nuxt/types';
-import { LangConfig } from 'types/locale';
+import { LangConfig } from 'types/configs/locale';
 
 Vue.use(VueI18n);
 
@@ -62,7 +62,6 @@ export async function Locale(...params: Parameters<Plugin>) {
 
   // hooks
   await hook('locale:messages').exec(messages, fallbackLocale);
-  await hook('locale:set-support-languages').exec((languages: LangConfig[]) => appStore.addSupportLanguages(languages));
 
   // 从 router
   const hasDocument = typeof document !== 'undefined';
@@ -101,7 +100,7 @@ export async function Locale(...params: Parameters<Plugin>) {
   //           setLocale(locale);
   //         }
   //       },
-  //       // { immediate: true },
+  //       { immediate: true },
   //     );
   //   },
   // });

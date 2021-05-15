@@ -11,20 +11,7 @@ import { appStore, userStore } from '@/store/modules';
 import * as directives from '@/directives';
 import * as filters from '@/filters';
 import cookie from '@/utils/cookie';
-import config, {
-  SET_LAYOUT,
-  SET_THEME,
-  SET_PRIMARY_COLOR,
-  SET_CONTENT_WIDTH,
-  TOGGLE_FIXED_HEADER,
-  TOGGLE_FIX_SIDEBAR,
-  TOGGLE_SIDE_COLLAPSED,
-  TOGGLE_COLOR_WEAK,
-  TOGGLE_AUTO_HIDE_HEADER,
-  TOGGLE_MULTI_TAB,
-  ACCESS_TOKEN,
-  LOCALE,
-} from '@/config/proLayoutConfigs';
+import { ACCESS_TOKEN, LOCALE } from '@/configs/settings.config';
 
 // 添加到 Vue.protytype 上的属性和方法
 import prototypeArgs from '@/includes/prototype';
@@ -112,30 +99,12 @@ export async function Initializer(...params: Parameters<Plugin>) {
   };
 
   /**
-   * 主题配置
+   * 设置全局配置
    */
-  if (process.client) {
-    appStore.setLayout(Vue.ls.get(SET_LAYOUT, config.settings.layout));
-    appStore.setTheme(Vue.ls.get(SET_THEME, config.settings.theme));
-    appStore.setPrimaryColor(Vue.ls.get(SET_PRIMARY_COLOR, config.settings.primaryColor));
-    appStore.setContentWidth(Vue.ls.get(SET_CONTENT_WIDTH, config.settings.contentWidth));
-    appStore.toggleFixedHeader(Vue.ls.get(TOGGLE_FIXED_HEADER, config.settings.fixedHeader));
-    appStore.toggleFixSidebar(Vue.ls.get(TOGGLE_FIX_SIDEBAR, config.settings.fixSiderbar));
-    appStore.toggleSideCollapsed(Vue.ls.get(TOGGLE_SIDE_COLLAPSED, config.settings.sideCollapsed));
-    appStore.toggleSideCollapsed(Vue.ls.get(TOGGLE_COLOR_WEAK, config.settings.colorWeak));
-    appStore.toggleAutoHideHeader(Vue.ls.get(TOGGLE_AUTO_HIDE_HEADER, config.settings.autoHideHeader));
-    appStore.toggleMultiTab(Vue.ls.get(TOGGLE_MULTI_TAB, config.settings.multiTab));
-  } else {
-    // ssr
-  }
-
-  /**
-   * 修改全局配置
-   */
-  globalSettings.baseUrl = $config['baseUrl'] || '';
+  globalSettings.serverUrl = $config['server_url'] || '';
   globalSettings.basePath = app.router!.options.base || '';
 
-  // 不在项目初始货页面时，才能读取数据库
+  // 初始化项目之后才能读取数据库
   if (route.name !== 'init') {
     // login/logout/register/lost-password 页面排除
     if (!route.name?.startsWith('account-')) {
@@ -181,6 +150,8 @@ export async function Initializer(...params: Parameters<Plugin>) {
         // ate by dog
       });
     appStore.setLocale(siteLocale);
+    appStore.setSupportLanguages(JSON.parse(autoloadOptions['support_languages'] || '[]'));
+    appStore.setAdminLayout(JSON.parse(autoloadOptions['admin_layout'] || '{}'));
 
     inject('userOptions', autoloadOptions);
   }

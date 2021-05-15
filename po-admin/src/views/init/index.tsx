@@ -61,7 +61,7 @@ export default class Init extends Vue {
     this.form.setFieldsValue({
       locale: appStore.locale,
       title: this.$tv('init.titleInitValue', 'This is a simple title'),
-      siteUrl: window.location.origin,
+      homeUrl: window.location.origin,
     });
   }
 
@@ -80,7 +80,7 @@ export default class Init extends Vue {
         .initDB(initParams)
         .then((result) => {
           if (result) {
-            this.$router.replace({ path: '/logout' });
+            this.$router.replace({ path: '/login' });
           }
         })
         .catch((err) => {
@@ -101,10 +101,13 @@ export default class Init extends Vue {
       <div id="init" class={classes.wrapper}>
         <div class={classes.container}>
           <div class={classes.top}>
-            <p class={classes.topTitle}>{this.$tv('init.title', 'Start to use Polumemo Blog')}</p>
+            <p class={classes.topTitle}>{this.$tv('init.title', 'Start to use Plumemo Blog')}</p>
           </div>
           <a-form class={classes.form} form={this.form} onSubmit={m.stop.prevent(this.handleSubmit.bind(this))}>
-            <a-form-item help={this.$tv('init.localeDescription', 'Locale description')}>
+            <a-form-item
+              class={classes.formItem}
+              extra={this.$tv('init.localeDescription', 'Language for admin account')}
+            >
               <a-select
                 options={this.localeOptions}
                 size="large"
@@ -125,7 +128,7 @@ export default class Init extends Vue {
                 }}
               ></a-select>
             </a-form-item>
-            <a-form-item help={this.$tv('init.titleDescription', 'Title description')}>
+            <a-form-item class={classes.formItem} extra={this.$tv('init.titleDescription', 'Blog title')}>
               <a-input
                 size="large"
                 type="text"
@@ -146,23 +149,29 @@ export default class Init extends Vue {
                 }}
               ></a-input>
             </a-form-item>
-            <a-form-item help={this.$tv('init.siteUrlDescription', 'Site URL description')}>
+            <a-form-item
+              class={classes.formItem}
+              extra={this.$tv(
+                'init.homeUrlDescription',
+                'If you set the different domain address with admin, use which you set',
+              )}
+            >
               <a-input
                 size="large"
                 type="text"
-                placeholder={this.$tv('init.siteUrlPlaceholder', 'Site URL')}
+                placeholder={this.$tv('init.homeUrlPlaceholder', 'Blog domain address')}
                 {...{
                   directives: [
                     {
                       name: 'decorator',
                       value: [
-                        'siteUrl',
+                        'homeUrl',
                         {
                           rules: [
-                            { required: true, message: this.$tv('init.siteUrlRequired', 'Site URL is required!') },
+                            { required: true, message: this.$tv('init.homeUrlRequired', 'Home URL is required!') },
                             {
                               type: 'url',
-                              message: this.$tv('init.siteUrlFormValidation', 'Site Url format is not correct'),
+                              message: this.$tv('init.homeUrlFormatValidation', 'Home Url format is not correct'),
                             },
                           ],
                           validateTrigger: 'blur',
@@ -173,7 +182,10 @@ export default class Init extends Vue {
                 }}
               ></a-input>
             </a-form-item>
-            <a-form-item help={this.$tv('init.passwordDescription', 'Password description')}>
+            <a-form-item
+              class={classes.formItem}
+              extra={this.$tv('init.passwordDescription', 'Password for admin account')}
+            >
               <a-input
                 size="large"
                 type="text"
@@ -193,6 +205,7 @@ export default class Init extends Vue {
                               message: this.$tv(
                                 'init.passwordLengthVaildation',
                                 'Password length must be at least 6 bits!',
+                                { length: 6 },
                               ),
                             },
                           ],
@@ -204,7 +217,7 @@ export default class Init extends Vue {
                 }}
               ></a-input>
             </a-form-item>
-            <a-form-item help={this.$tv('init.emailDescription', 'Email description')}>
+            <a-form-item class={classes.formItem} extra={this.$tv('init.emailDescription', 'Email for admin account')}>
               <a-input
                 size="large"
                 type="text"

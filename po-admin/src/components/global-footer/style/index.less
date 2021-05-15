@@ -1,0 +1,30 @@
+@import '../../style/themes/default.less';
+
+@global-footer-prefix-cls:~ '@{po-prefix}-global-footer';
+
+.@{global-footer-prefix-cls} {
+  padding: 0 16px;
+  margin: 48px 0 24px;
+  text-align: center;
+
+  &__links {
+    margin-bottom: 8px;
+
+    a {
+      color: rgba(0, 0, 0, 0.45);
+
+      &:hover {
+        color: rgba(0, 0, 0, 0.65);
+      }
+
+      &:not(:last-child) {
+        margin-right: 40px;
+      }
+    }
+  }
+
+  &__copyright {
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 14px;
+  }
+}

@@ -6,7 +6,7 @@ import { store } from '@/store';
 import { httpClient, graphqlClient, gql } from '@/includes/functions';
 import { UserRole, UserCapability } from '@/includes/datas';
 import cookie from '@/utils/cookie';
-import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/config/proLayoutConfigs';
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/configs/settings.config';
 
 // Types
 import { Context } from '@nuxt/types';

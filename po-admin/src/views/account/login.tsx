@@ -106,7 +106,7 @@ export default class Login extends Vue {
     return (
       <div id="login" class={classes.wrapper}>
         <div class={classes.top}>
-          <p class={classes.topTitle}>{this.$tv('login.title', 'Welcome to Polumemo Blog Admin')}</p>
+          <p class={classes.topTitle}>{this.$tv('login.title', 'Welcome to Plumemo Blog Admin')}</p>
           <p class={classes.topDesc}>{this.$tv('login.description', 'A simple front-end to back-end blog system')}</p>
         </div>
         <a-form class={classes.form} form={this.form} onSubmit={m.stop.prevent(this.handleSubmit.bind(this))}>
@@ -132,7 +132,7 @@ export default class Login extends Vue {
                 ],
               }}
             >
-              <a-icon slot="prefix" type="user" style={{ color: 'rgba(0,0,0,.25)' }} />
+              <a-icon slot="prefix" type="user" />
             </a-input>
           </a-form-item>
 
@@ -159,7 +159,7 @@ export default class Login extends Vue {
                 ],
               }}
             >
-              <a-icon slot="prefix" type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />
+              <a-icon slot="prefix" type="lock" />
             </a-input>
           </a-form-item>
 
