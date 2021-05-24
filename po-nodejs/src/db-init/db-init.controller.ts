@@ -49,13 +49,13 @@ export class DbInitController extends BaseController {
       });
       return success
         ? this.success({
-            message: await i18n.t('db-init.init_data.success'),
+            message: await i18n.tv('core.db-init.init_data.success', 'Initialize datas successful!'),
           })
-        : this.faild(await i18n.t('db-init.init_data.faild'));
+        : this.faild(await i18n.tv('core.db-init.init_data.faild', 'An error occurred while initializing datas!'));
     } else {
       // 已经存在表结构，直接返回成功
       return this.success({
-        message: await i18n.t('db-init.init_database.success'),
+        message: await i18n.tv('core.db-init.init_database.success', 'Initialize database successful!'),
       });
     }
   }

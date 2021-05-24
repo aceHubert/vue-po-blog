@@ -126,12 +126,16 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   ): Promise<boolean> {
     if (model.userRole && requestUser.role !== UserRole.Administrator) {
       throw new ForbiddenError(
-        await i18n.t('error.forbidden_role', {
-          args: {
-            userRole: requestUser.role,
-            requiredRole: UserRole.Administrator,
+        await i18n.tv(
+          'error.forbidden_role',
+          `Access denied, You don't have permission (role "${UserRole.Administrator}" required) for this action!`,
+          {
+            args: {
+              userRole: requestUser.role,
+              requiredRole: UserRole.Administrator,
+            },
           },
-        }),
+        ),
       );
     }
     return this.userDataSource.update(id, model, requestUser);

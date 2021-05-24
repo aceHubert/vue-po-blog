@@ -1,9 +1,8 @@
 {
-  "login": {
-    "faild": "用户名或密码不正确!",
-    "success": "登录成功!"
+  "signin": {
+    "faild": "用户名或密码不正确!"
   },
-  "logout": {
+  "signout": {
     "success": "登出成功!"
   },
   "update_pwd": {

@@ -153,9 +153,13 @@ export class DbInitDataSource extends BaseDataSource {
       );
 
       // 初始化默认分类
-      const defautlCategoryName = await this.i18nService.t('datasource.default_data.uncategorized', {
-        lang: initArgs.locale,
-      });
+      const defautlCategoryName = await this.i18nService.tv(
+        'core.datasource.default_data.uncategorized',
+        'Uncategorized',
+        {
+          lang: initArgs.locale,
+        },
+      );
       const defaultCategory = await this.models.Terms.create(
         { name: defautlCategoryName, slug: 'uncategorized' },
         {
@@ -170,12 +174,20 @@ export class DbInitDataSource extends BaseDataSource {
       );
 
       // 初始化页面和文章
-      const defaultArticleTitle = await this.i18nService.t('datasource.default_data.article_title', {
-        lang: initArgs.locale,
-      });
-      const defaultArticleContent = await this.i18nService.t('datasource.default_data.article_content', {
-        lang: initArgs.locale,
-      });
+      const defaultArticleTitle = await this.i18nService.tv(
+        'core.datasource.default_data.article_title',
+        'Simple Article',
+        {
+          lang: initArgs.locale,
+        },
+      );
+      const defaultArticleContent = await this.i18nService.tv(
+        'datasource.default_data.article_content',
+        '<p>This is your first article.</p>',
+        {
+          lang: initArgs.locale,
+        },
+      );
       await this.models.Posts.bulkCreate(
         [
           {

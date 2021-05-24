@@ -13,6 +13,9 @@ import { FileManageModule } from '@/file-manage/file-manage.module';
 import { AuthModule } from '@/auth/auth.module';
 import { DbInitModule } from '@/db-init/db-init.module';
 
+// extends
+import '@/common/extends/i18n.extend';
+
 // graphql
 import { GraphQLModule } from '@nestjs/graphql';
 import { CommentModule } from '@/comments/comment.module';
@@ -42,7 +45,7 @@ const contentPath = isProduction ? path.join(process.cwd(), 'po-content') : path
             'zh-*': 'zh-CN',
           },
           parserOptions: {
-            paths: [path.join(contentPath, '/languages/nodejs')],
+            path: path.join(contentPath, '/languages/nodejs'),
             watch: !isProduction,
           },
         };

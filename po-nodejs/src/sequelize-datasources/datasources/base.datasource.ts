@@ -182,10 +182,14 @@ export abstract class BaseDataSource implements OnModuleInit {
       return callback(
         !result
           ? new ForbiddenError(
-              await this.i18nService.t('error.forbidden_capability', {
-                lang: requestUser.lang,
-                args: { requiredCapability: kebabCase(capability) },
-              }),
+              await this.i18nService.tv(
+                'error.forbidden_capability',
+                `Access denied, You don't have capability "${kebabCase(capability)}" for this action!`,
+                {
+                  lang: requestUser.lang,
+                  args: { requiredCapability: kebabCase(capability) },
+                },
+              ),
             )
           : null,
       );

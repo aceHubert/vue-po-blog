@@ -31,7 +31,9 @@ export class AllExceptionFilter implements ExceptionFilter {
       // @ts-ignore
       if (exception instanceof DatabaseError && exception.original.code === 'ER_NO_SUCH_TABLE') {
         // 当出现表不存在错误时，提示要初始化数据库， 并设置 response.dbInitRequired = true
-        description.message = await this.i18nService.t('error.no_such_table', { lang: request.i18nLang });
+        description.message = await this.i18nService.tv('core.error.no_such_table', 'No such table!', {
+          lang: request.i18nLang,
+        });
         description.dbInitRequired = true;
       }
 
@@ -116,7 +118,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     const description =
       exception instanceof UnauthorizedError // express-jwt UnauthorizedError
         ? exception.inner instanceof JsonWebTokenError // jwt verify error
-          ? await this.i18nService.t('error.invalid_token', { lang })
+          ? await this.i18nService.tv('core.error.invalid_token', 'Invalid token!', { lang })
           : exception.message
         : exception instanceof HttpException
         ? exception.getResponse()
