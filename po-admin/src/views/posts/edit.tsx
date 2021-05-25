@@ -29,6 +29,7 @@ export default class PostEdit extends mixins(PostEditMixin) {
         style="height:100vh"
         ref="editForm"
         editModel={this.post}
+        i18nKeyPrefix="core.page-post"
         updatePost={this.onUpdatePost.bind(this)}
         updatePostStatus={this.onUpdatePostStatus.bind(this)}
         onStatusChange={(status) => (this.status = status)}
@@ -38,12 +39,12 @@ export default class PostEdit extends mixins(PostEditMixin) {
               <div>
                 <a-form-item
                   class="px-3 pb-4"
-                  label={this.$tv('post.form.excerpt', 'Excerpt')}
-                  help={this.$tv('post.form.excerptHelp', 'Write an excerpt(optional)')}
+                  label={this.$tv('core.page-post.form.excerpt', 'Excerpt')}
+                  help={this.$tv('core.page-post.form.excerpt_help', 'Write an excerpt(optional)')}
                   hasFeedback={false}
                 >
                   <a-textarea
-                    placeholder={this.$tv('post.form.excerptPlaceholder', 'Please input excerpt')}
+                    placeholder={this.$tv('core.page-post.form.excerpt_placeholder', 'Please input excerpt')}
                     {...{ directives: [{ name: 'decorator', value: ['excerpt'] }] }}
                   />
                 </a-form-item>
@@ -57,11 +58,14 @@ export default class PostEdit extends mixins(PostEditMixin) {
                 >
                   <a-collapse-panel
                     key="statusAndVisibility"
-                    header={this.$tv('post.form.statusAndVisibility', 'Status & Visibility')}
+                    header={this.$tv('core.page-post.form.status_and_visibility', 'Status & Visibility')}
                   >
                     <a-row>
                       <a-col span={6}>
-                        <span style="line-height:24px;"> {this.$tv('post.form.visibility', 'Visibility')}</span>
+                        <span style="line-height:24px;">
+                          {' '}
+                          {this.$tv('core.page-post.form.visibility', 'Visibility')}
+                        </span>
                       </a-col>
                       <a-col span={18}>
                         {this.hasPublishCapability ? (
@@ -69,16 +73,16 @@ export default class PostEdit extends mixins(PostEditMixin) {
                             <template slot="content">
                               <a-radio-group vModel={this.visibility} onChange={this.handleVisibility.bind(this)}>
                                 <a-radio style="display:block" value={PostVisibility.Public}>
-                                  {this.$tv('post.visibility.public', 'Public')}
+                                  {this.$tv('core.page-post.visibility.public', 'Public')}
                                   <span class="grey--text" style="display:block">
-                                    {this.$tv('post.visibility.publicDescription', 'Visible for everyone!')}
+                                    {this.$tv('core.page-post.visibility.public_description', 'Visible for everyone!')}
                                   </span>
                                 </a-radio>
                                 <a-radio style="display:block" value={PostVisibility.Private}>
-                                  {this.$tv('post.visibility.private', 'Private')}
+                                  {this.$tv('core.page-post.visibility.private', 'Private')}
                                   <span class="grey--text" style="display:block">
                                     {this.$tv(
-                                      'post.visibility.privateDescription',
+                                      'core.page-post.visibility.private_description',
                                       'Only visible to site admins and editors',
                                     )}
                                   </span>
@@ -87,7 +91,9 @@ export default class PostEdit extends mixins(PostEditMixin) {
                             </template>
                             <a-button type="link" size="small">
                               {this.$tv(
-                                `post.visibility.${this.status === PostStatus.Private ? 'private' : 'public'}`,
+                                `core.page-post.visibility.${
+                                  this.status === PostStatus.Private ? 'private' : 'public'
+                                }`,
                                 this.status === PostStatus.Private ? 'Private' : 'Public',
                               )}
                             </a-button>
@@ -95,7 +101,7 @@ export default class PostEdit extends mixins(PostEditMixin) {
                         ) : (
                           <span style="line-height:24px;">
                             {this.$tv(
-                              `post.visibility.${this.status === PostStatus.Private ? 'private' : 'public'}`,
+                              `core.page-post.visibility.${this.status === PostStatus.Private ? 'private' : 'public'}`,
                               this.status === PostStatus.Private ? 'Private' : 'Public',
                             )}
                           </span>
@@ -103,7 +109,7 @@ export default class PostEdit extends mixins(PostEditMixin) {
                       </a-col>
                     </a-row>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('post.form.thumbnail', 'Thumbnail')}>
+                  <a-collapse-panel header={this.$tv('core.page-post.form.thumbnail', 'Thumbnail')}>
                     <a-upload
                       action="/api/file/upload/"
                       class="upload-list-inline"
@@ -115,12 +121,12 @@ export default class PostEdit extends mixins(PostEditMixin) {
                       {!this.thumbnailList.length
                         ? [
                             <a-icon type="plus" />,
-                            <div class="ant-upload-text">{this.$tv('post.btnText.upload', 'Upload')}</div>,
+                            <div class="ant-upload-text">{this.$tv('core.page-post.btn_text.upload', 'Upload')}</div>,
                           ]
                         : null}
                     </a-upload>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('post.form.categoryTitle', 'Categories')}>
+                  <a-collapse-panel header={this.$tv('core.page-post.form.category_title', 'Categories')}>
                     <div class="mb-3">
                       <a-tree
                         checkable
@@ -132,17 +138,17 @@ export default class PostEdit extends mixins(PostEditMixin) {
                       ></a-tree>
                     </div>
                     <nuxt-link to={{ name: 'categories' }}>
-                      {this.$tv('post.form.addCategoryLinkText', 'Add Cagetory')}
+                      {this.$tv('core.page-post.form.add_category_link_text', 'Add Cagetory')}
                     </nuxt-link>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('post.form.tagTitle', 'Tags')}>
+                  <a-collapse-panel header={this.$tv('core.page-post.form.tag_title', 'Tags')}>
                     <a-select
                       value={this.selectedTags}
                       options={this.allTags}
                       maxTagCount={10}
                       mode="tags"
                       optionFilterProp="children"
-                      placeholder={this.$tv('post.form.tagPlaceholder', 'Please choose/input a tag')}
+                      placeholder={this.$tv('core.page-post.form.tag_placeholder', 'Please choose/input a tag')}
                       style="width:100%"
                       class="mb-3"
                       onSelect={this.handleTagSelect.bind(this)}
@@ -150,16 +156,16 @@ export default class PostEdit extends mixins(PostEditMixin) {
                       onSearch={() => {}}
                     ></a-select>
                     <nuxt-link to={{ name: 'tags' }}>
-                      {this.$tv('post.form.tagManagementLinkText', 'Tag Management')}
+                      {this.$tv('core.page-post.form.tag_management_link_text', 'Tag Management')}
                     </nuxt-link>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('post.form.discusionTitle', 'Discusion')}>
+                  <a-collapse-panel header={this.$tv('core.page-post.form.discusion_title', 'Discusion')}>
                     <a-checkbox
                       checked={this.allowComments}
                       disabled={this.allowCommentsChanging}
                       onChange={this.handleAllowCommentsChange.bind(this)}
                     >
-                      {this.$tv('post.form.allowCommentCheckboxText', 'Allow comments')}
+                      {this.$tv('core.page-post.form.allow_comment_checkbox_text', 'Allow comments')}
                     </a-checkbox>
                   </a-collapse-panel>
                 </a-collapse>

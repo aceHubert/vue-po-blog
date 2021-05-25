@@ -43,7 +43,7 @@ export default async ({ route, redirect, error, $i18n }: Context) => {
     } else if (!hasCapability(route, userStore.capabilities)) {
       error({
         statusCode: 401,
-        message: $i18n.tv('error.noCapability', 'No capabilities to operate this page!') as string,
+        message: $i18n.tv('core.error.no_capability', 'No capabilities to operate this page!') as string,
       });
     }
   }

@@ -19,7 +19,7 @@ export default class ErrorPageNotFound extends Vue {
   mounted() {
     this.$nuxt.error({
       statusCode: 404,
-      message: this.$tv(`error.pageNotFound`, 'Page not found!') as string,
+      message: this.$tv(`core.error.page_not_found`, 'Page not found!') as string,
     });
   }
 

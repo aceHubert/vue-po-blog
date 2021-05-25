@@ -37,10 +37,10 @@ export default class AvatarDropdown extends Vue {
 
   handleLogout() {
     this.$confirm({
-      title: this.$tv('avatarDropdown.dialog.logout.title', 'Message'),
-      content: this.$tv('avatarDropdown.dialog.logout.content', 'Do you really log-out?'),
-      okText: this.$tv('avatarDropdown.dialog.logout.okText', 'Yes') as string,
-      cancelText: this.$tv('avatarDropdown.dialog.logout.cancelText', 'No') as string,
+      title: this.$tv('core.components.avatar_dropdown.dialog.logout.title', 'Message'),
+      content: this.$tv('core.components.avatar_dropdown.dialog.logout.content', 'Do you really log-out?'),
+      okText: this.$tv('core.components.avatar_dropdown.dialog.logout.okText', 'Yes') as string,
+      cancelText: this.$tv('core.components.avatar_dropdown.dialog.logout.cancelText', 'No') as string,
       onOk: () => {
         this.handleAction(Actions.Logout);
       },
@@ -69,18 +69,18 @@ export default class AvatarDropdown extends Vue {
                 : [
                     <a-menu-item key="profile" onClick={() => this.handleAction(Actions.Profile)}>
                       <a-icon type="user" />
-                      {this.$tv('avatarDropdown.user.profile', 'Profile')}
+                      {this.$tv('core.components.avatar_dropdown.user.profile', 'Profile')}
                     </a-menu-item>,
                     <a-menu-item key="settings" onClick={() => this.handleAction(Actions.Settings)}>
                       <a-icon type="setting" />
-                      {this.$tv('avatarDropdown.user.settings', 'Settings')}
+                      {this.$tv('core.components.avatar_dropdown.user.settings', 'Settings')}
                     </a-menu-item>,
                     <a-menu-divider />,
                   ]
               : null}
             <a-menu-item key="logout" onClick={this.handleLogout.bind(this)}>
               <a-icon type="logout" />
-              {this.$tv('avatarDropdown.user.logout', 'Logout')}
+              {this.$tv('core.components.avatar_dropdown.user.logout', 'Logout')}
             </a-menu-item>
           </a-menu>
         </template>

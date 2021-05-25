@@ -331,7 +331,7 @@ export default class AsyncTable extends Vue {
       return (
         <span style="margin-right: 12px">
           {typeof item.title === 'function' ? item.title(this.$tv.bind(this)) : item.title}
-          {this.$tv('asyncTable.sum', ' Sum')}:&nbsp;
+          {this.$tv('core.components.async_table.sum', ' Sum')}:&nbsp;
           <a style="font-weight: 600">{!item.customRender ? item.total : item.customRender(item.total)}</a>
         </span>
       );
@@ -349,7 +349,7 @@ export default class AsyncTable extends Vue {
       <a-alert showIcon={true} style="margin-bottom: 16px;">
         <template slot="message">
           <span style="margin-right: 12px">
-            {this.$tv('asyncTable.selected', 'Selected')}:&nbsp;
+            {this.$tv('core.components.async_table.selected', 'Selected')}:&nbsp;
             <a style="font-weight: 600">{this.selectedRows.length}</a>
           </span>
           {needTotalItems}
@@ -369,7 +369,7 @@ export default class AsyncTable extends Vue {
             this.handleClearSelected();
           }}
         >
-          {this.$tv('asyncTable.clear', 'Clear')}
+          {this.$tv('core.components.async_table.clear', 'Clear')}
         </a>
       );
     }

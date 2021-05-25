@@ -41,12 +41,15 @@ import { Term } from 'types/datas/term';
           if (!data.post) {
             return error({
               statusCode: 500,
-              message: $i18n.tv('post.tips.notExists', 'Post is not exists!') as string,
+              message: $i18n.tv('core.page-post.tips.not_exists', 'Post is not exists!') as string,
             });
           } else if (data.post.status === PostStatus.Trash) {
             return error({
               statusCode: 500,
-              message: $i18n.tv('post.tips.trashStatusEdit', 'Could not edit "trash" status Post') as string,
+              message: $i18n.tv(
+                'core.page-post.tips.trash_status_edit',
+                'Could not edit "trash" status Post!',
+              ) as string,
             });
           }
           return data.post;
@@ -203,10 +206,14 @@ export default class EditMixin extends mixins(postMixin, termMixin) {
           if (this.$route.name === 'posts-create') {
             this.$router.replace({ name: 'posts-edit', params: { id: this.post.id } });
           } else {
-            this.$message.success(this.$tv('post.tips.updateSuccessful', `Update post successful!`) as string);
+            this.$message.success(
+              this.$tv('core.page-post.tips.update_successful', `Update post successful!`) as string,
+            );
           }
         } else {
-          this.$message.error(this.$tv('post.tips.updateFaild', 'An error occurred while updating post!') as string);
+          this.$message.error(
+            this.$tv('core.page-post.tips.update_faild', 'An error occurred while updating post!') as string,
+          );
         }
         return data!.result;
       })
@@ -222,7 +229,10 @@ export default class EditMixin extends mixins(postMixin, termMixin) {
       .then((result) => {
         if (!result) {
           this.$message.error(
-            this.$tv('post.tips.updateStatusFaild', 'An error occurred while updating post status!') as string,
+            this.$tv(
+              'core.page-post.tips.update_status_faild',
+              'An error occurred while updating post status!',
+            ) as string,
           );
         }
       })
@@ -330,9 +340,12 @@ export default class EditMixin extends mixins(postMixin, termMixin) {
     this.visibilityPopShown = false;
     if (this.visibility === PostVisibility.Private) {
       this.$confirm({
-        content: this.$tv('post.tips.privateAlert', 'Would you like to privately publish this post now?'),
-        okText: this.$tv(`post.btnText.privatelyOkTest`, 'Yes') as string,
-        cancelText: this.$tv('post.btnText.privatelyCancelTest', 'No') as string,
+        content: this.$tv(
+          'core.page-post.tips.privately_confirm_content',
+          'Would you like to privately publish this post now?',
+        ),
+        okText: this.$tv(`core.page-post.btn_text.privately_confirm_ok_text`, 'Yes') as string,
+        cancelText: this.$tv('core.page-post.btn_text.privately_confirm_cancel_text', 'No') as string,
         onOk: this.editForm.handleMakePrivate.bind(this.editForm),
         onCancel: () => {
           this.visibility = this.status === PostStatus.Private ? PostVisibility.Private : PostVisibility.Public;

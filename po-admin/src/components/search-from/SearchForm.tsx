@@ -187,7 +187,9 @@ export default class SearchFrom extends Vue {
               <a-form-item class="po-search-form__input-item">
                 <a-input-search
                   vModel={this.localeKeyword}
-                  placeholder={this.keywordPlaceholder || this.$tv('searchForm.keywordPlaceholder', 'Keyword')}
+                  placeholder={
+                    this.keywordPlaceholder || this.$tv('core.components.search_form.keyword_placeholder', 'Keyword')
+                  }
                   onSearch={this.handleSearch.bind(this)}
                 />
               </a-form-item>
@@ -205,7 +207,7 @@ export default class SearchFrom extends Vue {
                       <a-space>
                         <a-select vModel={this.blukAciton} style="min-width:120px;">
                           <a-select-option value="">
-                            {this.$tv('searchForm.bulkActionPlaceholder', 'Bulk actions')}
+                            {this.$tv('core.components.search_form.bulk_action_placeholder', 'Bulk actions')}
                           </a-select-option>
                           {this.blukAcitonOptions.map((option) => (
                             <a-select-option value={option.value}>{option.label}</a-select-option>
@@ -215,10 +217,10 @@ export default class SearchFrom extends Vue {
                           ghost
                           type="primary"
                           loading={this.blukApplying}
-                          title={this.$tv('searchForm.bulkApplyBtnTitle', 'Apply')}
+                          title={this.$tv('core.components.search_form.bulk_apply_btn_tips', 'Apply')}
                           onClick={this.handleBlukAction.bind(this)}
                         >
-                          {this.$tv('searchForm.bulkApplyBtnText', 'Apply')}
+                          {this.$tv('core.components.search_form.bulk_apply_btn_text', 'Apply')}
                         </a-button>
                       </a-space>
                     </a-form-item>
@@ -236,7 +238,9 @@ export default class SearchFrom extends Vue {
                 ) : this.itemCount ? (
                   <a-form-item class="po-search-from__count-item">
                     <span>
-                      {this.$tv('searchForm.itemCount', `${this.itemCount} Items`, { count: this.itemCount })}
+                      {this.$tv('core.components.search_form.item_count', `${this.itemCount} Items`, {
+                        count: this.itemCount,
+                      })}
                     </span>
                   </a-form-item>
                 ) : null}

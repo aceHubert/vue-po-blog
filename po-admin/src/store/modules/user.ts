@@ -101,12 +101,12 @@ class UserStore extends VuexModule {
    * @param loginQuery 登录参数
    */
   @VuexAction({ rawError: true, commit: 'setAccessToken' })
-  login(loginQuery: LoginQuery) {
+  signin(loginQuery: LoginQuery) {
     const { req, res } = store.app.context as Context;
     const Cookie = process.client ? cookie.clientCookie : cookie.serverCookie(req, res);
 
     return httpClient
-      .post<LoginResponse>('/auth/login', {
+      .post<LoginResponse>('/auth/signin', {
         username: loginQuery.username,
         password: loginQuery.password,
         device: 'Web', // todo: 多设备登录
@@ -141,7 +141,7 @@ class UserStore extends VuexModule {
     const refreshtoken = Cookie.get(REFRESH_TOKEN);
 
     if (!refreshtoken) {
-      throw new Error($i18n.tv('refreshTokenRequired', 'The refresh_token is not exists!') as string);
+      throw new Error($i18n.tv('core.common.refresh_token_required', 'The refresh token is not exists!') as string);
     }
 
     return httpClient
@@ -239,14 +239,14 @@ class UserStore extends VuexModule {
    * 前清除 store accessToken及用户基本信息
    */
   @VuexAction({ rawError: true, commit: 'setAccessToken' })
-  logout() {
+  signout() {
     if (!this.accessToken) return Promise.resolve();
 
     const { req, res } = store.app.context as Context;
     const Cookie = process.client ? cookie.clientCookie : cookie.serverCookie(req, res);
 
     return httpClient
-      .post('/auth/logout')
+      .post('/auth/signout')
       .then(() => {
         // 清除 store access token
         return null;

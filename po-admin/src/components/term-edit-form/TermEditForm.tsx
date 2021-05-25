@@ -1,4 +1,5 @@
 import { Vue, Component, Prop } from 'nuxt-property-decorator';
+import { lowerCase } from 'lodash-es';
 import { modifiers as m } from 'vue-tsx-support';
 
 // Types
@@ -23,6 +24,7 @@ export default class TermEditForm extends Vue {
       tsx.PickProps<
         TermEditForm,
         | 'editModel'
+        | 'i18nKeyPrefix'
         | 'taxonomy'
         | 'nested'
         | 'syncTreeData'
@@ -42,7 +44,9 @@ export default class TermEditForm extends Vue {
 
   /** 修改的对象，留空表示新建 */
   @Prop(Object) editModel?: Term;
-  /** 同时作为 i18n key 前缀, 例如 [taxonomy].form.btnText */
+  /** 同时作为 i18n key 前缀(末尾不用加.),  [i18nKeyPrefix].term_form.btn_text */
+  @Prop({ type: String, required: true }) i18nKeyPrefix!: string;
+  /** 类别 */
   @Prop({ type: String, required: true }) taxonomy!: string;
   /** 显示 parent 选择框 */
   @Prop({ type: Boolean, default: false }) nested!: boolean;
@@ -147,7 +151,7 @@ export default class TermEditForm extends Vue {
       name: [
         {
           required: true,
-          message: this.$tv(`${this.taxonomy}.form.nameRequired`, 'Name is required!'),
+          message: this.$tv(`${this.i18nKeyPrefix}.term_form.name_required`, 'Name is required!'),
         },
       ],
     };
@@ -185,31 +189,34 @@ export default class TermEditForm extends Vue {
         onSubmit={m.stop.prevent(this.handleSave.bind(this))}
       >
         <a-form-item
-          label={this.$tv(`${this.taxonomy}.form.name`, 'Name')}
-          help={this.$tv(`${this.taxonomy}.form.nameHelp`, 'The name is how it appears on your site.')}
+          label={this.$tv(`${this.i18nKeyPrefix}.term_form.name`, 'Name')}
+          help={this.$tv(`${this.i18nKeyPrefix}.term_form.name_help`, 'The name is how it appears on your site.')}
         >
           <a-input
             style="width:220px"
-            placeholder={this.$tv(`${this.taxonomy}.form.namePlaceholder`, 'Please input name')}
+            placeholder={this.$tv(`${this.i18nKeyPrefix}.term_form.name_placeholder`, 'Please input name')}
             {...{ directives: [{ name: 'decorator', value: ['name', { rules: this.rules.name }] }] }}
           />
         </a-form-item>
 
         <a-form-item
-          label={this.$tv(`${this.taxonomy}.form.slug`, 'Slug')}
-          help={this.$tv(`${this.taxonomy}.form.slugHelp`, 'The “slug” is the URL-friendly version of the name.')}
+          label={this.$tv(`${this.i18nKeyPrefix}.term_form.slug`, 'Slug')}
+          help={this.$tv(
+            `${this.i18nKeyPrefix}.term_form.slug_help`,
+            'The “slug” is the URL-friendly version of the name.',
+          )}
         >
           <a-input
             style="width:220px"
-            placeholder={this.$tv(`${this.taxonomy}.form.slugPlaceholder`, 'Please input slug')}
+            placeholder={this.$tv(`${this.i18nKeyPrefix}.term_form.slug_placeholder`, 'Please input slug')}
             {...{ directives: [{ name: 'decorator', value: ['slug'] }] }}
           />
         </a-form-item>
 
         {this.nested ? (
           <a-form-item
-            label={this.$tv(`${this.taxonomy}.form.parent`, 'Parent')}
-            help={this.$tv(`${this.taxonomy}.form.parentHelp`, `Parent ${this.taxonomy}.`)}
+            label={this.$tv(`${this.i18nKeyPrefix}.term_form.parent`, 'Parent')}
+            help={this.$tv(`${this.i18nKeyPrefix}.term_form.parent_help`, `Parent ${lowerCase(this.taxonomy)}.`)}
           >
             <a-tree-select
               style="width: 100%"
@@ -217,18 +224,18 @@ export default class TermEditForm extends Vue {
               treeDataSimpleMode
               treeData={this.treeData}
               loadData={this.syncTreeData ? undefined : this.onLoadTreeData.bind(this)}
-              placeholder={this.$tv(`${this.taxonomy}.form.parentPlaceholder`, 'Please choose parent')}
+              placeholder={this.$tv(`${this.i18nKeyPrefix}.term_form.parent_placeholder`, 'Please choose parent')}
               {...{ directives: [{ name: 'decorator', value: ['parentId'] }] }}
             ></a-tree-select>
           </a-form-item>
         ) : null}
 
         <a-form-item
-          label={this.$tv(`${this.taxonomy}.form.description`, 'Description')}
-          help={this.$tv(`${this.taxonomy}.form.descriptionHelp`, 'A shot description for name.')}
+          label={this.$tv(`${this.i18nKeyPrefix}.term_form.description`, 'Description')}
+          help={this.$tv(`${this.i18nKeyPrefix}.term_form.description_help`, 'A shot description for name.')}
         >
           <a-textarea
-            placeholder={this.$tv(`${this.taxonomy}.form.descriptionPlaceholder`, 'Please input description')}
+            placeholder={this.$tv(`${this.taxonomy}.term_form.description_placeholder`, 'Please input description')}
             {...{ directives: [{ name: 'decorator', value: ['description'] }] }}
           />
         </a-form-item>
@@ -241,13 +248,13 @@ export default class TermEditForm extends Vue {
             loading={this.submiting}
             title={
               this.btnTitle || this.isCreating
-                ? this.$tv(`${this.taxonomy}.btnTips.create`, 'Create Term')
-                : this.$tv(`${this.taxonomy}.btnTips.update`, 'Update Term')
+                ? this.$tv(`${this.i18nKeyPrefix}.term_form.btn_create_tips`, 'Create Term')
+                : this.$tv(`${this.i18nKeyPrefix}.term_form.btn_update_tips`, 'Update Term')
             }
           >
             {this.btnText || this.isCreating
-              ? this.$tv(`${this.taxonomy}.btnText.create`, 'Create Term')
-              : this.$tv(`${this.taxonomy}.btnText.update`, 'Update Term')}
+              ? this.$tv(`${this.i18nKeyPrefix}.term_form.btn_create_text`, 'Create Term')
+              : this.$tv(`${this.i18nKeyPrefix}.term_form.btn_update_text`, 'Update Term')}
           </a-button>
         </a-form-item>
       </a-form>

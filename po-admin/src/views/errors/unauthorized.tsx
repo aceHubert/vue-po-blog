@@ -19,7 +19,7 @@ export default class ErrorUnauthorized extends Vue {
   mounted() {
     this.$nuxt.error({
       statusCode: 401,
-      message: this.$tv(`error.unauthorized`, 'No permissions to visit this site!') as string,
+      message: this.$tv(`core.error.unauthorized`, 'No permissions to visit this site!') as string,
     });
   }
 

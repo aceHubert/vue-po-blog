@@ -26,7 +26,7 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'author' },
     },
     {
-      title: i18nRender('post.column.commentCount', 'Comment Count'),
+      title: i18nRender('post.column.comment_count', 'Comment Count'),
       align: 'center',
       dataIndex: 'commentCount',
       hideInMobile: true,
@@ -47,7 +47,7 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'tags' },
     },
     {
-      title: i18nRender('post.column.createTime', 'CreateTime'),
+      title: i18nRender('post.column.create_time', 'CreateTime'),
       align: 'center',
       dataIndex: 'createTime',
       width: '220px',

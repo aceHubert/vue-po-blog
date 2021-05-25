@@ -69,7 +69,7 @@ export default class Categories extends Vue {
     return [
       {
         value: BlukActions.Delete,
-        label: this.$tv('category.search.bulkDeleteAction', 'Delete') as string,
+        label: this.$tv('core.page-category.search.bulk_delete_action_text', 'Delete') as string,
       },
     ];
   }
@@ -142,7 +142,7 @@ export default class Categories extends Vue {
     const noneCategory: TreeData = {
       id: '0',
       value: '0',
-      title: this.$tv('category.form.noneCategory', 'None') as string,
+      title: this.$tv('core.page-category.term_form.none_category', 'None') as string,
       isLeaf: true,
     };
 
@@ -234,14 +234,19 @@ export default class Categories extends Vue {
   // 批量操作
   handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
-      this.$message.warn({ content: this.$tv('category.tips.bulkRowReqrired', 'Please choose a row!') as string });
+      this.$message.warn({
+        content: this.$tv('core.page-category.tips.bulk_row_reqrired', 'Please choose a row!') as string,
+      });
       return;
     }
     if (action === BlukActions.Delete) {
       this.$confirm({
-        content: this.$tv('category.btnTips.blukDeletePopContent', 'Do you really want to delete these categorys?'),
-        okText: this.$tv('category.btnText.deletePopOkText', 'Ok') as string,
-        cancelText: this.$tv('category.btnText.deletePopCancelText', 'No') as string,
+        content: this.$tv(
+          'core.page-category.btn_tips.bluk_delete_pop_content',
+          'Do you really want to delete these categories?',
+        ),
+        okText: this.$tv('core.page-category.btn_text.delete_pop_ok_text', 'Ok') as string,
+        cancelText: this.$tv('core.page-category.btn_text.delete_pop_cancel_text', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
           this.graphqlClient
@@ -262,8 +267,8 @@ export default class Categories extends Vue {
               } else {
                 this.$message.error(
                   this.$tv(
-                    'category.tips.blukDeleteFailed',
-                    'An error occurred while deleting categorys, please try later again!',
+                    'category.tips.bluk_delete_failed',
+                    'An error occurred while deleting categories, please try again later!',
                   ) as string,
                 );
               }
@@ -300,8 +305,8 @@ export default class Categories extends Vue {
         } else {
           this.$message.error(
             this.$tv(
-              'category.tips.deleteFailed',
-              'An error occurred while deleting category, please try later again!',
+              'core.page-category.tips.delete_failed',
+              'An error occurred while deleting category, please try again later!',
             ) as string,
           );
         }
@@ -340,28 +345,31 @@ export default class Categories extends Vue {
       <div class={classes.actions}>
         <a
           href="#none"
-          title={this.$tv('category.btnTips.edit', 'Edit') as string}
+          title={this.$tv('core.page-category.btn_tips.edit', 'Edit') as string}
           onClick={m.stop.prevent(() => {
             this.editModel = record;
             this.formModelShown = true;
           })}
         >
-          {this.$tv('category.btnText.edit', 'Edit')}
+          {this.$tv('core.page-category.btn_text.edit', 'Edit')}
         </a>
         {record.id !== this.$userOptions['default_category']
           ? [
               <a-divider type="vertical" />,
               <a-popconfirm
-                title={this.$tv('category.btnTips.deletePopContent', 'Do you really want to delete this category?')}
-                okText={this.$tv('category.btnText.deletePopOkText', 'Ok')}
-                cancelText={this.$tv('category.btnText.deletePopCancelText', 'No')}
+                title={this.$tv(
+                  'core.page-category.btn_tips.delete_pop_content',
+                  'Do you really want to delete this category?',
+                )}
+                okText={this.$tv('core.page-category.btn_text.delete_pop_ok_text', 'Ok')}
+                cancelText={this.$tv('core.page-category.btn_text.delete_pop_cancel_text', 'No')}
                 onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
               >
                 <a
                   href="#none"
-                  title={this.$tv('category.btnTips.delete', 'Delete this category permanently') as string}
+                  title={this.$tv('core.page-category.btn_tips.delete', 'Delete this category permanently') as string}
                 >
-                  {this.$tv('category.btnText.delete', 'Delete')}
+                  {this.$tv('core.page-category.btn_text.delete', 'Delete')}
                 </a>
               </a-popconfirm>,
             ]
@@ -413,7 +421,7 @@ export default class Categories extends Vue {
     return (
       <a-card class="post-index" bordered={false} size="small">
         <SearchForm
-          keywordPlaceholder={this.$tv('category.search.keywordPlaceholder', 'Search Categories') as string}
+          keywordPlaceholder={this.$tv('core.page-category.search.keyword_placeholder', 'Search Categories') as string}
           itemCount={this.itemCount}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
@@ -423,13 +431,13 @@ export default class Categories extends Vue {
           <template slot="sub">
             <a-button
               type="primary"
-              title={this.$tv('category.btnTips.create', 'New Category')}
+              title={this.$tv('core.page-category.btn_tips.create', 'New Category')}
               onClick={m.stop(() => {
                 this.editModel = undefined;
                 this.formModelShown = true;
               })}
             >
-              {this.$tv('category.btnText.create', 'New Category')}
+              {this.$tv('core.page-category.btn_text.create', 'New Category')}
             </a-button>
           </template>
         </SearchForm>
@@ -455,7 +463,7 @@ export default class Categories extends Vue {
         <a-modal
           vModel={this.formModelShown}
           title={this.$tv(
-            `category.form.${this.editModel ? 'updateModelTitle' : 'creationModelTitle'}`,
+            `core.page-category.term_form.${this.editModel ? 'update_model_title' : 'creation_model_title'}`,
             this.editModel ? 'Update Category' : 'Create Category',
           )}
           keyboard={false}
@@ -466,6 +474,7 @@ export default class Categories extends Vue {
           <TermEditForm
             editModel={this.editModel}
             taxonomy={TermTaxonomy.Category}
+            i18nKeyPrefix="core.page-category"
             nested
             syncTreeData
             getTreeData={this.getTreeData.bind(this)}

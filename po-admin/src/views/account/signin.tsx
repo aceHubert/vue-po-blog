@@ -2,7 +2,7 @@ import { Vue, Component, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
 import { appStore, userStore } from '@/store/modules';
 import { isAbsoluteUrl } from '@/utils/path';
-import classes from './styles/login.less?module';
+import classes from './styles/signin.less?module';
 
 // Types
 import { WrappedFormUtils } from 'ant-design-vue/types/form/form';
@@ -17,20 +17,27 @@ import { LoginQuery } from '@/store/modules/user';
 }
 
 @Component({
-  name: 'Login',
+  name: 'SignIn',
   layout: 'user',
   meta: {
     anonymous: true,
   },
+  head() {
+    return {
+      title: this.$tv('core.page-signin.page_title', 'Sign In') as string,
+    };
+  },
 })
-export default class Login extends Vue {
+export default class SignIn extends Vue {
   @InjectReactive({ from: 'isMobile', default: false }) isMobile!: boolean;
 
-  logining!: boolean;
-  loginError!: string;
+  // form
   form!: WrappedFormUtils;
   rules!: Dictionary<any>;
 
+  // data
+  logining!: boolean;
+  loginError!: string;
   data() {
     return {
       logining: false,
@@ -64,7 +71,7 @@ export default class Login extends Vue {
 
       this.logining = true;
       userStore
-        .login(loginParams)
+        .signin(loginParams)
         .then(() => {
           // 登录后要重新设置站点的个人配置
           return userStore
@@ -104,17 +111,19 @@ export default class Login extends Vue {
 
   render() {
     return (
-      <div id="login" class={classes.wrapper}>
+      <div id="signin" class={classes.wrapper}>
         <div class={classes.top}>
-          <p class={classes.topTitle}>{this.$tv('login.title', 'Welcome to Plumemo Blog Admin')}</p>
-          <p class={classes.topDesc}>{this.$tv('login.description', 'A simple front-end to back-end blog system')}</p>
+          <p class={classes.topTitle}>{this.$tv('core.page-signin.title', 'Welcome to Plumemo Blog Admin')}</p>
+          <p class={classes.topSubtitle}>
+            {this.$tv('core.page-signin.subtitle', 'A simple front-end to back-end blog system')}
+          </p>
         </div>
         <a-form class={classes.form} form={this.form} onSubmit={m.stop.prevent(this.handleSubmit.bind(this))}>
           <a-form-item>
             <a-input
               size="large"
               type="text"
-              placeholder={this.$tv('login.usernamePlaceholder', 'Username/Email')}
+              placeholder={this.$tv('core.page-signin.username_placeholder', 'Username/Email')}
               {...{
                 directives: [
                   {
@@ -123,7 +132,10 @@ export default class Login extends Vue {
                       'username',
                       {
                         rules: [
-                          { required: true, message: this.$tv('login.usernameRequired', 'Username is required') },
+                          {
+                            required: true,
+                            message: this.$tv('core.page-signin.username_required', 'Username is required!'),
+                          },
                         ],
                         validateTrigger: 'change',
                       },
@@ -141,7 +153,7 @@ export default class Login extends Vue {
               size="large"
               type="password"
               autocomplete="false"
-              placeholder={this.$tv('login.passwordPlaceholder', 'Password')}
+              placeholder={this.$tv('core.page-signin.password_placeholder', 'Password')}
               {...{
                 directives: [
                   {
@@ -150,7 +162,10 @@ export default class Login extends Vue {
                       'password',
                       {
                         rules: [
-                          { required: true, message: this.$tv('login.passwordRequired', 'Password is required!') },
+                          {
+                            required: true,
+                            message: this.$tv('core.page-signin.password_required', 'Password is required!'),
+                          },
                         ],
                         validateTrigger: 'change',
                       },
@@ -174,7 +189,7 @@ export default class Login extends Vue {
               loading={this.logining}
               disabled={this.logining}
             >
-              {this.$tv('login.btnLogin', 'Log In')}
+              {this.$tv('core.page-signin.btn_signin_text', 'Sign In')}
             </a-button>
           </a-form-item>
         </a-form>

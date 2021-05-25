@@ -27,6 +27,7 @@ export default class PageCreate extends mixins(PageEditMixin) {
         style="height:100vh"
         ref="editForm"
         editModel={this.page}
+        i18nKeyPrefix="core.page-page"
         updatePost={this.onUpdatePage.bind(this)}
         updatePostStatus={this.onUpdatePageStatus.bind(this)}
         isPage
@@ -44,27 +45,29 @@ export default class PageCreate extends mixins(PageEditMixin) {
                 >
                   <a-collapse-panel
                     key="statusAndVisibility"
-                    header={this.$tv('post.form.statusAndVisibility', 'Status & Visibility')}
+                    header={this.$tv('core.page-post.form.status_and_visibility', 'Status & Visibility')}
                   >
                     <a-row>
                       <a-col span={6}>
-                        <span style="line-height:24px;"> {this.$tv('post.form.visibility', 'Visibility')}</span>
+                        <span style="line-height:24px;">
+                          {this.$tv('core.page-post.form.visibility', 'Visibility')}
+                        </span>
                       </a-col>
                       <a-col span={18}>
                         <a-popover vModel={this.visibilityPopShown} placement="bottomRight" trigger="click">
                           <template slot="content">
                             <a-radio-group vModel={this.visibility} onChange={this.handleVisibility.bind(this)}>
                               <a-radio style="display:block" value={PostVisibility.Public}>
-                                {this.$tv('post.visibility.public', 'Public')}
+                                {this.$tv('core.page-post.visibility.public', 'Public')}
                                 <span class="grey--text" style="display:block">
-                                  {this.$tv('post.visibility.publicDescription', 'Visible for everyone!')}
+                                  {this.$tv('core.page-post.visibility.public_description', 'Visible for everyone!')}
                                 </span>
                               </a-radio>
                               <a-radio style="display:block" value={PostVisibility.Private}>
-                                {this.$tv('post.visibility.private', 'Private')}
+                                {this.$tv('core.page-post.visibility.private', 'Private')}
                                 <span class="grey--text" style="display:block">
                                   {this.$tv(
-                                    'post.visibility.privateDescription',
+                                    'core.page-post.visibility.private_description',
                                     'Only visible to site admins and editors',
                                   )}
                                 </span>
@@ -73,7 +76,7 @@ export default class PageCreate extends mixins(PageEditMixin) {
                           </template>
                           <a-button type="link" size="small">
                             {this.$tv(
-                              `post.visibility.${this.status === PostStatus.Private ? 'private' : 'public'}`,
+                              `core.page-post.visibility.${this.status === PostStatus.Private ? 'private' : 'public'}`,
                               this.status === PostStatus.Private ? 'Private' : 'Public',
                             )}
                           </a-button>
@@ -81,7 +84,7 @@ export default class PageCreate extends mixins(PageEditMixin) {
                       </a-col>
                     </a-row>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('page.form.thumbnail', 'Thumbnail')}>
+                  <a-collapse-panel header={this.$tv('core.page-page.form.thumbnail', 'Thumbnail')}>
                     <a-upload
                       action="/api/file/upload/"
                       class="upload-list-inline"
@@ -93,22 +96,22 @@ export default class PageCreate extends mixins(PageEditMixin) {
                       {!this.thumbnailList.length
                         ? [
                             <a-icon type="plus" />,
-                            <div class="ant-upload-text">{this.$tv('page.btnText.upload', 'Upload')}</div>,
+                            <div class="ant-upload-text">{this.$tv('core.page-page.btn_text.upload', 'Upload')}</div>,
                           ]
                         : null}
                     </a-upload>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('page.form.discusionTitle', 'Discusion')}>
+                  <a-collapse-panel header={this.$tv('core.page-page.form.discusion_title', 'Discusion')}>
                     <a-checkbox
                       checked={this.allowComments}
                       disabled={this.allowCommentsChanging}
                       onChange={this.handleAllowCommentsChange.bind(this)}
                     >
-                      {this.$tv('page.form.allowCommentCheckboxText', 'Allow comments')}
+                      {this.$tv('core.page-page.form.allow_comment_checkbox_text', 'Allow comments')}
                     </a-checkbox>
                   </a-collapse-panel>
-                  <a-collapse-panel header={this.$tv('page.form.attributes', 'Page Attributes')}>
-                    <a-form-item label={this.$tv(`page.form.order`, 'Order')} hasFeedback={false}>
+                  <a-collapse-panel header={this.$tv('core.page-page.form.attributes', 'Page Attributes')}>
+                    <a-form-item label={this.$tv(`core.page-page.form.order`, 'Order')} hasFeedback={false}>
                       <a-input-number {...{ directives: [{ name: 'decorator', value: ['order'] }] }} />
                     </a-form-item>
                   </a-collapse-panel>

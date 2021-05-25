@@ -46,7 +46,7 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'userRole' },
     },
     {
-      title: i18nRender('user.column.createTime', 'CreateTime'),
+      title: i18nRender('user.column.create_time', 'CreateTime'),
       align: 'center',
       dataIndex: 'createTime',
       width: '160px',

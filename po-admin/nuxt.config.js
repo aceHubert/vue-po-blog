@@ -115,6 +115,7 @@ module.exports = (configContext) => {
 
     plugins: [
       { src: 'plugins/vue-antd' },
+      { src: 'plugins/vue-i18n' },
       { src: 'plugins/vue-ls', ssr: false },
       { src: 'plugins/vue-ckeditor', ssr: false },
       { src: 'plugins/bootstrap' },

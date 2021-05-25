@@ -1,0 +1,46 @@
+{
+  "dashboard": "仪表盘", 
+  "post": {
+      "root": "文章", 
+      "posts": "所有文章", 
+      "create": "新建文章", 
+      "tags": "标签", 
+      "categories": "分类"
+  }, 
+  "media": {
+      "root": "媒体", 
+      "medias": "媒体库", 
+      "create": "新建媒体"
+  }, 
+  "page": {
+      "root": "页面", 
+      "pages": "所有页面", 
+      "create": "新建页面"
+  }, 
+  "theme": {
+      "root": "外观", 
+      "libs": "主题", 
+      "customize": "自定义", 
+      "widgets": "小组件", 
+      "menu": "菜单"
+  }, 
+  "plugin": {
+      "root": "插件", 
+      "installed": "已安装的插件", 
+      "add": "安装插件"
+  }, 
+  "user": {
+      "root": "用户", 
+      "users": "所有用户", 
+      "create": "新建用户"
+  }, 
+  "tools": {
+      "root": "工具", 
+      "import": "导入", 
+      "export": "导出"
+  }, 
+  "settings": {
+      "root": "设置", 
+      "general": "常规"
+  }
+}

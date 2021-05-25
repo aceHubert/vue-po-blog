@@ -1,5 +1,6 @@
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
+import { lowerCase } from 'lodash-es';
 import { PostStatus, UserCapability } from '@/includes/datas';
 import LogoSvg from '@/assets/images/logo.svg?inline';
 
@@ -25,7 +26,10 @@ export type TreeData = {
 })
 export default class PostEditForm extends Vue {
   _tsx!: tsx.DeclareProps<
-    tsx.PickProps<PostEditForm, 'editModel' | 'updatePost' | 'updatePostStatus' | 'disabledActions' | 'isPage'>
+    tsx.PickProps<
+      PostEditForm,
+      'editModel' | 'updatePost' | 'updatePostStatus' | 'i18nKeyPrefix' | 'disabledActions' | 'isPage'
+    >
   > &
     tsx.DeclareOnEvents<{
       onChange: (values: Dictionary<any>) => void;
@@ -57,9 +61,11 @@ export default class PostEditForm extends Vue {
   @Prop({ type: Function, required: true }) updatePost!: (model: PostUpdateModel | PageUpdateModel) => Promise<boolean>;
   /** 修改状态 */
   @Prop({ type: Function, required: true }) updatePostStatus!: (status: PostStatus) => Promise<void>;
+  /** 同时作为 i18n key 前缀(末尾不用加.),  [i18nKeyPrefix].term_form.btn_text */
+  @Prop({ type: String, required: true }) i18nKeyPrefix!: string;
   /** 右上角操作按纽禁用 */
   @Prop(Boolean) disabledActions?: boolean;
-  /** 是否是页面（locale 前缀变成 "page.", 不显示 excerpt） */
+  /** 是否是页面 */
   @Prop(Boolean) isPage?: boolean;
 
   // form
@@ -169,11 +175,11 @@ export default class PostEditForm extends Vue {
   handleSwitchToDraft() {
     this.$confirm({
       content: this.$tv(
-        `${this.taxonomy}.tips.unpublisheAlert`,
-        `Are you sure you want to unpublish this ${this.taxonomy}?`,
+        `${this.i18nKeyPrefix}.tips.unpublisheAlert`,
+        `Are you sure you want to unpublish this ${lowerCase(this.taxonomy)}?`,
       ),
-      okText: this.$tv(`${this.taxonomy}.btnText.unpublishOkText`, 'Yes') as string,
-      cancelText: this.$tv(`${this.taxonomy}.btnText.unpublishCancelText`, 'No') as string,
+      okText: this.$tv(`${this.i18nKeyPrefix}.btn_text.unpublish_ok_text`, 'Yes') as string,
+      cancelText: this.$tv(`${this.i18nKeyPrefix}.btn_text.unpublish_cancel_text`, 'No') as string,
       onOk: () => {
         this.savingToDarft = true;
         const status = PostStatus.Draft;
@@ -274,10 +280,10 @@ export default class PostEditForm extends Vue {
                         type="primary"
                         disabled={!this.changed || this.processing || this.disabledActions}
                         loading={this.updating}
-                        title={this.$tv(`${this.taxonomy}.btnTips.review`, 'Review the post')}
+                        title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.review`, 'Review the post')}
                         onClick={m.stop.prevent(this.handleUpdate.bind(this))}
                       >
-                        {this.$tv(`${this.taxonomy}.btnText.review`, 'Review')}
+                        {this.$tv(`${this.i18nKeyPrefix}.btn_text.review`, 'Review')}
                       </a-button>,
                     ]
                   : this.status === PostStatus.Publish || this.status === PostStatus.Private
@@ -287,30 +293,33 @@ export default class PostEditForm extends Vue {
                         type="primary"
                         disabled={this.processing || this.disabledActions}
                         loading={this.savingToDarft}
-                        title={this.$tv(`${this.taxonomy}.btnTips.switchToDraft`, 'swith the post into draft box')}
+                        title={this.$tv(
+                          `${this.i18nKeyPrefix}.btn_tips.switch_to_draft`,
+                          'swith the post into draft box',
+                        )}
                         onClick={m.stop.prevent(this.handleSwitchToDraft.bind(this))}
                       >
-                        {this.$tv(`${this.taxonomy}.btnText.switchToDraft`, 'Switch to Draft')}
+                        {this.$tv(`${this.i18nKeyPrefix}.btn_text.switch_to_draft`, 'Switch to Draft')}
                       </a-button>,
                       this.hasPublishCapability ? (
                         <a-button
                           type="primary"
                           disabled={!this.changed || this.processing || this.disabledActions}
                           loading={this.updating}
-                          title={this.$tv(`${this.taxonomy}.btnTips.update`, 'Update the post')}
+                          title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.update`, 'Update the post')}
                           onClick={m.stop.prevent(this.handleUpdate.bind(this))}
                         >
-                          {this.$tv(`${this.taxonomy}.btnText.update`, 'Update')}
+                          {this.$tv(`${this.i18nKeyPrefix}.btn_text.update`, 'Update')}
                         </a-button>
                       ) : (
                         <a-button
                           type="primary"
                           disabled={!this.changed || this.processing || this.disabledActions}
                           loading={this.reviewSubmiting}
-                          title={this.$tv(`${this.taxonomy}.btnTips.review`, 'Review the post')}
+                          title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.review`, 'Review the post')}
                           onClick={m.stop.prevent(this.handleSubmitReview.bind(this))}
                         >
-                          {this.$tv(`${this.taxonomy}.btnText.review`, 'Review')}
+                          {this.$tv(`${this.i18nKeyPrefix}.btn_text.review`, 'Review')}
                         </a-button>
                       ),
                     ]
@@ -320,30 +329,30 @@ export default class PostEditForm extends Vue {
                         type="primary"
                         disabled={!this.changed || this.processing || this.disabledActions}
                         loading={this.savingToDarft}
-                        title={this.$tv(`${this.taxonomy}.btnTips.saveToDraft`, 'Save the post into draft box')}
+                        title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.save_to_draft`, 'Save the post into draft box')}
                         onClick={m.stop.prevent(this.handleSaveToDraft.bind(this))}
                       >
-                        {this.$tv(`${this.taxonomy}.btnText.saveToDraft`, 'Save to Draft')}
+                        {this.$tv(`${this.i18nKeyPrefix}.btn_text.save_to_draft`, 'Save to Draft')}
                       </a-button>,
                       this.hasPublishCapability ? (
                         <a-button
                           type="primary"
                           disabled={this.processing || this.disabledActions}
                           loading={this.publishing}
-                          title={this.$tv(`${this.taxonomy}.btnTips.publish`, 'Publish the post')}
+                          title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.publish`, 'Publish the post')}
                           onClick={m.stop.prevent(this.handelPublish.bind(this, false))}
                         >
-                          {this.$tv(`${this.taxonomy}.btnText.publish`, 'Publish')}
+                          {this.$tv(`${this.i18nKeyPrefix}.btn_text.publish`, 'Publish')}
                         </a-button>
                       ) : (
                         <a-button
                           type="primary"
                           disabled={!this.changed || this.processing || this.disabledActions}
                           loading={this.reviewSubmiting}
-                          title={this.$tv(`${this.taxonomy}.btnTips.review`, 'Review the post')}
+                          title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.review`, 'Review the post')}
                           onClick={m.stop.prevent(this.handleSubmitReview.bind(this))}
                         >
-                          {this.$tv(`${this.taxonomy}.btnText.review`, 'Review')}
+                          {this.$tv(`${this.i18nKeyPrefix}.btn_text.review`, 'Review')}
                         </a-button>
                       ),
                     ]}
@@ -356,7 +365,7 @@ export default class PostEditForm extends Vue {
             </a-col>
           </a-row>
           {/* <a-drawer
-          title={this.$tv(`${this.taxonomy}.publishDrawerTitle`, 'Publish Settings')}
+          title={this.$tv(`${this.i18nKeyPrefix}.publish_drawer_title`, 'Publish Settings')}
           placement="right"
           closable={false}
           mask={false}
@@ -369,22 +378,22 @@ export default class PostEditForm extends Vue {
               <rich-editor
                 vModel={this.content}
                 config={this.editorConfig}
-                placeholder={this.$tv(`${this.taxonomy}.contentPlaceholder`, 'Please input content')}
+                placeholder={this.$tv(`${this.i18nKeyPrefix}.content_placeholder`, 'Please input content')}
                 class={'po-post-edit__editor grey lighten-4'}
               />
             </client-only>
           </a-layout-content>
           <a-layout-sider width="300" collapsed={this.siderCollapsed} collapsedWidth={0}>
-            <a-card title={this.$tv(`${this.taxonomy}.form.settingsTitle`, 'Settings')} bordered={false}>
+            <a-card title={this.$tv(`${this.i18nKeyPrefix}.form.settings_title`, 'Settings')} bordered={false}>
               <template slot="extra">
                 <a-icon type="close" onClick={() => (this.siderCollapsed = !this.siderCollapsed)}></a-icon>
               </template>
               {this.$scopedSlots.beforeForm ? this.$scopedSlots.beforeForm() : null}
               <a-form form={this.form}>
                 {this.$scopedSlots.beforeFormItem ? this.$scopedSlots.beforeFormItem() : null}
-                <a-form-item class="px-3 pt-2" label={this.$tv(`${this.taxonomy}.form.title`, 'Title')}>
+                <a-form-item class="px-3 pt-2" label={this.$tv(`${this.i18nKeyPrefix}.form.title`, 'Title')}>
                   <a-input
-                    placeholder={this.$tv(`${this.taxonomy}.form.titlePlaceholder`, 'Please input title')}
+                    placeholder={this.$tv(`${this.i18nKeyPrefix}.form.title_placeholder`, 'Please input title')}
                     {...{ directives: [{ name: 'decorator', value: ['title'] }] }}
                   />
                 </a-form-item>

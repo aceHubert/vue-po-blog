@@ -40,12 +40,15 @@ import { Page, PageCreationModel, PageUpdateModel } from 'types/datas/page';
           if (!data.page) {
             return error({
               statusCode: 500,
-              message: $i18n.tv('page.tips.notExists', 'Page is not exists!') as string,
+              message: $i18n.tv('core.page-page.tips.not_exists', 'Page is not exists!') as string,
             });
           } else if (data.page.status === PostStatus.Trash) {
             return error({
               statusCode: 500,
-              message: $i18n.tv('page.tips.trashStatusEdit', 'Could not edit "trash" status Page') as string,
+              message: $i18n.tv(
+                'core.page-page.tips.trash_status_edit',
+                'Could not edit "trash" status Page',
+              ) as string,
             });
           }
           return data.page;
@@ -137,10 +140,14 @@ export default class PageEditMixin extends mixins(postMixin, termMixin) {
           if (this.$route.name === 'pages-create') {
             this.$router.replace({ name: 'pages-edit', params: { id: this.page.id } });
           } else {
-            this.$message.success(this.$tv('page.tips.updateSuccessful', `Update page successful!`) as string);
+            this.$message.success(
+              this.$tv('core.page-page.tips.update_successful', `Update page successful!`) as string,
+            );
           }
         } else {
-          this.$message.error(this.$tv('page.tips.updateFaild', 'An error occurred while updating page!') as string);
+          this.$message.error(
+            this.$tv('core.page-page.tips.update_faild', 'An error occurred while updating page!') as string,
+          );
         }
         return data!.result;
       })
@@ -156,7 +163,10 @@ export default class PageEditMixin extends mixins(postMixin, termMixin) {
       .then((result) => {
         if (!result) {
           this.$message.error(
-            this.$tv('page.tips.updateStatusFaild', 'An error occurred while updating page status!') as string,
+            this.$tv(
+              'core.page-page.tips.update_status_faild',
+              'An error occurred while updating page status!',
+            ) as string,
           );
         }
       })
@@ -218,9 +228,12 @@ export default class PageEditMixin extends mixins(postMixin, termMixin) {
     this.visibilityPopShown = false;
     if (this.visibility === PostVisibility.Private) {
       this.$confirm({
-        content: this.$tv('post.tips.privateAlert', 'Would you like to privately publish this post now?'),
-        okText: this.$tv(`post.btnText.privatelyOkTest`, 'Yes') as string,
-        cancelText: this.$tv('post.btnText.privatelyCancelTest', 'No') as string,
+        content: this.$tv(
+          'core.page-post.tips.privately_confirm_content',
+          'Would you like to privately publish this post now?',
+        ),
+        okText: this.$tv(`core.page-post.btn_text.privately_confirm_ok_text`, 'Yes') as string,
+        cancelText: this.$tv('core.page-post.btn_text.privately_confirm_cancel_text', 'No') as string,
         onOk: this.editForm.handleMakePrivate.bind(this.editForm),
         onCancel: () => {
           this.visibility = this.status === PostStatus.Private ? PostVisibility.Private : PostVisibility.Public;

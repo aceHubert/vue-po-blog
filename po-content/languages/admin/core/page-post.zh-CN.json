@@ -1,0 +1,101 @@
+{
+  "page_title": {},
+  "status": {
+    "all": "全部",
+    "self": "我的",
+    "draft": "草稿",
+    "publish": "已发布",
+    "private": "私有",
+    "pending": "待发布",
+    "review": "待审核",
+    "trash": "回收站"
+  },
+  "visibility": {
+    "private": "私有",
+    "public": "公开"
+  },
+  "search": {
+    "keyword_placeholder": "搜索文章",
+    "all_dates": "所有日期",
+    "choose_date": "选择日期",
+    "all_categories": "所有分类",
+    "choose_category": "选择分类",
+    "bulk_restore_action": "重置",
+    "bulk_trash_action": "移至回收站",
+    "filter_btn_text": "过滤"
+  },
+  "column": {
+    "title": "标题",
+    "author": "作者",
+    "category": "分类",
+    "tag": "标签",
+    "comment_count": "评论",
+    "create_time": "日期"
+  },
+  "form": {
+    "settings_title": "设置",
+    "title": "文章标题",
+    "title_placeholder": "请输入@:core.page-post.form.title",
+    "title_required": "@:core.page-post.form.title必填",
+    "excerpt": "摘要",
+    "excerpt_help": "写一段简单的摘要（选填）",
+    "excerpt_placeholder": "请输入文章摘要",
+    "status_and_visibility": "状态和可见范围",
+    "visibility": "可见范围",
+    "thumbnail": "封面图",
+    "tag_title": "标签",
+    "tag_placeholder": "请选择/输入标签",
+    "tag_management_link_text": "标签管理",
+    "category_title": "分类",
+    "add_category_link_text": "添加分类",
+    "discusion_title": "评论",
+    "allow_comment_checkbox_text": "允许评论",
+    "content_placeholder": "编辑文章内容"
+  },
+  "tips": {
+    "bulk_row_reqrired": "@:core.common.tips.bulk_row_reqrired",
+    "delete_pop_content": "确定永久删除这篇文章吗？",
+    "trash_status_edit": "文章在回收站中，请先恢复后再操作！",
+    "not_exists": "文章不在在，或被管理员删除！",
+    "update_faild": "修改文章发生错误，请稍后重试！",
+    "update_successful": "修改文章成功！",
+    "unpublishe_alert": "确定取消发布这篇文章吗？",
+    "privately_confirm_content": "确定现在将这篇文章发布到私有吗？"
+  },
+  "btn_text": {
+    "edit": "@:core.common.btn_text.edit",
+    "update": "@:core.common.btn_text.update",
+    "save": "@:core.common.btn_text.save",
+    "save_to_draft": "保存到草稿箱",
+    "delete": "永久删除",
+    "delete_pop_ok_text": "@:core.common.btn_text.ok",
+    "delete_pop_cancel_text": "@:core.common.btn_text.no",
+    "privately_confirm_ok_text": "@:core.common.btn_text.ok",
+    "privately_confirm_cancel_text": "@:core.common.btn_text.ok",
+    "publish": "发布",
+    "review": "提交审核",
+    "upload": "点击上传",
+    "view": "查看",
+    "preview": "预览",
+    "restore": "重置",
+    "move_to_draft": "移至草稿箱",
+    "move_to_trash": "移至回收站",
+    "switch_to_draft": "切换到草稿箱"
+  },
+  "btn_tips": {
+    "edit": "@:core.page-post.btn_text.edit",
+    "update": "@:core.page-post.btn_text.update",
+    "save": "保存文章并发布",
+    "save_to_draft": "保存文章到草稿箱",
+    "delete": "@:core.page-post.btn_text.delete",
+    "reset": "@:core.page-post.btn_text.reset",
+    "publish": "@:core.page-post.btn_text.publish",
+    "review": "@:core.page-post.btn_text.review",
+    "view": "@:core.page-post.btn_text.view",
+    "preview": "@:core.page-post.btn_text.preview",
+    "restore": "@:core.page-post.btn_text.restore",
+    "move_to_draft": "@:core.page-post.btn_text.move_to_draft",
+    "move_to_trash": "@:core.page-post.btn_text.move_to_trash",
+    "switch_to_draft": "切换文章到草稿箱"
+  }
+}

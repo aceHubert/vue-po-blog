@@ -1,6 +1,6 @@
 import { Vue, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
-import { lowerFirst } from 'lodash-es';
+import { snakeCase } from 'lodash-es';
 import { trailingSlash } from '@/utils/path';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
@@ -67,7 +67,7 @@ enum BlukActions {
         const { statusCode, message } = formatError(err);
         error({
           statusCode: statusCode || 500,
-          message: $i18n.tv(`error.${statusCode}`, message) as string,
+          message: $i18n.tv(`core.error.${statusCode}`, message) as string,
         });
       });
   },
@@ -127,7 +127,7 @@ export default class PageIndex extends Vue {
     return [
       {
         value: undefined,
-        label: this.$tv('page.status.all', 'All') as string,
+        label: this.$tv('core.page-page.status.all', 'All') as string,
         // 总数不记录 trash 状态
         count: this.statusCounts.reduce((prev, curr) => {
           return prev + (curr.status === PostStatus.Trash ? 0 : curr.count);
@@ -136,7 +136,7 @@ export default class PageIndex extends Vue {
       },
       ...this.statusCounts.map(({ status, count }) => ({
         value: status,
-        label: this.$tv(`post.status.${lowerFirst(status)}`, status) as string,
+        label: this.$tv(`core.page-post.status.${snakeCase(status)}`, status) as string,
         count,
       })),
     ];
@@ -147,7 +147,7 @@ export default class PageIndex extends Vue {
     return [
       {
         value: '',
-        label: this.$tv('page.search.allDates', 'All Dates') as string,
+        label: this.$tv('core.page-page.search.all_dates', 'All Dates') as string,
       },
       ...this.allMonths.map(({ month }) => ({
         value: month,
@@ -162,13 +162,13 @@ export default class PageIndex extends Vue {
       ? [
           {
             value: BlukActions.Restore,
-            label: this.$tv('page.search.bulkRestoreAction', 'Restore') as string,
+            label: this.$tv('core.page-page.search.bulk_restore_action', 'Restore') as string,
           },
         ]
       : [
           {
             value: BlukActions.MoveToTrash,
-            label: this.$tv('page.search.bulkTrashAction', 'Move To Trash') as string,
+            label: this.$tv('core.page-page.search.bulk_trash_action', 'Move To Trash') as string,
           },
         ];
   }
@@ -230,7 +230,7 @@ export default class PageIndex extends Vue {
       })
       .catch((err) => {
         const { statusCode, message } = formatError(err);
-        this.$message.error(this.$tv(`error.${statusCode}`, message) as string);
+        this.$message.error(this.$tv(`core.error.${statusCode}`, message) as string);
       });
   }
 
@@ -271,7 +271,9 @@ export default class PageIndex extends Vue {
   // 批量操作
   handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
-      this.$message.warn({ content: this.$tv('page.tips.bulkRowReqrired', 'Please choose a row!') as string });
+      this.$message.warn({
+        content: this.$tv('core.page-page.tips.bulk_row_reqrired', 'Please choose a row!') as string,
+      });
       return;
     }
     if (action === BlukActions.MoveToTrash || action === BlukActions.Restore) {
@@ -405,11 +407,11 @@ export default class PageIndex extends Vue {
     const getStatusText = (record: Page) => {
       if (!this.searchQuery.status) {
         if (record.status === PostStatus.Draft) {
-          return this.$tv('page.status.draft', 'Draft');
+          return this.$tv('core.page-page.status.draft', 'Draft');
         } else if (record.status === PostStatus.Trash) {
-          return this.$tv('page.status.trash', 'Trash');
+          return this.$tv('core.page-page.status.trash', 'Trash');
         } else if (record.status === PostStatus.Private) {
-          return this.$tv('page.status.private', 'Private');
+          return this.$tv('core.page-page.status.private', 'Private');
         }
       }
       return;
@@ -421,49 +423,55 @@ export default class PageIndex extends Vue {
           ? [
               <a
                 href="#none"
-                title={this.$tv('page.btnTips.restore', 'Restore this post') as string}
+                title={this.$tv('core.page-page.btn_tips.restore', 'Restore this post') as string}
                 onClick={m.stop.prevent(this.handleRestore.bind(this, record.id))}
               >
-                {this.$tv('page.btnText.restore', 'Restore')}
+                {this.$tv('core.page-page.btn_text.restore', 'Restore')}
               </a>,
               <a-divider type="vertical" />,
               <a-popconfirm
-                title={this.$tv('page.btnTips.deletePopContent', 'Do you really want to delete this post?')}
-                okText={this.$tv('page.btnText.deletePopOkText', 'Ok')}
-                cancelText={this.$tv('page.btnText.deletePopCancelText', 'No')}
+                title={this.$tv('core.page-page.tips.delete_pop_content', 'Do you really want to delete this post?')}
+                okText={this.$tv('core.page-page.btn_text.delete_pop_ok_text', 'Ok')}
+                cancelText={this.$tv('core.page-page.btn_text.delete_pop_cancel_text', 'No')}
                 onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
               >
-                <a href="#none" title={this.$tv('page.btnTips.delete', 'Delete this post permanently') as string}>
-                  {this.$tv('page.btnText.delete', 'Delete Permanently')}
+                <a
+                  href="#none"
+                  title={this.$tv('core.page-page.btn_tips.delete', 'Delete this post permanently') as string}
+                >
+                  {this.$tv('core.page-page.btn_text.delete', 'Delete Permanently')}
                 </a>
               </a-popconfirm>,
             ]
           : [
               <nuxt-link
                 to={{ name: 'pages-edit', params: { id: String(record.id) } }}
-                title={this.$tv('page.btnTips.edit', 'Edit') as string}
+                title={this.$tv('core.page-page.btn_tips.edit', 'Edit') as string}
               >
-                {this.$tv('page.btnText.edit', 'Edit')}
+                {this.$tv('core.page-page.btn_text.edit', 'Edit')}
               </nuxt-link>,
               <a-divider type="vertical" />,
               <a
                 href="#none"
-                title={this.$tv('page.btnTips.moveToTrash', 'Move to trash') as string}
+                title={this.$tv('core.page-page.btn_tips.move_to_trash', 'Move to trash') as string}
                 onClick={m.stop.prevent(this.handleModifyStatus.bind(this, record.id, PostStatus.Trash))}
               >
-                {this.$tv('page.btnText.moveToTrash', 'Trash')}
+                {this.$tv('core.page-page.btn_text.move_to_trash', 'Trash')}
               </a>,
               <a-divider type="vertical" />,
               record.status === PostStatus.Draft ? (
                 <a
                   href={this.getPreviewUrl(record.id)}
-                  title={this.$tv('page.btnTips.preview', 'Preview this post') as string}
+                  title={this.$tv('core.page-page.btn_tips.preview', 'Preview this post') as string}
                 >
-                  {this.$tv('page.btnText.preview', 'Preview')}
+                  {this.$tv('core.page-page.btn_text.preview', 'Preview')}
                 </a>
               ) : (
-                <a href={this.getViewUrl(record.id)} title={this.$tv('page.btnTips.view', 'View this post') as string}>
-                  {this.$tv('page.btnText.view', 'View')}
+                <a
+                  href={this.getViewUrl(record.id)}
+                  title={this.$tv('core.page-page.btn_tips.view', 'View this post') as string}
+                >
+                  {this.$tv('core.page-page.btn_text.view', 'View')}
                 </a>
               ),
             ]}
@@ -503,7 +511,7 @@ export default class PageIndex extends Vue {
                         name: 'users-profile',
                         query: record.author.id === userStore.id ? {} : { id: String(record.author.id) },
                       }}
-                      title={this.$tv('page.btnTips.edit', 'Edit') as string}
+                      title={this.$tv('core.page-page.btn_tips.edit', 'Edit') as string}
                     >
                       {record.author.displayName}
                     </nuxt-link>
@@ -531,7 +539,7 @@ export default class PageIndex extends Vue {
                 name: 'users-profile',
                 query: text.id === userStore.id ? {} : { id: text.id },
               }}
-              title={this.$tv('page.btnTips.edit', 'Edit') as string}
+              title={this.$tv('core.page-page.btn_tips.edit', 'Edit') as string}
             >
               {text.displayName}
             </nuxt-link>
@@ -546,7 +554,7 @@ export default class PageIndex extends Vue {
     return (
       <a-card class="post-index" bordered={false}>
         <SearchForm
-          keywordPlaceholder={this.$tv('page.search.keywordPlaceholder', 'Search Page') as string}
+          keywordPlaceholder={this.$tv('core.page-page.search.keyword_placeholder', 'Search Pages') as string}
           itemCount={this.itemCount}
           statusOptions={this.statusOptions}
           blukAcitonOptions={this.blukActionOptions}
@@ -558,11 +566,11 @@ export default class PageIndex extends Vue {
             <a-select
               vModel={this.searchQuery.date}
               options={this.dateOptions}
-              placeholder={this.$tv('page.search.chooseDate', 'Choose date')}
+              placeholder={this.$tv('core.page-page.search.choose_date', 'Choose date')}
               style="min-width:100px;"
             ></a-select>
             <a-button ghost type="primary" onClick={this.handleFilter.bind(this)}>
-              {this.$tv('page.search.filterBtnText', 'Filter')}
+              {this.$tv('core.page-page.search.filter_btn_text', 'Filter')}
             </a-button>
           </template>
         </SearchForm>

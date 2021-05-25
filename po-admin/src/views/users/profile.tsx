@@ -25,7 +25,7 @@ import { User, UserMetas, UserResponse } from 'types/datas/user';
   name: 'Profile',
   head() {
     return {
-      title: this.$tv('pageTitle.user.profile', 'Profile') as string,
+      title: this.$tv('core.page-user.page_title.profile', 'Profile') as string,
     };
   },
   asyncData: async ({ route, error, redirect, graphqlClient }) => {
@@ -94,12 +94,12 @@ export default class Profile extends Vue {
         {/* Name */}
         <a-row gutter={[8, 8]}>
           <a-col xs={24} sm={{ span: 18, offset: 6 }}>
-            <h1>{this.$tv('user.form.groupName', 'Name')}</h1>
+            <h1>{this.$tv('core.page-user.form.group_name', 'Name')}</h1>
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
           <a-col xs={24} sm={6} class="text-right">
-            <strong>{this.$tv('user.form.username', 'Username')}: </strong>
+            <strong>{this.$tv('core.page-user.form.username', 'Username')}: </strong>
           </a-col>
           <a-col xs={24} sm={18}>
             {this.user.username}
@@ -107,7 +107,7 @@ export default class Profile extends Vue {
         </a-row>
         <a-row gutter={[8, 24]}>
           <a-col xs={24} sm={6} class="text-right">
-            <strong>{this.$tv('user.form.firstName', 'First Name')}: </strong>
+            <strong>{this.$tv('core.page-user.form.firstname', 'First Name')}: </strong>
           </a-col>
           <a-col xs={24} sm={18}>
             {this.user.firstName}
@@ -115,7 +115,7 @@ export default class Profile extends Vue {
         </a-row>
         <a-row gutter={[8, 24]}>
           <a-col xs={24} sm={6} class="text-right">
-            <strong>{this.$tv('user.form.lastName', 'Last Name')}: </strong>
+            <strong>{this.$tv('core.page-user.form.lastname', 'Last Name')}: </strong>
           </a-col>
           <a-col xs={24} sm={18}>
             {this.user.lastName}
@@ -123,7 +123,7 @@ export default class Profile extends Vue {
         </a-row>
         <a-row gutter={[8, 24]}>
           <a-col xs={24} sm={6} class="text-right">
-            <strong>{this.$tv('user.form.nickname', 'Nickname')}: </strong>
+            <strong>{this.$tv('core.page-user.form.nickname', 'Nickname')}: </strong>
           </a-col>
           <a-col xs={24} sm={18}>
             {this.user.nickName}
@@ -131,7 +131,7 @@ export default class Profile extends Vue {
         </a-row>
         <a-row gutter={[8, 24]}>
           <a-col xs={24} sm={6} class="text-right">
-            <strong>{this.$tv('user.form.displayName', 'Display name for public as')}: </strong>
+            <strong>{this.$tv('core.page-user.form.display_name', 'Display name for public as')}: </strong>
           </a-col>
           <a-col xs={24} sm={18}>
             {this.user.displayName}
@@ -140,12 +140,12 @@ export default class Profile extends Vue {
         {/* Contact Info */}
         <a-row gutter={[8, 8]}>
           <a-col xs={24} sm={{ span: 18, offset: 6 }}>
-            <h1>{this.$tv('user.form.groupContactInfo', 'Contact Info')}</h1>
+            <h1>{this.$tv('core.page-user.form.group_contact_info', 'Contact Info')}</h1>
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
           <a-col xs={24} sm={6} class="text-right">
-            <strong>{this.$tv('user.form.email', 'Email')}: </strong>
+            <strong>{this.$tv('core.page-user.form.email', 'Email')}: </strong>
           </a-col>
           <a-col xs={24} sm={18}>
             {this.user.email}
@@ -153,7 +153,7 @@ export default class Profile extends Vue {
         </a-row>
         <a-row gutter={[8, 24]}>
           <a-col xs={24} sm={6} class="text-right">
-            <strong>{this.$tv('user.form.website', 'Website')}: </strong>
+            <strong>{this.$tv('core.page-user.form.website', 'Website')}: </strong>
           </a-col>
           <a-col xs={24} sm={18}>
             {this.user.url}
@@ -162,12 +162,12 @@ export default class Profile extends Vue {
         {/* About Yourself */}
         <a-row gutter={[8, 8]}>
           <a-col xs={24} sm={{ span: 18, offset: 6 }}>
-            <h1>{this.$tv('user.form.groupAboutYourself', 'About Yourself')}</h1>
+            <h1>{this.$tv('core.page-user.form.group_about_yourself', 'About Yourself')}</h1>
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
           <a-col xs={24} sm={6} class="text-right">
-            <strong style="line-height:64px">{this.$tv('user.form.avator', 'Profile Picture')}: </strong>
+            <strong style="line-height:64px">{this.$tv('core.page-user.form.avator', 'Profile Picture')}: </strong>
           </a-col>
           <a-col xs={24} sm={18}>
             {this.user.avatar ? (
@@ -179,7 +179,7 @@ export default class Profile extends Vue {
         </a-row>
         <a-row gutter={[8, 24]}>
           <a-col xs={24} sm={6} class="text-right">
-            <strong>{this.$tv('user.form.description', 'Biographical Info')}: </strong>
+            <strong>{this.$tv('core.page-user.form.description', 'Biographical Info')}: </strong>
           </a-col>
           <a-col xs={24} sm={18}>
             {this.user.description}
@@ -190,10 +190,10 @@ export default class Profile extends Vue {
             <a-col xs={24} sm={{ span: 18, offset: 6 }}>
               <a-button
                 type="primary"
-                title={this.$tv('user.btnTips.editProfile', 'Edit Profile')}
+                title={this.$tv('core.page-user.btn_tips.edit_profile', 'Edit Profile')}
                 onClick={() => this.$router.push({ name: 'profile-edit' })}
               >
-                {this.$tv('user.btnText.editProfile', 'Edit Profile')}
+                {this.$tv('core.page-user.btn_text.edit_profile', 'Edit Profile')}
               </a-button>
             </a-col>
           </a-row>

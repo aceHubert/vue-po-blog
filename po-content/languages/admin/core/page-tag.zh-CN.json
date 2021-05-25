@@ -1,0 +1,52 @@
+{
+  "page_title": {},
+  "search": {
+    "keyword_placeholder": "搜索标签",
+    "bulk_delete_action_text": "@:core.common.search.bulk_delete_action_text"
+  },
+  "column": {
+    "name": "名称",
+    "slug": "别名",
+    "description": "描述",
+    "count": "数量"
+  },
+  "term_form": {
+    "creation_model_title": "新建标签",
+    "update_model_title": "修改标签",
+    "name": "标签名称",
+    "name_placeholder": "请输入分类名称",
+    "name_pequired": "@:core.page-tag.term_form.name必填",
+    "name_help": "标签名称会显示在您的网站上。",
+    "slug": "别名",
+    "slug_placeholder": "请输入别名",
+    "slug_help": "\"别名\"是在URL中友好的显示标签名称，通常为英文字母组成。",
+    "description": "描述",
+    "description_placeholder": "请输入描述",
+    "description_help": "对标签作一段简短的描述",
+    "btn_create_text": "@:core.page-tag.btn_text.create",
+    "btn_create_tips": "@:core.page-tag.btn_tips.create",
+    "btn_update_text": "@:core.page-tag.btn_text.update",
+    "btn_update_tips": "@:core.page-tag.btn_tips.update"
+  },
+  "tips": {
+    "bulk_row_reqrired": "@:core.common.tips.bulk_row_reqrired",
+    "delete_pop_content": "确定永久删除这条标签吗？",
+    "delete_failed": "删除标签发生错误，请稍后重试！",
+    "bluk_delete_pop_content": "确定永久删除这些标签吗？",
+    "bluk_delete_failed": "批量删除标签发生错误，请稍后重试！"
+  },
+  "btn_text": {
+    "create": "新建标签",
+    "update": "修改标签",
+    "edit": "@:core.common.btn_text.edit",
+    "delete": "@:core.common.btn_text.delete",
+    "delete_pop_ok_text": "@:core.common.btn_text.ok",
+    "delete_pop_cancel_text": "@:core.common.btn_text.no"
+  },
+  "btn_tips": {
+    "create": "@:core.page-tag.btn_text.create",
+    "update": "@:core.pae-tag.btn_text.update",
+    "edit": "@:core.page-tag.btn_text.edit",
+    "delete": "永久删除这条标签"
+  }
+}

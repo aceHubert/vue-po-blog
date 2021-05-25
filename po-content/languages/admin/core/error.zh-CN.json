@@ -1,0 +1,7 @@
+{
+  "unauthorized": "抱歉，您没有权限访问此站点。", 
+  "page_not_found": "页面未找到！", 
+  "server_error": "系统错误，请稍后重试！", 
+  "no_capability": "抱歉，您没有权限操作此页面！", 
+  "load_module_failed": "模块加载失败"
+}

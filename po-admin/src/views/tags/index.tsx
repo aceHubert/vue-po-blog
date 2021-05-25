@@ -69,7 +69,7 @@ export default class Tags extends Vue {
     return [
       {
         value: BlukActions.Delete,
-        label: this.$tv('tag.search.bulkDeleteAction', 'Delete') as string,
+        label: this.$tv('core.page-tag.search.bulk_delete_action_text', 'Delete') as string,
       },
     ];
   }
@@ -181,14 +181,16 @@ export default class Tags extends Vue {
   // 批量操作
   handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
-      this.$message.warn({ content: this.$tv('tag.tips.bulkRowReqrired', 'Please choose a row!') as string });
+      this.$message.warn({
+        content: this.$tv('core.page-tag.tips.bulk_row_reqrired', 'Please choose a row!') as string,
+      });
       return;
     }
     if (action === BlukActions.Delete) {
       this.$confirm({
-        content: this.$tv('tag.btnTips.blukDeletePopContent', 'Do you really want to delete these tags?'),
-        okText: this.$tv('tag.btnText.deletePopOkText', 'Ok') as string,
-        cancelText: this.$tv('tag.btnText.deletePopCancelText', 'No') as string,
+        content: this.$tv('core.page-tag.btn_tips.bluk_delete_pop_content', 'Do you really want to delete these tags?'),
+        okText: this.$tv('core.page-tag.btn_text.delete_pop_ok_text', 'Ok') as string,
+        cancelText: this.$tv('core.page-tag.btn_text.delete_pop_cancel_text', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
           this.graphqlClient
@@ -209,8 +211,8 @@ export default class Tags extends Vue {
               } else {
                 this.$message.error(
                   this.$tv(
-                    'tag.tips.blukDeleteFailed',
-                    'An error occurred while deleting tags, please try later again!',
+                    'core.page-tag.tips.bluk_delete_failed',
+                    'An error occurred while deleting tags, please try again later!',
                   ) as string,
                 );
               }
@@ -247,8 +249,8 @@ export default class Tags extends Vue {
         } else {
           this.$message.error(
             this.$tv(
-              'tag.tips.deleteFailed',
-              'An error occurred while deleting tag, please try later again!',
+              'core.page-tag.tips.delete_failed',
+              'An error occurred while deleting tag, please try again later!',
             ) as string,
           );
         }
@@ -278,23 +280,23 @@ export default class Tags extends Vue {
       <div class={classes.actions}>
         <a
           href="#none"
-          title={this.$tv('tag.btnTips.edit', 'Edit') as string}
+          title={this.$tv('core.page-tag.btn_tips.edit', 'Edit') as string}
           onClick={m.stop.prevent(() => {
             this.editModel = record;
             this.formModelShown = true;
           })}
         >
-          {this.$tv('tag.btnText.edit', 'Edit')}
+          {this.$tv('core.page-tag.btn_text.edit', 'Edit')}
         </a>
         <a-divider type="vertical" />
         <a-popconfirm
-          title={this.$tv('tag.btnTips.deletePopContent', 'Do you really want to delete this tag?')}
-          okText={this.$tv('tag.btnText.deletePopOkText', 'Ok')}
-          cancelText={this.$tv('tag.btnText.deletePopCancelText', 'No')}
+          title={this.$tv('core.page-tag.tips.delete_pop_content', 'Do you really want to delete this tag?')}
+          okText={this.$tv('core.page-tag.btn_text.delete_pop_ok_text', 'Ok')}
+          cancelText={this.$tv('core.page-tag.btn_text.delete_pop_cancel_text', 'No')}
           onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
         >
-          <a href="#none" title={this.$tv('tag.btnTips.delete', 'Delete this tag permanently') as string}>
-            {this.$tv('tag.btnText.delete', 'Delete')}
+          <a href="#none" title={this.$tv('core.page-tag.btn_tips.delete', 'Delete this tag permanently') as string}>
+            {this.$tv('core.page-tag.btn_text.delete', 'Delete')}
           </a>
         </a-popconfirm>
       </div>
@@ -344,7 +346,7 @@ export default class Tags extends Vue {
     return (
       <a-card class="post-index" bordered={false} size="small">
         <SearchForm
-          keywordPlaceholder={this.$tv('tag.search.keywordPlaceholder', 'Search Tags') as string}
+          keywordPlaceholder={this.$tv('core.page-tag.search.keyword_placeholder', 'Search Tags') as string}
           itemCount={this.itemCount}
           blukAcitonOptions={this.blukActionOptions}
           blukApplying={this.blukApplying}
@@ -354,13 +356,13 @@ export default class Tags extends Vue {
           <template slot="sub">
             <a-button
               type="primary"
-              title={this.$tv('tag.btnTips.create', 'New Tag')}
+              title={this.$tv('core.page-tag.btn_tips.create', 'New Tag')}
               onClick={m.stop(() => {
                 this.editModel = undefined;
                 this.formModelShown = true;
               })}
             >
-              {this.$tv('tag.btnText.create', 'New Tag')}
+              {this.$tv('core.page-tag.btn_text.create', 'New Tag')}
             </a-button>
           </template>
         </SearchForm>
@@ -385,7 +387,7 @@ export default class Tags extends Vue {
         <a-modal
           vModel={this.formModelShown}
           title={this.$tv(
-            `tag.form.${this.editModel ? 'updateModelTitle' : 'creationModelTitle'}`,
+            `core.page-tag.term_form.${this.editModel ? 'update_model_title' : 'creation_model_title'}`,
             this.editModel ? 'Update Tag' : 'Create Tag',
           )}
           keyboard={false}
@@ -396,6 +398,7 @@ export default class Tags extends Vue {
           <TermEditForm
             editModel={this.editModel}
             taxonomy={TermTaxonomy.Tag}
+            i18nKeyPrefix="core.page-tag"
             createTerm={this.onCreate.bind(this)}
             updateTerm={this.onUpdate.bind(this)}
           />

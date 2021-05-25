@@ -1,5 +1,5 @@
 import { Vue, Component, Watch } from 'nuxt-property-decorator';
-import { camelCase } from 'lodash-es';
+import { snakeCase } from 'lodash-es';
 
 export type Bread = {
   label: string;
@@ -39,8 +39,8 @@ export default class Breadcrumb extends Vue {
         if (resolved.name === name) {
           // 嵌套路由与parent 路由相同，直接修改上一个的 label
           list[index - 1].label =
-            (title && (this.$tv(`breadcrumb.${camelCase(title)}`, title) as string)) ||
-            (name && (this.$tv(`breadcrumb.${camelCase(name)}`, name) as string)) ||
+            (title && (this.$tv(`core.breadcrumb.${snakeCase(title)}`, title) as string)) ||
+            (name && (this.$tv(`core.breadcrumb.${snakeCase(name)}`, name) as string)) ||
             '';
           return;
         }
@@ -48,8 +48,8 @@ export default class Breadcrumb extends Vue {
       }
       list.push({
         label:
-          (title && (this.$tv(`breadcrumb.${camelCase(title)}`, title) as string)) ||
-          (name && (this.$tv(`breadcrumb.${camelCase(name)}`, name) as string)) ||
+          (title && (this.$tv(`core.breadcrumb.${snakeCase(title)}`, title) as string)) ||
+          (name && (this.$tv(`core.breadcrumb.${snakeCase(name)}`, name) as string)) ||
           '',
         to: path,
       });
