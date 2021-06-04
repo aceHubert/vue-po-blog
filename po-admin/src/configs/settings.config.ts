@@ -1,8 +1,7 @@
 import LogoSvg from '@/assets/images/logo.svg?inline';
 
 // Types
-import { LangConfig } from 'types/configs/locale';
-import { LayoutConfig } from 'types/configs/layout';
+import { LayoutConfig, ColorConfig } from 'types/configs/layout';
 
 // save to cookie
 export const ACCESS_TOKEN = 'po_access_token';
@@ -21,16 +20,13 @@ export enum Theme {
 }
 
 export enum Layout {
-  SideMenu = 'sidemenu',
+  SiderMenu = 'sidermenu',
   TopMenu = 'topmenu',
 }
 
 export const defaultSettings: {
   layout: LayoutConfig;
-  locale: {
-    default: string;
-    supportLanguages: LangConfig[];
-  };
+  color: ColorConfig;
 } = {
   // pwa: false,
   // iconfontUrl: '',
@@ -51,9 +47,7 @@ export const defaultSettings: {
   layout: {
     title: 'Plumemo Admin',
     logo: LogoSvg,
-    layout: Layout.SideMenu,
-    theme: Theme.Dark,
-    primaryColor: '#355c7d',
+    layout: Layout.SiderMenu,
     contentWidth: ContentWidth.Fluid,
     fixedHeader: true,
     fixSiderbar: true,
@@ -61,24 +55,8 @@ export const defaultSettings: {
     autoHideHeader: false,
     multiTab: false,
   },
-
-  // locale
-  locale: {
-    default: 'en-US',
-    supportLanguages: [
-      {
-        name: 'English',
-        shortName: 'EN',
-        icon: '🇺🇸',
-        locale: 'en-US',
-        alternate: 'en',
-      },
-      {
-        name: '简体中文',
-        shortName: '中',
-        icon: '🇨🇳',
-        locale: 'zh-CN',
-      },
-    ],
+  color: {
+    theme: Theme.Dark,
+    primaryColor: '#355c7d',
   },
 };

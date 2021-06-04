@@ -1,23 +1,29 @@
 import { mixins, Component, Watch } from 'nuxt-property-decorator';
 import { upperFirst } from 'lodash-es';
 import { appMixin, deviceMixin } from '@/mixins';
-import { Breadcrumb, AvatarDropdown, LocaleDropdown, GlobalFooter } from '@/components';
+import { ConfigProvider, Breadcrumb, AvatarDropdown, LocaleDropdown, GlobalFooter } from '@/components';
 import { appStore, userStore } from '@/store/modules';
 import { getDefaultMenus } from '@/configs/menu.cofnig';
 import classes from './styles/default.less?module';
 
 // Types
 import { Menu } from 'types/configs/menu';
-import { User, Actions } from '@/components/global-header/AvatarDropdown';
+import { Actions } from '@/components/global-header/AvatarDropdown';
 
 @Component<DefaultLayout>({
   name: 'DefaultLayout',
+  head() {
+    return {
+      link: [{ rel: 'stylesheet', href: `/assets/themes/${this.isRealDark ? 'dark' : 'light'}.css`, hid: 'po-theme' }],
+    };
+  },
 })
 export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
   menuOpenKeys!: string[];
   headerHeight!: number;
   siderCollapsed!: boolean;
   siderWidth!: number;
+  siderCollapsedWidth!: number;
 
   data() {
     return {
@@ -25,6 +31,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
       headerHeight: 48,
       siderCollapsed: false,
       siderWidth: 256,
+      siderCollapsedWidth: 48,
     };
   }
 
@@ -35,7 +42,9 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
 
   get headerWidth() {
     const needSettingWidth = this.fixedHeader && this.hasSiderMenu && !this.isMobile;
-    return needSettingWidth ? `calc(100% - ${this.siderCollapsed ? 80 : this.siderWidth}px)` : '100%';
+    return needSettingWidth
+      ? `calc(100% - ${this.siderCollapsed ? this.siderCollapsedWidth : this.siderWidth}px)`
+      : '100%';
   }
 
   get contentPaddingLeft() {
@@ -43,7 +52,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
     // don't need padding in phone mode
     const hasLeftPadding = this.fixSiderbar && this.hasSiderMenu && !this.isMobile;
     if (hasLeftPadding) {
-      return `${this.siderCollapsed ? 80 : this.siderWidth}px`;
+      return `${this.siderCollapsed ? this.siderCollapsedWidth : this.siderWidth}px`;
     }
     return 0;
   }
@@ -58,7 +67,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
         id: userStore.id,
         name: userStore.info.displayName || userStore.loginName,
         photo: userStore.info.avatar,
-      } as User;
+      };
     }
     return undefined;
   }
@@ -143,8 +152,8 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
       this.$router.push({ name: 'profile' });
     } else if (key === Actions.Settings) {
       this.$router.push({ name: 'settings-general' });
-    } else if (key === Actions.Logout) {
-      this.$router.replace('/logout');
+    } else if (key === Actions.SignOut) {
+      appStore.signout();
     }
   }
 
@@ -172,17 +181,17 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
     // }
   }
 
-  renderLogo(logo: any) {
-    if (typeof logo === 'string') {
-      return <img src={logo} class="logo" alt="logo" />;
+  renderLogo() {
+    const logo = this.siteLogo;
+    if (logo === undefined || logo === 'none' || logo === null) {
+      return null;
     }
 
-    if (typeof logo === 'function') {
-      return logo();
-    }
-
-    const Logo = logo;
-    return <Logo class="logo" />;
+    return typeof logo === 'object' ? (
+      <a-icon class="logo" component={logo}></a-icon>
+    ) : (
+      <img class="logo" src={logo} alt="logo" />
+    );
   }
 
   renderMenu(mode: 'horizontal' | 'inline' = 'inline', classname = '') {
@@ -193,6 +202,24 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
       }
 
       return typeof icon === 'object' ? <a-icon component={icon}></a-icon> : <a-icon type={icon}></a-icon>;
+    };
+
+    const handleClick = () => {
+      this.isMobile && (this.siderCollapsed = false);
+    };
+
+    const handleOpenChange = (openKeys: string[]) => {
+      // 在水平模式下时，不再执行后续
+      if (mode === 'horizontal') {
+        this.menuOpenKeys = openKeys;
+        return;
+      }
+      const latestOpenKey = openKeys.find((key) => !this.menuOpenKeys.includes(key));
+      if (latestOpenKey && !this.rootSubmenuKeys.includes(latestOpenKey)) {
+        this.menuOpenKeys = openKeys;
+      } else {
+        this.menuOpenKeys = latestOpenKey ? [latestOpenKey] : [];
+      }
     };
 
     const renderMenuItem = function renderMenuItem(menu: Menu) {
@@ -223,20 +250,6 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
       );
     };
 
-    const handleOpenChange = (openKeys: string[]) => {
-      // 在水平模式下时，不再执行后续
-      if (mode === 'horizontal') {
-        this.menuOpenKeys = openKeys;
-        return;
-      }
-      const latestOpenKey = openKeys.find((key) => !this.menuOpenKeys.includes(key));
-      if (latestOpenKey && !this.rootSubmenuKeys.includes(latestOpenKey)) {
-        this.menuOpenKeys = openKeys;
-      } else {
-        this.menuOpenKeys = latestOpenKey ? [latestOpenKey] : [];
-      }
-    };
-
     const props: Dictionary<any> = {
       mode,
       theme: this.isDark ? 'dark' : 'light',
@@ -244,13 +257,14 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
     };
     if (mode === 'inline') {
       props.inlineCollapsed = this.isMobile ? false : this.siderCollapsed;
+      props.inlineIndent = 16;
     }
 
     return (
-      <a-menu {...{ class: classname, props }} onOpenChange={handleOpenChange}>
+      <a-menu {...{ class: classname, props }} onClick={handleClick} onOpenChange={handleOpenChange}>
         {this.menus.map((menu) =>
           menu.children && menu.children.length ? (
-            <a-sub-menu>
+            <a-sub-menu key={menu.name}>
               <span slot="title">
                 {renderIcon(menu.icon)}
                 <span>{menu.title}</span>
@@ -271,20 +285,21 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
         class={[
           classes.layoutSider,
           {
+            [classes.layoutSiderCollapsed]: this.siderCollapsed,
             [classes.layoutSiderFixed]: this.fixSiderbar,
-            [classes.hasSiderMenu]: this.hasSiderMenu,
           },
         ]}
         theme={this.isDark ? 'dark' : 'light'}
         width={this.siderWidth}
+        collapsedWidth={this.siderCollapsedWidth}
         trigger={null}
         breakpoint="lg"
         collapsible
         collapsed={this.isMobile ? false : this.siderCollapsed}
       >
         <nuxt-link to="/" class={classes.siderLogo}>
-          {this.renderLogo(this.siteLogo)}
-          <h1>{this.siteTitle}</h1>
+          {this.renderLogo()}
+          {!this.siderCollapsed ? <h1>{this.siteTitle}</h1> : null}
         </nuxt-link>
         {this.renderMenu('inline', classes.siderMenu)}
       </a-layout-sider>
@@ -317,10 +332,11 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
       <div class={classes.contentRight}>
         <AvatarDropdown
           class={classes.contentRightAction}
-          user={this.currentUser}
+          username={this.currentUser?.name}
+          imgSrc={this.currentUser?.photo}
           onAction={this.handleAction.bind(this)}
         />
-        {this.supportLanguages!.length ? (
+        {this.supportLanguages.length > 1 ? (
           <LocaleDropdown
             class={classes.contentRightAction}
             supportLanguages={this.supportLanguages!}
@@ -347,16 +363,18 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
           right: this.fixedHeader ? 0 : undefined,
         }}
       >
-        <div class={[classes.layoutHeaderWrapper, classes[`contentWidth${upperFirst(this.contentWidth)}`]]}>
+        <div class={[classes.layoutHeaderWrapper]}>
           {this.isMobile ? (
-            <nuxt-link to="/" class={classes.headerLogo}>
-              {this.renderLogo(this.siteLogo)}
-            </nuxt-link>
+            <div class={classes.headerLogo}>
+              <nuxt-link to="/">{this.renderLogo()}</nuxt-link>
+            </div>
           ) : this.hasTopMenu ? (
-            <nuxt-link to="/" class={classes.headerLogo} style="min-width: 186px">
-              {this.renderLogo(this.siteLogo)}
-              <h1>{this.siteTitle}</h1>
-            </nuxt-link>
+            <div class={classes.headerLogo} style="min-width: 186px">
+              <nuxt-link to="/">
+                {this.renderLogo()}
+                <h1>{this.siteTitle}</h1>
+              </nuxt-link>
+            </div>
           ) : null}
 
           {this.isMobile || !this.hasTopMenu ? (
@@ -376,7 +394,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
                 this.renderMenu('horizontal', classes.topMenu)
               ) : (
                 <div class={classes.content}>
-                  <Breadcrumb style="padding: 0 12px; line-height: 64px" />
+                  <Breadcrumb style="padding: 0 12px; line-height: 48px" />
                 </div>
               )
             ) : null}
@@ -412,7 +430,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
 
   renderFooter() {
     return (
-      <a-layout-footer class={classes.layoutFooter}>
+      <a-layout-footer class={classes.layoutFooter} style="padding: 0;">
         <GlobalFooter>
           <template slot="links">
             <a href="https://github.com/aceHubert/vue-po-blog" target="_blank">
@@ -427,19 +445,21 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
 
   render() {
     return (
-      <a-layout id="layout-default" class={[classes.layoutWrapper, `theme-${this.theme}`, `is-${this.device}`]}>
-        {this.hasSiderMenu || this.isMobile ? this.renderSiderMenu() : null}
-        <a-layout
-          style={{
-            paddingLeft: this.hasSiderMenu ? this.contentPaddingLeft : undefined,
-            minHeight: '100vh',
-          }}
-        >
-          {this.renderHeader()}
-          {this.renderContent()}
-          {this.renderFooter()}
+      <ConfigProvider theme={this.theme} device={this.device} locale={this.antLocale}>
+        <a-layout id="layout-default" class={[classes.layoutWrapper, `theme-${this.theme}`, `is-${this.device}`]}>
+          {this.hasSiderMenu || this.isMobile ? this.renderSiderMenu() : null}
+          <a-layout
+            style={{
+              paddingLeft: this.hasSiderMenu ? this.contentPaddingLeft : undefined,
+              minHeight: '100vh',
+            }}
+          >
+            {this.renderHeader()}
+            {this.renderContent()}
+            {this.renderFooter()}
+          </a-layout>
         </a-layout>
-      </a-layout>
+      </ConfigProvider>
     );
   }
 }

@@ -64,10 +64,13 @@ module.exports = (configContext) => {
         { hid: 'description', name: 'description', content: 'Po Blog' },
       ],
       script: [],
-      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+      link: [
+        { rel: 'stylesheet', href: `/assets/themes/light.css`, hid: 'po-theme' },
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      ],
       style: [],
     },
-    css: ['~/assets/styles/index.less', '~/assets/styles/antd/themes/light/index.less'],
+    css: ['~/assets/styles/index.less'],
     modules: ['@nuxtjs/proxy'],
     proxy: {
       // // 在 devtools 时调试后台模块代理
@@ -130,10 +133,10 @@ module.exports = (configContext) => {
             name: 'home',
             redirect: { name: 'dashboard' },
           },
-          {
-            path: '*',
-            redirect: { path: '/page-not-found' },
-          },
+          // {
+          //   path: '*',
+          //   redirect: { path: '/page-not-found' },
+          // },
         );
       },
     },

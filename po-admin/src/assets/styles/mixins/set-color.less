@@ -1,0 +1,23 @@
+.set-color(@key, @value) {
+  .@{key}{
+    background-color: @value;
+    border-color: @value;
+  }
+
+  .@{key}--text{
+    color: @value;
+    caret-color: @value;
+  }
+}
+
+.set-color(@key, @value, @deep){
+  .@{key}.@{deep}{
+    background-color: @value;
+    border-color: @value;
+  }
+
+  .@{key}--text.text--@{deep}{
+    color: @value;
+    caret-color: @value;
+  }
+}

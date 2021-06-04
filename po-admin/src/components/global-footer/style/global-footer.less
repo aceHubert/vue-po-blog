@@ -1,0 +1,30 @@
+@global-footer-prefix-cls: ~'@{ant-prefix}-global-footer';
+
+.@{global-footer-prefix-cls} {
+  &-wrapper {
+    padding: 0 16px;
+    margin: 48px 0 24px;
+    text-align: center;
+  }
+
+  &__links {
+    margin-bottom: 8px;
+
+    a {
+      color: @text-color-secondary;
+
+      &:hover {
+        color: @text-color;
+      }
+
+      &:not(:last-child) {
+        margin-right: 40px;
+      }
+    }
+  }
+
+  &__copyright {
+    color: @text-color-secondary;
+    font-size: 14px;
+  }
+}

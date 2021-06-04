@@ -141,7 +141,9 @@ class UserStore extends VuexModule {
     const refreshtoken = Cookie.get(REFRESH_TOKEN);
 
     if (!refreshtoken) {
-      throw new Error($i18n.tv('core.common.refresh_token_required', 'The refresh token is not exists!') as string);
+      return Promise.reject(
+        new Error($i18n.tv('core.error.refresh_token_required', 'The refresh token is not exists!') as string),
+      );
     }
 
     return httpClient
@@ -170,7 +172,9 @@ class UserStore extends VuexModule {
    */
   @VuexAction({ rawError: true, commit: 'setInfo' })
   getUserInfo(metaKeys?: string[]) {
-    if (!this.accessToken) return Promise.reject();
+    const { $i18n } = store.app.context as Context;
+    if (!this.accessToken)
+      return Promise.reject(new Error($i18n.tv('core.common.no_token_provide', 'No token provide!') as string));
 
     return graphqlClient
       .query<{ result: User & { metas: Meta[] } }, { metaKeys?: string[] }>({
@@ -213,7 +217,9 @@ class UserStore extends VuexModule {
    */
   @VuexAction({ rawError: true, commit: 'setInfo' })
   updateUserMeta(meta: { metaKey: string; metaValue: string }) {
-    if (!this.accessToken) return Promise.reject();
+    const { $i18n } = store.app.context as Context;
+    if (!this.accessToken)
+      return Promise.reject(new Error($i18n.tv('core.common.no_token_provide', 'No token provide!') as string));
 
     return graphqlClient
       .mutate<{ result: boolean }, { userId: string; metaKey: string; metaValue: string }>({
@@ -234,27 +240,23 @@ class UserStore extends VuexModule {
   }
 
   /**
-   * 登出(不会抛出异常，仅支持在客户端调用)
+   * 登出(不会抛出异常)
    * 向服务端发出登出信号，清空本地 cookie 保存的token 以及graphqlClient 的缓存
    * 前清除 store accessToken及用户基本信息
    */
   @VuexAction({ rawError: true, commit: 'setAccessToken' })
   signout() {
-    if (!this.accessToken) return Promise.resolve();
+    const { $i18n } = store.app.context as Context;
+    if (!this.accessToken)
+      return Promise.resolve(new Error($i18n.tv('core.common.no_token_provide', 'No token provide!') as string));
 
     const { req, res } = store.app.context as Context;
     const Cookie = process.client ? cookie.clientCookie : cookie.serverCookie(req, res);
 
     return httpClient
       .post('/auth/signout')
-      .then(() => {
-        // 清除 store access token
-        return null;
-      })
       .catch((err) => {
         globalError(process.env.NODE_ENV === 'production', err.message);
-        // 清除 store access token
-        return null;
       })
       .finally(() => {
         // 清除 tokens from cookie
@@ -262,6 +264,8 @@ class UserStore extends VuexModule {
         Cookie.set(REFRESH_TOKEN, '', { path: '/', expires: new Date(0) });
         // 清除 client store
         graphqlClient.resetStore();
+        // setAccessToken 清除 token
+        return null;
       });
   }
 }

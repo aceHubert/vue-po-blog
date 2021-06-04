@@ -11,7 +11,10 @@ import { LoginQuery } from '@/store/modules/user';
 {
   /* <router>
 {
-  path: '/login'
+  path: '/signin',
+  meta:{
+    title: 'Signin',
+  }
 }
 </router> */
 }

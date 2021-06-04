@@ -6,25 +6,43 @@ import cookie from '@/utils/cookie';
 
 // Types
 import { Context } from '@nuxt/types';
-import { LangConfig } from 'types/configs/locale';
-import { LayoutConfig } from 'types/configs/layout';
-
-export type CheckResponse = {
-  dbInitRequired: boolean;
-};
+import { LocaleMessages } from 'vue-i18n';
+import { LocaleConfig } from 'types/configs/locale';
+import { LayoutConfig, ColorConfig } from 'types/configs/layout';
 
 @Module({ store, name: 'app', namespaced: true, dynamic: true, stateFactory: true })
 class AppStore extends VuexModule {
-  // 布局（主题色，标题，Logo等）
+  // 布局（标题，Logo等）
   layout: LayoutConfig = defaultSettings.layout;
-
+  // 主题（主题色，dark/light 模式等）
+  color: ColorConfig = defaultSettings.color;
   // 语言
-  locale: string = defaultSettings.locale.default;
-  supportLanguages: LangConfig[] = defaultSettings.locale.supportLanguages;
+  locale = 'en-US';
+  supportLanguages: LocaleConfig[] = [];
 
+  /**
+   * 设置布局
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * @param layout 布局配置
+   */
   @VuexMutation
-  setAdminLayout(layout: LayoutConfig) {
+  setLayout(layout: LayoutConfig) {
     this.layout = { ...defaultSettings.layout, ...layout };
+    // do something else
+  }
+
+  /**
+   * 设置主题颜色
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * @param color 主题颜色配置
+   */
+  @VuexMutation
+  setColor(color: ColorConfig) {
+    this.color = { ...defaultSettings.color, ...color };
     // do something else
   }
 
@@ -33,7 +51,6 @@ class AppStore extends VuexModule {
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 设置默认语言 locale
    */
   @VuexMutation
   setLocale(locale: string) {
@@ -56,19 +73,21 @@ class AppStore extends VuexModule {
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 添加支持语言列表
    */
   @VuexMutation
-  setSupportLanguages(languages: LangConfig[]) {
-    this.supportLanguages = defaultSettings.locale.supportLanguages.concat(languages);
+  setSupportLanguages(languages: LocaleConfig[]) {
+    this.supportLanguages = languages;
   }
 
   /**
    * 检查DB是否需要初始化, false 表示不需要初始了
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    */
   @VuexAction({ rawError: true })
   checkDB() {
-    return httpClient.get<CheckResponse>('/db-init/check').then((model) => {
+    return httpClient.get<{ dbInitRequired: boolean }>('/db-init/check').then((model) => {
       if (model.success) {
         return model.dbInitRequired;
       } else {
@@ -81,6 +100,9 @@ class AppStore extends VuexModule {
   /**
    * 初始化数据库
    * 如果数据库已经初始化，则会返回false。可以通过checkDB 判断
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    * @param params 初始化参数
    */
   @VuexAction({ rawError: true })
@@ -95,7 +117,35 @@ class AppStore extends VuexModule {
   }
 
   /**
+   * 获取翻译配置
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * @param locale Locale code, 如果不传值，将会获取所有语言配置ƒ
+   */
+  getTranslations(): Promise<{ languages: string[]; translations: LocaleMessages }>;
+  getTranslations(locale: string): Promise<LocaleMessages>;
+  @VuexAction({ rawError: true })
+  getTranslations(locale?: string): Promise<LocaleMessages | { languages: string[]; translations: LocaleMessages }> {
+    return httpClient
+      .get<{ locale: LocaleMessages | { languages: string[]; translations: LocaleMessages } }>(
+        '/locale/admin/translations',
+        { params: { locale } },
+      )
+      .then((model) => {
+        if (model.success) {
+          return model.locale;
+        } else {
+          throw new Error(model.message);
+        }
+      });
+  }
+
+  /**
    * 获取自动加载的配置参数
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    */
   @VuexAction({ rawError: true })
   getAutoLoadOptions() {
@@ -121,19 +171,32 @@ class AppStore extends VuexModule {
   /**
    * 跳转到 init 页面
    * 不在 Vue instance 的情况下，获取不到VueRouter对象
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    */
   @VuexAction
-  goToInitPage() {
-    return store.$router.replace('/init');
+  initPage() {
+    if (!store.$router.currentRoute.path.startsWith('/init')) {
+      return store.$router.replace('/init');
+    }
+    return Promise.resolve();
   }
 
   /**
-   * 跳转到 logout 页面
+   * 登出
    * 不在 Vue instance 的情况下，获取不到VueRouter对象
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    */
   @VuexAction
-  goToLogoutPage() {
-    return store.$router.replace('/logout');
+  signout() {
+    // 以免多次调用跳转循环
+    if (!store.$router.currentRoute.path.startsWith('/signout')) {
+      return store.$router.replace('/signout');
+    }
+    return Promise.resolve();
   }
 }
 

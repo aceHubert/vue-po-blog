@@ -9,13 +9,13 @@ import { Vue, Component } from 'nuxt-property-decorator';
 }
 
 @Component({
-  name: 'ErrorUnauthorized',
+  name: 'UnauthorizedError',
   layout: 'blank',
   meta: {
     anonymous: true,
   },
 })
-export default class ErrorUnauthorized extends Vue {
+export default class UnauthorizedError extends Vue {
   mounted() {
     this.$nuxt.error({
       statusCode: 401,

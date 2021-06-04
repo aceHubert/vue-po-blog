@@ -12,7 +12,7 @@ import classes from './styles/index.less?module';
 // Types
 import { Post, PostPagedQuery, PostPagedResponse, Term } from 'types/datas';
 import { DataSourceFn } from '@/components/async-table/AsyncTable';
-import { StatusOption, BlukAcitonOption } from '@/components/search-from/SearchForm';
+import { StatusOption, BlukAcitonOption } from '@/components/search-form/SearchForm';
 
 enum BlukActions {
   MoveToTrash = 'moveToTrash',

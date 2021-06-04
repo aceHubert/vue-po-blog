@@ -1,4 +1,5 @@
-import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator';
+import { Vue, Component, Prop, Watch, Inject } from 'nuxt-property-decorator';
+import { ConfigConsumerProps } from '../config-provider/configConsumerProps';
 
 // Types
 import * as tsx from 'vue-tsx-support';
@@ -73,6 +74,13 @@ export default class SearchFrom extends Vue {
     filterRight?: void;
   }>;
 
+  @Inject({
+    from: 'configProvider',
+    default: () => ConfigConsumerProps,
+  })
+  configProvider!: typeof ConfigConsumerProps;
+
+  @Prop(String) prefixCls?: string;
   /**  keyword input placeholder */
   @Prop(String) keywordPlaceholder?: string;
   /** 关键字名字，显示到 URI query 中的 key, 默认：keyword */
@@ -163,14 +171,26 @@ export default class SearchFrom extends Vue {
   }
 
   render() {
+    const customizePrefixCls = this.prefixCls;
+    const getPrefixCls = this.configProvider.getPrefixCls;
+    const prefixCls = getPrefixCls('search-form', customizePrefixCls);
+
     return (
-      <div class="po-search">
+      <div class={`${prefixCls}-wrapper`}>
         {this.statusOptions.length ? (
-          <ul class="po-search-sub">
-            {this.statusOptions.map((option) =>
+          <ul class={`${prefixCls}-sub`}>
+            {this.statusOptions.map((option, index) =>
               option.keepStatusShown || this.keepStatusShown || option.count > 0 ? (
-                <li class="po-search-sub__item">
-                  <nuxt-link to={this.getStatusUrl(option)} activeClass="" exactActiveClass="active" exact replace>
+                <li class={`${prefixCls}-sub__item`}>
+                  {index !== 0 ? <a-divider type="vertical" /> : null}
+                  <nuxt-link
+                    to={this.getStatusUrl(option)}
+                    class={`${prefixCls}-sub__item-link`}
+                    activeClass=""
+                    exactActiveClass="active"
+                    exact
+                    replace
+                  >
                     {option.label}
                     {option.count > 0 ? <span>({option.count})</span> : null}
                   </nuxt-link>
@@ -179,12 +199,12 @@ export default class SearchFrom extends Vue {
             )}
           </ul>
         ) : this.$scopedSlots.sub ? (
-          <div class="po-search-sub-slot">{this.$scopedSlots.sub()}</div>
+          <div class={`${prefixCls}-sub__slot`}>{this.$scopedSlots.sub()}</div>
         ) : null}
-        <a-form layout="inline" size="small" class="po-search-form">
+        <a-form layout="inline" size="small" class={`${prefixCls}-content`}>
           <a-row>
             <a-col md={{ span: 16, offset: 8 }} sm={24}>
-              <a-form-item class="po-search-form__input-item">
+              <a-form-item class={`${prefixCls}-content__input-item`}>
                 <a-input-search
                   vModel={this.localeKeyword}
                   placeholder={
@@ -199,7 +219,7 @@ export default class SearchFrom extends Vue {
           this.itemCount ||
           this.$scopedSlots.filter ||
           this.$scopedSlots.filterRight ? (
-            <a-row class="po-search-form__filter-row">
+            <a-row class={`${prefixCls}-content__filter-row`}>
               <a-col md={16} xs={24}>
                 <a-space size="middle" style="flex-wrap: wrap;">
                   {this.itemCount && this.itemCount > 0 ? (
@@ -236,7 +256,7 @@ export default class SearchFrom extends Vue {
                     {this.$scopedSlots.filterRight()}
                   </a-space>
                 ) : this.itemCount ? (
-                  <a-form-item class="po-search-from__count-item">
+                  <a-form-item class={`${prefixCls}-content__count-item`}>
                     <span>
                       {this.$tv('core.components.search_form.item_count', `${this.itemCount} Items`, {
                         count: this.itemCount,

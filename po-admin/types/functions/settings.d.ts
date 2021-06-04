@@ -1,12 +1,20 @@
 export interface SettingsFunctions {
   /**
+   * vue-router base path(末尾带有"/")
+   */
+  getBasePath(): string;
+  /**
+   * site url(末尾带有"/")
+   */
+  getSiteUrl(): string;
+  /**
+   * home url(末尾带有"/")
+   */
+  getHomeUrl(): string;
+  /**
    * request server url
    */
   getServerUrl(): string;
-  /**
-   * vue-router base path
-   */
-  getBasePath(): string;
   /**
    * api request path
    */

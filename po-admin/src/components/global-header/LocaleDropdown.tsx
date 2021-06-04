@@ -1,8 +1,9 @@
-import { Vue, Component, Prop, Emit } from 'nuxt-property-decorator';
+import { Vue, Component, Prop, Inject, Emit } from 'nuxt-property-decorator';
+import { ConfigConsumerProps } from '../config-provider/configConsumerProps';
 
 // Types
 import * as tsx from 'vue-tsx-support';
-import { LangConfig } from 'types/configs/locale';
+import { LocaleConfig } from 'types/configs/locale';
 import { Dropdown } from 'ant-design-vue/types/dropdown/dropdown';
 
 @Component({
@@ -10,18 +11,29 @@ import { Dropdown } from 'ant-design-vue/types/dropdown/dropdown';
 })
 export default class LocaleDropdown extends Vue {
   _tsx!: tsx.DeclareProps<
-    tsx.MakeOptional<
-      tsx.PickProps<LocaleDropdown, 'locale' | 'supportLanguages' | 'showShortName' | 'placement'>,
-      'showShortName' | 'placement'
-    >
+    tsx.MakeOptional<tsx.PickProps<LocaleDropdown, 'locale' | 'supportLanguages' | 'placement'>, 'placement'>
   > &
     tsx.DeclareOnEvents<{
       onChange: (locale: string) => void;
     }>;
 
+  $scopedSlots!: tsx.InnerScopedSlots<{
+    /** 语言图标位置自定义内容，参数：当前的语言配置 */
+    default?: LocaleConfig;
+  }>;
+
+  @Inject({
+    from: 'configProvider',
+    default: () => ConfigConsumerProps,
+  })
+  configProvider!: typeof ConfigConsumerProps;
+
+  @Prop(String) prefixCls?: string;
+  /** 当前语言 code, 如果没有则会尝试从 $i18n 中取值 */
   @Prop(String) locale?: string;
-  @Prop({ type: Array, required: true, validator: (val) => !!val.length }) supportLanguages!: LangConfig[];
-  @Prop({ type: Boolean, default: false }) showShortName!: boolean;
+  /** 支持的语言列表，长度必须大于0 */
+  @Prop({ type: Array, required: true, validator: (val) => !!val.length }) supportLanguages!: LocaleConfig[];
+  /** 下拉选项显示位置 */
   @Prop({ type: String, default: 'bottomRight' }) placement!: Dropdown['placement'];
 
   get currentLang() {
@@ -40,23 +52,34 @@ export default class LocaleDropdown extends Vue {
   }
 
   render() {
+    const customizePrefixCls = this.prefixCls;
+    const getPrefixCls = this.configProvider.getPrefixCls;
+    const prefixCls = getPrefixCls('global-header-locale-dropdown', customizePrefixCls);
+
     const renderIcon = function renderIcon(icon: any) {
       if (icon === undefined || icon === 'none' || icon === null) {
         return null;
       }
 
-      return typeof icon === 'object' ? <a-icon component={icon}></a-icon> : <span role="icon">{icon}</span>;
+      return typeof icon === 'object' ? (
+        <a-icon component={icon}></a-icon>
+      ) : (
+        <img class="flag-icon" src={icon} alt="flag icon" />
+      );
     };
 
     return (
-      <a-dropdown class="po-locale-dropdown" placement={this.placement}>
-        <span>
-          <a-icon type="global" title={this.currentLang.name} />
-          {this.showShortName ? <span class="po-locale-dropdown__name">{this.currentLang.shortName}</span> : null}
-        </span>
+      <a-dropdown class={prefixCls} placement={this.placement}>
+        {this.$scopedSlots.default ? (
+          this.$scopedSlots.default(this.currentLang)
+        ) : (
+          <span>
+            <a-icon type="global" title={this.currentLang.name} />
+          </span>
+        )}
         <template slot="overlay">
           <a-menu
-            class="po-locale-dropdown__menu"
+            class={`${prefixCls}-overlay__menu`}
             selectedKeys={[this.currentLang.locale]}
             onClick={this.handleLocaleChange.bind(this)}
           >

@@ -391,7 +391,7 @@ export default class UserEdit extends Vue {
             label={this.$tv('core.page-user.form.email', 'Email')}
             has-feedback
             help={this.$tv(
-              'user.form.email_edit_help',
+              'core.page-user.form.email_edit_help',
               'If you change this, we will send you an email at your new address to confirm it. ',
             )}
           >
@@ -484,7 +484,7 @@ export default class UserEdit extends Vue {
             label={this.$tv('core.page-user.form.password', 'Password')}
             has-feedback
             help={this.$tv(
-              'user.form.password_edit_help',
+              'core.page-user.form.password_edit_help',
               'If you want to keep using old password, pleases leave it empty.',
             )}
           >

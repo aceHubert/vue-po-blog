@@ -1,12 +1,8 @@
-@import '../../default.less';
+@import '../default';
 
 @theme: dark;
-
-@primary-color: #36a679; // 全局主色
-@link-color: #006799; // 链接色
-@success-color: #52c41a; // 成功色
-@warning-color: #faad14; // 警告色
-@error-color: #f5222d; // 错误色
+@scrollbar-track-bg: fade(@white, 8%);
+@scrollbar-thumb-bg: fade(@white, 12%);
 
 // color palettes
 @blue-1: mix(color(~`colorPalette('@{blue-base}', 8) `), @component-background, 15%);
@@ -261,7 +257,8 @@
 // Layout
 // ---
 @layout-body-background: @body-background;
-@layout-header-background: @popover-background;
+@layout-header-background: @component-background;
+@layout-sider-background: @popover-background;
 @layout-trigger-background: #262626;
 
 // Input
@@ -297,7 +294,8 @@
 // Menu
 // ---
 // dark theme
-@menu-dark-inline-submenu-bg: @component-background;
+@menu-dark-submenu-bg:@component-background;
+// @menu-dark-inline-submenu-bg: @component-background;
 @menu-dark-bg: @popover-background;
 @menu-popup-bg: @popover-background;
 

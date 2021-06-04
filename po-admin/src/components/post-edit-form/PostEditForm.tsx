@@ -1,8 +1,8 @@
-import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator';
+import { Vue, Component, Prop, Watch, Inject } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
 import { lowerCase } from 'lodash-es';
 import { PostStatus, UserCapability } from '@/includes/datas';
-import LogoSvg from '@/assets/images/logo.svg?inline';
+import { ConfigConsumerProps } from '../config-provider/configConsumerProps';
 
 // Types
 import * as tsx from 'vue-tsx-support';
@@ -28,7 +28,7 @@ export default class PostEditForm extends Vue {
   _tsx!: tsx.DeclareProps<
     tsx.PickProps<
       PostEditForm,
-      'editModel' | 'updatePost' | 'updatePostStatus' | 'i18nKeyPrefix' | 'disabledActions' | 'isPage'
+      'logo' | 'editModel' | 'updatePost' | 'updatePostStatus' | 'i18nKeyPrefix' | 'disabledActions' | 'isPage'
     >
   > &
     tsx.DeclareOnEvents<{
@@ -55,6 +55,15 @@ export default class PostEditForm extends Vue {
     afterForm?: void;
   }>;
 
+  @Inject({
+    from: 'configProvider',
+    default: () => ConfigConsumerProps,
+  })
+  configProvider!: typeof ConfigConsumerProps;
+
+  @Prop(String) prefixCls?: string;
+  /** logo, 显示在左上角内容 */
+  @Prop() logo?: any;
   /** 修改的实体 */
   @Prop({ type: Object, required: true, validator: (val) => !!val.id }) editModel!: Post | Page;
   /** 修改实体 */
@@ -258,133 +267,161 @@ export default class PostEditForm extends Vue {
     });
   }
 
-  render() {
+  renderLogo() {
+    const logo = this.logo;
+    if (logo === undefined || logo === 'none' || logo === null) {
+      return null;
+    }
+
     return (
-      <a-layout class="po-post-edit">
-        <a-layout-header>
-          <a-row gutter={16} type="flex" justify="space-between">
-            <a-col flex={0}>
-              <a-space>
-                <a href="javascript:;" class="po-post-edit__logo" onClick={() => this.$router.back()}>
-                  <LogoSvg />
-                </a>
-                {this.$scopedSlots.leftAction ? this.$scopedSlots.leftAction() : null}
-              </a-space>
-            </a-col>
-            <a-col flex={1} class={['text-right']}>
-              <a-space>
-                {this.$scopedSlots.rightPrefixAction ? this.$scopedSlots.rightPrefixAction() : null}
-                {this.status === PostStatus.Pending
-                  ? [
-                      <a-button
-                        type="primary"
-                        disabled={!this.changed || this.processing || this.disabledActions}
-                        loading={this.updating}
-                        title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.review`, 'Review the post')}
-                        onClick={m.stop.prevent(this.handleUpdate.bind(this))}
-                      >
-                        {this.$tv(`${this.i18nKeyPrefix}.btn_text.review`, 'Review')}
-                      </a-button>,
-                    ]
-                  : this.status === PostStatus.Publish || this.status === PostStatus.Private
-                  ? [
-                      <a-button
-                        ghost
-                        type="primary"
-                        disabled={this.processing || this.disabledActions}
-                        loading={this.savingToDarft}
-                        title={this.$tv(
-                          `${this.i18nKeyPrefix}.btn_tips.switch_to_draft`,
-                          'swith the post into draft box',
-                        )}
-                        onClick={m.stop.prevent(this.handleSwitchToDraft.bind(this))}
-                      >
-                        {this.$tv(`${this.i18nKeyPrefix}.btn_text.switch_to_draft`, 'Switch to Draft')}
-                      </a-button>,
-                      this.hasPublishCapability ? (
+      <a href="javascript:;" class="logo-action" onClick={() => this.$router.back()}>
+        {typeof logo === 'object' ? (
+          <a-icon class="logo" component={logo}></a-icon>
+        ) : (
+          <img class="logo" src={logo} alt="logo" />
+        )}
+      </a>
+    );
+  }
+
+  render() {
+    const customizePrefixCls = this.prefixCls;
+    const getPrefixCls = this.configProvider.getPrefixCls;
+    const prefixCls = getPrefixCls('post-edit', customizePrefixCls);
+
+    return (
+      <a-layout class={`${prefixCls}-wrapper`}>
+        <a-layout-header class={`${prefixCls}-header`} style="padding:0;">
+          <div class={`${prefixCls}-header-wrapper`}>
+            <a-row gutter={16} type="flex" justify="space-between">
+              <a-col flex={0}>
+                <a-space>
+                  {this.renderLogo()}
+                  {this.$scopedSlots.leftAction ? this.$scopedSlots.leftAction() : null}
+                </a-space>
+              </a-col>
+              <a-col flex={1} class={['text-right']}>
+                <a-space>
+                  {this.$scopedSlots.rightPrefixAction ? this.$scopedSlots.rightPrefixAction() : null}
+                  {this.status === PostStatus.Pending
+                    ? [
                         <a-button
                           type="primary"
                           disabled={!this.changed || this.processing || this.disabledActions}
                           loading={this.updating}
-                          title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.update`, 'Update the post')}
+                          title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.review`, 'Review the post')}
                           onClick={m.stop.prevent(this.handleUpdate.bind(this))}
                         >
-                          {this.$tv(`${this.i18nKeyPrefix}.btn_text.update`, 'Update')}
-                        </a-button>
-                      ) : (
-                        <a-button
-                          type="primary"
-                          disabled={!this.changed || this.processing || this.disabledActions}
-                          loading={this.reviewSubmiting}
-                          title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.review`, 'Review the post')}
-                          onClick={m.stop.prevent(this.handleSubmitReview.bind(this))}
-                        >
                           {this.$tv(`${this.i18nKeyPrefix}.btn_text.review`, 'Review')}
-                        </a-button>
-                      ),
-                    ]
-                  : [
-                      <a-button
-                        ghost
-                        type="primary"
-                        disabled={!this.changed || this.processing || this.disabledActions}
-                        loading={this.savingToDarft}
-                        title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.save_to_draft`, 'Save the post into draft box')}
-                        onClick={m.stop.prevent(this.handleSaveToDraft.bind(this))}
-                      >
-                        {this.$tv(`${this.i18nKeyPrefix}.btn_text.save_to_draft`, 'Save to Draft')}
-                      </a-button>,
-                      this.hasPublishCapability ? (
+                        </a-button>,
+                      ]
+                    : this.status === PostStatus.Publish || this.status === PostStatus.Private
+                    ? [
                         <a-button
+                          ghost
                           type="primary"
                           disabled={this.processing || this.disabledActions}
-                          loading={this.publishing}
-                          title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.publish`, 'Publish the post')}
-                          onClick={m.stop.prevent(this.handelPublish.bind(this, false))}
+                          loading={this.savingToDarft}
+                          title={this.$tv(
+                            `${this.i18nKeyPrefix}.btn_tips.switch_to_draft`,
+                            'swith the post into draft box',
+                          )}
+                          onClick={m.stop.prevent(this.handleSwitchToDraft.bind(this))}
                         >
-                          {this.$tv(`${this.i18nKeyPrefix}.btn_text.publish`, 'Publish')}
-                        </a-button>
-                      ) : (
+                          {this.$tv(`${this.i18nKeyPrefix}.btn_text.switch_to_draft`, 'Switch to Draft')}
+                        </a-button>,
+                        this.hasPublishCapability ? (
+                          <a-button
+                            type="primary"
+                            disabled={!this.changed || this.processing || this.disabledActions}
+                            loading={this.updating}
+                            title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.update`, 'Update the post')}
+                            onClick={m.stop.prevent(this.handleUpdate.bind(this))}
+                          >
+                            {this.$tv(`${this.i18nKeyPrefix}.btn_text.update`, 'Update')}
+                          </a-button>
+                        ) : (
+                          <a-button
+                            type="primary"
+                            disabled={!this.changed || this.processing || this.disabledActions}
+                            loading={this.reviewSubmiting}
+                            title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.review`, 'Review the post')}
+                            onClick={m.stop.prevent(this.handleSubmitReview.bind(this))}
+                          >
+                            {this.$tv(`${this.i18nKeyPrefix}.btn_text.review`, 'Review')}
+                          </a-button>
+                        ),
+                      ]
+                    : [
                         <a-button
+                          ghost
                           type="primary"
                           disabled={!this.changed || this.processing || this.disabledActions}
-                          loading={this.reviewSubmiting}
-                          title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.review`, 'Review the post')}
-                          onClick={m.stop.prevent(this.handleSubmitReview.bind(this))}
+                          loading={this.savingToDarft}
+                          title={this.$tv(
+                            `${this.i18nKeyPrefix}.btn_tips.save_to_draft`,
+                            'Save the post into draft box',
+                          )}
+                          onClick={m.stop.prevent(this.handleSaveToDraft.bind(this))}
                         >
-                          {this.$tv(`${this.i18nKeyPrefix}.btn_text.review`, 'Review')}
-                        </a-button>
-                      ),
-                    ]}
-                {this.$scopedSlots.rightMiddleAction ? this.$scopedSlots.rightMiddleAction() : null}
-                <a-button disabled={!this.siderCollapsed} onClick={() => (this.siderCollapsed = false)}>
-                  <a-icon type="setting"></a-icon>
-                </a-button>
-                {this.$scopedSlots.rightAppendAction ? this.$scopedSlots.rightAppendAction() : null}
-              </a-space>
-            </a-col>
-          </a-row>
-          {/* <a-drawer
+                          {this.$tv(`${this.i18nKeyPrefix}.btn_text.save_to_draft`, 'Save to Draft')}
+                        </a-button>,
+                        this.hasPublishCapability ? (
+                          <a-button
+                            type="primary"
+                            disabled={this.processing || this.disabledActions}
+                            loading={this.publishing}
+                            title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.publish`, 'Publish the post')}
+                            onClick={m.stop.prevent(this.handelPublish.bind(this, false))}
+                          >
+                            {this.$tv(`${this.i18nKeyPrefix}.btn_text.publish`, 'Publish')}
+                          </a-button>
+                        ) : (
+                          <a-button
+                            type="primary"
+                            disabled={!this.changed || this.processing || this.disabledActions}
+                            loading={this.reviewSubmiting}
+                            title={this.$tv(`${this.i18nKeyPrefix}.btn_tips.review`, 'Review the post')}
+                            onClick={m.stop.prevent(this.handleSubmitReview.bind(this))}
+                          >
+                            {this.$tv(`${this.i18nKeyPrefix}.btn_text.review`, 'Review')}
+                          </a-button>
+                        ),
+                      ]}
+                  {this.$scopedSlots.rightMiddleAction ? this.$scopedSlots.rightMiddleAction() : null}
+                  <a-button disabled={!this.siderCollapsed} onClick={() => (this.siderCollapsed = false)}>
+                    <a-icon type="setting"></a-icon>
+                  </a-button>
+                  {this.$scopedSlots.rightAppendAction ? this.$scopedSlots.rightAppendAction() : null}
+                </a-space>
+              </a-col>
+            </a-row>
+            {/* <a-drawer
           title={this.$tv(`${this.i18nKeyPrefix}.publish_drawer_title`, 'Publish Settings')}
           placement="right"
           closable={false}
           mask={false}
           visible={true}
         ></a-drawer> */}
+          </div>
         </a-layout-header>
         <a-layout hasSider>
-          <a-layout-content>
+          <a-layout-content class={`${prefixCls}-content`}>
             <client-only>
               <rich-editor
                 vModel={this.content}
                 config={this.editorConfig}
                 placeholder={this.$tv(`${this.i18nKeyPrefix}.content_placeholder`, 'Please input content')}
-                class={'po-post-edit__editor grey lighten-4'}
+                class={`${prefixCls}__editor`}
               />
             </client-only>
           </a-layout-content>
-          <a-layout-sider width="300" collapsed={this.siderCollapsed} collapsedWidth={0}>
-            <a-card title={this.$tv(`${this.i18nKeyPrefix}.form.settings_title`, 'Settings')} bordered={false}>
+          <a-layout-sider class={`${prefixCls}-sider`} width="300" collapsed={this.siderCollapsed} collapsedWidth={0}>
+            <a-card
+              title={this.$tv(`${this.i18nKeyPrefix}.form.settings_title`, 'Settings')}
+              bordered={false}
+              style="border-radius:0;"
+            >
               <template slot="extra">
                 <a-icon type="close" onClick={() => (this.siderCollapsed = !this.siderCollapsed)}></a-icon>
               </template>

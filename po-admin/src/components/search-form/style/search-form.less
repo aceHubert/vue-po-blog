@@ -1,19 +1,14 @@
-@import '../../style/themes/default.less';
-
-@search-from-prefix-cls:~'@{po-prefix}-search';
+@search-from-prefix-cls: ~'@{ant-prefix}-search-form';
 
 .@{search-from-prefix-cls}{
-  position: relative;
+  &-wrapper{
+    position: relative;
+    .clearfix();
 
-  &::before,
-  &::after {
-    content: '';
-    display: table;
-  }
-
-  @media screen and (max-width: 576px) {
-    display: flex;
-    flex-direction: column-reverse;
+    @media screen and (max-width: 576px) {
+      display: flex;
+      flex-direction: column-reverse;
+    }
   }
 
   &-sub {
@@ -34,32 +29,18 @@
       padding: 0;
       white-space: nowrap;
       position: relative;
-  
-      &::before {
-        content: '';
-        border-left: 1px solid currentColor;
-        position: absolute;
-        left: -1px;
-        top: 0.3em;
-        bottom: 0.3em;
-      }
-  
-      &:first-child::before {
-        border-left: none;
-      }
     }
   
-    a {
-      padding: 0.2em 0.4em;
-  
-      &:global(.active) {
-        color: inherit;
-        font-weight: 600;
+    &__item-link {
+      color: @text-color;
+
+      &.active {
+        color: @primary-color;
       }
     }
   }
 
-  &-sub-slot {
+  &-sub__slot {
     line-height: 40px;
     position: absolute;
     z-index: 1;
@@ -70,7 +51,7 @@
     }
   }
 
-  &-form {
+  &-content {
     @media screen and (max-width: 576px) {
       .@{search-from-prefix-cls}-sub-slot + & {
         margin-bottom: 4px !important;

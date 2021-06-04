@@ -1,4 +1,4 @@
-import { userStore } from '@/store/modules';
+import { appStore, userStore } from '@/store/modules';
 
 // Types
 import { Context } from '@nuxt/types';
@@ -33,7 +33,7 @@ export default async ({ route, redirect, error, $i18n }: Context) => {
       try {
         await userStore.refreshToken();
       } catch {
-        redirect('/logout');
+        return appStore.signout();
       }
     }
 

@@ -1,73 +1,30 @@
-.layout-wrapper {
-  &:not('.is-mobile') {
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.06);
-      border-radius: 3px;
-      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.08);
-    }
-    /* 滚动条滑块 */
-    ::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.12);
-      border-radius: 3px;
-      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-  }
-}
 
 :global(.theme-light) {
   .layout-header {
+    &__wrapper {
+      background: #fff;
+    }
+
     .header-logo h1 {
-      color: #333;
+      color:@heading-color;
     }
   }
 
   .layout-sider {
     .sider-logo h1 {
-      color: #333;
+      color: @primary-color;
     }
   }
 }
 
 :global(.theme-dark) {
   .layout-header {
-    .header-logo h1 {
+    &__wrapper {
+      background: #fff;
+    }
+
+    &.has-top-menu .layout-header__wrapper {
       color: #fff;
-    }
-
-    &.has-top-menu {
-      color: #fff;
-      background: #333;
-
-      .top-menu {
-        background: transparent;
-      }
-    }
-  }
-
-  .layout-sider {
-    color: #fff;
-    background: #212121;
-
-    .sider-menu {
-      background: transparent;
-    }
-
-    .sider-logo h1 {
-      color: #fff;
-    }
-  }
-}
-
-:global(.theme-realdark) {
-  .layout-header {
-    color: #fff;
-    background: #333;
-
-    .top-menu {
       background: transparent;
     }
 
@@ -77,29 +34,16 @@
   }
 
   .layout-sider {
-    color: #fff;
-    background: #212121;
-
-    .sider-menu {
-      background: transparent;
-    }
-
     .sider-logo h1 {
       color: #fff;
     }
-  }
-
-  .layout-content,
-  .layout-footer {
-    color: #fff;
-    background: #212121;
   }
 }
 
 .layout-sider {
   min-height: 100vh;
   position: relative;
-  box-shadow: 2px 0 8px rgba(29, 35, 41, 0.5);
+  box-shadow: 2px 0 8px rgba(29, 35, 41, 0.05);
   z-index: 10;
 
   &--fixed {
@@ -111,19 +55,23 @@
   .layout-sider-drawer & {
     box-shadow: none;
 
-    :global(.ant-drawer-open)& {
+    :global(.@{ant-prefix}-drawer-open)& {
       box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
     }
   }
 
   .sider-logo {
-    padding-left: 24px;
+    padding: 16px;
     height: 64px;
-    line-height: 64px;
     display: block;
     overflow: hidden;
+    white-space: nowrap;
     transition: all 0.3s;
     position: relative;
+
+    .layout-sider--collapsed&{
+      padding: 16px 8px;
+    }
 
     :global {
       .logo,
@@ -134,21 +82,29 @@
 
       .logo {
         height: 32px;
-        width: 32px;
+        font-size: 32px;
       }
 
       h1 {
-        font-size: 20px;
         margin: 0 0 0 12px;
+        height: 32px;
+        line-height: 32px;
+        font-size: 18px;
         font-weight: 600;
       }
+    }
+  }
+
+  :global{
+    .@{ant-prefix}-menu{
+      width: 100%;
+      border-right: none;
     }
   }
 }
 
 .layout-header {
   width: 100%;
-  background: #fff;
   transition: width 0.2s;
   z-index: 9;
 
@@ -156,15 +112,10 @@
     padding: 0 16px;
     width: 100%;
     height: 100%;
-    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
     display: flex;
     align-items: center;
+    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
     position: relative;
-
-    &.content-width-fixed {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
   }
 
   &--fixed {
@@ -172,54 +123,41 @@
     top: 0;
   }
 
-  .action(@padding: 0 12px) {
-    padding: @padding;
-    display: inline-block;
-    cursor: pointer;
-    transition: color 0.3s;
-
-    &:hover {
-      background: rgba(0, 0, 0, 0.025);
-    }
-  }
-
   .header-logo {
     height: 100%;
     vertical-align: top;
+    overflow: hidden;
+    white-space: nowrap;
     cursor: pointer;
 
     :global {
-      .logo,
-      h1 {
+      .logo {
+        height: 32px;
+        font-size: 32px;
         vertical-align: middle;
         display: inline-block;
       }
 
-      .logo {
-        height: 28px;
-        width: auto;
-      }
-
-      h1 {
-        font-size: 16px;
+      h1 {        
         margin: 0 0 0 12px;
-        font-weight: 600;
+        font-weight: 400;
+        font-size: 16px; 
+        vertical-align: top;
+        display: inline-block;       
       }
     }
   }
 
   .trigger {
-    .action(0 0 0 16px);
+    padding: 0 0 0 12px;
+    display: inline-block;
+    cursor: pointer;
+    transition: color 0.3s;
 
-    :global(.anticon) {
+    :global(.@{ant-prefix}icon) {
       font-size: 20px;
       vertical-align: -0.225em;
     }
-  }
-
-  .ant-menu {
-    height: 100%;
-    border: none;
   }
 
   .content-right {
@@ -230,14 +168,24 @@
     overflow: hidden;
 
     &__action {
-      .action();
+      padding: 0 12px;
+      display: inline-block;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+  }
+
+  :global{
+    .@{ant-prefix}-menu{
+      background: 0 0;
+      border-bottom: none;
     }
   }
 }
 
 .layout-content {
   &__wrapper {
-    padding: 24px 24px 0;
+    padding: 16px 16px 0;
     width: 100%;
     min-height: 100%;
     transition: 0.3s;
@@ -248,8 +196,4 @@
       margin: 0 auto;
     }
   }
-}
-
-.layout-footer {
-  text-align: center;
 }

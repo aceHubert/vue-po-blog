@@ -11,7 +11,7 @@ import classes from './styles/index.less?module';
 // Types
 import { UserWithRole, UserMetas, UserPagedQuery, UserPagedResponse } from 'types/datas';
 import { DataSourceFn } from '@/components/async-table/AsyncTable';
-import { StatusOption, BlukAcitonOption } from '@/components/search-from/SearchForm';
+import { StatusOption, BlukAcitonOption } from '@/components/search-form/SearchForm';
 
 // import { Table } from 'types/constants';
 

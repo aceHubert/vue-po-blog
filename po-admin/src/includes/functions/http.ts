@@ -84,12 +84,12 @@ instance.interceptors.response.use(
                 return instance(config);
               })
               .catch(() => {
-                appStore.goToLogoutPage();
+                appStore.signout();
               });
           } else if (statusCode === 500) {
             // 需要初始化
             if (err.response.data?.dbInitRequired) {
-              appStore.goToInitPage();
+              appStore.initPage();
             }
           }
         } else if (err.request) {

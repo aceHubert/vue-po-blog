@@ -1,8 +1,8 @@
-export type LangConfig = {
+export type LocaleConfig = {
   name: string;
   shortName: string;
   /**
-   * svg icon or string text icon
+   * svg icon or src
    */
   icon: any;
   locale: string;

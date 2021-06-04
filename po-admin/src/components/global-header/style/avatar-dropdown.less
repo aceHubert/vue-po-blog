@@ -1,15 +1,17 @@
 
-@avatar-dropdown-prefix-cls: ~'@{po-prefix}-avatar-dropdown';
+@avatar-dropdown-prefix-cls: ~'@{ant-prefix}-global-header-avatar-dropdown';
 
 .@{avatar-dropdown-prefix-cls}{
   &__name {
     margin-left: 5px;
   }
 
-  &__menu{
+  &-overlay{
+    &__menu{
 
-    .ant-dropdown-menu-item {
+    .@{ant-prefix}-dropdown-menu-item {
       min-width: 120px;
     }
+  }
   }
 }

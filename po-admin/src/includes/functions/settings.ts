@@ -4,21 +4,13 @@ import { trailingSlash } from '@/utils/path';
 import { SettingsFunctions } from 'types/functions/settings';
 
 export const globalSettings: GlobalSettings = {
+  basePath: '/', // vue-router base
   serverUrl: '/', // server request url
-  basePath: '/admin/', // vue-router base
+  siteUrl: '/', // site url, from backend
+  homeUrl: '/', // home url, from backend
 };
 
 const settingsFunctions: SettingsFunctions = {
-  /**
-   * @author Hubert
-   * @since 2020-09-04
-   * @version 0.0.1
-   * server request url（末尾带有"/")
-   */
-  getServerUrl() {
-    return trailingSlash(globalSettings.serverUrl);
-  },
-
   /**
    * @author Hubert
    * @since 2020-09-04
@@ -27,6 +19,24 @@ const settingsFunctions: SettingsFunctions = {
    */
   getBasePath() {
     return trailingSlash(globalSettings.basePath);
+  },
+
+  getSiteUrl() {
+    return trailingSlash(globalSettings.siteUrl);
+  },
+
+  getHomeUrl() {
+    return trailingSlash(globalSettings.homeUrl);
+  },
+
+  /**
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * server request url（末尾带有"/")
+   */
+  getServerUrl() {
+    return trailingSlash(globalSettings.serverUrl);
   },
 
   /**

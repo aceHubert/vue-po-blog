@@ -5,7 +5,7 @@ import { Table } from 'types/datas/table';
 const table: Table = ({ i18nRender }) => ({
   columns: [
     {
-      title: i18nRender('user.column.username', 'Username'),
+      title: i18nRender('core.page-user.column.username', 'Username'),
       align: 'left',
       dataIndex: 'username',
       width: '300px',
@@ -13,7 +13,7 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'username' },
     },
     {
-      title: i18nRender('user.column.name', 'Name'),
+      title: i18nRender('core.page-user.column.name', 'Name'),
       align: 'left',
       dataIndex: 'name',
       ellipsis: true,
@@ -22,7 +22,7 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'name' },
     },
     {
-      title: i18nRender('user.column.mobile', 'Mobile'),
+      title: i18nRender('core.page-user.column.mobile', 'Mobile'),
       align: 'center',
       dataIndex: 'mobile',
       hideInMobile: true,
@@ -30,7 +30,7 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'mobile' },
     },
     {
-      title: i18nRender('user.column.email', 'Email'),
+      title: i18nRender('core.page-user.column.email', 'Email'),
       align: 'center',
       dataIndex: 'email',
       hideInMobile: true,
@@ -38,7 +38,7 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'email' },
     },
     {
-      title: i18nRender('user.column.role', 'Role'),
+      title: i18nRender('core.page-user.column.role', 'Role'),
       align: 'center',
       dataIndex: 'userRole',
       width: '120px',
@@ -46,7 +46,7 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'userRole' },
     },
     {
-      title: i18nRender('user.column.create_time', 'CreateTime'),
+      title: i18nRender('core.page-user.column.create_time', 'CreateTime'),
       align: 'center',
       dataIndex: 'createTime',
       width: '160px',

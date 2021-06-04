@@ -14,7 +14,7 @@ const nuxtCofnigPath = require.resolve(path.resolve('./', nuxtConfigFile));
 let nuxtConfig = require(path.resolve('./', nuxtConfigFile));
 
 if (typeof nuxtConfig === 'function') {
-  nuxtConfig = nuxtConfig({});
+  nuxtConfig = nuxtConfig({ dev: process.env.NODE_ENV !== 'production' });
 }
 
 try {

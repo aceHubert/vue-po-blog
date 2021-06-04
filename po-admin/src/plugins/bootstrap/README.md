@@ -8,7 +8,7 @@
 > 从 Storage 中初始站点的配置
 
 - 从 localeStorage 初始化网站的模版、样式等配置
-- 从 cookie 初始化 `access token` 配置到 store 中；如果 `access token` 但是 `refresh token` 在在，则会从服务端拉取一个新的 `access token`；如果都不在在或在拉取新的时候出现错误，则会退出重新登录(init/login/logout 页面跳过加载)
+- 从 cookie 初始化 `access token` 配置到 store 中；如果 `access token` 但是 `refresh token` 在在，则会从服务端拉取一个新的 `access token`；如果都不在在或在拉取新的时候出现错误，则会退出重新登录(init/signin/signout 页面跳过加载)
   <br/>
   <br/>
 

@@ -106,7 +106,7 @@ const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) 
   if (graphQLErrors) {
     // 需要初始化数据库(graphql resolver执行中产生的错误)
     if (graphQLErrors.some((err) => err.extensions?.dbInitRequired)) {
-      appStore.goToInitPage();
+      appStore.initPage();
       return;
     }
   }
@@ -118,7 +118,7 @@ const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) 
       if (statusCode === 401) {
         // 401 后通过 refresh token 重新获取 access token,如果再不成功则退出重新登录
         return promiseToObservable<string>(userStore.refreshToken(), () => {
-          appStore.goToLogoutPage();
+          appStore.signout();
         }).flatMap(() => {
           const headers = {
             ...operation.getContext().headers,
@@ -132,7 +132,7 @@ const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) 
       } else if (statusCode === 500) {
         // 需要初始化(以 http code 返回，中间件优先于graphql resolver执行时产生的错误)
         if (isServerError(networkError) && networkError.result.dbInitRequired) {
-          appStore.goToInitPage();
+          appStore.initPage();
         }
       }
     }

@@ -10,7 +10,10 @@ import { Route } from 'vue-router';
 {
   /* <router>
 {
-  path: '/logout'
+  path: '/signout',
+  meta:{
+    title: 'Signout',
+  }
 }
 </router> */
 }
@@ -45,7 +48,7 @@ export default class SignOut extends Vue {
       // }
       // window.location.href = settingsFuncs.getBaseUrl() + settingsFuncs.getBasePath() + `login?rutnrnUrl=${returnUrl}`;
 
-      this.$router.replace(`/login?returnUrl=${this.returnUrl}`);
+      this.$router.replace(`/signin?returnUrl=${this.returnUrl}`);
     });
   }
 

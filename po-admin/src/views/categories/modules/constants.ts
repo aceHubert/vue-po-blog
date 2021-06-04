@@ -5,7 +5,7 @@ import { Table } from 'types/datas/table';
 const table: Table = ({ i18nRender }) => ({
   columns: [
     {
-      title: i18nRender('category.column.name', 'Name'),
+      title: i18nRender('core.page-category.column.name', 'Name'),
       align: 'left',
       dataIndex: 'name',
       width: '300px',
@@ -13,21 +13,21 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'name' },
     },
     {
-      title: i18nRender('category.column.slug', 'Slug'),
+      title: i18nRender('core.page-category.column.slug', 'Slug'),
       align: 'center',
       dataIndex: 'slug',
       hideInMobile: true,
       scopedSlots: { customRender: 'slug' },
     },
     {
-      title: i18nRender('category.column.description', 'Description'),
+      title: i18nRender('core.page-category.column.description', 'Description'),
       align: 'center',
       dataIndex: 'description',
       hideInMobile: true,
       scopedSlots: { customRender: 'description' },
     },
     {
-      title: i18nRender('category.column.count', 'Count'),
+      title: i18nRender('core.page-category.column.count', 'Count'),
       align: 'center',
       dataIndex: 'count',
       hideInMobile: true,

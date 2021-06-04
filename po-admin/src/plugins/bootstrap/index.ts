@@ -24,7 +24,7 @@ const plugin: Plugin = async (cxt, inject) => {
       }
     } catch (err) {
       globalError(process.env.NODE_ENV === 'production', err.message);
-      cxt.redirect('/error');
+      cxt.error({});
       break;
     }
   }
