@@ -47,13 +47,20 @@ export class I18nValidationPipe implements PipeTransform<any> {
         .flatten()
         .filter((item) => !!item.constraints)
         .map((item) => {
-          return Object.keys(item.constraints!).map(async (validateKey) => {
+          return Object.keys(item.constraints!).map((validateKey) => {
             const i18nKey = `validator.${item.target ? snakeCase(item.target!.constructor.name) + '.' : ''}${snakeCase(
               item.property,
             )}.${snakeCase(validateKey)}`;
             this.logger.debug(i18nKey);
-            const translate = await this.i18n!.t(i18nKey);
-            return translate === i18nKey ? item.constraints![validateKey] : translate;
+            return this.i18n.tv(i18nKey, item.constraints![validateKey], {
+              // todo: 这里拿不到request lang
+              // lang,
+              args: {
+                target: item.target,
+                property: item.property,
+                value: item.value,
+              },
+            });
           });
         })
         .flatten()

@@ -13,6 +13,11 @@ import { Context } from '@nuxt/types';
   meta: {
     anonymous: true,
   },
+  head() {
+    return {
+      title: this.$tv('core.page-init.page_title', 'Init Site') as string,
+    };
+  },
   asyncData({ redirect }: Context) {
     return appStore
       .checkDB()
@@ -60,8 +65,8 @@ export default class Init extends Vue {
     // 设置默认初始值
     this.form.setFieldsValue({
       locale: appStore.locale,
-      title: this.$tv('init.titleInitValue', 'This is a simple title'),
-      siteUrl: window.location.origin,
+      title: this.$tv('core.page-init.title_init_value', 'This is a simple title'),
+      homeUrl: window.location.origin,
     });
   }
 
@@ -80,7 +85,7 @@ export default class Init extends Vue {
         .initDB(initParams)
         .then((result) => {
           if (result) {
-            this.$router.replace({ path: '/logout' });
+            this.$router.replace({ path: '/login' });
           }
         })
         .catch((err) => {
@@ -101,14 +106,17 @@ export default class Init extends Vue {
       <div id="init" class={classes.wrapper}>
         <div class={classes.container}>
           <div class={classes.top}>
-            <p class={classes.topTitle}>{this.$tv('init.title', 'Start to use Polumemo Blog')}</p>
+            <p class={classes.topTitle}>{this.$tv('core.page-init.title', 'Start to use Plumemo Blog')}</p>
           </div>
           <a-form class={classes.form} form={this.form} onSubmit={m.stop.prevent(this.handleSubmit.bind(this))}>
-            <a-form-item help={this.$tv('init.localeDescription', 'Locale description')}>
+            <a-form-item
+              class={classes.formItem}
+              extra={this.$tv('core.page-init.locale_description', 'Language for admin account')}
+            >
               <a-select
                 options={this.localeOptions}
                 size="large"
-                placeholder={this.$tv('init.localePlaceholder', 'Locale')}
+                placeholder={this.$tv('core.page-init.locale_placeholder', 'Admin language')}
                 {...{
                   directives: [
                     {
@@ -116,7 +124,12 @@ export default class Init extends Vue {
                       value: [
                         'locale',
                         {
-                          rules: [{ required: true, message: this.$tv('init.localeRequired', 'Locale is required') }],
+                          rules: [
+                            {
+                              required: true,
+                              message: this.$tv('core.page-init.locale_required', 'Admin language is required'),
+                            },
+                          ],
                           validateTrigger: 'change',
                         },
                       ],
@@ -125,11 +138,11 @@ export default class Init extends Vue {
                 }}
               ></a-select>
             </a-form-item>
-            <a-form-item help={this.$tv('init.titleDescription', 'Title description')}>
+            <a-form-item class={classes.formItem} extra={this.$tv('core.page-init.title_description', 'Blog title')}>
               <a-input
                 size="large"
                 type="text"
-                placeholder={this.$tv('init.titlePlaceholder', 'Title')}
+                placeholder={this.$tv('core.page-init.title_placeholder', 'Blog title')}
                 {...{
                   directives: [
                     {
@@ -137,32 +150,10 @@ export default class Init extends Vue {
                       value: [
                         'title',
                         {
-                          rules: [{ required: true, message: this.$tv('init.titleRequired', 'Title is required') }],
-                          validateTrigger: 'blur',
-                        },
-                      ],
-                    },
-                  ],
-                }}
-              ></a-input>
-            </a-form-item>
-            <a-form-item help={this.$tv('init.siteUrlDescription', 'Site URL description')}>
-              <a-input
-                size="large"
-                type="text"
-                placeholder={this.$tv('init.siteUrlPlaceholder', 'Site URL')}
-                {...{
-                  directives: [
-                    {
-                      name: 'decorator',
-                      value: [
-                        'siteUrl',
-                        {
                           rules: [
-                            { required: true, message: this.$tv('init.siteUrlRequired', 'Site URL is required!') },
                             {
-                              type: 'url',
-                              message: this.$tv('init.siteUrlFormValidation', 'Site Url format is not correct'),
+                              required: true,
+                              message: this.$tv('core.page-init.title_required', 'Blog title is required'),
                             },
                           ],
                           validateTrigger: 'blur',
@@ -173,26 +164,34 @@ export default class Init extends Vue {
                 }}
               ></a-input>
             </a-form-item>
-            <a-form-item help={this.$tv('init.passwordDescription', 'Password description')}>
+            <a-form-item
+              class={classes.formItem}
+              extra={this.$tv(
+                'core.page-init.home_url_description',
+                'If you set the different domain address with admin, use which you set',
+              )}
+            >
               <a-input
                 size="large"
                 type="text"
-                maxLength={50}
-                placeholder={this.$tv('init.passwordPlaceholder', 'Password')}
+                placeholder={this.$tv('core.page-init.home_url_placeholder', 'Blog domain address')}
                 {...{
                   directives: [
                     {
                       name: 'decorator',
                       value: [
-                        'password',
+                        'homeUrl',
                         {
                           rules: [
-                            { required: true, message: this.$tv('init.passwordRequired', 'Password is required!') },
                             {
-                              min: 6,
+                              required: true,
+                              message: this.$tv('core.page-init.home_url_required', 'Home URL is required!'),
+                            },
+                            {
+                              type: 'url',
                               message: this.$tv(
-                                'init.passwordLengthVaildation',
-                                'Password length must be at least 6 bits!',
+                                'core.page-init.home_url_format_validation',
+                                'Home Url format is not correct',
                               ),
                             },
                           ],
@@ -204,11 +203,52 @@ export default class Init extends Vue {
                 }}
               ></a-input>
             </a-form-item>
-            <a-form-item help={this.$tv('init.emailDescription', 'Email description')}>
+            <a-form-item
+              class={classes.formItem}
+              extra={this.$tv('core.page-init.password_description', 'Password for admin account')}
+            >
               <a-input
                 size="large"
                 type="text"
-                placeholder={this.$tv('init.emailPlaceholder', 'Email')}
+                maxLength={50}
+                placeholder={this.$tv('core.page-init.password_placeholder', 'Password')}
+                {...{
+                  directives: [
+                    {
+                      name: 'decorator',
+                      value: [
+                        'password',
+                        {
+                          rules: [
+                            {
+                              required: true,
+                              message: this.$tv('core.page-init.password_required', 'Password is required!'),
+                            },
+                            {
+                              min: 6,
+                              message: this.$tv(
+                                'core.page-init.password_length_vaildation',
+                                'Password length must be at least 6 characters!',
+                                { length: 6 },
+                              ),
+                            },
+                          ],
+                          validateTrigger: 'blur',
+                        },
+                      ],
+                    },
+                  ],
+                }}
+              ></a-input>
+            </a-form-item>
+            <a-form-item
+              class={classes.formItem}
+              extra={this.$tv('core.page-init.email_description', 'Email for admin account')}
+            >
+              <a-input
+                size="large"
+                type="text"
+                placeholder={this.$tv('core.page-init.email_placeholder', 'Email')}
                 {...{
                   directives: [
                     {
@@ -217,10 +257,16 @@ export default class Init extends Vue {
                         'email',
                         {
                           rules: [
-                            { required: true, message: this.$tv('init.emailRequired', 'Email is required!') },
+                            {
+                              required: true,
+                              message: this.$tv('core.page-init.email_required', 'Email is required!'),
+                            },
                             {
                               type: 'email',
-                              message: this.$tv('init.emailFormatValidation', 'Email format is not correct'),
+                              message: this.$tv(
+                                'core.page-init.email_format_validation',
+                                'Email format is not correct!',
+                              ),
                             },
                           ],
                           validateTrigger: 'blur',
@@ -243,7 +289,7 @@ export default class Init extends Vue {
                 loading={this.loading}
                 disabled={this.loading}
               >
-                {this.$tv('init.btnInit', 'Start')}
+                {this.$tv('core.page-init.btn_start_text', 'Start')}
               </a-button>
             </a-form-item>
           </a-form>

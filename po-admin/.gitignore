@@ -1,2 +1,3 @@
 .nuxt
 po-config.client.json
+/src/static/assets/themes/**/*

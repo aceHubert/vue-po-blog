@@ -1,11 +1,11 @@
 // Types
-import { Table } from 'types/constants';
+import { Table } from 'types/datas/table';
 
 // 表格列信息
 const table: Table = ({ i18nRender }) => ({
   columns: [
     {
-      title: i18nRender('tag.column.name', 'Name'),
+      title: i18nRender('core.page-tag.column.name', 'Name'),
       align: 'left',
       dataIndex: 'name',
       width: '300px',
@@ -13,21 +13,21 @@ const table: Table = ({ i18nRender }) => ({
       scopedSlots: { customRender: 'name' },
     },
     {
-      title: i18nRender('tag.column.slug', 'Slug'),
+      title: i18nRender('core.page-tag.column.slug', 'Slug'),
       align: 'center',
       dataIndex: 'slug',
       hideInMobile: true,
       scopedSlots: { customRender: 'slug' },
     },
     {
-      title: i18nRender('tag.column.description', 'Description'),
+      title: i18nRender('core.page-tag.column.description', 'Description'),
       align: 'center',
       dataIndex: 'description',
       hideInMobile: true,
       scopedSlots: { customRender: 'description' },
     },
     {
-      title: i18nRender('tag.column.count', 'Count'),
+      title: i18nRender('core.page-tag.column.count', 'Count'),
       align: 'center',
       dataIndex: 'count',
       hideInMobile: true,

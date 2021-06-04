@@ -1,0 +1,12 @@
+{
+  "signin": {
+    "faild": "用户名或密码不正确!"
+  },
+  "signout": {
+    "success": "登出成功!"
+  },
+  "update_pwd": {
+    "old_pwd_incorrect": "旧密码不正确!",
+    "success": "修改密码成功!"
+  }
+}

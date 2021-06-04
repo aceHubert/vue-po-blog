@@ -26,7 +26,7 @@ export default class TermMixin extends Vue {
       .mutate<{ term: Term }, { model: TermCreationModel & { taxonomy: TermTaxonomy } }>({
         mutation: gql`
           mutation createTerm($model: NewTermInput!) {
-            term: addTerm(model: $model) {
+            term: createTerm(model: $model) {
               id
               taxonomyId
               name
@@ -52,8 +52,8 @@ export default class TermMixin extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string; model: TermUpdateModel }>({
         mutation: gql`
-          mutation modifyTerm($id: ID!, $model: UpdateTermInput!) {
-            result: modifyTerm(id: $id, model: $model)
+          mutation updateTerm($id: ID!, $model: UpdateTermInput!) {
+            result: updateTerm(id: $id, model: $model)
           }
         `,
         variables: {
@@ -73,7 +73,7 @@ export default class TermMixin extends Vue {
       .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
           mutation deleteTerm($id: ID!) {
-            result: removeTerm(id: $id)
+            result: deleteTerm(id: $id)
           }
         `,
         variables: {
@@ -92,7 +92,7 @@ export default class TermMixin extends Vue {
       .mutate<{ result: boolean }, { ids: string[] }>({
         mutation: gql`
           mutation blukDeleteTerms($ids: [ID!]!) {
-            result: blukRemoveTerms(ids: $ids)
+            result: bulkDeleteTerms(ids: $ids)
           }
         `,
         variables: {
@@ -112,7 +112,7 @@ export default class TermMixin extends Vue {
       .mutate<{ relationship: TermRelationship }, { model: TermRelationshipCreationModel }>({
         mutation: gql`
           mutation createTermRelationship($model: NewTermRelationshipInput!) {
-            relationship: addTermRelationship(model: $model) {
+            relationship: createTermRelationship(model: $model) {
               objectId
               taxonomyId
             }
@@ -138,7 +138,7 @@ export default class TermMixin extends Vue {
       .mutate<{ result: boolean }, { objectId: string; taxonomyId: string }>({
         mutation: gql`
           mutation deleteTermRelationship($objectId: ID!, $taxonomyId: ID!) {
-            result: removeTermRelationship(objectId: $objectId, taxonomyId: $taxonomyId)
+            result: deleteTermRelationship(objectId: $objectId, taxonomyId: $taxonomyId)
           }
         `,
         variables: {

@@ -254,7 +254,11 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
 
     if (isExists) {
       throw new ValidationError(
-        await this.i18nService.t('relationship_duplicate_definition', { lang: requestUser.lang }),
+        await this.i18nService.tv(
+          'datasource.termrelationship_duplicate_definition',
+          'Term relationship has been defined!',
+          { lang: requestUser.lang },
+        ),
       );
     }
 

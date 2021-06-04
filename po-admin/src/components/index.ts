@@ -1,9 +1,10 @@
 // components
-export * from './AsyncTable';
-export * from './SearchFrom';
-export * from './TermEditForm';
-export * from './PostEditForm';
+export * from './config-provider';
+export * from './async-table';
+export * from './search-form';
+export * from './term-edit-form';
+export * from './post-edit-form';
 
 // layouts
-export * from './GlobalHeader';
-export * from './GlobalFooter';
+export * from './global-header';
+export * from './global-footer';

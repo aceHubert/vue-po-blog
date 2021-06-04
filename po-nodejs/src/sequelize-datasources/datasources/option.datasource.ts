@@ -110,9 +110,16 @@ export class OptionDataSource extends BaseDataSource {
 
     if (await this.isExists(model.optionName)) {
       throw new ValidationError(
-        await this.i18nService.t('datasource.option.name_exists', {
-          lang: requestUser.lang,
-        }),
+        await this.i18nService.tv(
+          'core.datasource.option.name_exists',
+          `Option name "${model.optionName}" has existed!`,
+          {
+            lang: requestUser.lang,
+            args: {
+              name: model.optionName,
+            },
+          },
+        ),
       );
     }
 

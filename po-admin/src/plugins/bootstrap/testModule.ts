@@ -1,5 +1,5 @@
 import { VueConstructor } from 'vue';
-import { Table } from 'types/constants';
+import { Table } from 'types/datas/table';
 import { ModuleOptions } from 'types/module-options';
 
 export default function (Vue: VueConstructor, opts: ModuleOptions) {

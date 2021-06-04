@@ -8,11 +8,12 @@ import settingsFunctions from './functions/settings';
 // Types
 import { ModuleOptions } from 'types/module-options';
 
-const { getBaseUrl, getGraphqlPath, getGraphqlWsPath, getApiPath } = settingsFunctions;
+const { getServerUrl, getBasePath, getGraphqlPath, getGraphqlWsPath, getApiPath } = settingsFunctions;
 
 const moduleOptions: Omit<ModuleOptions, 'addRoutes'> = {
   hook,
-  getBaseUrl,
+  getServerUrl,
+  getBasePath,
   getGraphqlPath,
   getGraphqlWsPath,
   getApiPath,

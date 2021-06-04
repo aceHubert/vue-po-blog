@@ -7,6 +7,7 @@ export type User = {
   displayName: string;
   mobile?: string;
   email: string;
+  url?: string;
   status: UserStatus;
   createTime: Date;
 };
@@ -19,6 +20,7 @@ export type UserMetas = {
   nickName: string;
   firstName: string;
   lastName: string;
+  avatar: string;
   description: string;
   role: UserRole;
   locale: string;

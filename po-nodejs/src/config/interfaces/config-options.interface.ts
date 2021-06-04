@@ -10,14 +10,14 @@ export interface ConfigOptions {
   /** server configs */
   server_port: number;
   /** db configs */
-  DB_NAME: string;
-  DB_USER: string;
-  DB_PASSWORD: string;
-  DB_HOST: string;
-  DB_PORT: number;
-  DB_DIALECT: Dialect;
-  DB_CHARSET: string;
-  DB_COLLATE: string;
+  db_name: string;
+  db_user: string;
+  db_password: string;
+  db_host: string;
+  db_port: number;
+  db_dialect: Dialect;
+  db_charset: string;
+  db_collate: string;
   table_prefix: string;
   /** jwt configs */
   jwt_screct: string;

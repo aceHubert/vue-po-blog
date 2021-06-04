@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRoles } from '@/common/utils/user-roles.util';
 import { OptionKeys, OptionTablePrefixKeys } from '@/common/utils/option-keys.util';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/utils/user-meta-keys.util';
+import { defaultSupportLanguages } from '~/common/utils/default-support-languages.util';
 import { UserRole } from '@/users/enums';
 import { PostCommentStatus } from '@/posts/enums';
 import { BaseDataSource } from './base.datasource';
@@ -61,7 +62,7 @@ export class DbInitDataSource extends BaseDataSource {
    * @access None
    */
   haveTables(): Promise<boolean> {
-    const dialect = this.getConfig('DB_DIALECT');
+    const dialect = this.getConfig('db_dialect');
     if (dialect === 'mysql') {
       return this.sequelize
         .query(
@@ -74,7 +75,7 @@ export class DbInitDataSource extends BaseDataSource {
     } else {
       // todo: 其它数据库
       this.logger.warn(`${dialect} is not supported!`);
-      return Promise.resolve(false);
+      return Promise.resolve(true);
     }
   }
 
@@ -144,7 +145,7 @@ export class DbInitDataSource extends BaseDataSource {
           {
             userId: user.id,
             metaKey: UserMetaKeys.AdminColor,
-            metaValue: 'default',
+            metaValue: '{}',
           },
         ],
         {
@@ -153,9 +154,13 @@ export class DbInitDataSource extends BaseDataSource {
       );
 
       // 初始化默认分类
-      const defautlCategoryName = await this.i18nService.t('datasource.default_data.uncategorized', {
-        lang: initArgs.locale,
-      });
+      const defautlCategoryName = await this.i18nService.tv(
+        'core.datasource.default_data.uncategorized',
+        'Uncategorized',
+        {
+          lang: initArgs.locale,
+        },
+      );
       const defaultCategory = await this.models.Terms.create(
         { name: defautlCategoryName, slug: 'uncategorized' },
         {
@@ -170,12 +175,20 @@ export class DbInitDataSource extends BaseDataSource {
       );
 
       // 初始化页面和文章
-      const defaultArticleTitle = await this.i18nService.t('datasource.default_data.article_title', {
-        lang: initArgs.locale,
-      });
-      const defaultArticleContent = await this.i18nService.t('datasource.default_data.article_content', {
-        lang: initArgs.locale,
-      });
+      const defaultArticleTitle = await this.i18nService.tv(
+        'core.datasource.default_data.article_title',
+        'Simple Article',
+        {
+          lang: initArgs.locale,
+        },
+      );
+      const defaultArticleContent = await this.i18nService.tv(
+        'core.datasource.default_data.article_content',
+        '<p>This is your first article.</p>',
+        {
+          lang: initArgs.locale,
+        },
+      );
       await this.models.Posts.bulkCreate(
         [
           {
@@ -197,6 +210,14 @@ export class DbInitDataSource extends BaseDataSource {
           { optionName: OptionKeys.BlogName, optionValue: initArgs.title },
           { optionName: OptionKeys.BlogDescription, optionValue: 'A simple and light blog system' },
           { optionName: OptionKeys.AdminEmail, optionValue: initArgs.email },
+          { optionName: OptionKeys.AdminLayout, optionValue: '{}' },
+          { optionName: OptionKeys.AdminColor, optionValue: '{}' },
+          {
+            optionName: OptionKeys.SupportLanguages,
+            optionValue: JSON.stringify(
+              defaultSupportLanguages.filter(({ locale }) => locale === initArgs.locale || locale === 'en-US'), // en-US 是默认值
+            ),
+          },
           { optionName: OptionKeys.UsersCanRegister, optionValue: 'off' },
           { optionName: OptionKeys.MailServerUrl, optionValue: 'mail.example.com' },
           { optionName: OptionKeys.MailServerLogin, optionValue: 'user@example.com' },

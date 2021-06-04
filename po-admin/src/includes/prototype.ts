@@ -9,11 +9,12 @@ import settingsFunctions from './functions/settings';
 // Types
 import { VueExtraPrototypes } from 'types/vue';
 
-const { getBaseUrl, getGraphqlPath, getGraphqlWsPath, getApiPath } = settingsFunctions;
+const { getServerUrl, getBasePath, getGraphqlPath, getGraphqlWsPath, getApiPath } = settingsFunctions;
 
 const prototypes: VueExtraPrototypes = {
   hook,
-  getBaseUrl,
+  getServerUrl,
+  getBasePath,
   getGraphqlPath,
   getGraphqlWsPath,
   getApiPath,

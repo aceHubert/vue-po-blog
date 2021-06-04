@@ -5,7 +5,7 @@ export interface FileManageModuleOptions {
   dest?: string;
   /** 文件分组，默认： month */
   groupBy?: 'month' | 'year';
-  /** url 显示显示静态文件前缀，默认：/static */
+  /** 相对于静态资源服务的前缀，默认: uploads */
   staticPrefix?: string;
 }
 

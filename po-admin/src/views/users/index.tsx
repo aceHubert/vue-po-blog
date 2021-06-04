@@ -1,5 +1,5 @@
 import { Vue, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
-import { camelCase, lowerFirst } from 'lodash-es';
+import { camelCase, snakeCase } from 'lodash-es';
 import { modifiers as m } from 'vue-tsx-support';
 import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
@@ -10,8 +10,8 @@ import classes from './styles/index.less?module';
 
 // Types
 import { UserWithRole, UserMetas, UserPagedQuery, UserPagedResponse } from 'types/datas';
-import { DataSourceFn } from '@/components/AsyncTable/AsyncTable';
-import { StatusOption, BlukAcitonOption } from '@/components/SearchFrom/SearchForm';
+import { DataSourceFn } from '@/components/async-table/AsyncTable';
+import { StatusOption, BlukAcitonOption } from '@/components/search-form/SearchForm';
 
 // import { Table } from 'types/constants';
 
@@ -44,7 +44,7 @@ const UserRoleOrder = Object.keys(UserRole)
   },
   head() {
     return {
-      title: this.$tv('pageTitle.user.index', 'Users') as string,
+      title: this.$tv('core.page-user.page_title.index', 'Users') as string,
     };
   },
   asyncData: async ({ error, graphqlClient }) => {
@@ -116,7 +116,7 @@ export default class UserIndex extends Vue {
     return [
       {
         value: undefined,
-        label: this.$tv('user.role.all', 'All') as string,
+        label: this.$tv('core.page-user.role.all', 'All') as string,
         // 总数不记录 None 状态
         count: this.roleCounts.reduce((prev, curr) => {
           return prev + curr.count;
@@ -127,7 +127,7 @@ export default class UserIndex extends Vue {
         .map(({ userRole, count }) => ({
           value: userRole,
           label: this.$tv(
-            `user.role.${userRole === 'None' ? 'noneFullName' : lowerFirst(userRole)}`,
+            `core.page-user.role.${userRole === 'None' ? 'none_full_name' : snakeCase(userRole)}`,
             userRole,
           ) as string,
           count,
@@ -142,7 +142,7 @@ export default class UserIndex extends Vue {
     return [
       {
         value: BlukActions.Delete,
-        label: this.$tv('user.search.bulkDeleteAction', 'Delete') as string,
+        label: this.$tv('core.page-user.search.bulk_delete_action_text', 'Delete') as string,
       },
     ];
   }
@@ -226,7 +226,7 @@ export default class UserIndex extends Vue {
       })
       .catch((err) => {
         const { statusCode, message } = formatError(err);
-        this.$message.error(this.$tv(`error.${statusCode}`, message) as string);
+        this.$message.error(this.$tv(`core.error.${statusCode}`, message) as string);
       });
   }
 
@@ -238,22 +238,25 @@ export default class UserIndex extends Vue {
   // 批量操作
   handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
-      this.$message.warn({ content: this.$tv('user.bulkRowReqrired', 'Please choose a row!') as string });
+      this.$message.warn({ content: this.$tv('core.page-user.bulk_row_reqrired', 'Please choose a row!') as string });
       return;
     }
 
     if (action === BlukActions.Delete) {
       this.$confirm({
-        content: this.$tv('user.btnTips.blukDeletePopContent', 'Do you really want to delete these users?'),
-        okText: this.$tv('user.btnText.deletePopOkText', 'Ok') as string,
-        cancelText: this.$tv('user.btnText.deletePopCancelText', 'No') as string,
+        content: this.$tv(
+          'core.page-user.btn_tips.bluk_delete_pop_content',
+          'Do you really want to delete these users?',
+        ),
+        okText: this.$tv('core.page-user.btn_text.delete_pop_ok_text', 'Ok') as string,
+        cancelText: this.$tv('core.page-user.btn_text.delete_pop_cancel_text', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
           this.graphqlClient
             .mutate<{ result: boolean }, { ids: string[] }>({
               mutation: gql`
-                mutation blukRemove($ids: [ID!]!) {
-                  result: blukRemoveUsers(ids: $ids)
+                mutation bulkDelete($ids: [ID!]!) {
+                  result: bulkDeleteUsers(ids: $ids)
                 }
               `,
               variables: {
@@ -267,8 +270,8 @@ export default class UserIndex extends Vue {
               } else {
                 this.$message.error(
                   this.$tv(
-                    'user.tips.blukDeleteFailed',
-                    'An error occurred while deleting users, please try later again!',
+                    'core.page-user.tips.bluk_delete_failed',
+                    'An error occurred while deleting users, please try again later!',
                   ) as string,
                 );
               }
@@ -290,8 +293,8 @@ export default class UserIndex extends Vue {
     return this.graphqlClient
       .mutate<{ result: boolean }, { id: string }>({
         mutation: gql`
-          mutation remove($id: ID!) {
-            result: removeUser(id: $id)
+          mutation delete($id: ID!) {
+            result: deleteUser(id: $id)
           }
         `,
         variables: {
@@ -305,8 +308,8 @@ export default class UserIndex extends Vue {
         } else {
           this.$message.error(
             this.$tv(
-              'user.tips.deleteFailed',
-              'An error occurred while deleting user, please try later again!',
+              'core.page-user.tips.delete_failed',
+              'An error occurred while deleting user, please try again later!',
             ) as string,
           );
         }
@@ -336,25 +339,28 @@ export default class UserIndex extends Vue {
         <nuxt-link
           to={
             userStore.id === record.id
-              ? { name: 'users-profile' }
+              ? { name: 'profile-edit' }
               : { name: 'users-edit', params: { id: String(record.id) } }
           }
-          title={this.$tv('user.btnTips.edit', 'Edit') as string}
+          title={this.$tv('core.page-user.btn_tips.edit', 'Edit') as string}
         >
-          {this.$tv('user.btnText.edit', 'Edit')}
+          {this.$tv('core.page-user.btn_text.edit', 'Edit')}
         </nuxt-link>
 
         {record.id !== userStore.id
           ? [
               <a-divider type="vertical" />,
               <a-popconfirm
-                title={this.$tv('user.btnTips.deletePopContent', 'Do you really want to delete this user?')}
-                okText={this.$tv('user.btnText.deletePopOkText', 'Ok')}
-                cancelText={this.$tv('user.btnText.deletePopCancelText', 'No')}
+                title={this.$tv('core.page-user.tips.delete_pop_content', 'Do you really want to delete this user?')}
+                okText={this.$tv('core.page-user.btn_text.delete_pop_ok_text', 'Ok')}
+                cancelText={this.$tv('core.page-user.btn_text.delete_pop_cancel_text', 'No')}
                 onConfirm={m.stop.prevent(this.handleDelete.bind(this, record.id))}
               >
-                <a href="#none" title={this.$tv('user.btnTips.delete', 'Delete this user permanently') as string}>
-                  {this.$tv('user.btnText.delete', 'Delete')}
+                <a
+                  href="#none"
+                  title={this.$tv('core.page-user.btn_tips.delete', 'Delete this user permanently') as string}
+                >
+                  {this.$tv('core.page-user.btn_text.delete', 'Delete')}
                 </a>
               </a-popconfirm>,
             ]
@@ -401,7 +407,7 @@ export default class UserIndex extends Vue {
                 </p>
                 <p class={classes.contentItem}>
                   <span class="grey--text text--lighten1">{getTitle('userRole', 'Role')}: </span>
-                  {this.$tv(`user.role.${lowerFirst(record.userRole || 'none')}`, record.userRole || 'none')}
+                  {this.$tv(`core.page-user.role.${snakeCase(record.userRole || 'none')}`, record.userRole || 'none')}
                 </p>
                 <p class={classes.contentItem}>
                   <span class="grey--text text--lighten1">{getTitle('createTime', 'CreateTime')}: </span>
@@ -419,15 +425,15 @@ export default class UserIndex extends Vue {
         mobile: (text: UserWithRole['mobile']) => text || '-',
         email: (text: UserWithRole['email']) => <a href={`mailto:${text}`}>{text}</a>,
         userRole: (text: UserWithRole['userRole']) =>
-          this.$tv(`user.role.${lowerFirst(text || 'none')}`, text || 'none'),
+          this.$tv(`core.page-user.role.${snakeCase(text || 'none')}`, text || 'none'),
         createTime: (text: string) => $filters.dateFormat(text),
       } as any;
     };
 
     return (
-      <a-card class="post-index" bordered={false}>
+      <a-card class="user-index" bordered={false}>
         <SearchForm
-          keywordPlaceholder={this.$tv('user.search.keywordPlaceholder', 'Search Post') as string}
+          keywordPlaceholder={this.$tv('core.page-user.search.keyword_placeholder', 'Search Users') as string}
           statusName="role"
           itemCount={this.itemCount}
           statusOptions={this.roleOptions}

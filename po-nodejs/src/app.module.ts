@@ -1,8 +1,9 @@
 import * as path from 'path';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { I18nModule, QueryResolver, HeaderResolver, AcceptLanguageResolver, CookieResolver } from 'nestjs-i18n';
-import { I18nJsonParser } from '@/common/parsers/i18n.json.parser';
+import { I18nFileParser } from '@/common/parsers/i18n.file.parser';
 import { AuthorizedGuard } from '@/common/guards/authorized.guard';
 import { AllExceptionFilter } from '@/common/filters/all-exception.filter';
 import { I18nValidationPipe } from '@/common/pipes/i18n-validation.pipe';
@@ -10,8 +11,12 @@ import { ConfigModule } from '@/config/config.module';
 import { GlobalCacheModule } from '@/global-cache/global-cache.module';
 import { DataSourceModule } from '@/sequelize-datasources/datasource.module';
 import { FileManageModule } from '@/file-manage/file-manage.module';
+import { LocaleModule } from '@/locale/locale.module';
 import { AuthModule } from '@/auth/auth.module';
 import { DbInitModule } from '@/db-init/db-init.module';
+
+// extends
+import '@/common/extends/i18n.extend';
 
 // graphql
 import { GraphQLModule } from '@nestjs/graphql';
@@ -30,7 +35,10 @@ const contentPath = isProduction ? path.join(process.cwd(), 'po-content') : path
 @Module({
   imports: [
     GlobalCacheModule,
-    ConfigModule.register({ path: path.join(process.cwd(), 'po-config.server.json') }),
+    ConfigModule.forRoot({ path: path.join(process.cwd(), 'po-config.server.json') }),
+    ServeStaticModule.forRoot({
+      rootPath: contentPath,
+    }),
     I18nModule.forRootAsync({
       useFactory: () => {
         return {
@@ -42,12 +50,12 @@ const contentPath = isProduction ? path.join(process.cwd(), 'po-content') : path
             'zh-*': 'zh-CN',
           },
           parserOptions: {
-            paths: [path.join(contentPath, '/languages/nodejs')],
+            path: path.join(contentPath, '/languages/nodejs'),
             watch: !isProduction,
           },
         };
       },
-      parser: I18nJsonParser,
+      parser: I18nFileParser,
       resolvers: [
         new QueryResolver(['lang', 'locale', 'l']),
         new HeaderResolver(['x-custom-lang', 'x-custom-locale']),
@@ -55,8 +63,13 @@ const contentPath = isProduction ? path.join(process.cwd(), 'po-content') : path
         AcceptLanguageResolver,
       ],
     }),
-    FileManageModule.register({
+    FileManageModule.forRoot({
       dest: path.join(contentPath, 'uploads'),
+      staticPrefix: '/uploads',
+    }),
+    LocaleModule.forRoot({
+      path: path.join(contentPath, '/languages'),
+      sites: ['admin', 'web'],
     }),
     DataSourceModule,
     AuthModule,

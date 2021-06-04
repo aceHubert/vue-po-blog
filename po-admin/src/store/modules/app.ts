@@ -1,125 +1,56 @@
-import Vue from 'vue';
 import { VuexModule, Module, VuexMutation, VuexAction, getModule } from 'nuxt-property-decorator';
 import { store } from '@/store';
 import { httpClient, graphqlClient, gql } from '@/includes/functions';
+import { defaultSettings, LOCALE } from '@/configs/settings.config';
 import cookie from '@/utils/cookie';
-import config, {
-  SET_LAYOUT,
-  SET_THEME,
-  SET_PRIMARY_COLOR,
-  SET_CONTENT_WIDTH,
-  TOGGLE_SIDE_COLLAPSED,
-  TOGGLE_FIXED_HEADER,
-  TOGGLE_FIX_SIDEBAR,
-  TOGGLE_AUTO_HIDE_HEADER,
-  TOGGLE_COLOR_WEAK,
-  TOGGLE_MULTI_TAB,
-  Layout,
-  Theme,
-  ContentWidth,
-  LOCALE,
-} from '@/config/proLayoutConfigs';
 
 // Types
 import { Context } from '@nuxt/types';
-import { LangConfig } from 'types/locale';
-
-export type CheckResponse = {
-  dbInitRequired: boolean;
-};
+import { LocaleMessages } from 'vue-i18n';
+import { LocaleConfig } from 'types/configs/locale';
+import { LayoutConfig, ColorConfig } from 'types/configs/layout';
 
 @Module({ store, name: 'app', namespaced: true, dynamic: true, stateFactory: true })
 class AppStore extends VuexModule {
-  layout: Layout = config.settings.layout;
-  theme: Theme = config.settings.theme;
-  primaryColor = config.settings.primaryColor;
-  contentWidth: ContentWidth = config.settings.contentWidth;
-  fixedHeader = config.settings.fixedHeader;
-  fixSidebar = config.settings.fixSiderbar;
-  sideCollapsed = config.settings.sideCollapsed;
-  colorWeak = config.settings.colorWeak;
-  // 下面两个暂时没有用
-  autoHideHeader = config.settings.autoHideHeader;
-  multiTab: boolean = config.settings.multiTab;
-
+  // 布局（标题，Logo等）
+  layout: LayoutConfig = defaultSettings.layout;
+  // 主题（主题色，dark/light 模式等）
+  color: ColorConfig = defaultSettings.color;
   // 语言
-  locale: string = config.locale.default;
-  supportLanguages: LangConfig[] = config.locale.supportLanguages;
-
-  get isDark() {
-    return this.theme === Theme.Dark;
-  }
-
-  get isLight() {
-    return !this.isDark;
-  }
-
-  @VuexMutation
-  setLayout(mode: Layout) {
-    this.layout = mode;
-    Vue.ls.set(SET_LAYOUT, mode);
-  }
-
-  @VuexMutation
-  setTheme(theme: Theme) {
-    this.theme = theme;
-    Vue.ls.set(SET_THEME, theme);
-  }
-
-  @VuexMutation
-  setPrimaryColor(color: string) {
-    this.primaryColor = color;
-    Vue.ls.set(SET_PRIMARY_COLOR, color);
-  }
-
-  @VuexMutation
-  setContentWidth(type: ContentWidth) {
-    this.contentWidth = type;
-    Vue.ls.set(SET_CONTENT_WIDTH, type);
-  }
-
-  @VuexMutation
-  toggleFixedHeader(mode: boolean) {
-    this.fixedHeader = mode;
-    Vue.ls.set(TOGGLE_FIXED_HEADER, mode);
-  }
-
-  @VuexMutation
-  toggleFixSidebar(mode: boolean) {
-    this.fixSidebar = mode;
-    Vue.ls.set(TOGGLE_FIX_SIDEBAR, mode);
-  }
-
-  @VuexMutation
-  toggleSideCollapsed(mode: boolean) {
-    this.sideCollapsed = mode;
-    Vue.ls.set(TOGGLE_SIDE_COLLAPSED, mode);
-  }
-
-  @VuexMutation
-  toggleColorWeak(mode: boolean) {
-    this.colorWeak = mode;
-    Vue.ls.set(TOGGLE_COLOR_WEAK, mode);
-  }
-
-  @VuexMutation
-  toggleAutoHideHeader(mode: boolean) {
-    this.autoHideHeader = mode;
-    Vue.ls.set(TOGGLE_AUTO_HIDE_HEADER, mode);
-  }
-
-  @VuexMutation
-  toggleMultiTab(mode: boolean) {
-    this.multiTab = mode;
-    Vue.ls.set(TOGGLE_MULTI_TAB, mode);
-  }
+  locale = 'en-US';
+  supportLanguages: LocaleConfig[] = [];
 
   /**
-   * 获取语言
+   * 设置布局
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 设置默认语言 locale
+   * @param layout 布局配置
+   */
+  @VuexMutation
+  setLayout(layout: LayoutConfig) {
+    this.layout = { ...defaultSettings.layout, ...layout };
+    // do something else
+  }
+
+  /**
+   * 设置主题颜色
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * @param color 主题颜色配置
+   */
+  @VuexMutation
+  setColor(color: ColorConfig) {
+    this.color = { ...defaultSettings.color, ...color };
+    // do something else
+  }
+
+  /**
+   * 设置语言
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    */
   @VuexMutation
   setLocale(locale: string) {
@@ -142,18 +73,21 @@ class AppStore extends VuexModule {
    * @author Hubert
    * @since 2020-09-04
    * @version 0.0.1
-   * 添加支持语言列表
    */
-  addSupportLanguages(languages: LangConfig[]) {
-    this.supportLanguages = this.supportLanguages.concat(languages);
+  @VuexMutation
+  setSupportLanguages(languages: LocaleConfig[]) {
+    this.supportLanguages = languages;
   }
 
   /**
    * 检查DB是否需要初始化, false 表示不需要初始了
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    */
   @VuexAction({ rawError: true })
   checkDB() {
-    return httpClient.get<CheckResponse>('/db-init/check').then((model) => {
+    return httpClient.get<{ dbInitRequired: boolean }>('/db-init/check').then((model) => {
       if (model.success) {
         return model.dbInitRequired;
       } else {
@@ -166,6 +100,9 @@ class AppStore extends VuexModule {
   /**
    * 初始化数据库
    * 如果数据库已经初始化，则会返回false。可以通过checkDB 判断
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    * @param params 初始化参数
    */
   @VuexAction({ rawError: true })
@@ -180,7 +117,35 @@ class AppStore extends VuexModule {
   }
 
   /**
+   * 获取翻译配置
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
+   * @param locale Locale code, 如果不传值，将会获取所有语言配置ƒ
+   */
+  getTranslations(): Promise<{ languages: string[]; translations: LocaleMessages }>;
+  getTranslations(locale: string): Promise<LocaleMessages>;
+  @VuexAction({ rawError: true })
+  getTranslations(locale?: string): Promise<LocaleMessages | { languages: string[]; translations: LocaleMessages }> {
+    return httpClient
+      .get<{ locale: LocaleMessages | { languages: string[]; translations: LocaleMessages } }>(
+        '/locale/admin/translations',
+        { params: { locale } },
+      )
+      .then((model) => {
+        if (model.success) {
+          return model.locale;
+        } else {
+          throw new Error(model.message);
+        }
+      });
+  }
+
+  /**
    * 获取自动加载的配置参数
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    */
   @VuexAction({ rawError: true })
   getAutoLoadOptions() {
@@ -206,19 +171,32 @@ class AppStore extends VuexModule {
   /**
    * 跳转到 init 页面
    * 不在 Vue instance 的情况下，获取不到VueRouter对象
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    */
   @VuexAction
-  goToInitPage() {
-    return store.$router.replace('/init');
+  initPage() {
+    if (!store.$router.currentRoute.path.startsWith('/init')) {
+      return store.$router.replace('/init');
+    }
+    return Promise.resolve();
   }
 
   /**
-   * 跳转到 logout 页面
+   * 登出
    * 不在 Vue instance 的情况下，获取不到VueRouter对象
+   * @author Hubert
+   * @since 2020-09-04
+   * @version 0.0.1
    */
   @VuexAction
-  goToLogoutPage() {
-    return store.$router.replace('/logout');
+  signout() {
+    // 以免多次调用跳转循环
+    if (!store.$router.currentRoute.path.startsWith('/signout')) {
+      return store.$router.replace('/signout');
+    }
+    return Promise.resolve();
   }
 }
 

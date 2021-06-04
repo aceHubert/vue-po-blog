@@ -7,7 +7,7 @@ import { kebabCase } from 'lodash-es';
 import { trailingSlash } from '@/utils/path';
 
 // Types
-import { LangConfig } from 'types/locale';
+import { LocaleConfig } from 'types/configs/locale';
 
 /**
  * layouts
@@ -55,10 +55,10 @@ export function root(routes: RouteConfig[]) {
 /**
  * 语言匹配规则
  */
-export function genLocaleConfig(localeConfig: { locale: string; supportLanguages: LangConfig[] }) {
+export function genLocaleConfig(localeConfig: { locale: string; supportLanguages: LocaleConfig[] }) {
   // Matches allowed languages
   const localePattern = localeConfig.supportLanguages
-    .map((lang: LangConfig) => lang.alternate || lang.locale)
+    .map((lang: LocaleConfig) => lang.alternate || lang.locale)
     .join('|');
   const localeRegexp = new RegExp('^(' + localePattern + ')$');
 
@@ -74,7 +74,7 @@ export function genLocaleConfig(localeConfig: { locale: string; supportLanguages
   // 判断是否在支持的语言中在在
   const hasLocale = function (locale: string) {
     return localeConfig.supportLanguages.some(
-      (lang: LangConfig) => lang.alternate === locale || lang.locale === locale,
+      (lang: LocaleConfig) => lang.alternate === locale || lang.locale === locale,
     );
   };
 
@@ -96,7 +96,10 @@ function redirect(redirect: (to: Route) => string) {
  * @param children
  * @param locale
  */
-export function localeRoot(children: RouteConfig[], localeConfig: { locale: string; supportLanguages: LangConfig[] }) {
+export function localeRoot(
+  children: RouteConfig[],
+  localeConfig: { locale: string; supportLanguages: LocaleConfig[] },
+) {
   const { localePattern, genericLocaleRegexp, preferredLocale } = genLocaleConfig(localeConfig);
 
   // Reomve start slash

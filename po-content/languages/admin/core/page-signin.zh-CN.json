@@ -1,0 +1,10 @@
+{
+  "page_title": "用户登录",
+  "title": "欢迎登录Plumemo管理平台",
+  "subtitle": "一个简单的前后端分离博客系统",
+  "username_placeholder": "用户名/邮箱",
+  "username_required": "请输入用户名！",
+  "password_placeholder": "密码",
+  "password_required": "请输入密码",
+  "btn_signin_text": "登录"
+}

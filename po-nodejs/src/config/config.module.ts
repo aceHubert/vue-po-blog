@@ -14,7 +14,7 @@ import {
 @Global()
 @Module({})
 export class ConfigModule {
-  static register(options: ConfigModuleOptions): DynamicModule {
+  static forRoot(options: ConfigModuleOptions): DynamicModule {
     let configOptions = options as ConfigOptions;
     if (options.path) {
       configOptions = getOptionsFromFile(options.path);
@@ -33,7 +33,7 @@ export class ConfigModule {
     };
   }
 
-  static registerAsync(options: ConfigModuleAsyncOptions): DynamicModule {
+  static forRootAsync(options: ConfigModuleAsyncOptions): DynamicModule {
     return {
       module: ConfigModule,
       imports: options.imports,

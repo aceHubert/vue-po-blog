@@ -7,7 +7,7 @@ import { ConfigService } from '@/config/config.service';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
-import { TokenResponse, RefreshTokenResponse } from './interfaces/token-response.interface';
+import { Token, RefreshToken } from './interfaces/token.interface';
 
 @Injectable()
 export class AuthService {
@@ -169,10 +169,14 @@ export class AuthService {
         jwt.verify(token, screct, jwtOptions);
         return payload;
       } catch {
-        throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
+        throw new UnauthorizedException(
+          await this.i18nService.tv('core.error.invalid_token', 'Invalid token!', { lang }),
+        );
       }
     } else {
-      throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
+      throw new UnauthorizedException(
+        await this.i18nService.tv('core.error.invalid_token', 'Invalid token!', { lang }),
+      );
     }
   }
 
@@ -198,10 +202,14 @@ export class AuthService {
         jwt.verify(refreshToken, screct, jwtOptions);
         return payload;
       } catch {
-        throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
+        throw new UnauthorizedException(
+          await this.i18nService.tv('core.error.invalid_token', 'Invalid token!', { lang }),
+        );
       }
     } else {
-      throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
+      throw new UnauthorizedException(
+        await this.i18nService.tv('core.error.invalid_token', 'Invalid token!', { lang }),
+      );
     }
   }
 
@@ -219,7 +227,9 @@ export class AuthService {
     try {
       return jwt.decode(token, { ...jwtOptions, json: true }) as JwtPayload | null;
     } catch (err) {
-      throw new UnauthorizedException(await this.i18nService.t('error.invalid_token', { lang }));
+      throw new UnauthorizedException(
+        await this.i18nService.tv('core.error.invalid_token', 'Invalid token!', { lang }),
+      );
     }
   }
 
@@ -235,7 +245,7 @@ export class AuthService {
    * @param password 登录密码
    * @param device 设备名称
    */
-  async login(username: string, password: string, device: string): Promise<false | TokenResponse> {
+  async signin(username: string, password: string, device: string): Promise<false | Token> {
     const payload = await this.userDataSource.verifyUser(username, password, ['id', 'loginName', 'createdAt']);
     if (payload) {
       const jwtScrect = await this.getScrect(payload.id, device, false);
@@ -270,7 +280,7 @@ export class AuthService {
    * @access None
    * @param token refresh token
    */
-  async refreshToken(refreshToken: string, lang?: string): Promise<false | RefreshTokenResponse> {
+  async refreshToken(refreshToken: string, lang?: string): Promise<false | RefreshToken> {
     const refreshTokenPayload = await this.verifyRefreshToken(refreshToken, { lang });
     if (refreshTokenPayload && isPlainObject(refreshTokenPayload) && refreshTokenPayload.id) {
       const jwtScrect = await this.updateScrect(refreshTokenPayload.id, refreshTokenPayload.device);
@@ -324,7 +334,7 @@ export class AuthService {
    * @param userId 用户 Id
    * @param device 设备名称
    */
-  async logout(userId: number, device: string | null): Promise<void> {
+  async signout(userId: number, device: string | null): Promise<void> {
     await this.resetScrect(userId, device);
   }
 }

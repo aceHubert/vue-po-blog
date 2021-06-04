@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 // Types
 import { UserLoginDto } from './dto/user-login.dto';
 import { UpdatePwdDto } from './dto/update-pwd.dto';
-import { TokenResponse, RefreshTokenResponse } from './interfaces/token-response.interface';
+import { Token, RefreshToken } from './interfaces/token.interface';
 
 @Controller({ path: 'api/auth', scope: Scope.REQUEST })
 export class AuthController extends BaseController {
@@ -16,9 +16,9 @@ export class AuthController extends BaseController {
     super();
   }
 
-  @Post('login')
-  async login(@Body() userLoginDto: UserLoginDto, @I18n() i18n: I18nContext): Promise<Response<TokenResponse>> {
-    const tokenOrFalse = await this.authService.login(
+  @Post('signin')
+  async signin(@Body() userLoginDto: UserLoginDto, @I18n() i18n: I18nContext): Promise<Response<Token>> {
+    const tokenOrFalse = await this.authService.signin(
       userLoginDto.username,
       userLoginDto.password,
       userLoginDto.device,
@@ -26,24 +26,21 @@ export class AuthController extends BaseController {
     if (tokenOrFalse) {
       return this.success(tokenOrFalse);
     } else {
-      return this.faild(await i18n.t('auth.login.faild'));
+      return this.faild(await i18n.tv('core.auth.signin.faild', 'Username or password is incorrect!'));
     }
   }
 
   @Post('refresh')
-  async refresh(
-    @Query('refreshtoken') token: string,
-    @I18n() i18n: I18nContext,
-  ): Promise<Response<RefreshTokenResponse>> {
+  async refresh(@Query('refreshtoken') token: string, @I18n() i18n: I18nContext): Promise<Response<RefreshToken>> {
     try {
-      const newToken = await this.authService.refreshToken(token, i18n.detectedLanguage);
-      if (newToken) {
-        return this.success(newToken);
+      const newTokenOrFalse = await this.authService.refreshToken(token, i18n.detectedLanguage);
+      if (newTokenOrFalse) {
+        return this.success(newTokenOrFalse);
       } else {
-        return this.faild(await i18n.t('error.invalid_token'));
+        return this.faild(await i18n.tv('core.error.invalid_token', 'Invalid token!'));
       }
     } catch (err) {
-      return this.faild(err.message);
+      return this.faild(err);
     }
   }
 
@@ -57,23 +54,23 @@ export class AuthController extends BaseController {
     const result = await this.authService.updatePwd(userId, updatePwdDto.oldPwd, updatePwdDto.newPwd);
     if (result) {
       return this.success({
-        message: await i18n.t('auth.update_pwd.success'),
+        message: await i18n.tv('core.auth.update_pwd.success', 'Update password successful!'),
       });
     } else {
-      return this.faild(await i18n.t('auth.update_pwd.old_pwd_incorrect'));
+      return this.faild(await i18n.tv('core.auth.update_pwd.old_pwd_incorrect', 'The old password is incorrect!'));
     }
   }
 
   @Authorized()
-  @Post('logout')
-  async logout(
+  @Post('signout')
+  async signout(
     @User('id') userId: number,
     @User('device') device: string,
     @I18n() i18n: I18nContext,
   ): Promise<Response<{ message: string }>> {
-    await this.authService.logout(userId, device);
+    await this.authService.signout(userId, device);
     return this.success({
-      message: await i18n.t('auth.logout.success'),
+      message: await i18n.tv('core.auth.signout.success', 'Sign out successful!'),
     });
   }
 }

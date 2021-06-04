@@ -1,126 +1,100 @@
-import { Vue, Component } from 'nuxt-property-decorator';
+import { Vue, Component, Watch } from 'nuxt-property-decorator';
+import { error as globalError } from '@vue-async/utils';
 import { appStore } from '@/store/modules';
-import { Layout, Theme, ContentWidth } from '@/config/proLayoutConfigs';
+import { Layout, ContentWidth, Theme } from '@/configs/settings.config';
 
 // Types
-import { Menu } from 'types/functions';
+import { Locale } from 'ant-design-vue/types/locale-provider';
 
 @Component
 export default class AppMixin extends Vue {
-  get layout() {
-    return appStore.layout;
+  antLocale?: Locale = {} as Locale;
+
+  @Watch('locale', { immediate: true })
+  watchLocale(val: string) {
+    this.loadAntLocaleAsync(val)
+      .then((locale) => {
+        this.antLocale = locale;
+      })
+      .catch((err) => {
+        globalError(process.env.NODE_ENV === 'production', err.message);
+      });
+  }
+
+  /** admin logo */
+  get siteLogo() {
+    return appStore.layout.logo;
+  }
+
+  /** Admin site title */
+  get siteTitle() {
+    return appStore.layout.title;
+  }
+
+  get locale() {
+    return appStore.locale;
+  }
+
+  get layoutType() {
+    return appStore.layout.layout;
+  }
+
+  get hasTopMenu() {
+    return this.layoutType === Layout.TopMenu;
+  }
+
+  get hasSiderMenu() {
+    return !this.hasTopMenu;
   }
 
   get theme() {
-    return appStore.theme;
+    return appStore.color.theme;
   }
 
   get isDark() {
-    return appStore.isDark;
+    return this.theme === Theme.Dark || this.theme === Theme.RealDark;
+  }
+
+  get isRealDark() {
+    return this.theme === Theme.RealDark;
   }
 
   get isLight() {
-    return appStore.isLight;
+    return !this.isDark;
   }
 
   get primaryColor() {
-    return appStore.primaryColor;
+    return appStore.color.primaryColor;
   }
 
   get fixedHeader() {
-    return appStore.fixedHeader;
+    return appStore.layout.fixedHeader;
   }
 
   get fixSiderbar() {
-    return appStore.fixSidebar;
+    return appStore.layout.fixSiderbar;
   }
 
   get contentWidth() {
-    return appStore.contentWidth;
-  }
-
-  get sideCollapsed() {
-    return appStore.sideCollapsed;
+    return this.layoutType === Layout.SiderMenu ? ContentWidth.Fluid : appStore.layout.contentWidth;
   }
 
   get colorWeak() {
-    return appStore.colorWeak;
+    return appStore.layout.colorWeak;
   }
 
   get autoHideHeader() {
-    return appStore.autoHideHeader;
+    return appStore.layout.autoHideHeader;
   }
 
   get multiTab() {
-    return appStore.multiTab;
-  }
-
-  isTopMenu() {
-    return this.layout === Layout.topMenu;
-  }
-  isSideMenu() {
-    return !this.isTopMenu();
-  }
-  setLayout(val: Layout) {
-    appStore.setLayout(val);
-  }
-  setTheme(val: Theme) {
-    appStore.setTheme(val);
-  }
-  setPrimaryColor(val: string) {
-    appStore.setPrimaryColor(val);
-  }
-  setContentWidth(val: ContentWidth) {
-    appStore.setContentWidth(val);
-  }
-  setFixedHeader(val: boolean) {
-    appStore.toggleFixedHeader(val);
-  }
-  setFixedSidebar(val: boolean) {
-    appStore.toggleFixSidebar(val);
-  }
-  setSideCollapsed(val: boolean) {
-    appStore.toggleSideCollapsed(val);
-  }
-  setAutoHideHeader(val: boolean) {
-    appStore.toggleAutoHideHeader(val);
-  }
-  setColorWeak(val: boolean) {
-    appStore.toggleColorWeak(val);
+    return appStore.layout.multiTab;
   }
 
   /**
-   * 菜单角色权限过滤
+   * 加载 antd 语言文件
    */
-  menuRoleFilter(menus: Menu[]): Menu[] {
-    return menus
-      .map((menu) => {
-        // 根目录没有设置权限，或有权限
-        if (!menu.capabilities || this.hasCapability(menu.capabilities)) {
-          // 如果有设置子目录，判断权限，否则直接显示
-          if (menu.children) {
-            const children = menu.children
-              .map((child) => {
-                // 子目录有权限
-                if (!child.capabilities || this.hasCapability(child.capabilities)) {
-                  return child;
-                }
-                return false;
-              })
-              .filter(Boolean);
-            // 如果不在在子目录，则根目录也一同不显示
-            if (children.length) {
-              return {
-                ...menu,
-                children,
-              };
-            }
-            return false;
-          }
-          return menu;
-        }
-        return false;
-      })
-      .filter(Boolean) as Menu[];
+  loadAntLocaleAsync(locale: string): Promise<Locale> {
+    return import(`ant-design-vue/lib/locale/${locale.replace(/-/g, '_')}.js`).then((data) => data.default || data);
   }
 }

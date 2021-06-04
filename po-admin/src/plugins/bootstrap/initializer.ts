@@ -6,25 +6,12 @@
 import Vue from 'vue';
 import Axios from 'axios';
 import { hasOwn, error as globalError } from '@vue-async/utils';
-import { httpClient, graphqlClient, hook, globalSettings } from '@/includes/functions';
+import { httpClient, graphqlClient, hook, globalSettings, settingsFuncs } from '@/includes/functions';
 import { appStore, userStore } from '@/store/modules';
 import * as directives from '@/directives';
 import * as filters from '@/filters';
 import cookie from '@/utils/cookie';
-import config, {
-  SET_LAYOUT,
-  SET_THEME,
-  SET_PRIMARY_COLOR,
-  SET_CONTENT_WIDTH,
-  TOGGLE_FIXED_HEADER,
-  TOGGLE_FIX_SIDEBAR,
-  TOGGLE_SIDE_COLLAPSED,
-  TOGGLE_COLOR_WEAK,
-  TOGGLE_AUTO_HIDE_HEADER,
-  TOGGLE_MULTI_TAB,
-  ACCESS_TOKEN,
-  LOCALE,
-} from '@/config/proLayoutConfigs';
+import { ACCESS_TOKEN, LOCALE } from '@/configs/settings.config';
 
 // 添加到 Vue.protytype 上的属性和方法
 import prototypeArgs from '@/includes/prototype';
@@ -32,6 +19,7 @@ import prototypeArgs from '@/includes/prototype';
 // Types
 import { DirectiveOptions, DirectiveFunction } from 'vue';
 import { Plugin } from '@nuxt/types';
+import { LocaleConfig } from 'types/configs/locale';
 
 // Register global directives
 Object.keys(directives).map((key) => {
@@ -68,23 +56,22 @@ Vue.graphqlClient = graphqlClient;
 })({ ...prototypeArgs, axios: Axios, httpClient, graphqlClient });
 
 // 异常处理
-Vue.config.errorHandler = function (err: Error, vm: Vue, info: string) {
-  if (process.env.NODE_ENV === 'production') {
-    // todo: 总的 error 处理, 推送到服务端
-  } else {
-    globalError(false, `[core] Error(${info})：${err.message || err}`, vm);
-  }
+// Vue.config.errorHandler = function (err: Error, vm: Vue, info: string) {
+//   if (process.env.NODE_ENV === 'production') {
+//     // todo: 总的 error 处理, 推送到服务端
+//   } else {
+//     globalError(false, `[core] Error(${info})：${err.message || err}`, vm);
+//   }
 
-  if (vm && vm.$root) {
-    // do something if vue instance is exists
-  }
-};
+//   if (vm && vm.$root) {
+//     // do something if vue instance is exists
+//   }
+// };
 
 export async function Initializer(...params: Parameters<Plugin>) {
   const cxt = params[0];
   const inject = params[1];
-  const { app, route, $config } = cxt;
-
+  const { app, route, base, $config } = cxt;
   /**
    *  注册公共方法到 Context上
    */
@@ -103,84 +90,83 @@ export async function Initializer(...params: Parameters<Plugin>) {
   const _created = app.created;
   const _mounted = app.mounted;
   app.created = function created() {
-    hook('app:created').exec();
     _created && _created.call(this);
+    hook('app:created').exec();
   };
   app.mounted = function mounted() {
-    hook('app:mounted').exec();
     _mounted && _mounted.call(this);
+    hook('app:mounted').exec();
   };
 
   /**
-   * 主题配置
+   * 设置全局配置
    */
-  if (process.client) {
-    appStore.setLayout(Vue.ls.get(SET_LAYOUT, config.settings.layout));
-    appStore.setTheme(Vue.ls.get(SET_THEME, config.settings.theme));
-    appStore.setPrimaryColor(Vue.ls.get(SET_PRIMARY_COLOR, config.settings.primaryColor));
-    appStore.setContentWidth(Vue.ls.get(SET_CONTENT_WIDTH, config.settings.contentWidth));
-    appStore.toggleFixedHeader(Vue.ls.get(TOGGLE_FIXED_HEADER, config.settings.fixedHeader));
-    appStore.toggleFixSidebar(Vue.ls.get(TOGGLE_FIX_SIDEBAR, config.settings.fixSiderbar));
-    appStore.toggleSideCollapsed(Vue.ls.get(TOGGLE_SIDE_COLLAPSED, config.settings.sideCollapsed));
-    appStore.toggleSideCollapsed(Vue.ls.get(TOGGLE_COLOR_WEAK, config.settings.colorWeak));
-    appStore.toggleAutoHideHeader(Vue.ls.get(TOGGLE_AUTO_HIDE_HEADER, config.settings.autoHideHeader));
-    appStore.toggleMultiTab(Vue.ls.get(TOGGLE_MULTI_TAB, config.settings.multiTab));
-  } else {
-    // ssr
-  }
+  globalSettings.serverUrl = $config['server_url'] || '';
+  globalSettings.basePath = base || '/';
 
-  /**
-   * 修改全局配置
-   */
-  globalSettings.baseUrl = $config['baseUrl'] || '';
-  globalSettings.basePath = app.router!.options.base || '';
-
-  // 不在项目初始货页面时，才能读取数据库
+  // 初始化项目之后才能读取数据库
   if (route.name !== 'init') {
-    // login/logout/register/lost-password 页面排除
-    if (!route.name?.startsWith('account-')) {
-      // 设置token
-      const accessToken = process.client
-        ? cookie.clientCookie.get(ACCESS_TOKEN)
-        : cookie.serverCookie(cxt.req, cxt.res).get(ACCESS_TOKEN);
-
-      if (accessToken) {
-        userStore.setAccessToken(accessToken);
-      }
-    }
-
-    // 加载网站配置文件， autoload: Yes
+    // 加载网站配置文件， autoload: Yes (匿名访问)
     const autoloadOptions = await appStore.getAutoLoadOptions().catch((err) => {
       globalError(process.env.NODE_ENV === 'production', err.message);
       return {} as Dictionary<string>;
     });
 
+    /**
+     * 设置全局配置（从后端配置中）
+     */
+    globalSettings.siteUrl = autoloadOptions['siteurl'] || '/';
+    globalSettings.homeUrl = autoloadOptions['homeurl'] || '/';
+
     // 设置用户角色配置
     let userRoles;
     if ((userRoles = autoloadOptions['user_roles'])) {
-      userStore.setUserRoles(JSON.parse(userRoles));
+      userStore.setRoleCapabilities(JSON.parse(userRoles));
     }
 
-    // 个人站点配置
+    // 设置token
+    const accessToken = process.client
+      ? cookie.clientCookie.get(ACCESS_TOKEN)
+      : cookie.serverCookie(cxt.req, cxt.res).get(ACCESS_TOKEN);
+
+    if (accessToken) {
+      userStore.setAccessToken(accessToken);
+    }
+
     // localeFromUser > localeFromCookie > siteLocale
-    let siteLocale = autoloadOptions['locale'];
+    let siteLocale = autoloadOptions['locale'] || 'en-US';
     const localeFromCookie = process.client
       ? cookie.clientCookie.get(LOCALE)
       : cookie.serverCookie(cxt.req, cxt.res).get(LOCALE);
     if (localeFromCookie) {
       siteLocale = localeFromCookie;
     }
-    await userStore
-      .getUserMetas()
-      .then(() => {
-        if (userStore.info.locale) {
-          siteLocale = userStore.info.locale;
-        }
-      })
-      .catch(() => {
-        // ate by dog
-      });
+
+    // 此方法会把用户信息保存到 userStore.info 中
+    await userStore.getUserInfo().catch(() => {
+      // ate by dog
+    });
+
+    if (userStore.info.locale) {
+      siteLocale = userStore.info.locale;
+    }
+
+    // 设置管理界面的配置
+    appStore.setSupportLanguages(
+      JSON.parse(autoloadOptions['support_languages'] || '[]').map((item: LocaleConfig) => ({
+        ...item,
+        icon: `${settingsFuncs.getSiteUrl()}${item.icon}`,
+      })),
+    );
     appStore.setLocale(siteLocale);
+    appStore.setLayout(JSON.parse(autoloadOptions['admin_layout'] || '{}'));
+    appStore.setColor(
+      Object.assign(
+        {},
+        JSON.parse(autoloadOptions['admin_color'] || '{}'),
+        JSON.parse(userStore.info['admin_color'] || '{}'),
+      ),
+    );
 
     inject('userOptions', autoloadOptions);
   }

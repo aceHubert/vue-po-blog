@@ -39,13 +39,24 @@ export class AuthorizedGuard implements CanActivate {
       const fieldRoles = this.resolveGraphqlOutputFieldsRoles(info);
       if (Object.keys(fieldRoles).length && !user) {
         // 没有的提供 token, return 401
-        throw new UnauthorizedException(await this.i18nService.t('error.unauthorized', { lang }));
+        throw new UnauthorizedException(
+          await this.i18nService.tv('core.error.unauthorized', `Access denied, You don't permission for this action!`, {
+            lang,
+          }),
+        );
       }
       for (const field in fieldRoles) {
         if (!this.hasPermission(user!, fieldRoles[field])) {
           // false return 403
           throw new ForbiddenException(
-            await this.i18nService.t('error.forbidden_field', { lang, args: { field, userRole: user!.role } }),
+            await this.i18nService.tv(
+              'core.error.forbidden_field',
+              `Access denied, You don't capability for this action!`,
+              {
+                lang,
+                args: { field, userRole: user!.role },
+              },
+            ),
           );
         }
       }
@@ -61,10 +72,18 @@ export class AuthorizedGuard implements CanActivate {
 
     if (!user) {
       // 没有的提供 token, return 401
-      throw new UnauthorizedException(await this.i18nService.t('error.unauthorized', { lang }));
+      throw new UnauthorizedException(
+        await this.i18nService.tv('core.error.unauthorized', `Access denied, You don't permission for this action!`, {
+          lang,
+        }),
+      );
     } else if (!this.hasPermission(user, roles)) {
       // false return 403
-      throw new ForbiddenException(await this.i18nService.t('error.forbidden', { lang }));
+      throw new ForbiddenException(
+        await this.i18nService.tv('core.error.forbidden', `Access denied, You don't capability for this action!`, {
+          lang,
+        }),
+      );
     }
     return true;
   }
@@ -114,16 +133,13 @@ export class AuthorizedGuard implements CanActivate {
       if (isObjectType(returnType) || isInterfaceType(returnType)) {
         for (const key in fieldsByTypeName[returnType.name]) {
           const fields = returnType.getFields();
-          if (fields[key].extensions?.roles) {
-            fieldRoles[`${parentTypeName ? parentTypeName + '.' : ''}${key}`] = fields[key].extensions?.roles;
+          const field = fieldsByTypeName[returnType.name][key];
+          if (fields[field.name]?.extensions?.roles) {
+            fieldRoles[`${parentTypeName ? parentTypeName + '.' : ''}${field.name}`] =
+              fields[field.name].extensions?.roles;
           }
-          Object.keys(fieldsByTypeName[returnType.name][key].fieldsByTypeName).length &&
-            resolveFields(
-              fieldsByTypeName[returnType.name][key].fieldsByTypeName,
-              fields[key].type,
-              fieldsByTypeName[returnType.name][key].name,
-              fieldRoles,
-            );
+          Object.keys(field.fieldsByTypeName).length &&
+            resolveFields(field.fieldsByTypeName, fields[field.name].type, field.name, fieldRoles);
         }
       }
       return fieldRoles;

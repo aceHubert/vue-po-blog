@@ -1,3 +1,5 @@
+import { HttpException } from '@nestjs/common';
+
 export abstract class BaseController {
   /**
    * 返回成功
@@ -15,11 +17,21 @@ export abstract class BaseController {
    * @param message 错误消息
    * @param statusCode http code
    */
-  protected faild(message: string, statusCode?: number): ResponseError {
-    return {
-      success: false,
-      message,
-      statusCode,
-    };
+  protected faild(exception: Error): ResponseError;
+  protected faild(message: string, statusCode?: number): ResponseError;
+  protected faild(messageOrException: string | Error, statusCode?: number): ResponseError {
+    if (typeof messageOrException === 'string') {
+      return {
+        success: false,
+        message: messageOrException,
+        statusCode,
+      };
+    } else {
+      return {
+        success: false,
+        message: messageOrException.message,
+        statusCode: messageOrException instanceof HttpException ? messageOrException.getStatus() : undefined,
+      };
+    }
   }
 }

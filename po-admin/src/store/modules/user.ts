@@ -6,12 +6,13 @@ import { store } from '@/store';
 import { httpClient, graphqlClient, gql } from '@/includes/functions';
 import { UserRole, UserCapability } from '@/includes/datas';
 import cookie from '@/utils/cookie';
-import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/config/proLayoutConfigs';
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/configs/settings.config';
 
 // Types
 import { Context } from '@nuxt/types';
+import { User, Meta } from 'types/datas';
 
-export type UserRoles = {
+export type RoleCapabilities = {
   [role in UserRole]: {
     name: string;
     capabilities: UserCapability[];
@@ -37,17 +38,21 @@ export type RefreshTokenResponse = {
 @Module({ store, name: 'user', namespaced: true, dynamic: true, stateFactory: true })
 class UserStore extends VuexModule {
   id: string | null = null; // 用户Id， graphql ID 是序列化成string
-  name = 'User';
+  loginName = 'User';
   info: Dictionary<any> = {}; // 用户基本信息及 metas
   accessToken: string | null = null;
-  role: UserRole | null = null; // 当前用户角色
 
-  userRoles: UserRoles | null = null; // 用户角色
+  roleCapabilities: RoleCapabilities | null = null; // 用户角色权限
+
+  // 用户角色
+  get role() {
+    return this.info.role;
+  }
 
   // 当前用户权限
   get capabilities() {
-    if (this.userRoles && this.role) {
-      return this.userRoles[this.role].capabilities;
+    if (this.roleCapabilities && this.role) {
+      return this.roleCapabilities[this.role as UserRole].capabilities;
     }
     return [];
   }
@@ -66,19 +71,17 @@ class UserStore extends VuexModule {
       try {
         const payload = jwt.decode(token, { json: true });
 
-        const { id, loginName, role, ...rest } = payload as Dictionary<any>;
+        const { id, loginName, ...rest } = payload as Dictionary<any>;
         this.id = String(id);
-        this.name = loginName;
+        this.loginName = loginName;
         this.info = Object.assign({}, this.info, rest);
-        this.role = role;
       } catch {
         // ate by dog
       }
     } else {
       this.id = null;
-      this.name = 'User';
+      this.loginName = 'User';
       this.info = {};
-      this.role = null;
     }
   }
 
@@ -88,8 +91,8 @@ class UserStore extends VuexModule {
   }
 
   @VuexMutation
-  setUserRoles(userRoles: UserRoles) {
-    this.userRoles = userRoles;
+  setRoleCapabilities(roleCapabilities: RoleCapabilities) {
+    this.roleCapabilities = roleCapabilities;
   }
 
   /**
@@ -98,12 +101,16 @@ class UserStore extends VuexModule {
    * @param loginQuery 登录参数
    */
   @VuexAction({ rawError: true, commit: 'setAccessToken' })
-  login(loginQuery: LoginQuery) {
+  signin(loginQuery: LoginQuery) {
     const { req, res } = store.app.context as Context;
     const Cookie = process.client ? cookie.clientCookie : cookie.serverCookie(req, res);
 
     return httpClient
-      .post<LoginResponse>('/auth/login', { username: loginQuery.username, password: loginQuery.password })
+      .post<LoginResponse>('/auth/signin', {
+        username: loginQuery.username,
+        password: loginQuery.password,
+        device: 'Web', // todo: 多设备登录
+      })
       .then((model) => {
         if (model.success) {
           Cookie.set(ACCESS_TOKEN, model.accessToken, {
@@ -134,7 +141,9 @@ class UserStore extends VuexModule {
     const refreshtoken = Cookie.get(REFRESH_TOKEN);
 
     if (!refreshtoken) {
-      throw new Error($i18n.tv('refreshTokenRequired', 'The refresh_token is not exists!') as string);
+      return Promise.reject(
+        new Error($i18n.tv('core.error.refresh_token_required', 'The refresh token is not exists!') as string),
+      );
     }
 
     return httpClient
@@ -156,33 +165,46 @@ class UserStore extends VuexModule {
   }
 
   /**
-   * 获取 user metas(需要权限验证)
+   * 获取用户信息，包括meta(需要权限验证)
    * 可以通过些方法加载不在 token payload 中的数据
    * 返回 meta values 会自动合并到 store info 中
    * @param metaKeys 需要获取的meta keys
    */
   @VuexAction({ rawError: true, commit: 'setInfo' })
-  getUserMetas(metaKeys?: string[]) {
-    if (!this.accessToken) return Promise.reject();
+  getUserInfo(metaKeys?: string[]) {
+    const { $i18n } = store.app.context as Context;
+    if (!this.accessToken)
+      return Promise.reject(new Error($i18n.tv('core.common.no_token_provide', 'No token provide!') as string));
 
     return graphqlClient
-      .query<{ result: Array<{ metaKey: string; metaValue: string }> }, { userId: string; metaKeys?: string[] }>({
+      .query<{ result: User & { metas: Meta[] } }, { metaKeys?: string[] }>({
         query: gql`
-          query getUserMetas($userId: ID!, $metaKeys: [String!]) {
-            result: userMetas(userId: $userId, metaKeys: $metaKeys) {
-              metaKey
-              metaValue
+          query getUser($metaKeys: [String!]) {
+            result: user {
+              displayName
+              email
+              mobile
+              url
+              metas(metaKeys: $metaKeys) {
+                metaKey
+                metaValue
+              }
             }
           }
         `,
         variables: {
-          userId: this.id!,
           metaKeys,
         },
       })
       .then(({ data }) => {
-        return data.result.reduce((prev, curr) => {
-          prev[curr.metaKey] = curr.metaValue;
+        return Object.keys(data.result).reduce((prev, key) => {
+          if (key === 'metas') {
+            data.result.metas.forEach((meta) => {
+              prev[meta.metaKey] = meta.metaValue;
+            });
+          } else {
+            prev[key] = data.result[key as keyof User];
+          }
           return prev;
         }, {} as Dictionary<any>);
       });
@@ -195,7 +217,9 @@ class UserStore extends VuexModule {
    */
   @VuexAction({ rawError: true, commit: 'setInfo' })
   updateUserMeta(meta: { metaKey: string; metaValue: string }) {
-    if (!this.accessToken) return Promise.reject();
+    const { $i18n } = store.app.context as Context;
+    if (!this.accessToken)
+      return Promise.reject(new Error($i18n.tv('core.common.no_token_provide', 'No token provide!') as string));
 
     return graphqlClient
       .mutate<{ result: boolean }, { userId: string; metaKey: string; metaValue: string }>({
@@ -216,27 +240,23 @@ class UserStore extends VuexModule {
   }
 
   /**
-   * 登出(不会抛出异常，仅支持在客户端调用)
+   * 登出(不会抛出异常)
    * 向服务端发出登出信号，清空本地 cookie 保存的token 以及graphqlClient 的缓存
    * 前清除 store accessToken及用户基本信息
    */
   @VuexAction({ rawError: true, commit: 'setAccessToken' })
-  logout() {
-    if (!this.accessToken) return Promise.resolve();
+  signout() {
+    const { $i18n } = store.app.context as Context;
+    if (!this.accessToken)
+      return Promise.resolve(new Error($i18n.tv('core.common.no_token_provide', 'No token provide!') as string));
 
     const { req, res } = store.app.context as Context;
     const Cookie = process.client ? cookie.clientCookie : cookie.serverCookie(req, res);
 
     return httpClient
-      .post('/auth/logout')
-      .then(() => {
-        // 清除 store access token
-        return null;
-      })
+      .post('/auth/signout')
       .catch((err) => {
         globalError(process.env.NODE_ENV === 'production', err.message);
-        // 清除 store access token
-        return null;
       })
       .finally(() => {
         // 清除 tokens from cookie
@@ -244,6 +264,8 @@ class UserStore extends VuexModule {
         Cookie.set(REFRESH_TOKEN, '', { path: '/', expires: new Date(0) });
         // 清除 client store
         graphqlClient.resetStore();
+        // setAccessToken 清除 token
+        return null;
       });
   }
 }

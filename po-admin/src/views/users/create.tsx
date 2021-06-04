@@ -25,7 +25,7 @@ import { User, UserCreationModel } from 'types/datas/user';
   },
   head() {
     return {
-      title: this.$tv('pageTitle.user.create', 'New User') as string,
+      title: this.$tv('core.page-user.page_title.creation', 'New User') as string,
     };
   },
 })
@@ -94,8 +94,8 @@ export default class UserCreate extends Vue {
           { model: Omit<UserCreationModel, 'username' | 'password'> & { loginName: string; loginPwd: string } }
         >({
           mutation: gql`
-            mutation addUser($model: NewUserInput!) {
-              user: addUser(model: $model) {
+            mutation createUser($model: NewUserInput!) {
+              user: createUser(model: $model) {
                 id
                 loginName
               }
@@ -110,7 +110,7 @@ export default class UserCreate extends Vue {
           },
         })
         .then(({ data }) => {
-          this.$router.replace({ name: 'users-profile', query: { id: data!.user.id } });
+          this.$router.replace({ name: 'users-edit', query: { id: data!.user.id } });
         })
         .catch((err) => {
           const { message } = formatError(err);
@@ -148,13 +148,17 @@ export default class UserCreate extends Vue {
       username: [
         {
           required: true,
-          message: this.$tv('user.form.usernameRequired', 'Username is required!'),
+          message: this.$tv('core.page-user.form.username_required', 'Username is required!'),
         },
         {
           min: 4,
-          message: this.$tv('user.form.usernameMinLengthError', 'Username length must not less than 4 characters!', {
-            min: 4,
-          }),
+          message: this.$tv(
+            'core.page-user.form.username_min_length_error',
+            'Username length must not less than 4 characters!',
+            {
+              min: 4,
+            },
+          ),
         },
         {
           validator: (rule: any, value: string, callback: Function) => {
@@ -162,7 +166,11 @@ export default class UserCreate extends Vue {
               .then((result) => {
                 result
                   ? callback()
-                  : callback(this.$tv('user.form.usernameHasExisted', `Username "${value}" has existed!`, { value }));
+                  : callback(
+                      this.$tv('core.page-user.form.username_has_existed', `Username "${value}" has existed!`, {
+                        value,
+                      }),
+                    );
               })
               .catch((err) => {
                 callback(err.message);
@@ -173,11 +181,11 @@ export default class UserCreate extends Vue {
       email: [
         {
           required: true,
-          message: this.$tv('user.form.emailRequired', 'Email is required!'),
+          message: this.$tv('core.page-user.form.email_required', 'Email is required!'),
         },
         {
           type: 'email',
-          message: this.$tv('user.form.emailFormatError', 'Email format is incorrect!'),
+          message: this.$tv('core.page-user.form.email_format_error', 'Email format is incorrect!'),
         },
         {
           validator: (rule: any, value: string, callback: Function) => {
@@ -185,7 +193,9 @@ export default class UserCreate extends Vue {
               .then((result) => {
                 result
                   ? callback()
-                  : callback(this.$tv('user.form.emailHasExisted', `Email "${value}" has existed!`, { value }));
+                  : callback(
+                      this.$tv('core.page-user.form.email_has_existed', `Email "${value}" has existed!`, { value }),
+                    );
               })
               .catch((err) => {
                 callback(err.message);
@@ -196,7 +206,7 @@ export default class UserCreate extends Vue {
       mobile: [
         {
           len: 11,
-          message: this.$tv('user.form.mobileLengthError', 'Mobile format is incorrect!', { len: 11 }),
+          message: this.$tv('core.page-user.form.mobile_length_error', 'Mobile format is incorrect!', { length: 11 }),
         },
         {
           validator: (rule: any, value: string, callback: Function) => {
@@ -204,7 +214,9 @@ export default class UserCreate extends Vue {
               .then((result) => {
                 result
                   ? callback()
-                  : callback(this.$tv('user.form.mobileHasExisted', `Mobile "${value}" has existed!`, { value }));
+                  : callback(
+                      this.$tv('core.page-user.form.mobile_has_existed', `Mobile "${value}" has existed!`, { value }),
+                    );
               })
               .catch((err) => {
                 callback(err.message);
@@ -215,19 +227,23 @@ export default class UserCreate extends Vue {
       website: [
         {
           type: 'url',
-          message: this.$tv('user.form.websiteFormatError', 'Website format is incorrect!'),
+          message: this.$tv('core.page-user.form.website_format_error', 'Website format is incorrect!'),
         },
       ],
       password: [
         {
           required: true,
-          message: this.$tv('user.form.passwordRequired', 'Password is required!'),
+          message: this.$tv('core.page-user.form.password_required', 'Password is required!'),
         },
         {
           min: 6,
-          message: this.$tv('user.form.passwordMinLengthError', 'Password length must not less than 6 characters!', {
-            min: 6,
-          }),
+          message: this.$tv(
+            'core.page-user.form.password_min_length_error',
+            'Password length must not less than 6 characters!',
+            {
+              min: 6,
+            },
+          ),
         },
       ],
     };
@@ -235,17 +251,17 @@ export default class UserCreate extends Vue {
 
   render() {
     return (
-      <div>
+      <a-card class="user-create" bordered={false}>
         <a-form
           form={this.form}
           label-col={{ xs: { span: 24 }, sm: { span: 5 } }}
           wrapper-col={{ xs: { span: 24 }, sm: { span: 12 } }}
           onSubmit={m.stop.prevent(this.handleSave.bind(this))}
         >
-          <a-form-item label={this.$tv('user.form.username', 'Username')} has-feedback>
+          <a-form-item label={this.$tv('core.page-user.form.username', 'Username')} has-feedback>
             <a-input
               style="width:220px"
-              placeholder={this.$tv('user.form.usernamePlaceholder', 'Please input username')}
+              placeholder={this.$tv('core.page-user.form.username_placeholder', 'Please input username')}
               {...{
                 directives: [
                   { name: 'decorator', value: ['username', { rules: this.rules.username, validateFirst: true }] },
@@ -254,11 +270,11 @@ export default class UserCreate extends Vue {
             />
           </a-form-item>
 
-          <a-form-item label={this.$tv('user.form.password', 'Password')} has-feedback>
+          <a-form-item label={this.$tv('core.page-user.form.password', 'Password')} has-feedback>
             <a-input-password
               style="width:220px"
               autocomplete="off"
-              placeholder={this.$tv('user.form.passwordPlaceholder', 'Please input password')}
+              placeholder={this.$tv('core.page-user.form.password_placeholder', 'Please input password')}
               {...{
                 directives: [
                   { name: 'decorator', value: ['password', { rules: this.rules.password, validateFirst: true }] },
@@ -267,46 +283,46 @@ export default class UserCreate extends Vue {
             />
           </a-form-item>
 
-          <a-form-item label={this.$tv('user.form.email', 'Email')} has-feedback>
+          <a-form-item label={this.$tv('core.page-user.form.email', 'Email')} has-feedback>
             <a-input
               style="width:220px"
-              placeholder={this.$tv('user.form.emailPlaceholder', 'Please input email')}
+              placeholder={this.$tv('core.page-user.form.email_placeholder', 'Please input email')}
               {...{
                 directives: [{ name: 'decorator', value: ['email', { rules: this.rules.email, validateFirst: true }] }],
               }}
             />
           </a-form-item>
 
-          <a-form-item label={this.$tv('user.form.firstName', 'First Name')}>
+          <a-form-item label={this.$tv('core.page-user.form.firstname', 'First Name')}>
             <a-input
               style="width:220px"
-              placeholder={this.$tv('user.form.firstNamePlaceholder', 'Please input first name')}
+              placeholder={this.$tv('core.page-user.form.firstname_placeholder', 'Please input first name')}
               {...{ directives: [{ name: 'decorator', value: ['firstName'] }] }}
             />
           </a-form-item>
 
-          <a-form-item label={this.$tv('user.form.lastName', 'Last Name')}>
+          <a-form-item label={this.$tv('core.page-user.form.lastname', 'Last Name')}>
             <a-input
               style="width:220px"
-              placeholder={this.$tv('user.form.lastNamePlaceholder', 'Please input last name')}
+              placeholder={this.$tv('core.page-user.form.lastname_placeholder', 'Please input last name')}
               {...{ directives: [{ name: 'decorator', value: ['lastName'] }] }}
             />
           </a-form-item>
 
-          <a-form-item label={this.$tv('user.form.website', 'Website')}>
+          <a-form-item label={this.$tv('core.page-user.form.website', 'Website')}>
             <a-input
               style="width:220px"
-              placeholder={this.$tv('user.form.websitePlaceholder', 'Please input website')}
+              placeholder={this.$tv('core.page-user.form.website_placeholder', 'Please input website')}
               {...{
                 directives: [{ name: 'decorator', value: ['url', { rules: this.rules.website, validateFirst: true }] }],
               }}
             />
           </a-form-item>
 
-          <a-form-item label={this.$tv('user.form.language', 'Language')}>
+          <a-form-item label={this.$tv('core.page-user.form.language', 'Language')}>
             <a-select style="width:120px" {...{ directives: [{ name: 'decorator', value: ['locale'] }] }}>
               <a-select-option value={null}>
-                {this.$tv('user.form.languageSiteDefaultOptionText', 'Site Default')}
+                {this.$tv('core.page-user.form.language_site_default_option_text', 'Site Default')}
               </a-select-option>
               {this.supportLanguages.map((language) => (
                 <a-select-option value={language.locale}>{language.name}</a-select-option>
@@ -314,7 +330,7 @@ export default class UserCreate extends Vue {
             </a-select>
           </a-form-item>
 
-          <a-form-item label={this.$tv('user.form.userRole', 'Role')}>
+          <a-form-item label={this.$tv('core.page-user.form.user_role', 'Role')}>
             <a-select style="width:120px" {...{ directives: [{ name: 'decorator', value: ['userRole'] }] }}>
               {Object.values(UserRole)
                 .reverse()
@@ -324,11 +340,11 @@ export default class UserCreate extends Vue {
             </a-select>
           </a-form-item>
 
-          <a-form-item label={this.$tv('user.form.sendUserNotification', 'Send User Notification')}>
+          <a-form-item label={this.$tv('core.page-user.form.send_user_notification', 'Send User Notification')}>
             <a-checkbox {...{ directives: [{ name: 'decorator', value: ['sendUserNotification'] }] }}>
               {this.$tv(
-                'user.form.sendUserNotificationCheckboxText',
-                ' Send the new user an email about their account.',
+                'user.form.send_user_notification_checkbox_text',
+                'Send the new user an email about their account.',
               )}
             </a-checkbox>
           </a-form-item>
@@ -338,13 +354,13 @@ export default class UserCreate extends Vue {
               type="primary"
               html-type="submit"
               loading={this.submiting}
-              title={this.$tv('user.btnTips.createUser', 'Create User')}
+              title={this.$tv('core.page-user.btn_tips.create_user', 'Create User')}
             >
-              {this.$tv('user.btnText.createUser', 'Create User')}
+              {this.$tv('core.page-user.btn_text.create_user', 'Create User')}
             </a-button>
           </a-form-item>
         </a-form>
-      </div>
+      </a-card>
     );
   }
 }

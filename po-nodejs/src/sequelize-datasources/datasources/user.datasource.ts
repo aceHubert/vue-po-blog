@@ -36,11 +36,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers(optional)]
-   * @param id 用户 Id（null 则查询请求用户，否则需要 EditUsers 权限）
+   * @param id 用户 Id（null 则查询请求用户，否则 id 不是自己时需要 EditUsers 权限）
    * @param fields 返回的字段
    */
   async get(id: number | null, fields: string[], requestUser: JwtPayloadWithLang): Promise<UserModel | null> {
-    if (id) {
+    // 查询非自己时，需要权限验证
+    if (id && id !== requestUser.id) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     } else {
       id = requestUser.id;
@@ -253,19 +254,29 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
     if (await this.isLoginNameExists(model.loginName)) {
       throw new ValidationError(
-        await this.i18nService.t('datasource.user.username_unique_required', { lang: requestUser.lang }),
+        await this.i18nService.tv(
+          'core.datasource.user.username_unique_required',
+          'Username is reqiured to be unique!',
+          {
+            lang: requestUser.lang,
+          },
+        ),
       );
     }
 
     if (await this.isEmailExists(model.email)) {
       throw new ValidationError(
-        await this.i18nService.t('datasource.user.email_unique_required', { lang: requestUser.lang }),
+        await this.i18nService.tv('core.datasource.user.email_unique_required', `Email is reqiured to be unique!`, {
+          lang: requestUser.lang,
+        }),
       );
     }
 
     if (model.mobile && (await this.isMobileExists(model.mobile))) {
       throw new ValidationError(
-        await this.i18nService.t('datasource.user.mobile_unique_required', { lang: requestUser.lang }),
+        await this.i18nService.tv('core.datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!', {
+          lang: requestUser.lang,
+        }),
       );
     }
 
@@ -318,7 +329,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         {
           userId: user.id,
           metaKey: UserMetaKeys.AdminColor,
-          metaValue: 'default',
+          metaValue: '{}',
         },
         {
           userId: user.id,
@@ -372,12 +383,16 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (user) {
       if (model.email && model.email !== user.email && (await this.isEmailExists(model.email))) {
         throw new ValidationError(
-          await this.i18nService.t('datasource.user.email_unique_required', { lang: requestUser.lang }),
+          await this.i18nService.tv('core.datasource.user.email_unique_required', 'Email is reqiured to be unique!', {
+            lang: requestUser.lang,
+          }),
         );
       }
       if (model.mobile && model.mobile !== user.mobile && (await this.isMobileExists(model.mobile))) {
         throw new ValidationError(
-          await this.i18nService.t('datasource.user.mobile_unique_required', { lang: requestUser.lang }),
+          await this.i18nService.tv('core.datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!', {
+            lang: requestUser.lang,
+          }),
         );
       }
 
@@ -522,7 +537,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       }
       if (await this.isEmailExists(email)) {
         throw new ValidationError(
-          await this.i18nService.t('datasource.user.email_unique_required', { lang: requestUser.lang }),
+          await this.i18nService.tv('core.datasource.user.email_unique_required', 'Email is reqiured to be unique!', {
+            lang: requestUser.lang,
+          }),
         );
       }
 
@@ -557,7 +574,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       }
       if (await this.isMobileExists(mobile)) {
         throw new ValidationError(
-          await this.i18nService.t('datasource.user.mobile_unique_required', { lang: requestUser.lang }),
+          await this.i18nService.tv('core.datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!', {
+            lang: requestUser.lang,
+          }),
         );
       }
 
@@ -604,7 +623,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
     if (id === requestUser.id) {
       throw new ForbiddenError(
-        await this.i18nService.t('datasource.user.delete_self_forbidden', { lang: requestUser.lang }),
+        await this.i18nService.tv('core.datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
+          lang: requestUser.lang,
+        }),
       );
     }
 
@@ -641,7 +662,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
     if (ids.includes(requestUser.id)) {
       throw new ForbiddenError(
-        await this.i18nService.t('datasource.user.delete_self_forbidden', { lang: requestUser.lang }),
+        await this.i18nService.tv('core.datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
+          lang: requestUser.lang,
+        }),
       );
     }
 

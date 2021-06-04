@@ -61,7 +61,7 @@ export async function LoadModules(...params: Parameters<Plugin>) {
       module.args = _moduleArgs;
     });
   } catch (err) {
-    cxt.redirect('/error', { code: 'loadModuleFailed' });
+    cxt.redirect('/error', { code: 'load_module_failed' });
   }
 
   const moduleLoader = new ModuleLoader({

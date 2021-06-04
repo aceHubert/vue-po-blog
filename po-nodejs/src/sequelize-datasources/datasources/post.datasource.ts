@@ -736,7 +736,13 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       // 如果状态为 Trash, 不被允许修改，先使用 restore 统一处理状态逻辑
       // 需要恢复到移入Trash前的状态，并删除记录等逻辑
       if (post.status === PostStatus.Trash) {
-        throw new ForbiddenError(await this.i18nService.t('update_trash_forbidden', { lang: requestUser.lang }));
+        throw new ForbiddenError(
+          await this.i18nService.tv(
+            'datasource.post.update_trash_forbidden',
+            `Cound not update with "trush" status, use "restore" function first!`,
+            { lang: requestUser.lang },
+          ),
+        );
       }
 
       // 是否有编辑权限
@@ -867,7 +873,13 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       // 如果状态为 Trash, 不被允许修改，先使用 restore 统一处理状态逻辑
       // 需要恢复到移入Trash前的状态等逻辑
       if (post.status === PostStatus.Trash) {
-        throw new ForbiddenError(await this.i18nService.t('update_trash_forbidden', { lang: requestUser.lang }));
+        throw new ForbiddenError(
+          await this.i18nService.tv(
+            'datasource.post.update_trash_forbidden',
+            `Cound not update with "trush" status, use "restore" function first!"`,
+            { lang: requestUser.lang },
+          ),
+        );
       }
 
       // 是否有编辑权限
@@ -937,11 +949,16 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     // trash 状态下不可以修改，使用 restore 重置
     const trushedIds = posts.filter((post) => post.status === PostStatus.Trash).map((post) => post.id);
     if (trushedIds.length > 0) {
+      const ids = trushedIds.join(',');
       throw new ForbiddenError(
-        await this.i18nService.t('update_trash_forbidden_with_ids', {
-          lang: requestUser.lang,
-          args: { ids: trushedIds.join(',') },
-        }),
+        await this.i18nService.tv(
+          'datasource.post.update_trash_forbidden_with_ids',
+          `Cound not update with "trush" status, use "restore" function first, ids: ${ids}!`,
+          {
+            lang: requestUser.lang,
+            args: { ids },
+          },
+        ),
       );
     }
 
@@ -1023,7 +1040,11 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
         // 如果状态为非 Trash, 不被允许重置
         if (post.status !== PostStatus.Trash) {
           throw new ForbiddenError(
-            await this.i18nService.t('datasource.post.restore_without_trash_forbidden', { lang: requestUser.lang }),
+            await this.i18nService.tv(
+              'datasource.post.restore_without_trash_forbidden',
+              `Could not restore without "trush" status!`,
+              { lang: requestUser.lang },
+            ),
           );
         }
 
@@ -1075,13 +1096,16 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     // 如果状态为非 Trash, 不被允许重置
     const notWithTrushedIds = posts.filter((post) => post.status !== PostStatus.Trash).map((post) => post.id);
     if (notWithTrushedIds.length > 0) {
+      const ids = notWithTrushedIds.join(',');
       throw new ForbiddenError(
-        await this.i18nService.t('datasource.post.restore_without_trash_forbidden_with_ids', {
-          lang: requestUser.lang,
-          args: {
-            ids: notWithTrushedIds.join(','),
+        await this.i18nService.tv(
+          'datasource.post.restore_without_trash_forbidden_with_ids',
+          `Could not restore without "trush" status, ids: ${ids}!`,
+          {
+            lang: requestUser.lang,
+            args: { ids },
           },
-        }),
+        ),
       );
     }
 
@@ -1174,9 +1198,13 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       // 非 trash 状态下不可以删除
       if (post.status !== PostStatus.Trash) {
         throw new ForbiddenError(
-          await this.i18nService.t('datasource.post.delete_without_trash_forbidden', {
-            lang: requestUser.lang,
-          }),
+          await this.i18nService.tv(
+            'datasource.post.delete_without_trash_forbidden',
+            `Could not delete without "trash" status!`,
+            {
+              lang: requestUser.lang,
+            },
+          ),
         );
       }
 
@@ -1237,13 +1265,16 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     // 如果状态为非 Trash, 不被允许删除
     const notWithTrushedIds = posts.filter((post) => post.status !== PostStatus.Trash).map((post) => post.id);
     if (notWithTrushedIds.length > 0) {
+      const ids = notWithTrushedIds.join(',');
       throw new ForbiddenError(
-        await this.i18nService.t('datasource.post.delete_without_trash_forbidden_with_ids', {
-          lang: requestUser.lang,
-          args: {
-            ids: notWithTrushedIds.join(','),
+        await this.i18nService.tv(
+          'datasource.post.delete_without_trash_forbidden_with_ids',
+          `Could not delete without "trash" status, ids: ${ids}!`,
+          {
+            lang: requestUser.lang,
+            args: { ids },
           },
-        }),
+        ),
       );
     }
 

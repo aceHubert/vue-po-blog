@@ -1,0 +1,56 @@
+{
+  "page_title": {},
+  "search": {
+    "keyword_placeholder": "搜索分类",
+    "bulk_delete_action_text": "@:core.common.search.bulk_delete_action_text"
+  },
+  "column": {
+    "name": "名称",
+    "slug": "别名",
+    "description": "描述",
+    "count": "数量"
+  },
+  "term_form": {
+    "creation_model_title": "新建分类",
+    "update_model_title": "修改分类",
+    "name": "分类名称",
+    "name_placeholder": "请输入分类名称",
+    "name_required": "@:core.page-category.form.name必填",
+    "name_help": "分类名称会显示在您的网站上。",
+    "slug": "别名",
+    "slug_placeholder": "请输入别名",
+    "slug_help": "\"别名\"是在URL中友好的显示分类名称，通常为英文字母组成。",
+    "parent": "父级分类",
+    "parent_placeholder": "请选择父级分类",
+    "parent_help": "父级分类",
+    "none_category": "无",
+    "description": "描述",
+    "description_placeholder": "请输入描述",
+    "description_help": "对分类作一段简短的描述",
+    "btn_create_text": "@:core.page-category.btn_text.create",
+    "btn_create_tips": "@:core.page-category.btn_tips.create",
+    "btn_update_text": "@:core.page-category.btn_text.update",
+    "btn_update_tips": "@:core.page-category.btn_tips.update"
+  },
+  "tips": {
+    "bulk_row_reqrired": "@:core.common.tips.bulk_row_reqrired",
+    "delete_pop_content": "确定永久删除这条类别吗？",
+    "delete_failed": "删除类别发生错误，请稍后重试！",
+    "bluk_delete_pop_content": "确定永久删除这些类别吗？",
+    "bluk_delete_failed": "批量删除类别发生错误，请稍后重试！"
+  },
+  "btn_text": {
+    "create": "新建分类",
+    "update": "修改分类",
+    "edit": "@:core.common.btn_text.edit",
+    "delete": "@:core.common.btn_text.delete",
+    "delete_pop_ok_text": "@:core.common.btn_text.ok",
+    "delete_pop_cancel_text": "@:core.common.btn_text.no"
+  },
+  "btn_tips": {
+    "create": "@:core.page-category.btn_text.create",
+    "update": "@:core.page-category.btn_text.update",
+    "edit": "@:core.page-category.btn_text.edit",
+    "delete": "永久删除这条标签"
+  }
+}
