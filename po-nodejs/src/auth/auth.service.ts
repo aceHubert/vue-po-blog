@@ -7,7 +7,7 @@ import { ConfigService } from '@/config/config.service';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
-import { TokenResponse, RefreshTokenResponse } from './interfaces/token-response.interface';
+import { Token, RefreshToken } from './interfaces/token.interface';
 
 @Injectable()
 export class AuthService {
@@ -245,7 +245,7 @@ export class AuthService {
    * @param password 登录密码
    * @param device 设备名称
    */
-  async signin(username: string, password: string, device: string): Promise<false | TokenResponse> {
+  async signin(username: string, password: string, device: string): Promise<false | Token> {
     const payload = await this.userDataSource.verifyUser(username, password, ['id', 'loginName', 'createdAt']);
     if (payload) {
       const jwtScrect = await this.getScrect(payload.id, device, false);
@@ -280,7 +280,7 @@ export class AuthService {
    * @access None
    * @param token refresh token
    */
-  async refreshToken(refreshToken: string, lang?: string): Promise<false | RefreshTokenResponse> {
+  async refreshToken(refreshToken: string, lang?: string): Promise<false | RefreshToken> {
     const refreshTokenPayload = await this.verifyRefreshToken(refreshToken, { lang });
     if (refreshTokenPayload && isPlainObject(refreshTokenPayload) && refreshTokenPayload.id) {
       const jwtScrect = await this.updateScrect(refreshTokenPayload.id, refreshTokenPayload.device);

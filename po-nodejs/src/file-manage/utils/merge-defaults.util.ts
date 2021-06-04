@@ -3,7 +3,7 @@ import { FileManageModuleOptions } from '../interfaces/file-manage-module-option
 
 const defaultOptions: Required<FileManageModuleOptions> = {
   dest: path.resolve(process.cwd(), 'uploads'),
-  staticPrefix: '/static',
+  staticPrefix: 'uploads',
   groupBy: 'month',
 };
 

@@ -15,6 +15,17 @@ declare global {
     lang?: string;
   };
 
+  export type LocaleConfig = {
+    name: string;
+    shortName: string;
+    /**
+     * svg icon or string text icon
+     */
+    icon: any;
+    locale: string;
+    alternate?: string;
+  };
+
   export type GqlContext = Context<{
     user: JwtPayload | null;
   }>;

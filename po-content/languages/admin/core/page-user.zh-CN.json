@@ -70,7 +70,7 @@
     "description": "自我简介",
     "description_placeholder": "简短的介绍您自己",
     "avator": "头像",
-    "admin_color": "管理界面配色文案",
+    "admin_color": "管理界面配色方案",
     "user_role": "角色",
     "none_user_role_option_text": "此站点上没有任何用户角色",
     "send_user_notification": "发送用户通知",

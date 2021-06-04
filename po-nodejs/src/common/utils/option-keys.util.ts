@@ -19,8 +19,12 @@ export enum OptionKeys {
   TimeFormat = 'time_format',
   /** 时区，默认： UTC+0 */
   TimezoneString = 'timezone_string',
-  /** 管理界面布局（包括主题，Logo，标题等） */
+  /** 管理界面布局（Logo，标题等） */
   AdminLayout = 'admin_layout',
+  /** 管理界面样式（主题，颜色等） */
+  AdminColor = 'admin_color',
+  /** 客户端支持的可选语言 */
+  SupportLanguages = 'support_languages',
   /** email 服务器配置 */
   MailServerUrl = 'mailserver_url',
   MailServerLogin = 'mailserver_login',

@@ -28,7 +28,7 @@ async function bootstrap() {
       credentialsRequired: false,
       getToken,
     }).unless({
-      path: [/^\/api\/auth\/(signin|refresh)/],
+      path: [/^\/api\/auth\/(signin|refresh)/, /^\/api\/locale\//],
     }),
   );
 

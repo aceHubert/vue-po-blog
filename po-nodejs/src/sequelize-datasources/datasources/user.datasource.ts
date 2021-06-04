@@ -329,7 +329,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         {
           userId: user.id,
           metaKey: UserMetaKeys.AdminColor,
-          metaValue: 'default',
+          metaValue: '{}',
         },
         {
           userId: user.id,

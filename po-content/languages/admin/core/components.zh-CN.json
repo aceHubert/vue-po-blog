@@ -8,10 +8,10 @@
     "user": {
       "profile": "用户信息",
       "settings": "设置",
-      "logout": "退出登录"
+      "signout": "退出登录"
     },
     "dialog": {
-      "logout": {
+      "signout": {
         "title": "@:core.common.dialog.title.tips",
         "content": "确认退出吗？",
         "ok_text": "@:core.common.btn_text.ok",

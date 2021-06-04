@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRoles } from '@/common/utils/user-roles.util';
 import { OptionKeys, OptionTablePrefixKeys } from '@/common/utils/option-keys.util';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/utils/user-meta-keys.util';
+import { defaultSupportLanguages } from '~/common/utils/default-support-languages.util';
 import { UserRole } from '@/users/enums';
 import { PostCommentStatus } from '@/posts/enums';
 import { BaseDataSource } from './base.datasource';
@@ -144,7 +145,7 @@ export class DbInitDataSource extends BaseDataSource {
           {
             userId: user.id,
             metaKey: UserMetaKeys.AdminColor,
-            metaValue: 'default',
+            metaValue: '{}',
           },
         ],
         {
@@ -182,7 +183,7 @@ export class DbInitDataSource extends BaseDataSource {
         },
       );
       const defaultArticleContent = await this.i18nService.tv(
-        'datasource.default_data.article_content',
+        'core.datasource.default_data.article_content',
         '<p>This is your first article.</p>',
         {
           lang: initArgs.locale,
@@ -210,6 +211,13 @@ export class DbInitDataSource extends BaseDataSource {
           { optionName: OptionKeys.BlogDescription, optionValue: 'A simple and light blog system' },
           { optionName: OptionKeys.AdminEmail, optionValue: initArgs.email },
           { optionName: OptionKeys.AdminLayout, optionValue: '{}' },
+          { optionName: OptionKeys.AdminColor, optionValue: '{}' },
+          {
+            optionName: OptionKeys.SupportLanguages,
+            optionValue: JSON.stringify(
+              defaultSupportLanguages.filter(({ locale }) => locale === initArgs.locale || locale === 'en-US'), // en-US 是默认值
+            ),
+          },
           { optionName: OptionKeys.UsersCanRegister, optionValue: 'off' },
           { optionName: OptionKeys.MailServerUrl, optionValue: 'mail.example.com' },
           { optionName: OptionKeys.MailServerLogin, optionValue: 'user@example.com' },
