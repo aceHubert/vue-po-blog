@@ -184,7 +184,7 @@ export class DbInitDataSource extends BaseDataSource {
       );
       const defaultArticleContent = await this.i18nService.tv(
         'core.datasource.default_data.article_content',
-        '<p>This is your first article.</p>',
+        'This is your first article.',
         {
           lang: initArgs.locale,
         },
@@ -214,9 +214,7 @@ export class DbInitDataSource extends BaseDataSource {
           { optionName: OptionKeys.AdminColor, optionValue: '{}' },
           {
             optionName: OptionKeys.SupportLanguages,
-            optionValue: JSON.stringify(
-              defaultSupportLanguages.filter(({ locale }) => locale === initArgs.locale || locale === 'en-US'), // en-US 是默认值
-            ),
+            optionValue: JSON.stringify(defaultSupportLanguages),
           },
           { optionName: OptionKeys.UsersCanRegister, optionValue: 'off' },
           { optionName: OptionKeys.MailServerUrl, optionValue: 'mail.example.com' },

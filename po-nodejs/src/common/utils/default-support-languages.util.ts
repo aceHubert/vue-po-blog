@@ -3,7 +3,7 @@ export const defaultSupportLanguages: Readonly<LocaleConfig>[] = (function () {
     {
       name: 'English',
       shortName: 'EN',
-      icon: 'static/icons/flags/4x3/am.svg',
+      icon: 'static/icons/flags/4x3/us.svg',
       locale: 'en-US',
       alternate: 'en',
     },

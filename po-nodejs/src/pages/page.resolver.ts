@@ -1,3 +1,4 @@
+import DataLoader from 'dataloader';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
@@ -8,6 +9,7 @@ import { PostType } from '@/orm-entities/interfaces';
 import { PostDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
+import { UserSimpleModel } from '@/sequelize-datasources/interfaces';
 import { SimpleUser } from '@/users/models/user.model';
 import { PagedPageArgs } from './dto/paged-page.args';
 import { NewPageInput } from './dto/new-page.input';
@@ -21,12 +23,26 @@ import { PostStatusCount, PostDayCount, PostMonthCount, PostYearCount } from '..
 export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMetaInput, PostDataSource, {
   descriptionName: 'page',
 }) {
+  private authorLoader!: DataLoader<{ authorId: number; fields: string[] }, UserSimpleModel>;
+
   constructor(
     protected readonly moduleRef: ModuleRef,
     private readonly postDataSource: PostDataSource,
     private readonly userDataSource: UserDataSource,
   ) {
     super(moduleRef);
+    this.authorLoader = new DataLoader(async (keys) => {
+      if (keys.length) {
+        // 所有调用的 fields 都是相同的
+        const results = await this.userDataSource.getSimpleInfo(
+          keys.map((key) => key.authorId),
+          keys[0].fields,
+        );
+        return keys.map(({ authorId }) => results[authorId] || null);
+      } else {
+        return Promise.resolve([]);
+      }
+    });
   }
 
   @Query((returns) => Page, { nullable: true, description: 'Get page.' })
@@ -90,7 +106,7 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
     @Parent() { author: authorId }: { author: number },
     @Fields() fields: ResolveTree,
   ): Promise<SimpleUser | null> {
-    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
+    return this.authorLoader.load({ authorId, fields: this.getFieldNames(fields.fieldsByTypeName.SimpleUser) });
   }
 
   @Authorized()

@@ -70,13 +70,37 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id 用户 Id（null返回请求用户的实体）
    * @param fields 返回的字段
    */
-  async getSimpleInfo(id: number, fields: string[]): Promise<UserSimpleModel | null> {
+  getSimpleInfo(id: number, fields: string[]): Promise<UserSimpleModel | null>;
+  getSimpleInfo(id: number[], fields: string[]): Promise<Record<number, UserSimpleModel>>;
+  getSimpleInfo(
+    idorIds: number | number[],
+    fields: string[],
+  ): Promise<UserSimpleModel | Record<number, UserSimpleModel> | null> {
     // 过滤掉敏感字段
     fields = fields.filter((field) => ['id', 'displayName', 'email'].includes(field));
 
-    return this.models.Users.findByPk(id, {
-      attributes: this.filterFields(fields, this.models.Users),
-    }).then((user) => user?.toJSON() as UserSimpleModel);
+    if (Array.isArray(idorIds)) {
+      // 根据ID分组
+      if (!fields.includes('id')) {
+        fields.push('id');
+      }
+      return this.models.Users.findAll({
+        attributes: this.filterFields(fields, this.models.Users),
+        where: {
+          id: idorIds,
+        },
+      }).then((users) => {
+        return users.reduce((prev, curr) => {
+          prev[curr.id] = curr.toJSON() as UserSimpleModel;
+
+          return prev;
+        }, {} as Record<number, UserSimpleModel>);
+      });
+    } else {
+      return this.models.Users.findByPk(idorIds, {
+        attributes: this.filterFields(fields, this.models.Users),
+      }).then((user) => user?.toJSON() as UserSimpleModel);
+    }
   }
 
   /**

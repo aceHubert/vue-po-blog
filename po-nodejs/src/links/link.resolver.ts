@@ -1,3 +1,4 @@
+import DataLoader from 'dataloader';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
@@ -6,6 +7,7 @@ import { User } from '@/common/decorators/user.decorator';
 import { LinkDataSource, UserDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
+import { UserSimpleModel } from '@/sequelize-datasources/interfaces';
 import { SimpleUser } from '@/users/models/user.model';
 import { PagedLinkArgs } from './dto/paged-link.args';
 import { NewLinkInput } from './dto/new-link.input';
@@ -14,8 +16,22 @@ import { Link, PagedLink } from './models/link.model';
 
 @Resolver(() => Link)
 export class LinkResolver extends BaseResolver {
+  private userLoader!: DataLoader<{ userId: number; fields: string[] }, UserSimpleModel>;
+
   constructor(private readonly linkDataSource: LinkDataSource, private readonly userDataSource: UserDataSource) {
     super();
+    this.userLoader = new DataLoader(async (keys) => {
+      if (keys.length) {
+        // 所有调用的 fields 都是相同的
+        const results = await this.userDataSource.getSimpleInfo(
+          keys.map((key) => key.userId),
+          keys[0].fields,
+        );
+        return keys.map(({ userId }) => results[userId] || null);
+      } else {
+        return Promise.resolve([]);
+      }
+    });
   }
 
   @Query((returns) => Link, { nullable: true, description: 'Get link.' })
@@ -24,7 +40,7 @@ export class LinkResolver extends BaseResolver {
     @Fields() fields: ResolveTree,
   ): Promise<Link | null> {
     const _field = this.getFieldNames(fields.fieldsByTypeName.Link);
-    // field resolve
+    // graphql 字段与数据库字段不相同
     if (_field.includes('user')) {
       _field.push('userId');
     }
@@ -34,7 +50,7 @@ export class LinkResolver extends BaseResolver {
   @Query((returns) => PagedLink, { description: 'Get paged links.' })
   links(@Args() args: PagedLinkArgs, @Fields() fields: ResolveTree): Promise<PagedLink> {
     const _field = this.getFieldNames(fields.fieldsByTypeName.PagedLink.rows.fieldsByTypeName.Link);
-    // field resolve
+    // graphql 字段与数据库字段不相同
     if (_field.includes('user')) {
       _field.push('userId');
     }
@@ -43,7 +59,7 @@ export class LinkResolver extends BaseResolver {
 
   @ResolveField((returns) => SimpleUser, { nullable: true, description: 'User info.' })
   user(@Parent() { userId }: { userId: number }, @Fields() fields: ResolveTree): Promise<SimpleUser | null> {
-    return this.userDataSource.getSimpleInfo(userId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
+    return this.userLoader.load({ userId, fields: this.getFieldNames(fields.fieldsByTypeName.SimpleUser) });
   }
 
   @Authorized()

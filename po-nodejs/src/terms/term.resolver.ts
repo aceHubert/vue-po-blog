@@ -1,11 +1,14 @@
+import DataLoader from 'dataloader';
 import { ModuleRef } from '@nestjs/core';
-import { Resolver, ResolveField, Query, Mutation, Args, ID, Int, Parent } from '@nestjs/graphql';
+import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { TermDataSource } from '@/sequelize-datasources/datasources';
+import { Authorized } from '@/common/decorators/authorized.decorator';
 
 // Types
+import { TermTaxonomyModel } from '@/sequelize-datasources/interfaces';
 import { TermArgs } from './dto/term.args';
 import { TermByObjectIdArgs } from './dto/term-by-object-id.args';
 import { NewTermInput } from './dto/new-term.input';
@@ -13,15 +16,28 @@ import { NewTermMetaInput } from './dto/new-term-meta.input';
 import { NewTermRelationshipInput } from './dto/new-term-relationship.input';
 import { UpdateTermInput } from './dto/update-term.input';
 import { TermTaxonomy, TermRelationship, TermMeta } from './models/term.model';
-import { Authorized } from '@/common/decorators/authorized.decorator';
 
 @Resolver(() => TermTaxonomy)
 export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, NewTermMetaInput, TermDataSource, {
   resolverName: 'Term',
   descriptionName: 'term',
 }) {
+  private cascadeLoader!: DataLoader<{ parentId: number; fields: string[] }, TermTaxonomyModel[]>;
+
   constructor(protected readonly moduleRef: ModuleRef, private readonly termDataSource: TermDataSource) {
     super(moduleRef);
+    this.cascadeLoader = new DataLoader(async (keys) => {
+      if (keys.length) {
+        // 所有调用的 fields 都是相同的
+        const results = await this.termDataSource.getList(
+          keys.map((key) => key.parentId),
+          keys[0].fields,
+        );
+        return keys.map(({ parentId }) => results[parentId] || []);
+      } else {
+        return Promise.resolve([]);
+      }
+    });
   }
 
   @Query((returns) => TermTaxonomy, { nullable: true, description: 'Get term.' })
@@ -51,10 +67,9 @@ export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, New
   @ResolveField((returns) => [TermTaxonomy!], { description: 'Get cascade terms.' })
   children(
     @Parent() { taxonomyId: parentId }: { taxonomyId: number },
-    @Args('group', { type: () => Int, nullable: true, description: 'group' }) group: number,
     @Fields() fields: ResolveTree,
   ): Promise<TermTaxonomy[]> {
-    return this.termDataSource.getList({ parentId, group }, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy));
+    return this.cascadeLoader.load({ parentId, fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy) });
   }
 
   @Query((returns) => [TermTaxonomy!], { description: 'Get terms by objectId.' })

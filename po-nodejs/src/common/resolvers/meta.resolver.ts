@@ -2,8 +2,9 @@
  * DataSources 必须有 getMetas/createMeta/updateMeta/updateMetaByKey/deleteMeta 方法
  */
 import { ModuleRef } from '@nestjs/core';
-import { Type, OnModuleInit } from '@nestjs/common';
+import { Type } from '@nestjs/common';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
+import DataLoader from 'dataloader';
 import { lowerFirst } from 'lodash';
 import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { BaseResolver } from './base.resolver';
@@ -36,15 +37,26 @@ export function createMetaResolver<
   { resolverName, descriptionName }: Options = {},
 ) {
   @Resolver(() => resolverType, { isAbstract: true })
-  abstract class MetaResolver extends BaseResolver implements OnModuleInit {
+  abstract class MetaResolver extends BaseResolver {
     private metaDataSource!: MetaDataSource<MetaReturnType, NewMetaInputType>;
+    private metaLoader!: DataLoader<{ modelId: number; metaKeys?: string[]; fields: string[] }, MetaReturnType[]>;
 
     constructor(protected readonly moduleRef: ModuleRef) {
       super();
-    }
-
-    onModuleInit() {
       this.metaDataSource = this.moduleRef.get(metaDataSourceTypeOrToken, { strict: false });
+      this.metaLoader = new DataLoader(async (keys) => {
+        if (keys.length) {
+          // 所有调用的 metaKeys 和 fields 都是相同的
+          const results = await this.metaDataSource.getMetas(
+            keys.map((key) => key.modelId),
+            keys[0].metaKeys,
+            keys[0].fields,
+          );
+          return keys.map(({ modelId }) => results[modelId] || []);
+        } else {
+          return Promise.resolve([]);
+        }
+      });
     }
 
     /**
@@ -89,7 +101,12 @@ export function createMetaResolver<
       metaKeys: string[] | undefined,
       @Fields() fields: ResolveTree,
     ) {
-      return this.metaDataSource.getMetas(modelId, metaKeys, this.getFieldNames(fields.fieldsByTypeName.Meta));
+      return this.metaLoader.load({
+        modelId,
+        metaKeys,
+        fields: this.getFieldNames(fields.fieldsByTypeName.Meta),
+      });
+      // return this.metaDataSource.getMetas(modelId, metaKeys, this.getFieldNames(fields.fieldsByTypeName.Meta));
     }
 
     @Mutation((returns) => metaReturnType, {

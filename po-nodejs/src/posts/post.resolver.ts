@@ -1,3 +1,4 @@
+import DataLoader from 'dataloader';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
 import { TermTaxonomy as TermTaxonomyEnum } from '@/common/utils/term-taxonomy.util';
@@ -8,7 +9,8 @@ import { User } from '@/common/decorators/user.decorator';
 import { PostType } from '@/orm-entities/interfaces';
 import { PostDataSource, UserDataSource, TermDataSource } from '@/sequelize-datasources/datasources';
 
-// Typs
+// Types
+import { UserSimpleModel, TermTaxonomyModel } from '@/sequelize-datasources/interfaces';
 import { SimpleUser } from '@/users/models/user.model';
 import { TermTaxonomy } from '@/terms/models/term.model';
 import { PostStatus, PostCommentStatus } from './enums';
@@ -30,6 +32,16 @@ import {
 export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMetaInput, PostDataSource, {
   descriptionName: 'post',
 }) {
+  private authorLoader!: DataLoader<{ authorId: number; fields: string[] }, UserSimpleModel>;
+  private categoryLoader!: DataLoader<
+    { objectId: number; taxonomy: TermTaxonomyEnum; fields: string[] },
+    TermTaxonomyModel[]
+  >;
+  private tagLoader!: DataLoader<
+    { objectId: number; taxonomy: TermTaxonomyEnum; fields: string[] },
+    TermTaxonomyModel[]
+  >;
+
   constructor(
     protected readonly moduleRef: ModuleRef,
     private readonly postDataSource: PostDataSource,
@@ -37,6 +49,35 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     private readonly termDataSource: TermDataSource,
   ) {
     super(moduleRef);
+    this.authorLoader = new DataLoader(async (keys) => {
+      if (keys.length) {
+        // 所有调用的 fields 都是相同的
+        const results = await this.userDataSource.getSimpleInfo(
+          keys.map((key) => key.authorId),
+          keys[0].fields,
+        );
+        return keys.map(({ authorId }) => results[authorId] || new Error(`No result for ${authorId}`));
+      } else {
+        return Promise.resolve([]);
+      }
+    });
+    const termLoaderFn = async (
+      keys: Readonly<Array<{ objectId: number; taxonomy: TermTaxonomyEnum; fields: string[] }>>,
+    ) => {
+      if (keys.length) {
+        // 所有调用的 taxonomy 和 fields 都是相同的
+        const results = await this.termDataSource.getListByObjectId(
+          keys.map((key) => key.objectId),
+          keys[0].taxonomy,
+          keys[0].fields,
+        );
+        return keys.map(({ objectId }) => results[objectId] || []);
+      } else {
+        return Promise.resolve([]);
+      }
+    };
+    this.categoryLoader = new DataLoader(termLoaderFn);
+    this.tagLoader = new DataLoader(termLoaderFn);
   }
 
   @Query((returns) => Post, { nullable: true, description: 'Get post.' })
@@ -63,39 +104,25 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
     @Parent() { author: authorId }: { author: number },
     @Fields() fields: ResolveTree,
   ): Promise<SimpleUser | null> {
-    return this.userDataSource.getSimpleInfo(authorId, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
+    return this.authorLoader.load({ authorId, fields: this.getFieldNames(fields.fieldsByTypeName.SimpleUser) });
   }
 
   @ResolveField((returns) => [TermTaxonomy!], { description: 'Categories' })
-  categories(
-    @Args('parentId', {
-      type: () => ID,
-      nullable: true,
-      description: 'Parent id (it will search for all if none value is provided, 0 is root parent id)',
-    })
-    parentId: number | undefined,
-    @Args('desc', { type: () => Boolean, nullable: true, description: 'Sort (default: asc)' })
-    desc: boolean | undefined,
-    @Parent() { id }: { id: number },
-    @Fields() fields: ResolveTree,
-  ) {
-    return this.termDataSource.getListByObjectId(
-      { objectId: id, taxonomy: TermTaxonomyEnum.Category, parentId, desc },
-      this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
-    );
+  categories(@Parent() { id: objectId }: { id: number }, @Fields() fields: ResolveTree) {
+    return this.categoryLoader.load({
+      objectId,
+      taxonomy: TermTaxonomyEnum.Category,
+      fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+    });
   }
 
   @ResolveField((returns) => [TermTaxonomy!], { description: 'Tags' })
-  tags(
-    @Args('desc', { type: () => Boolean, nullable: true, description: 'Sort (default: asc)' })
-    desc: boolean | undefined,
-    @Parent() { id }: { id: number },
-    @Fields() fields: ResolveTree,
-  ) {
-    return this.termDataSource.getListByObjectId(
-      { objectId: id, taxonomy: TermTaxonomyEnum.Tag, desc },
-      this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
-    );
+  tags(@Parent() { id: objectId }: { id: number }, @Fields() fields: ResolveTree) {
+    return this.tagLoader.load({
+      objectId,
+      taxonomy: TermTaxonomyEnum.Tag,
+      fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+    });
   }
 
   @Authorized()
@@ -168,7 +195,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Mutation((returns) => Boolean, {
     description: 'Update bulk of posts status (not allow to update in "trash" status)',
   })
-  bulkModifyPostStatus(
+  bulkUpdatePostStatus(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
     @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
     @User() requestUser: JwtPayload,

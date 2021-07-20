@@ -1,16 +1,16 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { isUndefined } from 'lodash';
+import { TermTaxonomy as TermTaxonomyEnum } from '@/common/utils/term-taxonomy.util';
 import { ValidationError } from '@/common/utils/gql-errors.util';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
-import { WhereOptions, Transaction } from 'sequelize';
+import { Model, WhereOptions, Transaction } from 'sequelize';
 import { TermAttributes } from '@/orm-entities/interfaces';
 import {
   TermMetaModel,
   TermTaxonomyArgs,
-  ChildrenTermTaxonomyArgs,
   TermTaxonomyByObjectIdArgs,
   TermTaxonomyModel,
   TermRelationshipModel,
@@ -68,25 +68,35 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * @param query 过滤的字段
    * @param fields 返回的字段
    */
-  getList(query: TermTaxonomyArgs | ChildrenTermTaxonomyArgs, fields: string[]): Promise<TermTaxonomyModel[]> {
+  getList(parentIds: number[], fields: string[]): Promise<Record<number, TermTaxonomyModel[]>>;
+  getList(query: TermTaxonomyArgs, fields: string[]): Promise<TermTaxonomyModel[]>;
+  getList(
+    parendIdsOrQuery: number[] | TermTaxonomyArgs,
+    fields: string[],
+  ): Promise<Record<number, TermTaxonomyModel[]> | TermTaxonomyModel[]> {
+    let _query = parendIdsOrQuery as Omit<TermTaxonomyArgs, 'parentId' | 'taxonomy'> & {
+      taxonomy?: string;
+      parentId?: number | number[];
+    };
+    if (Array.isArray(parendIdsOrQuery)) {
+      _query = {
+        parentId: parendIdsOrQuery,
+      };
+    }
+
     // 主键(meta/children 查询)
     if (!fields.includes('id')) {
       fields.push('id');
     }
 
-    const keyword = (query as TermTaxonomyArgs).keyword;
-    const taxonomy = (query as TermTaxonomyArgs).taxonomy;
-    const parentId = query.parentId;
-    const group = query.group;
-
     const where: WhereOptions<TermAttributes> = {};
-    if (keyword) {
+    if (_query.keyword) {
       where['name'] = {
-        [this.Op.like]: `%${keyword}%`,
+        [this.Op.like]: `%${_query.keyword}%`,
       };
     }
-    if (!isUndefined(group)) {
-      where['group'] = query.group;
+    if (!isUndefined(_query.group)) {
+      where['group'] = _query.group;
     }
 
     return this.models.TermTaxonomy.findAll({
@@ -100,20 +110,32 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
         },
       ],
       where: {
-        ...(!isUndefined(parentId) ? { parentId } : {}),
-        ...(taxonomy ? { taxonomy } : {}),
+        ...(!isUndefined(_query.parentId) ? { parentId: _query.parentId } : {}),
+        ...(_query.taxonomy ? { taxonomy: _query.taxonomy } : {}),
       },
-    }).then((values) =>
-      values.map((term) => {
+    }).then((terms) => {
+      const format = (term: Model<TermTaxonomyModel>) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { Terms, id: taxonomyId, termId, ...restTaxonomy } = term.toJSON() as any;
         return {
-          taxonomyId,
+          taxonomyId, // parentId
           ...restTaxonomy,
           ...Terms,
         } as TermTaxonomyModel;
-      }),
-    );
+      };
+      if (Array.isArray(parendIdsOrQuery)) {
+        return (terms as any[]).reduce((prev, curr) => {
+          const key = (curr as any)[this.metaModelIdFieldName] as number;
+          if (!prev[key]) {
+            prev[key] = [];
+          }
+          prev[key].push(format(curr));
+          return prev;
+        }, {} as Record<number, TermTaxonomyModel[]>);
+      } else {
+        return (terms as any[]).map(format);
+      }
+    });
   }
 
   /**
@@ -121,21 +143,40 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * @param objectId 对象ID
    * @param fields 返回的字段
    */
-  getListByObjectId(query: TermTaxonomyByObjectIdArgs, fields: string[]): Promise<TermTaxonomyModel[]> {
+  getListByObjectId(
+    objectIds: number[],
+    taxonomy: TermTaxonomyEnum,
+    fields: string[],
+  ): Promise<Record<number, TermTaxonomyModel[]>>;
+  getListByObjectId(query: TermTaxonomyByObjectIdArgs, fields: string[]): Promise<TermTaxonomyModel[]>;
+  getListByObjectId(
+    objectIdsOrQuery: number[] | TermTaxonomyByObjectIdArgs,
+    taxonomyOrFields: TermTaxonomyEnum | string[],
+    fields?: string[],
+  ): Promise<Record<number, TermTaxonomyModel[]> | TermTaxonomyModel[]> {
+    let _query = objectIdsOrQuery as Omit<TermTaxonomyByObjectIdArgs, 'objectId'> & { objectId: number | number[] };
+    let _fields = taxonomyOrFields as string[];
+    if (Array.isArray(objectIdsOrQuery)) {
+      _query = {
+        objectId: objectIdsOrQuery,
+        taxonomy: taxonomyOrFields as TermTaxonomyEnum,
+      };
+      _fields = fields!;
+    }
     // 主键(meta/children 查询)
-    if (!fields.includes('id')) {
-      fields.push('id');
+    if (!_fields.includes('id')) {
+      _fields.push('id');
     }
 
     return this.models.TermTaxonomy.findAll({
-      attributes: this.filterFields(fields, this.models.TermTaxonomy),
+      attributes: this.filterFields(_fields, this.models.TermTaxonomy),
       include: [
         {
           model: this.models.Terms,
-          attributes: this.filterFields(fields, this.models.Terms),
+          attributes: this.filterFields(_fields, this.models.Terms),
           as: 'Terms',
           where: {
-            ...(!isUndefined(query.group) ? { group: query.group } : {}),
+            ...(!isUndefined(_query.group) ? { group: _query.group } : {}),
           },
           required: true,
         },
@@ -143,26 +184,38 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
           model: this.models.TermRelationships,
           as: 'TermRelationships',
           where: {
-            objectId: query.objectId,
+            objectId: _query.objectId,
           },
         },
       ],
       where: {
-        ...(!isUndefined(query.parentId) ? { parentId: query.parentId } : {}),
-        taxonomy: query.taxonomy,
+        ...(!isUndefined(_query.parentId) ? { parentId: _query.parentId } : {}),
+        taxonomy: _query.taxonomy,
       },
-      order: [[this.models.TermRelationships, 'order', query.desc ? 'DESC' : 'ASC']],
-    }).then((values) =>
-      values.map((term) => {
+      order: [[this.models.TermRelationships, 'order', _query.desc ? 'DESC' : 'ASC']],
+    }).then((terms) => {
+      const format = (term: Model<TermTaxonomyModel>) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { Terms, id: taxonomyId, termId, ...restTaxonomy } = term.toJSON() as any;
         return {
-          taxonomyId,
+          taxonomyId, // parentId
           ...restTaxonomy,
           ...Terms,
         } as TermTaxonomyModel;
-      }),
-    );
+      };
+      if (Array.isArray(objectIdsOrQuery)) {
+        return (terms as any[]).reduce((prev, curr) => {
+          const key = (curr as any)[this.metaModelIdFieldName] as number;
+          if (!prev[key]) {
+            prev[key] = [];
+          }
+          prev[key].push(format(curr));
+          return prev;
+        }, {} as Record<number, TermTaxonomyModel[]>);
+      } else {
+        return (terms as any[]).map(format);
+      }
+    });
   }
 
   /**

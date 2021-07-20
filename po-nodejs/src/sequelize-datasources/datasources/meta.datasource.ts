@@ -109,12 +109,26 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * @param metaKeys 过滤的字段(不需要添加 table 前缀，会自动匹配到带有前缀的数据)
    * @param fields 返回字段
    */
-  getMetas(modelId: number, metaKeys: string[] | undefined, fields: string[]): Promise<MetaReturnType[]> {
+  getMetas(modelId: number, metaKeys: string[] | undefined, fields: string[]): Promise<MetaReturnType[]>;
+  getMetas(
+    modelId: number[],
+    metaKeys: string[] | undefined,
+    fields: string[],
+  ): Promise<Record<number, MetaReturnType[]>>;
+  getMetas(
+    modelIdOrIds: number | number[],
+    metaKeys: string[] | undefined,
+    fields: string[],
+  ): Promise<MetaReturnType[] | Record<string, MetaReturnType[]>> {
+    // 用于在查询多个Id的情况下后面的分组
+    if (!fields.includes(this.metaModelIdFieldName)) {
+      fields.push(this.metaModelIdFieldName);
+    }
     return this.metaModel
       .findAll({
         attributes: this.filterFields(fields, this.metaModel),
         where: {
-          [this.metaModelIdFieldName]: modelId,
+          [this.metaModelIdFieldName]: modelIdOrIds,
           ...(metaKeys && metaKeys.length
             ? {
                 metaKey: flattenDeep(
@@ -131,16 +145,28 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
               }),
         },
       })
-      .then((metas) =>
-        metas.map((meta) => {
+      .then((metas) => {
+        const format = (meta: Model<MetaModel>) => {
           const { metaKey, ...rest } = meta.toJSON() as any;
           return ({
             ...rest,
             metaKey:
               metaKey && metaKey.startsWith(this.tablePrefix) ? metaKey.substr(this.tablePrefix.length) : metaKey,
           } as unknown) as MetaReturnType;
-        }),
-      );
+        };
+        if (Array.isArray(modelIdOrIds)) {
+          return metas.reduce((prev, curr) => {
+            const key = (curr as any)[this.metaModelIdFieldName] as number;
+            if (!prev[key]) {
+              prev[key] = [];
+            }
+            prev[key].push(format(curr));
+            return prev;
+          }, {} as Record<number, MetaReturnType[]>);
+        } else {
+          return metas.map(format);
+        }
+      });
   }
 
   /**

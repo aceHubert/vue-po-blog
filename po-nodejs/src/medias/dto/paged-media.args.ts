@@ -6,6 +6,9 @@ import { PagedArgs } from '@/common/models/general.model';
  */
 @ArgsType()
 export class PagedMediaArgs extends PagedArgs {
+  @Field({ nullable: true, description: 'Search keyword (fuzzy searching from file name)' })
+  keyword?: string;
+
   @Field({ nullable: true, description: 'File extension' })
   extension?: string;
 

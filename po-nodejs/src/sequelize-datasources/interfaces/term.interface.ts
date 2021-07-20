@@ -40,11 +40,6 @@ export interface TermTaxonomyArgs {
   group?: number;
 }
 
-export interface ChildrenTermTaxonomyArgs {
-  parentId: number;
-  group?: number;
-}
-
 /**
  * 协议关系搜索条件
  */
