@@ -60,7 +60,8 @@
     "nuxt-property-decorator": "^2.9.1",
     "subscriptions-transport-ws": "^0.9.18",
     "vue-i18n": "^8.21.0",
-    "vue-ls": "^3.2.1"
+    "vue-ls": "^3.2.1",
+    "warning": "^4.0.3"
   },
   "devDependencies": {
     "@nuxt/types": "^2.14.4",
@@ -74,6 +75,7 @@
     "@types/lodash-es": "^4.17.4",
     "@types/node": "^14.6.4",
     "@types/vue-ls": "^3.2.2",
+    "@types/warning": "^3.0.0",
     "eslint-plugin-vue": "^7.1.0",
     "grunt": "^1.4.1",
     "grunt-contrib-less": "^2.1.0",
