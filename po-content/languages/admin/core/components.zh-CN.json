@@ -4,21 +4,6 @@
     "selected": "已选择",
     "clear": "清除"
   },
-  "avatar_dropdown": {
-    "user": {
-      "profile": "用户信息",
-      "settings": "设置",
-      "signout": "退出登录"
-    },
-    "dialog": {
-      "signout": {
-        "title": "@:core.common.dialog.title.tips",
-        "content": "确认退出吗？",
-        "ok_text": "@:core.common.btn_text.ok",
-        "cancel_text": "@:core.common.btn_text.no"
-      }
-    }
-  },
   "search_form": {
     "keyword_placeholder": "关键字",
     "bulk_action_placeholder": "批量操作",

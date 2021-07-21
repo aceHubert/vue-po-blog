@@ -2,7 +2,7 @@
   "default_data": {
     "uncategorized": "未分类",
     "article_title": "示例文章",
-    "article_content": "<p>这是您的第一篇文章。</p>"
+    "article_content": "这是您的第一篇文章。"
   },
   "user": {
     "username_unique_required": "用户名必须是唯一的！",

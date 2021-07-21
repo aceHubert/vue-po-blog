@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 61 68" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="PSD">
+    </g>
+    <g id="music">
+    </g>
+    <g id="RAR">
+    </g>
+    <g id="link">
+    </g>
+    <g id="ics">
+    </g>
+    <g id="pdf">
+    </g>
+    <g id="apk">
+    </g>
+    <g id="mov">
+    </g>
+    <g id="pic">
+    </g>
+    <g id="PPT">
+    </g>
+    <g id="ECEL">
+    </g>
+    <g id="doc">
+    </g>
+    <g id="zip">
+    </g>
+    <g id="画板1" transform="matrix(0.786543,0,0,0.7043,244.363,-97.5106)">
+        <rect x="-310.68" y="138.45" width="77.555" height="96.55" style="fill:none;"/>
+        <g id="pdf1" serif:id="pdf" transform="matrix(1.27139,0,0,1.41985,-590.381,-311.646)">
+            <path id="圆角矩形-1" serif:id="圆角矩形 1" d="M267.5,343.995L268,343.495L268,383C268,384.096 267.119,384.986 266,385L222,385C220.895,385 220,384.105 220,383L220,333C220,331.896 220.895,331 222,331L254.505,331L267.5,343.995Z" style="fill:rgb(244,78,78);"/>
+            <path id="圆角矩形-1-拷贝" serif:id="圆角矩形 1 拷贝" d="M254,342.455C254,343.86 255.14,345 256.545,345L267.994,345L254,331.006L254,342.455Z" style="fill:rgb(196,0,0);"/>
+            <g id="形状-502" serif:id="形状 502" opacity="0.7">
+                <g transform="matrix(1,-0,-0,1,219.997,317.003)">
+                    <use xlink:href="#_Image1" x="8.026" y="26.117" width="29.887px" height="29.934px" transform="matrix(0.996233,0,0,0.997811,0,0)"/>
+                </g>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <image id="_Image1" width="30px" height="30px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACA0lEQVRIib2Wu2sVQRTGf9/lYqMo+Ch8gCAKdgqCQoI22kRTpVGCnRDvX6CNhdhZWYidYiOIFhZpbsBCKwXRkC5dsBAERSQPDZroZ7Ezd4f1xrtr7u6B5cyZndnffGdeCxXN9hnbo1X7bcoCdDo8m4K3KrYfARTKc02Co70CHtve2hR4R/AjwR9pCrxaiN0U+EPwcZ6XmwSnKleaAn8uxN+aAh8txGtNgU+Rzy/AudrBtvcAh5IqAR3b2qDLcMBkanvjSMr/dXRWBUd1swEu4JrtnbWAw9F4LIbADPAuxALGqoLbJdudKMRvgd+hXsBF22uSnpYFl011muYnktYlvQHuk6f8su2O7YNDAdveD5yOIfA8vpM0DTxK4BeAu7YvDVrtZVI9Rq72paRPyaDawGvgB3AltBMwCUza/gKsA7/IDpuPwIyk2X+OyvZJ4Eb4mIHrwHbgONliO1DoUmZPG7g5SHGq9hlwuwJgIxMw2hcc5mecfDUbmEiAg+7hRbIrcwnYAhwuvO/+NXLbu4CHyehMpvY7sC/45T7PUvCrklz4ZgvYC+wG3ktaVKHBODCVVIlsMdwboLCy9VJt+yrZdogqo+8OG9oD2+4A5/tA70haqAPcsn02gUYz8EDSizqgkJ1c6ZZxUq4lxSk4/Y+KKb4l6Wed4Da5sm3APNCV9LVOKMAfm7qyzzc90SEAAAAASUVORK5CYII="/>
+    </defs>
+</svg>

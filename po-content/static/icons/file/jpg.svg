@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 61 68" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="PSD">
+    </g>
+    <g id="music">
+    </g>
+    <g id="RAR">
+    </g>
+    <g id="link">
+    </g>
+    <g id="ics">
+    </g>
+    <g id="pdf">
+    </g>
+    <g id="apk">
+    </g>
+    <g id="mov">
+    </g>
+    <g id="pic">
+    </g>
+    <g id="PPT">
+    </g>
+    <g id="ECEL">
+    </g>
+    <g id="doc">
+    </g>
+    <g id="zip">
+    </g>
+    <g id="画板1" transform="matrix(0.786543,0,0,0.7043,244.363,-97.5106)">
+        <rect x="-310.68" y="138.45" width="77.555" height="96.55" style="fill:none;"/>
+        <clipPath id="_clip1">
+            <rect x="-310.68" y="138.45" width="77.555" height="96.55"/>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <g id="pic1" serif:id="pic" transform="matrix(1.27139,0,0,1.41985,-971.8,-98.6646)">
+                <path id="圆角矩形-1-拷贝-5" serif:id="圆角矩形 1 拷贝 5" d="M567.5,193.995L568,193.495L568,233C568,234.096 567.119,234.986 566,235L522,235C520.895,235 520,234.105 520,233L520,183C520,181.896 520.895,181 522,181L554.505,181L567.5,193.995Z" style="fill:rgb(68,152,217);"/>
+                <path id="矩形-18" serif:id="矩形 18" d="M559,219L530,219L530,197L559,197L559,219ZM533,200L556,200L556,216L551,211L546,215L539,207L533,216L533,200Z" style="fill:white;fill-opacity:0.7;"/>
+                <path id="圆角矩形-1-拷贝-4" serif:id="圆角矩形 1 拷贝 4" d="M554,192.455C554,193.86 555.14,195 556.545,195L567.994,195L554,181.006L554,192.455Z" style="fill:rgb(0,97,174);"/>
+            </g>
+        </g>
+    </g>
+</svg>

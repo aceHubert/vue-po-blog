@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 61 68" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="PSD">
+    </g>
+    <g id="music">
+    </g>
+    <g id="RAR">
+    </g>
+    <g id="link">
+    </g>
+    <g id="ics">
+    </g>
+    <g id="pdf">
+    </g>
+    <g id="apk">
+    </g>
+    <g id="mov">
+    </g>
+    <g id="pic">
+    </g>
+    <g id="PPT">
+    </g>
+    <g id="ECEL">
+    </g>
+    <g id="doc">
+    </g>
+    <g id="zip">
+    </g>
+    <g id="画板1" transform="matrix(0.786543,0,0,0.7043,244.363,-97.5106)">
+        <rect x="-310.68" y="138.45" width="77.555" height="96.55" style="fill:none;"/>
+        <clipPath id="_clip1">
+            <rect x="-310.68" y="138.45" width="77.555" height="96.55"/>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <g id="mov1" serif:id="mov" transform="matrix(1.27139,0,0,1.41985,-1098.94,-98.6646)">
+                <path id="圆角矩形-1-拷贝-5" serif:id="圆角矩形 1 拷贝 5" d="M667.5,193.995L668,193.495L668,233C668,234.096 667.119,234.986 666,235L622,235C620.895,235 620,234.105 620,233L620,183C620,181.896 620.895,181 622,181L654.505,181L667.5,193.995Z" style="fill:rgb(221,73,73);"/>
+                <path id="矩形-19" serif:id="矩形 19" d="M637,226L630,226L630,191L632,191L632,193L635,193L635,191L637,191L637,196L652,196L652,191L659,191L659,226L657,226L657,225L654,225L654,226L652,226L652,220L637,220L637,226ZM635,223L632,223L632,225L635,225L635,223ZM657,221L654,221L654,223L657,223L657,221ZM635,219L632,219L632,221L635,221L635,219ZM657,217L654,217L654,219L657,219L657,217ZM635,215L632,215L632,217L635,217L635,215ZM652,199L637,199L637,217L652,217L652,199ZM657,213L654,213L654,215L657,215L657,213ZM650.004,208.008L641.009,213.007L641.009,203.008L650.004,208.008ZM635,211L632,211L632,213L635,213L635,211ZM657,209L654,209L654,211L657,211L657,209ZM635,207L632,207L632,209L635,209L635,207ZM657,205L654,205L654,207L657,207L657,205ZM635,203L632,203L632,205L635,205L635,203ZM657,201L654,201L654,203L657,203L657,201ZM635,199L632,199L632,201L635,201L635,199ZM657,197L654,197L654,199L657,199L657,197ZM635,195L632,195L632,197L635,197L635,195ZM657,193L654,193L654,195L657,195L657,193Z" style="fill:white;fill-opacity:0.7;"/>
+                <path id="圆角矩形-1-拷贝-4" serif:id="圆角矩形 1 拷贝 4" d="M654,192.455C654,193.86 655.14,195 656.545,195L667.994,195L654,181.006L654,192.455Z" style="fill:rgb(176,0,0);"/>
+            </g>
+        </g>
+    </g>
+</svg>

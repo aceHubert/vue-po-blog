@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 61 68" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="PSD">
+    </g>
+    <g id="music">
+    </g>
+    <g id="RAR">
+    </g>
+    <g id="link">
+    </g>
+    <g id="ics">
+    </g>
+    <g id="pdf">
+    </g>
+    <g id="apk">
+    </g>
+    <g id="mov">
+    </g>
+    <g id="pic">
+    </g>
+    <g id="PPT">
+    </g>
+    <g id="ECEL">
+    </g>
+    <g id="doc">
+    </g>
+    <g id="zip">
+    </g>
+    <g id="画板1" transform="matrix(0.786543,0,0,0.7043,244.363,-97.5106)">
+        <rect x="-310.68" y="138.45" width="77.555" height="96.55" style="fill:none;"/>
+        <clipPath id="_clip1">
+            <rect x="-310.68" y="138.45" width="77.555" height="96.55"/>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <g id="ECEL1" serif:id="ECEL" transform="matrix(1.27139,0,0,1.41985,-717.523,-98.6646)">
+                <path id="圆角矩形-1-拷贝-5" serif:id="圆角矩形 1 拷贝 5" d="M367.5,193.995L368,193.495L368,233C368,234.096 367.119,234.986 366,235L322,235C320.895,235 320,234.105 320,233L320,183C320,181.896 320.895,181 322,181L354.505,181L367.5,193.995Z" style="fill:rgb(98,193,75);"/>
+                <path id="矩形-17" serif:id="矩形 17" d="M327,220L330,220L330,210L335,210L335,220L338,220L338,206L343,206L343,220L346,220L346,211L351,211L351,220L355,220L355,200L360,200L360,220L363,220L363,222L325,222L325,197L327,197L327,220Z" style="fill:white;fill-opacity:0.7;"/>
+                <path id="圆角矩形-1-拷贝-4" serif:id="圆角矩形 1 拷贝 4" d="M354,192.455C354,193.86 355.14,195 356.545,195L367.994,195L354,181.006L354,192.455Z" style="fill:rgb(25,136,0);"/>
+            </g>
+        </g>
+    </g>
+</svg>

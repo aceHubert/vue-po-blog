@@ -12,7 +12,9 @@
   },
   "visibility": {
     "private": "私有",
-    "public": "公开"
+    "private_description": "只对管理员和编辑者可见！",
+    "public": "公开",
+    "public_description": "对所有人可见！"
   },
   "search": {
     "keyword_placeholder": "搜索文章",
