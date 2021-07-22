@@ -1,11 +1,6 @@
 import { Vue, Component, ProvideReactive } from 'nuxt-property-decorator';
 import { createMediaQueryDispatcher } from '@/utils/enquire';
-
-export enum DeviceType {
-  Desktop = 'desktop',
-  Tablet = 'tablet',
-  Mobile = 'mobile',
-}
+import { DeviceType } from '@/configs/settings.config';
 
 // screen and (max-width: 1087.99px)
 const queries = {

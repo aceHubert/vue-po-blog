@@ -1,4 +1,4 @@
-export * from './table';
+export * from './column';
 export * from './paged';
 export * from './meta';
 export * from './term';

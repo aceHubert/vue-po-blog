@@ -1,24 +1,25 @@
 import { mixins, Component, Watch } from 'nuxt-property-decorator';
 import { upperFirst } from 'lodash-es';
-import { appMixin, deviceMixin } from '@/mixins';
-import { ConfigProvider, Breadcrumb, AvatarDropdown, LocaleDropdown, GlobalFooter } from '@/components';
 import { appStore, userStore } from '@/store/modules';
 import { getDefaultMenus } from '@/configs/menu.cofnig';
+import { AppMixin, DeviceMixin } from '@/mixins';
+import { ConfigProvider } from '@/components';
+import { Breadcrumb, AvatarDropdown, LocaleDropdown, GlobalFooter } from './modules';
 import classes from './styles/default.less?module';
 
 // Types
 import { Menu } from 'types/configs/menu';
-import { Actions } from '@/components/global-header/AvatarDropdown';
+import { AvatarDropdownAction } from './modules/global-header/AvatarDropdown';
 
 @Component<DefaultLayout>({
   name: 'DefaultLayout',
   head() {
     return {
-      link: [{ rel: 'stylesheet', href: `/assets/themes/${this.isRealDark ? 'dark' : 'light'}.css`, hid: 'po-theme' }],
+      link: this.isRealDark ? [{ rel: 'stylesheet', href: '/assets/themes/dark.css', hid: 'po-theme' }] : [],
     };
   },
 })
-export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
+export default class DefaultLayout extends mixins(AppMixin, DeviceMixin) {
   menuOpenKeys!: string[];
   headerHeight!: number;
   siderCollapsed!: boolean;
@@ -30,7 +31,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
       menuOpenKeys: [],
       headerHeight: 48,
       siderCollapsed: false,
-      siderWidth: 256,
+      siderWidth: 200,
       siderCollapsedWidth: 48,
     };
   }
@@ -147,12 +148,12 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
     });
   }
 
-  handleAction(key: Actions) {
-    if (key === Actions.Profile) {
+  handleAction(key: AvatarDropdownAction) {
+    if (key === AvatarDropdownAction.Profile) {
       this.$router.push({ name: 'profile' });
-    } else if (key === Actions.Settings) {
+    } else if (key === AvatarDropdownAction.Settings) {
       this.$router.push({ name: 'settings-general' });
-    } else if (key === Actions.SignOut) {
+    } else if (key === AvatarDropdownAction.SignOut) {
       appStore.signout();
     }
   }
@@ -205,7 +206,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
     };
 
     const handleClick = () => {
-      this.isMobile && (this.siderCollapsed = false);
+      this.isMobile && (this.siderCollapsed = true);
     };
 
     const handleOpenChange = (openKeys: string[]) => {
@@ -312,6 +313,7 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
         visible={!this.siderCollapsed}
         maskClosable
         getContainer={null}
+        width={this.siderWidth}
         bodyStyle={{
           padding: 0,
           height: '100vh',
@@ -433,8 +435,8 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
       <a-layout-footer class={classes.layoutFooter} style="padding: 0;">
         <GlobalFooter>
           <template slot="links">
-            <a href="https://github.com/aceHubert/vue-po-blog" target="_blank">
-              <a-icon type="github" />
+            <a href="https://github.com/aceHubert/vue-po-blog" class="grey--text text--lighten2" target="_blank">
+              <a-icon type="github" class="mr-1" />
               GitHub
             </a>
           </template>
@@ -445,7 +447,12 @@ export default class DefaultLayout extends mixins(appMixin, deviceMixin) {
 
   render() {
     return (
-      <ConfigProvider theme={this.theme} device={this.device} locale={this.antLocale}>
+      <ConfigProvider
+        theme={this.theme}
+        device={this.device}
+        i18nRender={(key, fallback) => this.$tv(key, fallback) as string}
+        locale={this.antLocale}
+      >
         <a-layout id="layout-default" class={[classes.layoutWrapper, `theme-${this.theme}`, `is-${this.device}`]}>
           {this.hasSiderMenu || this.isMobile ? this.renderSiderMenu() : null}
           <a-layout

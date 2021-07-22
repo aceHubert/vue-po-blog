@@ -1,4 +1,4 @@
-import { Vue, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
+import { mixins, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
 import { snakeCase } from 'lodash-es';
 import { trailingSlash } from '@/utils/path';
@@ -6,6 +6,7 @@ import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
 import { PostCommentStatus, PostStatus, UserCapability } from '@/includes/datas';
 import { userStore } from '@/store/modules';
+import { PostMixin } from '@/views/posts/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
@@ -72,8 +73,9 @@ enum BlukActions {
       });
   },
 })
-export default class PageIndex extends Vue {
+export default class PageIndex extends mixins(PostMixin) {
   @InjectReactive({ from: 'isMobile' }) isMobile!: boolean;
+  @InjectReactive({ from: 'isTablet' }) isTablet!: boolean;
   @Ref('table') table!: AsyncTable;
 
   // type 定义
@@ -111,13 +113,15 @@ export default class PageIndex extends Vue {
 
   // 所有列配置。 动态计算，title 配置有多语言
   get columns() {
-    return table({ i18nRender: (key, fallback) => this.$tv(key, fallback) }).columns;
+    return table({ i18nRender: (key, fallback) => this.$tv(key, fallback) as string }).columns;
   }
 
   // 动态计算，当是手机端时只显示第一列
   get fixedColumns() {
     if (this.isMobile) {
-      return this.columns.filter((column) => column.hideInMobile !== true);
+      return this.columns.filter((column) => column.showInMobile);
+    } else if (this.isTablet) {
+      return this.columns.filter((column) => column.showInTablet);
     }
     return this.columns;
   }
@@ -268,6 +272,11 @@ export default class PageIndex extends Vue {
     this.refreshTable();
   }
 
+  // 行选择
+  handleSelectChange(selectedRowKeys: Array<string | number>) {
+    this.selectedRowKeys = selectedRowKeys as any;
+  }
+
   // 批量操作
   handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
@@ -278,26 +287,12 @@ export default class PageIndex extends Vue {
     }
     if (action === BlukActions.MoveToTrash || action === BlukActions.Restore) {
       this.blukApplying = true;
-      this.graphqlClient
-        .mutate<{ result: boolean }, { ids: string[] }>({
-          mutation:
-            action === BlukActions.MoveToTrash
-              ? gql`
-                  mutation blukModifyStatus($ids: [ID!]!) {
-                    result: blukUpdatePostOrPageStatus(ids: $ids, status: Trash)
-                  }
-                `
-              : gql`
-                  mutation blukRestore($ids: [ID!]!) {
-                    result: blukRestorePostOrPage(ids: $ids)
-                  }
-                `,
-          variables: {
-            ids: this.selectedRowKeys,
-          },
-        })
-        .then(({ data }) => {
-          if (data?.result) {
+      (action === BlukActions.MoveToTrash
+        ? this.blukUpdatePostStatus(this.selectedRowKeys, PostStatus.Trash)
+        : this.blukRestorePost(this.selectedRowKeys)
+      )
+        .then((result) => {
+          if (result) {
             this.selectedRowKeys = [];
             this.refreshStatusCounts();
             this.refreshTable();
@@ -313,27 +308,11 @@ export default class PageIndex extends Vue {
     }
   }
 
-  // 行选择
-  handleSelectChange(selectedRowKeys: Array<string | number>) {
-    this.selectedRowKeys = selectedRowKeys as any;
-  }
-
   // 修改状态
-  handleModifyStatus(id: string, status: PostStatus) {
-    return this.graphqlClient
-      .mutate<{ result: boolean }, { id: string; status: PostStatus }>({
-        mutation: gql`
-          mutation updateStatus($id: ID!, $status: POST_STATUS!) {
-            result: updatePostOrPageStatus(id: $id, status: $status)
-          }
-        `,
-        variables: {
-          id,
-          status,
-        },
-      })
-      .then(({ data }) => {
-        if (data?.result) {
+  handleUpdateStatus(id: string, status: PostStatus) {
+    return this.updatePostStatus(id, status)
+      .then((result) => {
+        if (result) {
           this.refreshStatusCounts();
           this.refreshTable();
         }
@@ -346,19 +325,9 @@ export default class PageIndex extends Vue {
 
   // 重置
   handleRestore(id: string) {
-    return this.graphqlClient
-      .mutate<{ result: boolean }, { id: string }>({
-        mutation: gql`
-          mutation restorePostOrPage($id: ID!) {
-            result: restorePostOrPage(id: $id)
-          }
-        `,
-        variables: {
-          id,
-        },
-      })
-      .then(({ data }) => {
-        if (data?.result) {
+    return this.restorePost(id)
+      .then((result) => {
+        if (result) {
           this.refreshStatusCounts();
           this.refreshTable();
         }
@@ -371,19 +340,9 @@ export default class PageIndex extends Vue {
 
   // 删除
   handleDelete(id: string) {
-    return this.graphqlClient
-      .mutate<{ result: boolean }, { id: string }>({
-        mutation: gql`
-          mutation deletePost($id: ID!) {
-            result: deletePostOrPage(id: $id)
-          }
-        `,
-        variables: {
-          id,
-        },
-      })
-      .then(({ data }) => {
-        if (data?.result) {
+    return this.deletePost(id)
+      .then((result) => {
+        if (result) {
           this.refreshStatusCounts();
           this.refreshTable();
         }
@@ -454,7 +413,7 @@ export default class PageIndex extends Vue {
               <a
                 href="#none"
                 title={this.$tv('core.page-page.btn_tips.move_to_trash', 'Move to trash') as string}
-                onClick={m.stop.prevent(this.handleModifyStatus.bind(this, record.id, PostStatus.Trash))}
+                onClick={m.stop.prevent(this.handleUpdateStatus.bind(this, record.id, PostStatus.Trash))}
               >
                 {this.$tv('core.page-page.btn_text.move_to_trash', 'Trash')}
               </a>,

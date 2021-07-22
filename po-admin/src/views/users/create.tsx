@@ -110,7 +110,7 @@ export default class UserCreate extends Vue {
           },
         })
         .then(({ data }) => {
-          this.$router.replace({ name: 'users-edit', query: { id: data!.user.id } });
+          this.$router.replace({ name: 'users-edit', params: { id: data!.user.id } });
         })
         .catch((err) => {
           const { message } = formatError(err);
@@ -341,9 +341,13 @@ export default class UserCreate extends Vue {
           </a-form-item>
 
           <a-form-item label={this.$tv('core.page-user.form.send_user_notification', 'Send User Notification')}>
-            <a-checkbox {...{ directives: [{ name: 'decorator', value: ['sendUserNotification'] }] }}>
+            <a-checkbox
+              {...{
+                directives: [{ name: 'decorator', value: ['sendUserNotification', { valuePropName: 'checked' }] }],
+              }}
+            >
               {this.$tv(
-                'user.form.send_user_notification_checkbox_text',
+                'core.page-user.form.send_user_notification_checkbox_text',
                 'Send the new user an email about their account.',
               )}
             </a-checkbox>

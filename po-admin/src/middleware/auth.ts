@@ -25,7 +25,7 @@ const hasCapability = (route: Context['route'], userCapabilities: UserCapability
   return true;
 };
 
-export default async ({ route, redirect, error, $i18n }: Context) => {
+export default async ({ route, error, $i18n }: Context) => {
   // 没有授权，需要登录
   if (!isAnonymousRoute(route)) {
     if (!userStore.accessToken) {
@@ -39,7 +39,7 @@ export default async ({ route, redirect, error, $i18n }: Context) => {
 
     // 在登录时判断角色
     if (!userStore.role) {
-      redirect('/unauthorized');
+      error({ statusCode: 401 });
     } else if (!hasCapability(route, userStore.capabilities)) {
       error({
         statusCode: 401,

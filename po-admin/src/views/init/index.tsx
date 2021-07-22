@@ -48,11 +48,18 @@ export default class Init extends Vue {
   }
 
   get localeOptions() {
-    return appStore.supportLanguages.map((lang) => ({
-      key: lang.locale,
-      value: lang.locale,
-      title: lang.name,
-    }));
+    return [
+      {
+        key: 'en-US',
+        value: 'en-US',
+        title: 'English',
+      },
+      {
+        key: 'zh-CN',
+        value: 'zh-CN',
+        title: '简体中文',
+      },
+    ];
   }
 
   created() {
@@ -66,7 +73,7 @@ export default class Init extends Vue {
     this.form.setFieldsValue({
       locale: appStore.locale,
       title: this.$tv('core.page-init.title_init_value', 'This is a simple title'),
-      homeUrl: window.location.origin,
+      homeUrl: process.env.NODE_END === 'production' ? window.location.origin : 'http://localhost:5008',
     });
   }
 
@@ -85,7 +92,7 @@ export default class Init extends Vue {
         .initDB(initParams)
         .then((result) => {
           if (result) {
-            this.$router.replace({ path: '/login' });
+            this.$router.replace('/signin');
           }
         })
         .catch((err) => {

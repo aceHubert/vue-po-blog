@@ -1,8 +1,9 @@
-import { Vue, Component, Watch, Ref, InjectReactive } from 'nuxt-property-decorator';
+import { mixins, Component, Watch, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
-import { AsyncTable, SearchForm, TermEditForm } from '@/components';
+import { AsyncTable, SearchForm } from '@/components';
 import { gql, formatError } from '@/includes/functions';
 import { TermTaxonomy, UserCapability } from '@/includes/datas';
+import { TermMixin, TermEditForm } from '@/views/terms/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
@@ -30,8 +31,9 @@ enum BlukActions {
     capabilities: [UserCapability.ManageTags],
   },
 })
-export default class Tags extends Vue {
+export default class Tags extends mixins(TermMixin) {
   @InjectReactive({ from: 'isMobile' }) isMobile!: boolean;
+  @InjectReactive({ from: 'isTablet' }) isTablet!: boolean;
   @Ref('table') table!: AsyncTable;
 
   // type 定义
@@ -53,13 +55,15 @@ export default class Tags extends Vue {
 
   // 所有列配置。 动态计算，title 配置有多语言
   get columns() {
-    return table({ i18nRender: (key, fallback) => this.$tv(key, fallback) }).columns;
+    return table({ i18nRender: (key, fallback) => this.$tv(key, fallback) as string }).columns;
   }
 
   // 动态计算，当是手机端时只显示第一列
   get fixedColumns() {
     if (this.isMobile) {
-      return this.columns.filter((column) => column.hideInMobile !== true);
+      return this.columns.filter((column) => column.showInMobile);
+    } else if (this.isTablet) {
+      return this.columns.filter((column) => column.showInTablet);
     }
     return this.columns;
   }
@@ -123,22 +127,7 @@ export default class Tags extends Vue {
 
   // 新建标签
   onCreate(values: TermCreationModel) {
-    return this.graphqlClient
-      .mutate<{ term: Term }, { model: TermCreationModel & { taxonomy: 'tag' } }>({
-        mutation: gql`
-          mutation createTerm($model: NewTermInput!) {
-            term: createTerm(model: $model) {
-              id
-            }
-          }
-        `,
-        variables: {
-          model: {
-            ...values,
-            taxonomy: TermTaxonomy.Tag,
-          },
-        },
-      })
+    return this.createTerm(values, TermTaxonomy.Tag)
       .then(() => {
         this.formModelShown = false;
         this.refreshTable();
@@ -151,18 +140,7 @@ export default class Tags extends Vue {
 
   // 修改标签
   onUpdate(id: string, values: TermUpdateModel) {
-    return this.graphqlClient
-      .mutate<{ result: boolean }, { id: string; model: TermUpdateModel }>({
-        mutation: gql`
-          mutation updateTerm($id: ID!, $model: UpdateTermInput!) {
-            result: updateTerm(id: $id, model: $model)
-          }
-        `,
-        variables: {
-          id,
-          model: values,
-        },
-      })
+    return this.updateTerm(id, values)
       .then(() => {
         this.formModelShown = false;
         this.refreshTable();
@@ -178,6 +156,11 @@ export default class Tags extends Vue {
     this.refreshTable();
   }
 
+  // 行选择
+  handleSelectChange(selectedRowKeys: Array<string | number>) {
+    this.selectedRowKeys = selectedRowKeys as any;
+  }
+
   // 批量操作
   handleBlukApply(action: string | number) {
     if (!this.selectedRowKeys.length) {
@@ -188,24 +171,14 @@ export default class Tags extends Vue {
     }
     if (action === BlukActions.Delete) {
       this.$confirm({
-        content: this.$tv('core.page-tag.btn_tips.bluk_delete_pop_content', 'Do you really want to delete these tags?'),
+        content: this.$tv('core.page-tag.tips.bluk_delete_pop_content', 'Do you really want to delete these tags?'),
         okText: this.$tv('core.page-tag.btn_text.delete_pop_ok_text', 'Ok') as string,
         cancelText: this.$tv('core.page-tag.btn_text.delete_pop_cancel_text', 'No') as string,
         onOk: () => {
           this.blukApplying = true;
-          this.graphqlClient
-            .mutate<{ result: boolean }, { ids: string[] }>({
-              mutation: gql`
-                mutation bulkDelete($ids: [ID!]!) {
-                  result: bulkDeleteTerms(ids: $ids)
-                }
-              `,
-              variables: {
-                ids: this.selectedRowKeys,
-              },
-            })
-            .then(({ data }) => {
-              if (data?.result) {
+          this.blukDeleteTerms(this.selectedRowKeys)
+            .then((result) => {
+              if (result) {
                 this.selectedRowKeys = [];
                 this.refreshTable();
               } else {
@@ -232,19 +205,9 @@ export default class Tags extends Vue {
   // 删除标签
   handleDelete(id: string) {
     this.$nuxt.$loading.start();
-    this.graphqlClient
-      .mutate<{ result: boolean }, { id: string }>({
-        mutation: gql`
-          mutation delete($id: ID!) {
-            result: deleteTerm(id: $id)
-          }
-        `,
-        variables: {
-          id,
-        },
-      })
-      .then(({ data }) => {
-        if (data?.result) {
+    this.deleteTerm(id)
+      .then((result) => {
+        if (result) {
           this.refreshTable();
         } else {
           this.$message.error(
@@ -262,11 +225,6 @@ export default class Tags extends Vue {
       .finally(() => {
         this.$nuxt.$loading.finish();
       });
-  }
-
-  // 行选择
-  handleSelectChange(selectedRowKeys: Array<string | number>) {
-    this.selectedRowKeys = selectedRowKeys as any;
   }
 
   render() {

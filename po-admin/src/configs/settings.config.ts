@@ -8,6 +8,12 @@ export const ACCESS_TOKEN = 'po_access_token';
 export const REFRESH_TOKEN = 'po_refresh_token';
 export const LOCALE = 'po_locale';
 
+export enum DeviceType {
+  Desktop = 'desktop',
+  Tablet = 'tablet',
+  Mobile = 'mobile',
+}
+
 export enum ContentWidth {
   Fluid = 'fluid',
   Fixed = 'fixed',
@@ -45,7 +51,7 @@ export const defaultSettings: {
    * multiTab - 多 tab 页模式： boolean
    */
   layout: {
-    title: 'Plumemo Admin',
+    title: 'Admin System',
     logo: LogoSvg,
     layout: Layout.SiderMenu,
     contentWidth: ContentWidth.Fluid,

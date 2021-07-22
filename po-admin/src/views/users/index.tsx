@@ -1,15 +1,15 @@
 import { Vue, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { camelCase, snakeCase } from 'lodash-es';
 import { modifiers as m } from 'vue-tsx-support';
-import { AsyncTable, SearchForm } from '@/components';
-import { gql, formatError } from '@/includes/functions';
+import { AsyncTable, InlineTableRow, SearchForm } from '@/components';
+import { hook, gql, formatError } from '@/includes/functions';
 import { UserRole, UserCapability } from '@/includes/datas';
 import { userStore } from '@/store/modules';
 import { table } from './modules/constants';
 import classes from './styles/index.less?module';
 
 // Types
-import { UserWithRole, UserMetas, UserPagedQuery, UserPagedResponse } from 'types/datas';
+import { Column, CustomColumns, UserWithRole, UserMetas, UserPagedQuery, UserPagedResponse } from 'types/datas';
 import { DataSourceFn } from '@/components/async-table/AsyncTable';
 import { StatusOption, BlukAcitonOption } from '@/components/search-form/SearchForm';
 
@@ -49,9 +49,7 @@ const UserRoleOrder = Object.keys(UserRole)
   },
   asyncData: async ({ error, graphqlClient }) => {
     try {
-      // const columns = await hook('user:columns').filter(
-      //   table({ i18nRender: (key, fallback) => $i18n.tv(key, fallback) }).columns,
-      // );
+      const customColumns = await hook('user:columns').filter(null);
       // 获取分类
       const { data } = await graphqlClient.query<{
         roleCounts: Array<{ role: UserRole | 'None'; count: number }>;
@@ -67,6 +65,7 @@ const UserRoleOrder = Object.keys(UserRole)
       });
       return {
         roleCounts: data.roleCounts,
+        customColumns,
       };
     } catch (err) {
       const { statusCode, message } = formatError(err);
@@ -83,12 +82,13 @@ export default class UserIndex extends Vue {
   // columns!: ReturnType<Table>['columns'];
   selectedRowKeys!: string[];
   roleCounts!: Array<{ userRole: UserRole | 'None'; count: number }>;
+  customColumns!: CustomColumns;
   itemCount!: number;
   blukApplying!: boolean;
 
   data() {
     return {
-      // columns: [],
+      customColumns: [],
       selectedRowKeys: [],
       roleCounts: [],
       itemCount: 0,
@@ -98,17 +98,27 @@ export default class UserIndex extends Vue {
 
   // 所有列配置。 动态计算，title 配置有多语言
   get columns() {
-    return table({ i18nRender: (key, fallback) => this.$tv(key, fallback) }).columns;
+    const i18nRender = (key: string, fallback: string) => this.$tv(key, fallback) as string;
+    let customColumns = this.customColumns;
+    if (typeof this.customColumns === 'function') {
+      customColumns = this.customColumns.call(this, i18nRender);
+    }
+    return [...table.call(this, { i18nRender }).columns, ...(customColumns as Column[])];
   }
 
-  // 动态计算，当是手机端时只显示第一列
+  // 在不同尺寸屏幕显示的列
   get fixedColumns() {
     if (this.isMobile) {
-      return this.columns.filter((column) => column.hideInMobile !== true);
+      return this.columns.filter((column) => column.showInMobile);
     } else if (this.isTablet) {
-      return this.columns.filter((column) => column.hideInTablet !== true);
+      return this.columns.filter((column) => column.showInTablet);
     }
     return this.columns;
+  }
+
+  // 未在table 中显示的列
+  get inlineColumns() {
+    return this.columns.filter((column) => !this.fixedColumns.includes(column));
   }
 
   // 添加 All 选项
@@ -327,13 +337,6 @@ export default class UserIndex extends Vue {
   render() {
     const $filters = this.$options.filters!;
 
-    const getTitle = (dataIndex: string, defaultTitle: string) => {
-      return (
-        (this.columns as Array<{ title: string; dataIndex: string }>).find((column) => column.dataIndex === dataIndex)
-          ?.title || defaultTitle
-      );
-    };
-
     const renderActions = (record: UserWithRole) => (
       <div class={classes.actions}>
         <nuxt-link
@@ -374,45 +377,34 @@ export default class UserIndex extends Vue {
         username: (
           text: UserWithRole['username'],
           record: UserWithRole & Partial<UserMetas> & { expand?: boolean },
+          index: number,
         ) => (
           <div class={[classes.columnUsername]}>
             <p class={[classes.username]}>
               <span class="text-ellipsis" style="max-width:180px;display:inline-block;">
                 {text}
               </span>
-              <a-icon
-                type={record.expand ? 'up-circle' : 'down-circle'}
-                class="grey--text"
-                onClick={() => {
-                  this.$set(record, 'expand', !record.expand);
-                }}
-              ></a-icon>
+              {this.inlineColumns.length ? (
+                <a-icon
+                  type={record.expand ? 'up-circle' : 'down-circle'}
+                  class="grey--text"
+                  onClick={() => {
+                    this.$set(record, 'expand', !record.expand);
+                  }}
+                ></a-icon>
+              ) : null}
             </p>
 
-            {this.isMobile ? (
+            {this.inlineColumns.length ? (
               <div class={[classes.content]} v-show={record.expand}>
-                <p class={classes.contentItem}>
-                  <span class="grey--text text--lighten1">{getTitle('name', 'Name')}: </span>
-                  {record.firstName || record.lastName
-                    ? `${record.firstName} ${record.lastName}`
-                    : record.nickName || record.displayName}
-                </p>
-                <p class={classes.contentItem}>
-                  <span class="grey--text text--lighten1">{getTitle('mobile', 'Mobile')}: </span>
-                  {record.mobile || '-'}
-                </p>
-                <p class={classes.contentItem}>
-                  <span class="grey--text text--lighten1">{getTitle('email', 'Email')}: </span>
-                  <a href={`mailto:${record.email}`}>{record.email}</a>
-                </p>
-                <p class={classes.contentItem}>
-                  <span class="grey--text text--lighten1">{getTitle('userRole', 'Role')}: </span>
-                  {this.$tv(`core.page-user.role.${snakeCase(record.userRole || 'none')}`, record.userRole || 'none')}
-                </p>
-                <p class={classes.contentItem}>
-                  <span class="grey--text text--lighten1">{getTitle('createTime', 'CreateTime')}: </span>
-                  {$filters.dateFormat(record.createTime)}
-                </p>
+                <InlineTableRow
+                  columns={this.inlineColumns}
+                  record={record}
+                  index={index}
+                  {...{
+                    scopedSlots: scopedSolts(),
+                  }}
+                />
               </div>
             ) : null}
             {renderActions(record)}
@@ -431,7 +423,7 @@ export default class UserIndex extends Vue {
     };
 
     return (
-      <a-card class="user-index" bordered={false}>
+      <a-card class="user-index" bordered={false} size="small">
         <SearchForm
           keywordPlaceholder={this.$tv('core.page-user.search.keyword_placeholder', 'Search Users') as string}
           statusName="role"

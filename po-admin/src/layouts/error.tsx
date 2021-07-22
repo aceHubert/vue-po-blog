@@ -26,7 +26,12 @@ export default class Error extends Vue {
 
   get message() {
     return (
-      this.error.message || (this.$tv(`core.error.internal_error`, 'An error occurred while page render!') as string)
+      this.error.message ||
+      (this.statusCode === 401
+        ? (this.$tv(`core.error.unauthorized`, 'No permissions to visit this site!') as string)
+        : this.statusCode === 404
+        ? (this.$tv(`core.error.page_not_found`, 'Page not found!') as string)
+        : (this.$tv(`core.error.internal_error`, 'An error occurred while page render!') as string))
     );
   }
 

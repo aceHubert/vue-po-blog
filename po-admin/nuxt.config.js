@@ -65,7 +65,7 @@ module.exports = (configContext) => {
       ],
       script: [],
       link: [
-        { rel: 'stylesheet', href: `/assets/themes/light.css`, hid: 'po-theme' },
+        { rel: 'stylesheet', href: `/assets/themes/light.css` },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
       ],
       style: [],
@@ -118,7 +118,6 @@ module.exports = (configContext) => {
 
     plugins: [
       { src: 'plugins/vue-antd' },
-      { src: 'plugins/vue-i18n' },
       { src: 'plugins/vue-ls', ssr: false },
       { src: 'plugins/vue-ckeditor', ssr: false },
       { src: 'plugins/bootstrap' },
@@ -127,17 +126,11 @@ module.exports = (configContext) => {
       base: '/admin/',
       middleware: 'auth',
       extendRoutes(routes, _resolve) {
-        routes.push(
-          {
-            path: '/',
-            name: 'home',
-            redirect: { name: 'dashboard' },
-          },
-          // {
-          //   path: '*',
-          //   redirect: { path: '/page-not-found' },
-          // },
-        );
+        routes.push({
+          path: '/',
+          name: 'home',
+          redirect: { name: 'dashboard' },
+        });
       },
     },
     buildModules: ['@nuxt/typescript-build', '@nuxtjs/svg', '@nuxtjs/router-extras'],
@@ -202,10 +195,10 @@ module.exports = (configContext) => {
     // 启动加载 loading 配置
     loadingIndicator: {
       name: 'three-bounce',
-      color: '#f67280',
+      color: '#ccc',
       background: 'white',
     },
     // 忽略文件的 auto build
-    ignore: ['views/*/styles/**/*', 'views/*/modules/**/*'],
+    ignore: ['layouts/modules/**/*', 'views/*/modules/**/*'],
   };
 };

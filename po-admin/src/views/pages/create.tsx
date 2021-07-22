@@ -1,7 +1,6 @@
 import { Component, mixins } from 'nuxt-property-decorator';
-import { appStore } from '@/store/modules';
 import { PostStatus, PostVisibility, UserCapability } from '@/includes/datas';
-import { PostEditForm } from '@/components';
+import { PostEditForm } from '@/views/posts/modules';
 import { PageEditMixin } from './modules';
 
 {
@@ -28,7 +27,6 @@ export default class PageCreate extends mixins(PageEditMixin) {
         style="height:100vh"
         ref="editForm"
         editModel={this.page}
-        logo={appStore.layout.logo}
         i18nKeyPrefix="core.page-page"
         updatePost={this.onUpdatePage.bind(this)}
         updatePostStatus={this.onUpdatePageStatus.bind(this)}

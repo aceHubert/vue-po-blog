@@ -5,7 +5,8 @@
  */
 import Vue from 'vue';
 import Axios from 'axios';
-import { hasOwn, error as globalError } from '@vue-async/utils';
+import warning from 'warning';
+import { hasOwn } from '@vue-async/utils';
 import { httpClient, graphqlClient, hook, globalSettings, settingsFuncs } from '@/includes/functions';
 import { appStore, userStore } from '@/store/modules';
 import * as directives from '@/directives';
@@ -60,7 +61,7 @@ Vue.graphqlClient = graphqlClient;
 //   if (process.env.NODE_ENV === 'production') {
 //     // todo: 总的 error 处理, 推送到服务端
 //   } else {
-//     globalError(false, `[core] Error(${info})：${err.message || err}`, vm);
+//     warning(false, `[core] Error(${info})：${err.message || err}`);
 //   }
 
 //   if (vm && vm.$root) {
@@ -108,7 +109,7 @@ export async function Initializer(...params: Parameters<Plugin>) {
   if (route.name !== 'init') {
     // 加载网站配置文件， autoload: Yes (匿名访问)
     const autoloadOptions = await appStore.getAutoLoadOptions().catch((err) => {
-      globalError(process.env.NODE_ENV === 'production', err.message);
+      warning(process.env.NODE_ENV === 'production', err.message);
       return {} as Dictionary<string>;
     });
 
@@ -143,8 +144,8 @@ export async function Initializer(...params: Parameters<Plugin>) {
     }
 
     // 此方法会把用户信息保存到 userStore.info 中
-    await userStore.getUserInfo().catch(() => {
-      // ate by dog
+    await userStore.getUserInfo().catch((err) => {
+      warning(process.env.NODE_ENV === 'production', err.message);
     });
 
     if (userStore.info.locale) {

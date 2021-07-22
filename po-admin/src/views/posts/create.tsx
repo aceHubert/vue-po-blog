@@ -1,8 +1,6 @@
 import { Component, mixins } from 'nuxt-property-decorator';
-import { appStore } from '@/store/modules';
 import { PostStatus, PostVisibility, UserCapability } from '@/includes/datas';
-import { PostEditForm } from '@/components';
-import { PostEditMixin } from './modules';
+import { PostEditMixin, PostEditForm } from './modules';
 
 {
   /* <router>
@@ -28,8 +26,6 @@ export default class PostCreate extends mixins(PostEditMixin) {
         style="height:100vh"
         ref="editForm"
         editModel={this.post}
-        logo={appStore.layout.logo}
-        i18nKeyPrefix="core.page-post"
         updatePost={this.onUpdatePost.bind(this)}
         updatePostStatus={this.onUpdatePostStatus.bind(this)}
         {...{
@@ -82,7 +78,7 @@ export default class PostCreate extends mixins(PostEditMixin) {
                                   <span class="grey--text" style="display:block">
                                     {this.$tv(
                                       'core.page-post.visibility.private_description',
-                                      'Only visible to site admins and editors',
+                                      'Only visible to site admins and editors!',
                                     )}
                                   </span>
                                 </a-radio>

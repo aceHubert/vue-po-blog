@@ -1,4 +1,4 @@
-import { error as globalError } from '@vue-async/utils';
+import warning from 'warning';
 import { Initializer } from './initializer';
 import { Locale } from './locale';
 import { LoadModules } from './loadModules';
@@ -18,14 +18,12 @@ const plugin: Plugin = async (cxt, inject) => {
   // 或 throw Error(跳转到错误页面) 将终止后面的模块执行
   for (const name in bootstrapWaterfall) {
     try {
-      const result = await bootstrapWaterfall[name](cxt, inject);
-      if (result === false) {
-        break;
-      }
+      await bootstrapWaterfall[name](cxt, inject);
     } catch (err) {
-      globalError(process.env.NODE_ENV === 'production', err.message);
-      cxt.error({});
-      break;
+      warning(process.env.NODE_ENV === 'production', err.message);
+      throw err;
+      // cxt.error({});
+      // break;
     }
   }
 };

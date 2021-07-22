@@ -1,5 +1,5 @@
 import { mixins, Component } from 'nuxt-property-decorator';
-import { appMixin, deviceMixin } from '@/mixins';
+import { AppMixin, DeviceMixin } from '@/mixins';
 import { ConfigProvider } from '@/components';
 import classes from './styles/blank.less?module';
 
@@ -7,14 +7,19 @@ import classes from './styles/blank.less?module';
   name: 'BlankLayout',
   head() {
     return {
-      link: [{ rel: 'stylesheet', href: `/assets/themes/${this.isDark ? 'dark' : 'light'}.css`, hid: 'po-theme' }],
+      link: this.isRealDark ? [{ rel: 'stylesheet', href: '/assets/themes/dark.css', hid: 'po-theme' }] : [],
     };
   },
 })
-export default class BlankLayout extends mixins(appMixin, deviceMixin) {
+export default class BlankLayout extends mixins(AppMixin, DeviceMixin) {
   render() {
     return (
-      <ConfigProvider theme={this.theme} device={this.device} locale={this.antLocale}>
+      <ConfigProvider
+        theme={this.theme}
+        device={this.device}
+        i18nRender={(key, fallback) => this.$tv(key, fallback) as string}
+        locale={this.antLocale}
+      >
         <nuxt class={[classes.layoutWrapper, `theme-${this.theme}`, `is-${this.device}`]} />
       </ConfigProvider>
     );

@@ -1,5 +1,5 @@
+import warning from 'warning';
 import { Vue, Component, Watch } from 'nuxt-property-decorator';
-import { error as globalError } from '@vue-async/utils';
 import { appStore } from '@/store/modules';
 import { Layout, ContentWidth, Theme } from '@/configs/settings.config';
 
@@ -17,7 +17,7 @@ export default class AppMixin extends Vue {
         this.antLocale = locale;
       })
       .catch((err) => {
-        globalError(process.env.NODE_ENV === 'production', err.message);
+        warning(process.env.NODE_ENV === 'production', err.message);
       });
   }
 
@@ -96,5 +96,12 @@ export default class AppMixin extends Vue {
    */
   loadAntLocaleAsync(locale: string): Promise<Locale> {
     return import(`ant-design-vue/lib/locale/${locale.replace(/-/g, '_')}.js`).then((data) => data.default || data);
+  }
+
+  loadThemeCss(theme: 'light' | 'dark') {
+    if (document) {
+      const themeLink = document.querySelector<HTMLLinkElement>('link[data-hid="po-theme"]');
+      themeLink && (themeLink.href = `/static/assets/themes/${theme}.css`);
+    }
   }
 }

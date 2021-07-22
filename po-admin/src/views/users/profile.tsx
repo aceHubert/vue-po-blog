@@ -2,6 +2,7 @@ import { Vue, Component } from 'nuxt-property-decorator';
 import { camelCase } from 'lodash-es';
 import { userStore } from '@/store/modules';
 import { gql, formatError } from '@/includes/functions';
+import classes from './styles/profile.less?module';
 
 // Types
 import { User, UserMetas, UserResponse } from 'types/datas/user';
@@ -98,42 +99,42 @@ export default class Profile extends Vue {
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
-          <a-col xs={24} sm={6} class="text-right">
+          <a-col xs={8} sm={6} class={classes.itemLabel}>
             <strong>{this.$tv('core.page-user.form.username', 'Username')}: </strong>
           </a-col>
-          <a-col xs={24} sm={18}>
+          <a-col xs={16} sm={18}>
             {this.user.username}
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
-          <a-col xs={24} sm={6} class="text-right">
+          <a-col xs={8} sm={6} class={classes.itemLabel}>
             <strong>{this.$tv('core.page-user.form.firstname', 'First Name')}: </strong>
           </a-col>
-          <a-col xs={24} sm={18}>
+          <a-col xs={16} sm={18}>
             {this.user.firstName}
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
-          <a-col xs={24} sm={6} class="text-right">
+          <a-col xs={8} sm={6} class={classes.itemLabel}>
             <strong>{this.$tv('core.page-user.form.lastname', 'Last Name')}: </strong>
           </a-col>
-          <a-col xs={24} sm={18}>
+          <a-col xs={16} sm={18}>
             {this.user.lastName}
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
-          <a-col xs={24} sm={6} class="text-right">
+          <a-col xs={8} sm={6} class={classes.itemLabel}>
             <strong>{this.$tv('core.page-user.form.nickname', 'Nickname')}: </strong>
           </a-col>
-          <a-col xs={24} sm={18}>
+          <a-col xs={16} sm={18}>
             {this.user.nickName}
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
-          <a-col xs={24} sm={6} class="text-right">
+          <a-col xs={8} sm={6} class={classes.itemLabel}>
             <strong>{this.$tv('core.page-user.form.display_name', 'Display name for public as')}: </strong>
           </a-col>
-          <a-col xs={24} sm={18}>
+          <a-col xs={16} sm={18}>
             {this.user.displayName}
           </a-col>
         </a-row>
@@ -144,18 +145,18 @@ export default class Profile extends Vue {
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
-          <a-col xs={24} sm={6} class="text-right">
+          <a-col xs={8} sm={6} class={classes.itemLabel}>
             <strong>{this.$tv('core.page-user.form.email', 'Email')}: </strong>
           </a-col>
-          <a-col xs={24} sm={18}>
+          <a-col xs={16} sm={18}>
             {this.user.email}
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
-          <a-col xs={24} sm={6} class="text-right">
+          <a-col xs={8} sm={6} class={classes.itemLabel}>
             <strong>{this.$tv('core.page-user.form.website', 'Website')}: </strong>
           </a-col>
-          <a-col xs={24} sm={18}>
+          <a-col xs={16} sm={18}>
             {this.user.url}
           </a-col>
         </a-row>
@@ -166,22 +167,22 @@ export default class Profile extends Vue {
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
-          <a-col xs={24} sm={6} class="text-right">
+          <a-col xs={8} sm={6} class={classes.itemLabel}>
             <strong style="line-height:64px">{this.$tv('core.page-user.form.avator', 'Profile Picture')}: </strong>
           </a-col>
-          <a-col xs={24} sm={18}>
+          <a-col xs={16} sm={18}>
             {this.user.avatar ? (
-              <a-avatar shape="square" size={64} url={this.user.avatar}></a-avatar>
+              <a-avatar size={64} url={this.user.avatar}></a-avatar>
             ) : (
-              <a-avatar shape="square" size={64} icon="user" />
+              <a-avatar size={64} icon="user" />
             )}
           </a-col>
         </a-row>
         <a-row gutter={[8, 24]}>
-          <a-col xs={24} sm={6} class="text-right">
+          <a-col xs={8} sm={6} class={classes.itemLabel}>
             <strong>{this.$tv('core.page-user.form.description', 'Biographical Info')}: </strong>
           </a-col>
-          <a-col xs={24} sm={18}>
+          <a-col xs={16} sm={18}>
             {this.user.description}
           </a-col>
         </a-row>

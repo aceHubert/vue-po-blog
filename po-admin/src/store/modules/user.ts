@@ -1,7 +1,7 @@
 import { VuexModule, Module, VuexMutation, VuexAction, getModule } from 'nuxt-property-decorator';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
-import { error as globalError } from '@vue-async/utils';
+import warning from 'warning';
 import { store } from '@/store';
 import { httpClient, graphqlClient, gql } from '@/includes/functions';
 import { UserRole, UserCapability } from '@/includes/datas';
@@ -246,9 +246,7 @@ class UserStore extends VuexModule {
    */
   @VuexAction({ rawError: true, commit: 'setAccessToken' })
   signout() {
-    const { $i18n } = store.app.context as Context;
-    if (!this.accessToken)
-      return Promise.resolve(new Error($i18n.tv('core.common.no_token_provide', 'No token provide!') as string));
+    if (!this.accessToken) return Promise.resolve(null);
 
     const { req, res } = store.app.context as Context;
     const Cookie = process.client ? cookie.clientCookie : cookie.serverCookie(req, res);
@@ -256,7 +254,7 @@ class UserStore extends VuexModule {
     return httpClient
       .post('/auth/signout')
       .catch((err) => {
-        globalError(process.env.NODE_ENV === 'production', err.message);
+        warning(process.env.NODE_ENV === 'production', err.message);
       })
       .finally(() => {
         // 清除 tokens from cookie

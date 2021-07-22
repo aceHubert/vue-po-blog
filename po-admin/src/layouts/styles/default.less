@@ -2,7 +2,7 @@
 :global(.theme-light) {
   .layout-header {
     &__wrapper {
-      background: #fff;
+      background: @white;
     }
 
     .header-logo h1 {
@@ -20,22 +20,22 @@
 :global(.theme-dark) {
   .layout-header {
     &__wrapper {
-      background: #fff;
+      background: @white;
     }
 
     &.has-top-menu .layout-header__wrapper {
-      color: #fff;
+      color: @white;
       background: transparent;
     }
 
     .header-logo h1 {
-      color: #fff;
+      color: @white;
     }
   }
 
   .layout-sider {
     .sider-logo h1 {
-      color: #fff;
+      color: @white;
     }
   }
 }
@@ -47,7 +47,7 @@
   z-index: 10;
 
   &--fixed {
-    position: fixed;
+    position: fixed !important;
     top: 0;
     left: 0;
   }
@@ -61,8 +61,8 @@
   }
 
   .sider-logo {
-    padding: 16px;
-    height: 64px;
+    padding: 8px 16px;
+    height: 48px;
     display: block;
     overflow: hidden;
     white-space: nowrap;
@@ -70,7 +70,7 @@
     position: relative;
 
     .layout-sider--collapsed&{
-      padding: 16px 8px;
+      padding: 8px;
     }
 
     :global {
