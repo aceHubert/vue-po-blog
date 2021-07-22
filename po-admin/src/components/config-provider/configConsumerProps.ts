@@ -4,4 +4,7 @@ import { ConfigConsumerProps as AntConfigConsumerProps } from 'ant-design-vue/li
 export const ConfigConsumerProps = Object.assign({}, AntConfigConsumerProps, {
   theme: 'light',
   device: 'desktop',
+  i18nRender(key: string, fallback: string) {
+    return fallback;
+  },
 });

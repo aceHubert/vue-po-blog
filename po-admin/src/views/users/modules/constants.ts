@@ -1,6 +1,3 @@
-// Types
-import { Table } from 'types/datas/table';
-
 // 表格列信息
 const table: Table = ({ i18nRender }) => ({
   columns: [
@@ -8,8 +5,10 @@ const table: Table = ({ i18nRender }) => ({
       title: i18nRender('core.page-user.column.username', 'Username'),
       align: 'left',
       dataIndex: 'username',
-      width: '300px',
+      width: '285px',
       ellipsis: true,
+      showInMobile: true,
+      showInTablet: true,
       scopedSlots: { customRender: 'username' },
     },
     {
@@ -17,24 +16,18 @@ const table: Table = ({ i18nRender }) => ({
       align: 'left',
       dataIndex: 'name',
       ellipsis: true,
-      hideInMobile: true,
-      hideInTablet: true,
       scopedSlots: { customRender: 'name' },
     },
     {
       title: i18nRender('core.page-user.column.mobile', 'Mobile'),
       align: 'center',
       dataIndex: 'mobile',
-      hideInMobile: true,
-      hideInTablet: true,
       scopedSlots: { customRender: 'mobile' },
     },
     {
       title: i18nRender('core.page-user.column.email', 'Email'),
       align: 'center',
       dataIndex: 'email',
-      hideInMobile: true,
-      hideInTablet: true,
       scopedSlots: { customRender: 'email' },
     },
     {
@@ -42,7 +35,7 @@ const table: Table = ({ i18nRender }) => ({
       align: 'center',
       dataIndex: 'userRole',
       width: '120px',
-      hideInMobile: true,
+      showInTablet: true,
       scopedSlots: { customRender: 'userRole' },
     },
     {
@@ -50,7 +43,7 @@ const table: Table = ({ i18nRender }) => ({
       align: 'center',
       dataIndex: 'createTime',
       width: '160px',
-      hideInMobile: true,
+      showInTablet: true,
       scopedSlots: { customRender: 'createTime' },
     },
   ],

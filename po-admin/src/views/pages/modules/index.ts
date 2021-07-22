@@ -1,1 +1,1 @@
-export * from './edit-mixin';
+export * from './page-edit-mixin';

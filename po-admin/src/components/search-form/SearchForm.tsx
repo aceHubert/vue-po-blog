@@ -1,9 +1,10 @@
 import { Vue, Component, Prop, Watch, Inject } from 'nuxt-property-decorator';
-import { ConfigConsumerProps } from '../config-provider/configConsumerProps';
+import { ConfigConsumerProps } from '../config-provider';
 
 // Types
 import * as tsx from 'vue-tsx-support';
 import { Route } from 'vue-router';
+import { ConfigProviderProps } from '../config-provider/ConfigProvider';
 
 /**
  * 状态配置
@@ -78,7 +79,7 @@ export default class SearchFrom extends Vue {
     from: 'configProvider',
     default: () => ConfigConsumerProps,
   })
-  configProvider!: typeof ConfigConsumerProps;
+  configProvider!: ConfigProviderProps;
 
   @Prop(String) prefixCls?: string;
   /**  keyword input placeholder */
@@ -97,6 +98,8 @@ export default class SearchFrom extends Vue {
   @Prop(Boolean) blukApplying?: boolean;
   /** dataSource 行数（显示在表格的右上角）, 当 >0 时显示批量操作, 当scopedSlots.filterRight 有设置时，右上角行数不显示 */
   @Prop(Number) itemCount?: number;
+  /** 作为 i18n key 前缀(末尾不用加.),  [i18nKeyPrefix].term_form.btn_text */
+  @Prop({ type: String, default: 'core.components.search_form' }) i18nKeyPrefix!: string;
 
   localeKeyword?: string;
   localeStatus?: StatusOption['value'];
@@ -208,7 +211,7 @@ export default class SearchFrom extends Vue {
                 <a-input-search
                   vModel={this.localeKeyword}
                   placeholder={
-                    this.keywordPlaceholder || this.$tv('core.components.search_form.keyword_placeholder', 'Keyword')
+                    this.keywordPlaceholder || this.$tv(`${this.i18nKeyPrefix}.keyword_placeholder`, 'Keyword')
                   }
                   onSearch={this.handleSearch.bind(this)}
                 />
@@ -227,7 +230,7 @@ export default class SearchFrom extends Vue {
                       <a-space>
                         <a-select vModel={this.blukAciton} style="min-width:120px;">
                           <a-select-option value="">
-                            {this.$tv('core.components.search_form.bulk_action_placeholder', 'Bulk actions')}
+                            {this.$tv(`${this.i18nKeyPrefix}.bulk_action_placeholder`, 'Bulk actions')}
                           </a-select-option>
                           {this.blukAcitonOptions.map((option) => (
                             <a-select-option value={option.value}>{option.label}</a-select-option>
@@ -237,10 +240,10 @@ export default class SearchFrom extends Vue {
                           ghost
                           type="primary"
                           loading={this.blukApplying}
-                          title={this.$tv('core.components.search_form.bulk_apply_btn_tips', 'Apply')}
+                          title={this.$tv(`${this.i18nKeyPrefix}.bulk_apply_btn_tips`, 'Apply')}
                           onClick={this.handleBlukAction.bind(this)}
                         >
-                          {this.$tv('core.components.search_form.bulk_apply_btn_text', 'Apply')}
+                          {this.$tv(`${this.i18nKeyPrefix}.bulk_apply_btn_text`, 'Apply')}
                         </a-button>
                       </a-space>
                     </a-form-item>
@@ -258,7 +261,7 @@ export default class SearchFrom extends Vue {
                 ) : this.itemCount ? (
                   <a-form-item class={`${prefixCls}-content__count-item`}>
                     <span>
-                      {this.$tv('core.components.search_form.item_count', `${this.itemCount} Items`, {
+                      {this.$tv(`${this.i18nKeyPrefix}.item_count`, `${this.itemCount} Items`, {
                         count: this.itemCount,
                       })}
                     </span>

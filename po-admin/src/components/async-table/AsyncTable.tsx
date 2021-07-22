@@ -1,9 +1,11 @@
-import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator';
+import { Vue, Component, Prop, Watch, Ref, Inject } from 'nuxt-property-decorator';
 import { get } from 'lodash-es';
+import { ConfigConsumerProps } from '../config-provider';
 
 // Types
 import * as tsx from 'vue-tsx-support';
 import { Table, PaginationConfig, TableRowSelection } from 'ant-design-vue/types/table/table';
+import { ConfigProviderProps } from '../config-provider/ConfigProvider';
 
 export type DataSourceFn = (filter: {
   page: number;
@@ -52,6 +54,15 @@ export default class AsyncTable extends Vue {
         | 'pageNoKey'
       >
   >;
+
+  @Ref('aTable') aTable!: Table;
+
+  @Inject({
+    from: 'configProvider',
+    default: () => ConfigConsumerProps,
+  })
+  configProvider!: ConfigProviderProps;
+
   /** 列， 参考 https://antdv.com/components/table/#API */
   @Prop({ type: Array, required: true }) columns!: any;
   /** 数据源异步方法 */
@@ -89,6 +100,8 @@ export default class AsyncTable extends Vue {
    * } | true
    */
   @Prop({ type: [Object, Boolean], default: null }) alert!: Alert;
+  /** 作为 i18n key 前缀(末尾不用加.),  [i18nKeyPrefix].term_form.btn_text */
+  @Prop({ type: String, default: 'core.components.async_table' }) i18nKeyPrefix!: string;
 
   needTotalList!: Array<{
     title: string | ((i18nRender: Function) => string);
@@ -330,8 +343,8 @@ export default class AsyncTable extends Vue {
     const needTotalItems = this.needTotalList.map((item) => {
       return (
         <span style="margin-right: 12px">
-          {typeof item.title === 'function' ? item.title(this.$tv.bind(this)) : item.title}
-          {this.$tv('core.components.async_table.sum', ' Sum')}:&nbsp;
+          {typeof item.title === 'function' ? item.title(this.configProvider.i18nRender.bind(this)) : item.title}
+          {this.configProvider.i18nRender(`${this.i18nKeyPrefix}.sum`, ' Sum')}:&nbsp;
           <a style="font-weight: 600">{!item.customRender ? item.total : item.customRender(item.total)}</a>
         </span>
       );
@@ -349,7 +362,7 @@ export default class AsyncTable extends Vue {
       <a-alert showIcon={true} style="margin-bottom: 16px;">
         <template slot="message">
           <span style="margin-right: 12px">
-            {this.$tv('core.components.async_table.selected', 'Selected')}:&nbsp;
+            {this.configProvider.i18nRender(`${this.i18nKeyPrefix}.selected`, 'Selected')}:&nbsp;
             <a style="font-weight: 600">{this.selectedRows.length}</a>
           </span>
           {needTotalItems}
@@ -369,7 +382,7 @@ export default class AsyncTable extends Vue {
             this.handleClearSelected();
           }}
         >
-          {this.$tv('core.components.async_table.clear', 'Clear')}
+          {this.configProvider.i18nRender(`${this.i18nKeyPrefix}.clear`, 'Clear')}
         </a>
       );
     }
@@ -382,6 +395,10 @@ export default class AsyncTable extends Vue {
       dataSource: this.localDataSource,
       pagination: this.localPagination,
       loading: this.localLoading,
+      bodyStyle: {
+        overflowX: 'auto',
+        overflowY: 'auto',
+      },
       // rowSelection: this.localRowSelection,
     };
 
@@ -396,6 +413,7 @@ export default class AsyncTable extends Vue {
         <a-table
           {...{
             props,
+            ref: 'aTable',
             on: listeners,
             scopedSlots: this.$scopedSlots,
           }}

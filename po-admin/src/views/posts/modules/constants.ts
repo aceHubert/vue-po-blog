@@ -4,9 +4,6 @@
 import { upperFirst } from 'lodash-es';
 import { PostStatus } from '@/includes/datas/enums';
 
-// Types
-import { Table } from 'types/datas/table';
-
 // 表格列信息
 const table: Table = ({ i18nRender }) => ({
   columns: [
@@ -16,34 +13,34 @@ const table: Table = ({ i18nRender }) => ({
       dataIndex: 'title',
       width: '300px',
       ellipsis: true,
+      showInMobile: true,
+      showInTablet: true,
       scopedSlots: { customRender: 'titles' },
     },
     {
       title: i18nRender('core.page-post.column.author', 'Author'),
       align: 'center',
       dataIndex: 'author',
-      hideInMobile: true,
+      showInTablet: true,
       scopedSlots: { customRender: 'author' },
     },
     {
       title: i18nRender('core.page-post.column.comment_count', 'Comment Count'),
       align: 'center',
       dataIndex: 'commentCount',
-      hideInMobile: true,
+      showInTablet: true,
       scopedSlots: { customRender: 'commentCount' },
     },
     {
       title: i18nRender('core.page-post.column.category', 'Categories'),
       align: 'center',
       dataIndex: 'categories',
-      hideInMobile: true,
       scopedSlots: { customRender: 'categories' },
     },
     {
       title: i18nRender('core.page-post.column.tag', 'Tags'),
       align: 'center',
       dataIndex: 'tags',
-      hideInMobile: true,
       scopedSlots: { customRender: 'tags' },
     },
     {
@@ -51,7 +48,7 @@ const table: Table = ({ i18nRender }) => ({
       align: 'center',
       dataIndex: 'createTime',
       width: '220px',
-      hideInMobile: true,
+      showInTablet: true,
       scopedSlots: { customRender: 'createTime' },
     },
   ],
