@@ -189,6 +189,16 @@ module.exports = (configContext) => {
             path: 'empty',
             module: 'empty',
           });
+          // https://github.com/nuxt/nuxt.js/issues/212
+          config.module.rules.push({
+            enforce: 'pre',
+            test: /\.(js|jsx|ts|tsx|vue)$/,
+            loader: 'eslint-loader',
+            exclude: /(node_modules)/,
+            options: {
+              formatter: require('eslint-friendly-formatter'),
+            },
+          });
         }
       },
     },

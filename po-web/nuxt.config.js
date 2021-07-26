@@ -200,8 +200,26 @@ module.exports = (configContext) => {
       /*
        ** You can extend webpack config here
        */
-      // eslint-disable-next-line no-unused-vars
-      extend(config, ctx) {},
+      extend(config, ctx) {
+        if (ctx.isClient) {
+          // https://github.com/webpack/webpack/issues/5423
+          config.node = Object.assign({}, config.node, {
+            fs: 'empty',
+            path: 'empty',
+            module: 'empty',
+          });
+          // https://github.com/nuxt/nuxt.js/issues/212
+          config.module.rules.push({
+            enforce: 'pre',
+            test: /\.(js|jsx|ts|tsx|vue)$/,
+            loader: 'eslint-loader',
+            exclude: /(node_modules)/,
+            options: {
+              formatter: require('eslint-friendly-formatter'),
+            },
+          });
+        }
+      },
     },
     // 启动加载 loading 配置
     loadingIndicator: {
