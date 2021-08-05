@@ -15,7 +15,7 @@
   "widgets": "@:core.menu.theme.widgets", 
   "plugins": "@:core.menu.plugin.add", 
   "installed_plugins": "@:core.menu.plugin.installed", 
-  "allUsers": "@:core.menu.user.users", 
+  "all_users": "@:core.menu.user.users", 
   "users": "@:core.menu.user.root", 
   "profile": "个人信息", 
   "tools": "@:core.menu.tools.root", 
