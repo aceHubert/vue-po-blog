@@ -4,7 +4,7 @@ import { I18nService } from 'nestjs-i18n';
 import { Request, Response } from 'express';
 import { UnauthorizedError } from 'express-jwt';
 import { JsonWebTokenError } from 'jsonwebtoken';
-import { DatabaseError } from 'sequelize';
+import { BaseError as DbBaseError, DatabaseError, ConnectionError } from 'sequelize';
 import {
   AuthenticationError,
   ForbiddenError,
@@ -28,13 +28,45 @@ export class AllExceptionFilter implements ExceptionFilter {
       const status = this.getHttpCodeFromError(exception);
       const description = await this.getHttpDescriptionFromError(exception, request.i18nLang);
 
-      // @ts-ignore
-      if (exception instanceof DatabaseError && exception.original.code === 'ER_NO_SUCH_TABLE') {
-        // 当出现表不存在错误时，提示要初始化数据库， 并设置 response.dbInitRequired = true
-        description.message = await this.i18nService.tv('core.error.no_such_table', 'No such table!', {
-          lang: request.i18nLang,
-        });
-        description.dbInitRequired = true;
+      // 所有数据库操作异常
+      if (exception instanceof DbBaseError) {
+        // @ts-ignore
+        const dbErrorCode = exception.original?.code || exception.name;
+
+        // 设置一个总的db 操作异常消息
+        description.message = await this.i18nService.tv(
+          'core.error.db_operation',
+          `An error occurred while operating database (code: ${dbErrorCode})!`,
+          {
+            lang: request.i18nLang,
+            args: {
+              code: dbErrorCode,
+            },
+          },
+        );
+
+        if (exception instanceof ConnectionError) {
+          // 设置一个总的db 连接异常消息
+          description.message = await this.i18nService.tv(
+            'core.error.db_operation',
+            `An error occurred while connecting database (code: ${dbErrorCode})!`,
+            {
+              lang: request.i18nLang,
+              args: {
+                code: dbErrorCode,
+              },
+            },
+          );
+        } else if (exception instanceof DatabaseError) {
+          // 当检查到表不存在时，提示初始化数据（设置 response.dbInitRequired = true）
+          // todo: 这个不能排除第三方插件导致的问题
+          if (dbErrorCode === 'ER_NO_SUCH_TABLE') {
+            description.message = await this.i18nService.tv('core.error.no_such_table', 'No such table!', {
+              lang: request.i18nLang,
+            });
+            description.dbInitRequired = true;
+          }
+        }
       }
 
       response.status(status).json(
