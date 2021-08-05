@@ -2,10 +2,9 @@
  * 加载远程模块
  */
 import Vue from 'vue';
+import warning from 'warning';
 import VueRouter from 'vue-router';
 import ModuleLoader from '@vue-async/module-loader';
-import { warn as globalWarn } from '@vue-async/utils';
-import { hook } from '@/includes/functions';
 
 // megre routes
 import { megreRoutes, root } from '@/utils/router';
@@ -78,7 +77,7 @@ export async function LoadModules(...params: Parameters<Plugin>) {
     sync: true, // 同步执行
     error: (msg: string) => {
       // 此处只会提示错误，不会阻止 success 执行
-      globalWarn(false, `[core] 模块加载中出错，已忽略。 ${msg}`);
+      warning(false, `[core] 模块加载中出错，已忽略。 ${msg}`);
     },
   });
 
@@ -90,10 +89,4 @@ export async function LoadModules(...params: Parameters<Plugin>) {
   // -- theme 与 plugin 加载完成，入口文件中的方法全部执行完成 --
   // 以下可以执行到入口文件中注入的 hook 了~~~
   //
-
-  /**
-   * init 勾子
-   * 所有子模块初始化完成，并且在 new Vue() 之前
-   */
-  await hook('init').exec(cxt);
 }

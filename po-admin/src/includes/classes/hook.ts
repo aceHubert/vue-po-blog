@@ -1,4 +1,5 @@
-import { hasOwn, warn, isObject } from '@vue-async/utils';
+import warning from 'warning';
+import { hasOwn, isObject } from '@vue-async/utils';
 
 // Types
 import { Callback } from 'types/functions/hook';
@@ -116,7 +117,10 @@ export default class POHook {
     } else if (hasOwn(this.callbacks, priority as any)) {
       this.callbacks[priority] = [];
     } else {
-      warn(process.env.NDE_ENV === 'production', `priority "${priority}" is not exists , no filiters will be removed.`);
+      warning(
+        process.env.NDE_ENV === 'production',
+        `priority "${priority}" is not exists , no filiters will be removed.`,
+      );
     }
   }
 

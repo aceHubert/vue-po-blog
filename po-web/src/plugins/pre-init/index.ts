@@ -1,6 +1,7 @@
 import Vue from 'vue';
+import warning from 'warning';
 import Axios from 'axios';
-import { error as globalError, warn as globalWarn, hasOwn } from '@vue-async/utils';
+import { hasOwn } from '@vue-async/utils';
 import { hook, http, themeFuncs, settingsFuncs } from '@/includes/functions';
 import { tagApi, articleApi, categoryApi, userApi, siteApi } from '@/includes/datas';
 import themeFn from '@/includes/theme';
@@ -24,7 +25,7 @@ Vue.config.errorHandler = function (err: any, vm: any) {
   if (process.env.NODE_ENV === 'production') {
     // todo: 总的 error 处理, 推送到服务端
   } else {
-    globalError(false, `[core] 错误：${err.message || err}`, vm);
+    warning(false, `[core] 错误：${err.message || err}`, vm);
   }
 
   if (vm && vm.$root) {
@@ -134,7 +135,7 @@ const plugin: Plugin = async (cxt) => {
 
     settingsFuncs.setSiteSettings(settings);
   } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] 站点配置加载失败, 错误：${err.message}`);
+    warning(process.env.NODE_ENV === 'production', `[core] 站点配置加载失败, 错误：${err.message}`);
     return hook('__PLUGIN_ERROR__', (error: NuxtError | null) => {
       return error || { statusCode: 500, message: $i18n.tv('error.siteSettingsLoadError', 'Site settings load error') };
     });
@@ -158,7 +159,7 @@ const plugin: Plugin = async (cxt) => {
       }
     }
   } catch (err) {
-    globalWarn(process.env.NODE_ENV === 'production', `[core] SEO配置加载失败, 错误：${err.message}`);
+    warning(process.env.NODE_ENV === 'production', `[core] SEO配置加载失败, 错误：${err.message}`);
   }
 
   /**
@@ -169,7 +170,7 @@ const plugin: Plugin = async (cxt) => {
     themeFn.setThemes(configs.dark, configs.themes);
     themeFn.setDarkTheme(configs.dark);
   } catch (err) {
-    globalWarn(process.env.NODE_ENV === 'production', `[core] 主题色配置加载失败, 错误：${err.message}`);
+    warning(process.env.NODE_ENV === 'production', `[core] 主题色配置加载失败, 错误：${err.message}`);
   }
 
   /**
@@ -178,7 +179,7 @@ const plugin: Plugin = async (cxt) => {
   try {
     // todo
   } catch (err) {
-    globalWarn(process.env.NODE_ENV === 'production', `[core] 小组件配置加载失败, 错误：${err.message}`);
+    warning(process.env.NODE_ENV === 'production', `[core] 小组件配置加载失败, 错误：${err.message}`);
   }
 };
 

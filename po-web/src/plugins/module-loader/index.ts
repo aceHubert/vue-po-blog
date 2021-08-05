@@ -1,8 +1,8 @@
 import Vue from 'vue';
+import warning from 'warning';
 import { MetaInfo } from 'vue-meta';
 import VueRouter from 'vue-router';
 import ModuleLoader from '@vue-async/module-loader';
-import { error as globalError, warn as globalWarn } from '@vue-async/utils';
 import { hook } from '@/includes/functions';
 import { siteApi } from '@/includes/datas';
 
@@ -22,7 +22,7 @@ import { ModuleConfig } from 'types';
 Vue.use(ModuleLoader);
 
 const plugin: Plugin = async (cxt) => {
-  const { app, store, $i18n } = cxt;
+  const { app, $i18n } = cxt;
   /**
    * 添加路由
    * 放在模块入口文件 options 中，而不入在 Context 中，因为 Context 会传递到子模块中
@@ -45,7 +45,7 @@ const plugin: Plugin = async (cxt) => {
   try {
     themeModule = await siteApi.getThemeModule();
     if (!themeModule) {
-      globalError(process.env.NODE_ENV === 'production', `[core] 未配置主题模块`);
+      // globalError(process.env.NODE_ENV === 'production', `[core] 未配置主题模块`);
       return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
         return (
           error || { statusCode: 500, message: $i18n.tv('error.themeModuleUnset', 'Theme module does not set up') }
@@ -55,7 +55,7 @@ const plugin: Plugin = async (cxt) => {
       themeModule.args = _themeArgs;
     }
   } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] 主题模块加载失败， 错误:${err.message}`);
+    // globalError(process.env.NODE_ENV === 'production', `[core] 主题模块加载失败， 错误:${err.message}`);
     return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
       return error || { statusCode: 500, message: $i18n.tv('error.themeModuleLoadError', 'Theme module load error') };
     });
@@ -73,7 +73,7 @@ const plugin: Plugin = async (cxt) => {
       module.args = _pluginArgs;
     });
   } catch (err) {
-    globalError(process.env.NODE_ENV === 'production', `[core] 插件模块加载失败，错误:${err.message}`);
+    // globalError(process.env.NODE_ENV === 'production', `[core] 插件模块加载失败，错误:${err.message}`);
     return hook('__PLUGIN_ERROR__', (error?: NuxtError | null) => {
       return (
         error || { statusCode: 500, message: $i18n.tv('error.pluginModulesLoadError', 'Plguin modules load error') }
@@ -86,7 +86,7 @@ const plugin: Plugin = async (cxt) => {
     addRoutes: () => {
       /** do nothing */
     },
-  }).registerDynamicComponent(store);
+  });
 
   /**
    * 加载 theme 和 plugin, 按顺序执行
@@ -95,7 +95,7 @@ const plugin: Plugin = async (cxt) => {
     sync: true, // 同步执行，theme 优先加载，然后加载插件
     error: (msg: string) => {
       // 此处只会提示错误，不会阻止 success 执行
-      globalWarn(false, `[core] 模块加载中出错，已忽略。 ${msg}`);
+      warning(false, `[core] 模块加载中出错，已忽略。 ${msg}`);
     },
   });
 
