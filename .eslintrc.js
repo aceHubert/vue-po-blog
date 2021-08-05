@@ -8,7 +8,7 @@ module.exports = {
     commonjs: true,
     node: true,
   },
-  parser: 'babel-eslint',
+  parser: '@babel/eslint-parser',
   extends: ['eslint:recommended', 'plugin:prettier/recommended'],
   // parser 解析代码时的参数
   parserOptions: {
