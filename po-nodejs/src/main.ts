@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { NestFactory } from '@nestjs/core';
 import jwt, { secretType } from 'express-jwt';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { getToken } from '@/common/utils/get-token.util';
 import { ConfigService } from '@/config/config.service';
 import { AuthService } from '@/auth/auth.service';
@@ -15,8 +15,13 @@ async function bootstrap() {
   // 启动跨域
   app.enableCors();
 
+  // 启动 root 页面
+  app.getHttpAdapter().get('/', (req: Request, res: Response) => {
+    res.send('hello world!');
+  });
+
+  // express-jwt middleware
   app.use(
-    // express-jwt middleware
     jwt({
       secret(req: Request, payload: Express.User, done: (err: any, secret?: secretType) => void) {
         authService
