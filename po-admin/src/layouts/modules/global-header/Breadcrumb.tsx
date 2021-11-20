@@ -21,6 +21,7 @@ export default class Breadcrumb extends Vue {
   }
 
   @Watch('$route')
+  @Watch('$i18n.locale')
   watchRoute() {
     this.getBreadcrumb();
   }
