@@ -37,7 +37,7 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(configService.get('server_port'));
+  await app.listen(configService.get('server_port'), configService.get('server_host'));
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
