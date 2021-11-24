@@ -71,17 +71,18 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
   getList(parentIds: number[], fields: string[]): Promise<Record<number, TermTaxonomyModel[]>>;
   getList(query: TermTaxonomyArgs, fields: string[]): Promise<TermTaxonomyModel[]>;
   getList(
-    parendIdsOrQuery: number[] | TermTaxonomyArgs,
+    parentIdsOrQuery: number[] | TermTaxonomyArgs,
     fields: string[],
   ): Promise<Record<number, TermTaxonomyModel[]> | TermTaxonomyModel[]> {
-    let _query = parendIdsOrQuery as Omit<TermTaxonomyArgs, 'parentId' | 'taxonomy'> & {
+    let _query = parentIdsOrQuery as Omit<TermTaxonomyArgs, 'parentId' | 'taxonomy'> & {
       taxonomy?: string;
       parentId?: number | number[];
     };
-    if (Array.isArray(parendIdsOrQuery)) {
+    if (Array.isArray(parentIdsOrQuery)) {
       _query = {
-        parentId: parendIdsOrQuery,
+        parentId: parentIdsOrQuery,
       };
+      fields.push('parentId');
     }
 
     // 主键(meta/children 查询)
@@ -123,9 +124,10 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
           ...Terms,
         } as TermTaxonomyModel;
       };
-      if (Array.isArray(parendIdsOrQuery)) {
+      // Array is parentIds
+      if (Array.isArray(parentIdsOrQuery)) {
         return (terms as any[]).reduce((prev, curr) => {
-          const key = (curr as any)[this.metaModelIdFieldName] as number;
+          const key = (curr as any)['parentId'] as number;
           if (!prev[key]) {
             prev[key] = [];
           }
@@ -182,6 +184,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
         },
         {
           model: this.models.TermRelationships,
+          attributes: ['objectId'],
           as: 'TermRelationships',
           where: {
             objectId: _query.objectId,
@@ -196,20 +199,24 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
     }).then((terms) => {
       const format = (term: Model<TermTaxonomyModel>) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { Terms, id: taxonomyId, termId, ...restTaxonomy } = term.toJSON() as any;
+        const { Terms, TermRelationships, id: taxonomyId, termId, ...restTaxonomy } = term.toJSON() as any;
         return {
           taxonomyId, // parentId
           ...restTaxonomy,
           ...Terms,
         } as TermTaxonomyModel;
       };
+
       if (Array.isArray(objectIdsOrQuery)) {
         return (terms as any[]).reduce((prev, curr) => {
-          const key = (curr as any)[this.metaModelIdFieldName] as number;
-          if (!prev[key]) {
-            prev[key] = [];
-          }
-          prev[key].push(format(curr));
+          const { TermRelationships } = curr;
+          TermRelationships.forEach(({ objectId }: any) => {
+            if (!prev[objectId]) {
+              prev[objectId] = [];
+            }
+            prev[objectId].push(format(curr));
+          });
+
           return prev;
         }, {} as Record<number, TermTaxonomyModel[]>);
       } else {
