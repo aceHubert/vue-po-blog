@@ -13,11 +13,6 @@ import { AvatarDropdownAction } from './modules/global-header/AvatarDropdown';
 
 @Component<DefaultLayout>({
   name: 'DefaultLayout',
-  head() {
-    return {
-      link: this.isRealDark ? [{ rel: 'stylesheet', href: '/assets/themes/dark.css', hid: 'po-theme' }] : [],
-    };
-  },
 })
 export default class DefaultLayout extends mixins(AppMixin, DeviceMixin) {
   menuOpenKeys!: string[];
@@ -253,7 +248,7 @@ export default class DefaultLayout extends mixins(AppMixin, DeviceMixin) {
 
     const props: Dictionary<any> = {
       mode,
-      theme: this.isDark ? 'dark' : 'light',
+      theme: this.isRealLight ? 'light' : 'dark',
       openKeys: this.menuOpenKeys,
     };
     if (mode === 'inline') {
@@ -290,7 +285,7 @@ export default class DefaultLayout extends mixins(AppMixin, DeviceMixin) {
             [classes.layoutSiderFixed]: this.fixSiderbar,
           },
         ]}
-        theme={this.isDark ? 'dark' : 'light'}
+        theme={this.isRealLight ? 'light' : 'dark'}
         width={this.siderWidth}
         collapsedWidth={this.siderCollapsedWidth}
         trigger={null}
@@ -308,9 +303,9 @@ export default class DefaultLayout extends mixins(AppMixin, DeviceMixin) {
 
     return this.isMobile ? (
       <a-drawer
-        class={classes.layoutSiderDrawer}
         placement="left"
         visible={!this.siderCollapsed}
+        wrapClassName={classes.layoutSiderDrawer}
         maskClosable
         getContainer={null}
         width={this.siderWidth}

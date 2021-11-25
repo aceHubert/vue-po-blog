@@ -6,11 +6,6 @@ import classes from './styles/user.less?module';
 
 @Component<UserLayout>({
   name: 'UserLayout',
-  head() {
-    return {
-      link: this.isRealDark ? [{ rel: 'stylesheet', href: '/assets/themes/dark.css', hid: 'po-theme' }] : [],
-    };
-  },
 })
 export default class UserLayout extends mixins(AppMixin, DeviceMixin) {
   render() {

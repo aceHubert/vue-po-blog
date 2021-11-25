@@ -1,7 +1,7 @@
-/* eslint-disable no-console */
-/* eslint-disable prettier/prettier */
 const path = require('path');
 const fs = require('fs');
+const CopyPlugin = require('copy-webpack-plugin');
+const WriteFilePlugin = require('write-file-webpack-plugin');
 
 // 默认：http://localhost:5009/
 const port = process.env.PORT || 5009;
@@ -21,6 +21,7 @@ try {
   const options = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   Object.assign(publicConfig, options);
 } catch (err) {
+  // eslint-disable-next-line no-console
   console.log(err.message);
 }
 
@@ -119,7 +120,7 @@ module.exports = (configContext) => {
     plugins: [
       { src: 'plugins/vue-antd' },
       { src: 'plugins/vue-ls', ssr: false },
-      { src: 'plugins/vue-ckeditor', ssr: false },
+      { src: 'plugins/vue-uieditor', ssr: false },
       { src: 'plugins/bootstrap' },
     ],
     router: {
@@ -178,6 +179,17 @@ module.exports = (configContext) => {
           localsConvention: 'camelCaseOnly',
         },
       },
+      plugins: [
+        new CopyPlugin({
+          patterns: [
+            {
+              from: path.join(__dirname, 'node_modules/vue-uieditor/vue-uieditor'),
+              to: path.join(__dirname, 'src/static/vue-uieditor'),
+            },
+          ],
+        }),
+        new WriteFilePlugin(),
+      ],
       /*
        ** You can extend webpack config here
        */
@@ -195,9 +207,6 @@ module.exports = (configContext) => {
             test: /\.(js|jsx|ts|tsx|vue)$/,
             loader: 'eslint-loader',
             exclude: /(node_modules)/,
-            options: {
-              formatter: require('eslint-friendly-formatter'),
-            },
           });
         }
       },

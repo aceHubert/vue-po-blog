@@ -21,6 +21,7 @@
     "release:alpha": "lerna publish --canary prepatch --preid alpha --dist-tag latest --force-publish",
     "release": "lerna publish --no-git-reset"
   },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/eslint-parser": "^7.14.7",

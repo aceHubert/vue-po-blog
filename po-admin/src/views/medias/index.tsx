@@ -1,10 +1,10 @@
 import { Vue, Component } from 'nuxt-property-decorator';
-import { AsyncFileList } from '@/components';
+// import { AsyncFileList } from '@/components';
 // import { gql, formatError } from '@/includes/functions';
 
 // Types
 import { MediaPagedQuery } from 'types/datas/media';
-import { DataSourceFn, File } from '@/components/async-file-list/AsyncFileList';
+// import { DataSourceFn, File } from '@/components/async-file-list/AsyncFileList';
 
 {
   /* <router>
@@ -30,46 +30,42 @@ export default class MediaIndex extends Vue {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  loadData({ page, size }: Parameters<DataSourceFn>[0]): Promise<File[]> {
-    return Promise.resolve([]);
-    // const query: MediaPagedQuery = {
-    //   ...this.searchQuery,
-    //   offset: (page - 1) * size,
-    //   limit: size,
-    // };
-    // return this.graphqlClient
-    //   .query<{ medias: MediaPagedResponse }, MediaPagedQuery>({
-    //     query: gql`
-    //       query getMedias($keyword: String, $limit: Int, $offset: Int) {
-    //         posts(keyword: $keyword, limit: $limit, offset: $offset) {
-    //           rows {
-    //             id
-    //             fileName
-    //             originalFileName
-    //             extension
-    //             mimeType
-    //             createTime: createdAt
-    //           }
-    //           total
-    //         }
-    //       }
-    //     `,
-    //     variables: query,
-    //   })
-    //   .then(({ data }) => {
-    //     return data.medias;
-    //   })
-    //   .catch((err) => {
-    //     const { message } = formatError(err);
-    //     throw new Error(message);
-    //   });
-  }
+  // loadData({ page, size }: Parameters<DataSourceFn>[0]): Promise<File[]> {
+  //   return Promise.resolve([]);
+  //   // const query: MediaPagedQuery = {
+  //   //   ...this.searchQuery,
+  //   //   offset: (page - 1) * size,
+  //   //   limit: size,
+  //   // };
+  //   // return this.graphqlClient
+  //   //   .query<{ medias: MediaPagedResponse }, MediaPagedQuery>({
+  //   //     query: gql`
+  //   //       query getMedias($keyword: String, $limit: Int, $offset: Int) {
+  //   //         posts(keyword: $keyword, limit: $limit, offset: $offset) {
+  //   //           rows {
+  //   //             id
+  //   //             fileName
+  //   //             originalFileName
+  //   //             extension
+  //   //             mimeType
+  //   //             createTime: createdAt
+  //   //           }
+  //   //           total
+  //   //         }
+  //   //       }
+  //   //     `,
+  //   //     variables: query,
+  //   //   })
+  //   //   .then(({ data }) => {
+  //   //     return data.medias;
+  //   //   })
+  //   //   .catch((err) => {
+  //   //     const { message } = formatError(err);
+  //   //     throw new Error(message);
+  //   //   });
+  // }
 
   render() {
-    return (
-      <div>
-        <AsyncFileList dataSource={this.loadData.bind(this)} />
-      </div>
-    );
+    return <div>{/* <AsyncFileList dataSource={this.loadData.bind(this)} /> */}</div>;
   }
 }

@@ -20,9 +20,9 @@ export enum ContentWidth {
 }
 
 export enum Theme {
+  RealLight = 'reallight', // sidebar 显示为纯白
   Light = 'light',
   Dark = 'dark',
-  RealDark = 'realdark',
 }
 
 export enum Layout {

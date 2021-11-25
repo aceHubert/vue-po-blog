@@ -6,7 +6,13 @@ import { Layout, ContentWidth, Theme } from '@/configs/settings.config';
 // Types
 import { Locale } from 'ant-design-vue/types/locale-provider';
 
-@Component
+@Component<AppMixin>({
+  head() {
+    return {
+      link: this.isDark ? [{ rel: 'stylesheet', href: '/assets/themes/dark.css', hid: 'po-theme' }] : [],
+    };
+  },
+})
 export default class AppMixin extends Vue {
   antLocale?: Locale = {} as Locale;
 
@@ -52,15 +58,15 @@ export default class AppMixin extends Vue {
   }
 
   get isDark() {
-    return this.theme === Theme.Dark || this.theme === Theme.RealDark;
-  }
-
-  get isRealDark() {
-    return this.theme === Theme.RealDark;
+    return this.theme === Theme.Dark;
   }
 
   get isLight() {
     return !this.isDark;
+  }
+
+  get isRealLight() {
+    return this.theme === Theme.RealLight;
   }
 
   get primaryColor() {

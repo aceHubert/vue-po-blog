@@ -1,7 +1,7 @@
 import { Vue, Component, Ref, InjectReactive } from 'nuxt-property-decorator';
 import { camelCase, snakeCase } from 'lodash-es';
 import { modifiers as m } from 'vue-tsx-support';
-import { AsyncTable, InlineTableRow, SearchForm } from '@/components';
+import { AsyncTable, SearchForm } from '@/components';
 import { hook, gql, formatError } from '@/includes/functions';
 import { UserRole, UserCapability } from '@/includes/datas';
 import { userStore } from '@/store/modules';
@@ -377,7 +377,7 @@ export default class UserIndex extends Vue {
         username: (
           text: UserWithRole['username'],
           record: UserWithRole & Partial<UserMetas> & { expand?: boolean },
-          index: number,
+          // index: number,
         ) => (
           <div class={[classes.columnUsername]}>
             <p class={[classes.username]}>
@@ -397,14 +397,14 @@ export default class UserIndex extends Vue {
 
             {this.inlineColumns.length ? (
               <div class={[classes.content]} v-show={record.expand}>
-                <InlineTableRow
+                {/* <InlineTableRow
                   columns={this.inlineColumns}
                   record={record}
                   index={index}
                   {...{
                     scopedSlots: scopedSolts(),
                   }}
-                />
+                /> */}
               </div>
             ) : null}
             {renderActions(record)}

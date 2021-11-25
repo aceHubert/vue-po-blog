@@ -39,8 +39,8 @@ export default class Breadcrumb extends Vue {
         if (resolved.name === name) {
           // 嵌套路由与parent 路由相同，直接修改上一个的 label
           items[index - 1].label =
-            (title && (this.$tv(`core.breadcrumb.${snakeCase(title)}`, title) as string)) ||
-            (name && (this.$tv(`core.breadcrumb.${snakeCase(name)}`, name) as string)) ||
+            (title && (this.$tv(`core.layout_components.breadcrumb.${snakeCase(title)}`, title) as string)) ||
+            (name && (this.$tv(`core.layout_components.breadcrumb.${snakeCase(name)}`, name) as string)) ||
             '';
           return;
         }
@@ -48,8 +48,8 @@ export default class Breadcrumb extends Vue {
       }
       items.push({
         label:
-          (title && (this.$tv(`core.breadcrumb.${snakeCase(title)}`, title) as string)) ||
-          (name && (this.$tv(`core.breadcrumb.${snakeCase(name)}`, name) as string)) ||
+          (title && (this.$tv(`core.layout_components.breadcrumb.${snakeCase(title)}`, title) as string)) ||
+          (name && (this.$tv(`core.layout_components.breadcrumb.${snakeCase(name)}`, name) as string)) ||
           '',
         to: path,
       });

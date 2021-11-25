@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta http-equiv="Cache-Control" content="max-age=7200" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<style type="text/css">
+		html,
+		body {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="container" style="width:100%;height:100%"></div>
+	<script src="./vs/loader.js"></script>
+	<script>
+		//"monaco-editor": "0.18.1"
+		//https://github.com/Microsoft/monaco-editor
+		require.config({
+			paths: { 'vs': './vs' },
+			'vs/nls': {
+				availableLanguages: { '*': 'zh-cn' }
+			}
+		});
+
+		var _iframeId = (function () {
+			var url = window.location + '';
+			var query = url.split('?');
+			var macth = /id=([^\=]+)/i.exec(query[1]);
+			return macth ? macth[1] : '';
+		})();
+
+		function getMyFrame() {
+			return parent.document.getElementById(_iframeId);
+		}
+
+		require(['vs/editor/editor.main'], function () {
+
+			var option = {
+				value: [
+					'function x() {',
+					'\tconsole.log("Hello world!");',
+					'}'
+				].join('\n'),
+				language: 'javascript',
+				selectOnLineNumbers: true,
+				scrollbar: {
+					useShadows: false,
+					vertical: 'visible',
+					horizontal: 'visible',
+					horizontalSliderSize: 5,
+					verticalSliderSize: 5,
+					horizontalScrollbarSize: 15,
+					verticalScrollbarSize: 15,
+				},
+				minimap: {
+					enabled: true,
+					showSlider: 'always',
+					maxColumn: 60
+				}
+			};
+			getMyFrame().onBeforeInit(monaco, option);
+			var _extraLib = option.extraLib || '';
+			var _modelSetting = option.modelSetting;
+			delete option.extraLib;
+			delete option.modelSetting;
+			// console.warn('_extraLib', option.extraLib, option);
+
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(_extraLib);
+
+			var editor = monaco.editor.create(document.getElementById('container'), option);
+			if (_modelSetting)
+				editor.getModel().updateOptions(_modelSetting);
+			var changeTimeId;
+			editor.onDidChangeModelContent(function (e) {
+				if (changeTimeId) clearTimeout(changeTimeId);
+				changeTimeId = setTimeout(function () {
+					var myIframe1 = getMyFrame();
+					myIframe1.onChanged && myIframe1.onChanged(editor, editor.getValue(), e);
+				}, 500);
+			});
+			editor.onDidBlurEditorText(function () {
+				var myIframe1 = getMyFrame();
+				myIframe1.onBlured && myIframe1.onBlured(editor, editor.getValue());
+			});
+
+			editor.onDidFocusEditorText(function (content) {
+				var myIframe1 = getMyFrame();
+				myIframe1.onFocused && myIframe1.onFocused(editor, editor.getValue());
+			});
+			editor.onCompositionEnd(function (content) {
+				var myIframe1 = getMyFrame();
+				myIframe1.onCompositionEnd && myIframe1.onCompositionEnd(editor, editor.getValue());
+			});
+			var didScrollChangeDisposable = editor.onDidScrollChange(function (event) {
+				didScrollChangeDisposable.dispose();
+				var myIframe1 = getMyFrame();
+				myIframe1.onReady && myIframe1.onReady(editor, editor.getValue());
+			});
+
+
+			getMyFrame().onInited(editor);
+
+			window.onresize = function () {
+				editor.layout();
+				var myIframe1 = getMyFrame();
+				myIframe1.onResized && myIframe1.onResized(editor);
+			};
+			window.onunload = function () {
+				try {
+					getMyFrame().onDestory(monaco, editor);
+				} catch (e) {
+					console.error(e);
+				}
+				editor = null;
+			};
+
+			// //更改语言
+			// var modesIds = monaco.languages.getLanguages().map(function(lang) { return lang.id; });
+			// console.warn('modesIds', modesIds);
+			// modesIds.sort();
+			// var oldModel = editor.getModel();
+			// var newModel = monaco.editor.createModel(data, mode.modeId);
+			// editor.setModel(newModel);
+			// if (oldModel) {
+			// 	oldModel.dispose();
+			// }
+
+			// //自定义监听输入编写语法/
+			// monaco.languages.registerCompletionItemProvider('javascript', {
+			// 	provideCompletionItems: function (model, position) {
+			// 		// console.warn(monaco.languages.CompletionItemKind);
+			// 		//自定义匹配逻辑....
+			// 		var textUntilPosition = model.getValueInRange({
+			// 			startLineNumber: 1,
+			// 			startColumn: 1,
+			// 			endLineNumber: position.lineNumber,
+			// 			endColumn: position.column
+			// 		});
+			// 		var match = textUntilPosition.match(/\s*$/);
+			// 		var suggestions = match ? createDependencyProposals() : [];
+
+			// 		//点方法调用
+			// 		if (textUntilPosition.charAt(textUntilPosition.length - 1) == '.') {
+			// 			//当是点时匹配自定义的方法 ...
+			// 		} else {
+			// 			return { suggestions: suggestions };
+			// 		}
+
+			// 	},
+			// 	triggerCharacters: ['.'] // 写触发提示的字符，可以有多个
+			// });
+
+			// function createDependencyProposals() {
+			// 	var Kind = monaco.languages.CompletionItemKind;
+			// 	return [
+			// 		{
+			// 			label: 'context', //显示的提示名称
+			// 			kind: Kind.Variable,//图标显示类型
+			// 			insertText: 'context' //选择后粘贴到编辑器中的文字
+			// 		},
+			// 		// {
+			// 		// 	label: '$event', //显示的提示名称
+			// 		// 	kind: Kind.Variable,//图标显示类型
+			// 		// 	insertText: '$event' //选择后粘贴到编辑器中的文字
+			// 		// },
+			// 		{
+			// 			label: 'BuyGoods()', //显示的提示名称
+			// 			kind: 1,//图标显示类型
+			// 			insertText: 'BuyGoods(CSTradeScriptContext context, StockPrice price)',
+			// 			childs: [//该方法的子类方法，可通过点语法调用
+			// 				{
+			// 					label: 'Goods1()',
+			// 					insertText: 'Goods1()'
+			// 				}, {
+			// 					label: 'Goods2()',
+			// 					insertText: 'Goods2()'
+			// 				}
+			// 			]
+			// 		}
+			// 	];
+			// }
+
+
+		});
+
+// monaco.languages.CompletionItemKind
+// 0: "Method"
+// 1: "Function"
+// 2: "Constructor"
+// 3: "Field"
+// 4: "Variable"
+// 5: "Class"
+// 6: "Struct"
+// 7: "Interface"
+// 8: "Module"
+// 9: "Property"
+// 10: "Event"
+// 11: "Operator"
+// 12: "Unit"
+// 13: "Value"
+// 14: "Constant"
+// 15: "Enum"
+// 16: "EnumMember"
+// 17: "Keyword"
+// 18: "Text"
+// 19: "Color"
+// 20: "File"
+// 21: "Reference"
+// 22: "Customcolor"
+// 23: "Folder"
+// 24: "TypeParameter"
+// 25: "Snippet"
+
+	</script>
+</body>
+
+</html>

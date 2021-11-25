@@ -117,9 +117,7 @@ export default class SignIn extends Vue {
       <div id="signin" class={classes.wrapper}>
         <div class={classes.top}>
           <p class={classes.topTitle}>{this.$tv('core.page-signin.title', 'Welcome to Plumemo Blog Admin')}</p>
-          <p class={classes.topSubtitle}>
-            {this.$tv('core.page-signin.subtitle', 'A simple front-end to back-end blog system')}
-          </p>
+          <p class={classes.topSubtitle}>{this.$tv('core.page-signin.subtitle', 'A light blog system')}</p>
         </div>
         <a-form class={classes.form} form={this.form} onSubmit={m.stop.prevent(this.handleSubmit.bind(this))}>
           <a-form-item>

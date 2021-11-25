@@ -4,7 +4,6 @@ import { ModuleOptions } from 'types/module-options';
 export default function (_Vue: VueConstructor, opts: ModuleOptions) {
   const { hook } = opts;
   hook('user:columns', function () {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return function (this: Vue, i18nRender: (key: string, fallback: string) => string) {
       const h = this.$createElement;
       return [

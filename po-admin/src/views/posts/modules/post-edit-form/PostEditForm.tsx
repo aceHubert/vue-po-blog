@@ -1,6 +1,7 @@
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator';
 import { modifiers as m } from 'vue-tsx-support';
 import { lowerCase } from 'lodash-es';
+import { UERender, UEOption, UETheme } from 'vue-uieditor';
 import { PostStatus, UserCapability } from '@/includes/datas';
 import { appStore } from '@/store/modules';
 import './styles/post-edit-form.less';
@@ -104,9 +105,13 @@ export default class PostEditForm extends Vue {
     return this.savingToDarft || this.publishing || this.makingPrivate || this.reviewSubmiting || this.updating;
   }
 
-  get editorConfig() {
+  get editorOptions(): UEOption {
+    return UERender.DefineOption({});
+  }
+
+  get editorTheme(): UETheme {
     return {
-      toolbar: ['bold', 'italic', '|', 'link'],
+      modes: [],
     };
   }
 
@@ -385,12 +390,14 @@ export default class PostEditForm extends Vue {
         <a-layout hasSider>
           <a-layout-content class={`${prefixCls}-content`}>
             <client-only>
-              <rich-editor
-                vModel={this.content}
-                config={this.editorConfig}
+              <vue-uieditor
+                json={this.content}
+                options={this.editorOptions}
+                theme={this.editorTheme}
                 placeholder={this.$tv(`${this.i18nKeyPrefix}.content_placeholder`, 'Please input content')}
                 class={`${prefixCls}__editor`}
               />
+              <vue-uieditor-render options={this.editorOptions} />
             </client-only>
           </a-layout-content>
           <a-layout-sider class={`${prefixCls}-sider`} width="300" collapsed={this.siderCollapsed} collapsedWidth={0}>

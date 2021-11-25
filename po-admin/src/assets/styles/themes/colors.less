@@ -234,6 +234,9 @@ each(.text-vars(),{
   darken-4: @grey-10;
 };
 
+// alias name
+@gray: @grey;
+
 @shades: {
   white: #fff;
   black: #000;
@@ -242,7 +245,7 @@ each(.text-vars(),{
 
 
 @selector-colors: pink, magenta, red, volcano, orange, yellow, gold, cyan, lime, green, blue, geekblue,
-purple, primary, grey, shades;
+purple, primary, grey, gray, shades;
 
 each(@selector-colors,.(@root-value){
   each(@@root-value,.(@value,@key){

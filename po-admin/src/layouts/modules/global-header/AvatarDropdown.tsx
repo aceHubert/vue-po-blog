@@ -47,10 +47,10 @@ export default class AvatarDropdown extends Vue {
 
   handleLogout() {
     this.$confirm({
-      title: this.$tv('core.layout_component.avatar_dropdown.dialog.signout.title', 'Message'),
-      content: this.$tv('core.layout_component.avatar_dropdown.dialog.signout.content', 'Do you really log-out?'),
-      okText: this.$tv('core.layout_component.avatar_dropdown.dialog.signout.ok_text', 'Yes') as string,
-      cancelText: this.$tv('core.layout_component.avatar_dropdown.dialog.signout.cancel_text', 'No') as string,
+      title: this.$tv('core.layout_components.avatar_dropdown.dialog.signout.title', 'Message'),
+      content: this.$tv('core.layout_components.avatar_dropdown.dialog.signout.content', 'Do you really log-out?'),
+      okText: this.$tv('core.layout_components.avatar_dropdown.dialog.signout.ok_text', 'Yes') as string,
+      cancelText: this.$tv('core.layout_components.avatar_dropdown.dialog.signout.cancel_text', 'No') as string,
       onOk: () => {
         this.handleAction(AvatarDropdownAction.SignOut);
       },
@@ -64,11 +64,11 @@ export default class AvatarDropdown extends Vue {
     const defaultMenus: any[] = [
       <a-menu-item key="profile" onClick={() => this.handleAction(AvatarDropdownAction.Profile)}>
         <a-icon type="user" />
-        {this.$tv('core.layout_component.avatar_dropdown.user.profile', 'Profile')}
+        {this.$tv('core.layout_components.avatar_dropdown.user.profile', 'Profile')}
       </a-menu-item>,
       <a-menu-item key="settings" onClick={() => this.handleAction(AvatarDropdownAction.Settings)}>
         <a-icon type="setting" />
-        {this.$tv('core.layout_component.avatar_dropdown.user.settings', 'Settings')}
+        {this.$tv('core.layout_components.avatar_dropdown.user.settings', 'Settings')}
       </a-menu-item>,
       <a-menu-divider />,
     ];
@@ -96,7 +96,7 @@ export default class AvatarDropdown extends Vue {
             {this.$scopedSlots.menuItems ? this.$scopedSlots.menuItems(defaultMenus) : defaultMenus}
             <a-menu-item key="signout" onClick={this.handleLogout.bind(this)}>
               <a-icon type="logout" />
-              {this.$tv('core.layout_component.avatar_dropdown.user.signout', 'Sign out')}
+              {this.$tv('core.layout_components.avatar_dropdown.user.signout', 'Sign out')}
             </a-menu-item>
           </a-menu>
         </template>

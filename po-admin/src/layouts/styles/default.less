@@ -1,8 +1,9 @@
 
-:global(.theme-light) {
+:global(.theme-reallight) {
   .layout-header {
     &__wrapper {
       background: @white;
+    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
     }
 
     .header-logo h1 {
@@ -15,9 +16,13 @@
       color: @primary-color;
     }
   }
+
+  :global(.@{ant-prefix}-drawer-open).layout-sider-drawer .layout-sider {
+    box-shadow: 2px 0 6px rgba(0, 21, 41, 0.08);
+  }
 }
 
-:global(.theme-dark) {
+:global(.theme-light) {
   .layout-header {
     &__wrapper {
       background: @white;
@@ -37,6 +42,24 @@
     .sider-logo h1 {
       color: @white;
     }
+  }
+}
+
+:global(.theme-dark) {
+  .layout-header {
+    &__wrapper {
+      box-shadow: 0 1px 4px rgba(203, 203, 203, 0.08);
+    }
+  }
+
+  .layout-sider {
+    box-shadow: 2px 0 8px rgba(203, 203, 203, 0.05);
+
+    
+  }
+
+  :global(.@{ant-prefix}-drawer-open).layout-sider-drawer .layout-sider {
+      box-shadow: 2px 0 6px rgba(203, 203, 203, 0.22);
   }
 }
 

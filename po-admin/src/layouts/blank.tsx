@@ -5,11 +5,6 @@ import classes from './styles/blank.less?module';
 
 @Component<BlankLayout>({
   name: 'BlankLayout',
-  head() {
-    return {
-      link: this.isRealDark ? [{ rel: 'stylesheet', href: '/assets/themes/dark.css', hid: 'po-theme' }] : [],
-    };
-  },
 })
 export default class BlankLayout extends mixins(AppMixin, DeviceMixin) {
   render() {
