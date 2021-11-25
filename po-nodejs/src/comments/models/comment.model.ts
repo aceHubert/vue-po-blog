@@ -3,54 +3,54 @@ import { PagedResponse } from '@/common/models/general.model';
 import { Meta } from '@/common/models/meta.model';
 import { CommentType } from '../enums';
 
-@ObjectType({ description: '评论模型' })
+@ObjectType({ description: 'Comment model' })
 export class Comment {
-  @Field((type) => ID, { description: 'Id' })
+  @Field((type) => ID, { description: 'Comment Id' })
   id!: number;
 
-  @Field((type) => ID, { description: '文章 Id' })
+  @Field((type) => ID, { description: 'Post Id' })
   postId!: number;
 
-  @Field({ description: '评论人' })
+  @Field({ description: 'Username' })
   author!: string;
 
-  @Field({ nullable: true, description: '评论人 Email' })
+  @Field({ nullable: true, description: 'Comment user email' })
   authorEmail?: string;
 
-  @Field({ nullable: true, description: '评论人客户端 Url' })
+  @Field({ nullable: true, description: 'Comment user client Url' })
   authorUrl?: string;
 
-  @Field({ nullable: true, description: '评论人客户端 IP' })
+  @Field({ nullable: true, description: 'Comment user client IP' })
   authorIp?: string;
 
-  @Field({ description: '评论内容' })
+  @Field({ description: 'Content' })
   content!: string;
 
-  @Field({ description: '审核是否通过' })
+  @Field({ description: 'Approved' })
   approved!: boolean;
 
-  @Field({ description: '是否重新编译' })
+  @Field({ description: 'Edited' })
   edited!: boolean;
 
-  @Field(() => CommentType, { description: '扩展字段：类型' })
+  @Field(() => CommentType, { description: 'Extended field: Type' })
   type!: CommentType;
 
-  @Field({ nullable: true, description: '浏览器 UserAgent' })
+  @Field({ nullable: true, description: 'Browser UserAgent' })
   agent?: string;
 
-  @Field({ description: '修改时间' })
+  @Field({ description: 'Update time' })
   updatedAt!: Date;
 
-  @Field({ description: '创建时间' })
+  @Field({ description: 'Creation time' })
   createdAt!: Date;
 }
 
-@ObjectType({ description: '评论分页模型' })
+@ObjectType({ description: 'Comment paged model' })
 export class PagedComment extends PagedResponse(Comment) {
   // other fields
 }
 
-@ObjectType({ description: '评论元数据模型' })
+@ObjectType({ description: 'Comment meta model' })
 export class CommentMeta extends Meta {
   @Field((type) => ID, { description: 'Comment Id' })
   commentId!: number;
