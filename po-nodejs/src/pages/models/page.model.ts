@@ -13,6 +13,9 @@ export class Page {
   @Field({ description: 'Content' })
   content!: string;
 
+  @Field((type) => Int, { description: 'Order' })
+  order!: number;
+
   @Field((type) => PostStatus, { description: 'Page status' })
   status!: PostStatus;
 

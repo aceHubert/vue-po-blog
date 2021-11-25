@@ -1,4 +1,6 @@
 {
+  /** back-end server host */
+  "server_host": "0.0.0.0",
   /** back-end server port */
   "server_port": 5010,
   /** The name of the database */

@@ -177,21 +177,25 @@ export default class PageEditMixin extends mixins(PostMixin, TermMixin) {
   }
 
   beforeThumbnailUpload(file: File) {
-    const isJPG = file.type === 'image/jpeg';
-    if (!isJPG) {
+    const isJPGOrPNG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
+    if (!isJPGOrPNG) {
       this.$notification.error({
-        message: 'You can only upload JPG file!',
+        message: this.$tv('core.page-page.tips.upload_image_type_limited', 'You can only upload JPG or PNG file!', {
+          types: ['JPG', 'PNG'],
+        }) as string,
         description: '',
       });
     }
     const isLt2M = file.size / 1024 / 1024 < 2;
     if (!isLt2M) {
       this.$notification.error({
-        message: 'Image must smaller than 2MB!',
+        message: this.$tv('core.page-page.tips.upload_image_size_limited', 'Image must smaller than 2MB!', {
+          size: '2MB',
+        }) as string,
         description: '',
       });
     }
-    return isJPG && isLt2M;
+    return isJPGOrPNG && isLt2M;
   }
 
   handleThumbnailChange({ fileList }: any) {
