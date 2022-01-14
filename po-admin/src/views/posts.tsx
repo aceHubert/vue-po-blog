@@ -1,5 +1,5 @@
 import { Component } from 'nuxt-property-decorator';
-import VueNestedLayout from '@/utils/vue-nested-layout';
+import NestedLayoutMixin from '@/mixins/nested-layout';
 
 {
   /* <router>
@@ -14,7 +14,7 @@ import VueNestedLayout from '@/utils/vue-nested-layout';
 @Component({
   name: 'Posts',
 })
-export default class Posts extends VueNestedLayout {
+export default class Posts extends NestedLayoutMixin {
   render() {
     return <nuxt-child />;
   }

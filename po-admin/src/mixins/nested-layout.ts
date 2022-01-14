@@ -3,7 +3,7 @@
  * https://www.nuxtjs.cn/guides/components-glossary/pages-layout (默认是 first level)
  */
 import { Vue, Component } from 'nuxt-property-decorator';
-import { getMatchedComponents } from './router';
+import { getMatchedComponents } from '../utils/router';
 
 @Component({
   layout: (cxt) => {
