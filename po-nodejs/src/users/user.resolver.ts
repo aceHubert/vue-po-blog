@@ -83,7 +83,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
     @Args(
       'mobile',
       { type: () => String },
-      new ArgValidateByPipe({ validate: isMobilePhone, args: [], message: 'mobile format is incorrect' }),
+      new ArgValidateByPipe({ validate: isMobilePhone, message: 'mobile format is incorrect' }),
     )
     mobile: string,
   ): Promise<boolean> {
@@ -95,7 +95,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
     @Args(
       'email',
       { type: () => String },
-      new ArgValidateByPipe({ validate: isEmail, args: [], message: 'email format is incorrect' }),
+      new ArgValidateByPipe({ validate: isEmail, message: 'email format is incorrect' }),
     )
     email: string,
   ): Promise<boolean> {

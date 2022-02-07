@@ -2,7 +2,7 @@ import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 export interface ValidateByPipeOptions<Args extends any[] = []> {
   validate: (value: unknown, ...args: Args) => boolean;
-  args: Args;
+  args?: Args;
   message?: string | (() => string | Promise<string>);
 }
 
@@ -17,7 +17,7 @@ export class ArgValidateByPipe<Args extends any[]> implements PipeTransform<any>
 
   constructor(readonly options: ValidateByPipeOptions<Args>) {
     this.validate = options.validate;
-    this.args = options.args;
+    this.args = options.args || (([] as unknown) as Args);
     this.message = options.message || 'validate error';
   }
 
