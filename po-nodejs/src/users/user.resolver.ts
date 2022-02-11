@@ -74,7 +74,9 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   }
 
   @Query((returns) => Boolean, { description: 'Is login name exists?' })
-  isLoginNameExists(@Args('loginName', { type: () => String }) loginName: string): Promise<boolean> {
+  isLoginNameExists(
+    @Args('loginName', { type: () => String, description: 'Login name' }) loginName: string,
+  ): Promise<boolean> {
     return this.userDataSource.isLoginNameExists(loginName);
   }
 
@@ -82,7 +84,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   isMobileExists(
     @Args(
       'mobile',
-      { type: () => String },
+      { type: () => String, description: 'Mobile' },
       new ArgValidateByPipe({ validate: isMobilePhone, message: 'mobile format is incorrect' }),
     )
     mobile: string,
@@ -94,7 +96,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   isEmailExists(
     @Args(
       'email',
-      { type: () => String },
+      { type: () => String, description: 'Email' },
       new ArgValidateByPipe({ validate: isEmail, message: 'email format is incorrect' }),
     )
     email: string,
@@ -105,7 +107,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   @Authorized()
   @Mutation((returns) => User, { description: 'Create a new user.' })
   async createUser(
-    @Args('model', { type: () => NewUserInput }) model: NewUserInput,
+    @Args('model', { type: () => NewUserInput, description: 'User model' }) model: NewUserInput,
     @RequestUser() requestUser: JwtPayloadWithLang,
   ): Promise<User> {
     const { sendUserNotification, ...newUser } = model;
@@ -120,7 +122,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   @Mutation((returns) => Boolean, { description: 'Update user info.' })
   async updateUser(
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
-    @Args('model') model: UpdateUserInput,
+    @Args('model', { type: () => UpdateUserInput, description: 'User model' }) model: UpdateUserInput,
     @RequestUser() requestUser: JwtPayloadWithLang,
     @I18n() i18n: I18nContext,
   ): Promise<boolean> {
@@ -145,7 +147,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   @Mutation((returns) => Boolean, { description: 'Update user status.' })
   updateUserStatus(
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
-    @Args('status', { type: () => UserStatus }) status: UserStatus,
+    @Args('status', { type: () => UserStatus, description: 'User status' }) status: UserStatus,
     @RequestUser() requestUser: JwtPayloadWithLang,
   ): Promise<boolean> {
     return this.userDataSource.updateStatus(id, status, requestUser);

@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import jwt, { secretType } from 'express-jwt';
 import { Request, Response } from 'express';
 import { getToken } from '@/common/utils/get-token.util';
@@ -36,6 +37,19 @@ async function bootstrap() {
       path: [/^\/api\/auth\/(signin|refresh)/, /^\/api\/locale\//],
     }),
   );
+
+  // swagger
+  const api = new DocumentBuilder()
+    .setTitle('APIs')
+    .setDescription('The API description')
+    .setVersion('1.0')
+    .addTag('init', 'Website initialization.')
+    .addTag('auth', 'User authorization.')
+    .addTag('file', 'File management.')
+    .addTag('site', 'Site config.')
+    .build();
+  const document = SwaggerModule.createDocument(app, api);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(configService.get('server_port'), configService.get('server_host'));
   console.log(`Application is running on: ${await app.getUrl()}`);

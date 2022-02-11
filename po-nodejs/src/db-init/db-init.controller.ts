@@ -1,4 +1,5 @@
 import { HttpAdapterHost } from '@nestjs/core';
+import { ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Post, Body, Request, Scope } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { BaseController } from '@/common/controllers/base.controller';
@@ -8,6 +9,7 @@ import { DbInitService } from './db-init.service';
 // import express, { Express } from 'express';
 import { InitArgs } from './dto/init-args.dto';
 
+@ApiTags('init')
 @Controller({ path: 'api/db-init', scope: Scope.REQUEST })
 export class DbInitController extends BaseController {
   constructor(private readonly httpAdapterHost: HttpAdapterHost, private readonly dbInitService: DbInitService) {

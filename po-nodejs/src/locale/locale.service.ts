@@ -26,6 +26,8 @@ export class LocaleService {
    * @param site 站点
    * @param locale 语言 code
    */
+  async getTranslations(site: string): Promise<{ languages: string[]; translations: I18nTranslation } | null>;
+  async getTranslations(site: string, locale: string): Promise<I18nTranslation | null>;
   async getTranslations(
     site: string,
     locale?: string,

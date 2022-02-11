@@ -78,9 +78,9 @@ export class AllExceptionFilter implements ExceptionFilter {
       ? HttpStatus.FORBIDDEN
       : exception instanceof ValidationError // 将 ValidationError 转换成 http 405
       ? HttpStatus.METHOD_NOT_ALLOWED
-      : exception instanceof HttpException
+      : exception instanceof HttpException // 如果是 Http 错误，直接获取 status code
       ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR; // 500
+      : HttpStatus.INTERNAL_SERVER_ERROR; // 否则返回 500
   }
 
   /**
@@ -124,10 +124,6 @@ export class AllExceptionFilter implements ExceptionFilter {
         ? exception.getResponse()
         : exception.message;
 
-    if (typeof description === 'string') {
-      return { message: description };
-    } else {
-      return description;
-    }
+    return typeof description === 'string' ? { message: description } : description;
   }
 }

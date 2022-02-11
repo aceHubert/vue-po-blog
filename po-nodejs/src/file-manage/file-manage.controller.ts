@@ -1,10 +1,12 @@
 import { Controller, Post, Scope, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { ApiConsumes, ApiBody, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { BaseController } from '@/common/controllers/base.controller';
 import { User } from '@/common/decorators/user.decorator';
 import { FileManageService } from './file-manage.service';
 
+@ApiTags('file')
 @Controller({ path: 'api/file', scope: Scope.REQUEST })
 export class FileManageController extends BaseController {
   constructor(private readonly fileService: FileManageService) {
@@ -13,6 +15,19 @@ export class FileManageController extends BaseController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'File binary',
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @I18n() i18n: I18nContext,
@@ -39,6 +54,23 @@ export class FileManageController extends BaseController {
 
   @Post('upload-multi')
   @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'File binary array',
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          minItems: 2,
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
   async uploadFiles(
     @UploadedFiles() files: Express.Multer.File[],
     @I18n() i18n: I18nContext,

@@ -1,4 +1,5 @@
 import { Body, Controller, Query, Post, Scope } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { Authorized } from '@/common/decorators/authorized.decorator';
 import { User } from '@/common/decorators/user.decorator';
@@ -10,6 +11,7 @@ import { UserLoginDto } from './dto/user-login.dto';
 import { UpdatePwdDto } from './dto/update-pwd.dto';
 import { Token, RefreshToken } from './interfaces/token.interface';
 
+@ApiTags('auth')
 @Controller({ path: 'api/auth', scope: Scope.REQUEST })
 export class AuthController extends BaseController {
   constructor(private readonly authService: AuthService) {
@@ -46,6 +48,7 @@ export class AuthController extends BaseController {
 
   @Authorized()
   @Post('update-pwd')
+  @ApiBearerAuth()
   async updatePwd(
     @User('id') userId: number,
     @Body() updatePwdDto: UpdatePwdDto,
