@@ -646,7 +646,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async delete(id: number, requestUser: JwtPayloadWithLang): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
-    if (id === requestUser.id) {
+    // graphql ID is a string
+    if (String(id) === String(requestUser.id)) {
       throw new ForbiddenError(
         await this.i18nService.tv('core.datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
           lang: requestUser.lang,
@@ -699,8 +700,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async bulkDelete(ids: number[], requestUser: JwtPayloadWithLang): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
-    console.log(ids, requestUser.id, ids.includes(requestUser.id));
-    if (ids.includes(requestUser.id)) {
+    // graphql ID is a string
+    if (ids.some((id) => String(id) === String(requestUser.id))) {
       throw new ForbiddenError(
         await this.i18nService.tv('core.datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
           lang: requestUser.lang,
