@@ -6,6 +6,7 @@ import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/utils/user-meta-
 import { defaultSupportLanguages } from '~/common/utils/default-support-languages.util';
 import { UserRole } from '@/users/enums';
 import { PostCommentStatus } from '@/posts/enums';
+import { adminName } from '../utils';
 import { BaseDataSource } from './base.datasource';
 
 // Types
@@ -91,13 +92,12 @@ export class DbInitDataSource extends BaseDataSource {
     const t = await this.sequelize.transaction();
     try {
       // 默认用户
-      const name = 'admin';
       const user = await this.models.Users.create(
         {
-          loginName: name,
+          loginName: adminName,
           loginPwd: initArgs.password,
-          displayName: name,
-          niceName: name,
+          displayName: adminName,
+          niceName: adminName,
           url: initArgs.siteUrl,
           email: initArgs.email,
         },
@@ -110,7 +110,7 @@ export class DbInitDataSource extends BaseDataSource {
           {
             userId: user.id,
             metaKey: UserMetaKeys.NickName,
-            metaValue: name,
+            metaValue: adminName,
           },
           {
             userId: user.id,

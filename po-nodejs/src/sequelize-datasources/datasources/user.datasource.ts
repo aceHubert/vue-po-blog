@@ -7,6 +7,7 @@ import { UserCapability } from '@/common/utils/user-capability.util';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/utils/user-meta-keys.util';
 import { uuid } from '@/common/utils/uuid.util';
 import { UserRole, UserStatus } from '@/users/enums';
+import { adminName } from '../utils';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
@@ -653,6 +654,20 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       );
     }
 
+    const isAdmin = !!(await this.models.Users.count({
+      where: {
+        id,
+        loginName: adminName,
+      },
+    }));
+    if (isAdmin) {
+      throw new ForbiddenError(
+        await this.i18nService.tv('core.datasource.user.delete_admin_forbidden', `Could not delete admin account!`, {
+          lang: requestUser.lang,
+        }),
+      );
+    }
+
     const t = await this.sequelize.transaction();
     try {
       await this.models.UserMeta.destroy({
@@ -684,9 +699,24 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async bulkDelete(ids: number[], requestUser: JwtPayloadWithLang): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
+    console.log(ids, requestUser.id, ids.includes(requestUser.id));
     if (ids.includes(requestUser.id)) {
       throw new ForbiddenError(
         await this.i18nService.tv('core.datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
+          lang: requestUser.lang,
+        }),
+      );
+    }
+
+    const isAdmin = !!(await this.models.Users.count({
+      where: {
+        id: ids,
+        loginName: adminName,
+      },
+    }));
+    if (isAdmin) {
+      throw new ForbiddenError(
+        await this.i18nService.tv('core.datasource.user.delete_admin_forbidden', `Could not delete admin account!`, {
           lang: requestUser.lang,
         }),
       );
