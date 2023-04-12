@@ -2,12 +2,13 @@
  * 权限验证
  */
 import { Reflector } from '@nestjs/core';
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
 import { GraphQLResolveInfo, GraphQLOutputType, isObjectType, isInterfaceType, isWrappingType } from 'graphql';
 import { FieldsByTypeName, parse } from 'graphql-parse-resolve-info';
 import { I18nService } from 'nestjs-i18n';
 import { getContextObject } from '../utils/get-context-object.util';
+import { AuthenticationError, ForbiddenError } from '../utils/errors.util';
 import { ROLES_KEY } from '../constants';
 
 // Types
@@ -39,7 +40,7 @@ export class AuthorizedGuard implements CanActivate {
       const fieldRoles = this.resolveGraphqlOutputFieldsRoles(info);
       if (Object.keys(fieldRoles).length && !user) {
         // 没有的提供 token, return 401
-        throw new UnauthorizedException(
+        throw new AuthenticationError(
           await this.i18nService.tv('core.error.unauthorized', `Access denied, You don't permission for this action!`, {
             lang,
           }),
@@ -48,7 +49,7 @@ export class AuthorizedGuard implements CanActivate {
       for (const field in fieldRoles) {
         if (!this.hasPermission(user!, fieldRoles[field])) {
           // false return 403
-          throw new ForbiddenException(
+          throw new ForbiddenError(
             await this.i18nService.tv(
               'core.error.forbidden_field',
               `Access denied, You don't capability for this action!`,
@@ -72,14 +73,14 @@ export class AuthorizedGuard implements CanActivate {
 
     if (!user) {
       // 没有的提供 token, return 401
-      throw new UnauthorizedException(
+      throw new AuthenticationError(
         await this.i18nService.tv('core.error.unauthorized', `Access denied, You don't permission for this action!`, {
           lang,
         }),
       );
     } else if (!this.hasPermission(user, roles)) {
       // false return 403
-      throw new ForbiddenException(
+      throw new ForbiddenError(
         await this.i18nService.tv('core.error.forbidden', `Access denied, You don't capability for this action!`, {
           lang,
         }),

@@ -45,7 +45,7 @@ export class LinkDataSource extends BaseDataSource {
    * 添加链接
    * @param model 添加实体模型
    */
-  async create(model: NewLinkInput, requestUser: JwtPayloadWithLang): Promise<LinkModel> {
+  async create(model: NewLinkInput, requestUser: RequestUser): Promise<LinkModel> {
     const link = await this.models.Links.create({
       ...model,
       userId: requestUser.id,
@@ -62,7 +62,7 @@ export class LinkDataSource extends BaseDataSource {
    * @param id Link Id
    * @param model 修改实体模型
    */
-  async update(id: number, model: UpdateLinkInput, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async update(id: number, model: UpdateLinkInput, requestUser: RequestUser): Promise<boolean> {
     const link = await this.models.Links.findByPk(id, {
       attributes: ['userId'],
     });
@@ -87,7 +87,7 @@ export class LinkDataSource extends BaseDataSource {
    * @access capabilities: [ManageLinks (if not yours)]
    * @param id Link Id
    */
-  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async delete(id: number, requestUser: RequestUser): Promise<boolean> {
     const link = await this.models.Links.findByPk(id);
     if (link) {
       if (link.userId !== requestUser.id) {

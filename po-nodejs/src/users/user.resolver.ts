@@ -7,7 +7,7 @@ import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
 import { User as RequestUser } from '@/common/decorators/user.decorator';
 import { ArgValidateByPipe } from '@/common/pipes/arg-valitate-by.pipe';
-import { ForbiddenError } from '@/common/utils/gql-errors.util';
+import { ForbiddenError } from '@/common/utils/errors.util';
 import { UserDataSource } from '@/sequelize-datasources/datasources';
 import { UserRole } from './enums/user-role.enum';
 import { UserStatus } from './enums/user-status.enum';
@@ -30,7 +30,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
 
   @Authorized()
   @Query((returns) => User, { nullable: true, description: 'Get current user info.' })
-  user(@Fields() fields: ResolveTree, @RequestUser() requestUser: JwtPayloadWithLang): Promise<User | null> {
+  user(@Fields() fields: ResolveTree, @RequestUser() requestUser: RequestUser): Promise<User | null> {
     return this.userDataSource.get(null, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
   }
 
@@ -42,7 +42,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   userById(
     @Args('id', { type: () => ID }) id: number,
     @Fields() fields: ResolveTree,
-    @RequestUser() requestUser: JwtPayloadWithLang,
+    @RequestUser() requestUser: RequestUser,
   ): Promise<User | null> {
     return this.userDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.User), requestUser);
   }
@@ -52,7 +52,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   users(
     @Args() args: PagedUserArgs,
     @Fields() fields: ResolveTree,
-    @RequestUser() requestUser: JwtPayloadWithLang,
+    @RequestUser() requestUser: RequestUser,
   ): Promise<PagedUser> {
     return this.userDataSource.getPaged(
       args,
@@ -108,7 +108,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   @Mutation((returns) => User, { description: 'Create a new user.' })
   async createUser(
     @Args('model', { type: () => NewUserInput, description: 'User model' }) model: NewUserInput,
-    @RequestUser() requestUser: JwtPayloadWithLang,
+    @RequestUser() requestUser: RequestUser,
   ): Promise<User> {
     const { sendUserNotification, ...newUser } = model;
     const user = await this.userDataSource.create(newUser, requestUser);
@@ -123,13 +123,13 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   async updateUser(
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @Args('model', { type: () => UpdateUserInput, description: 'User model' }) model: UpdateUserInput,
-    @RequestUser() requestUser: JwtPayloadWithLang,
+    @RequestUser() requestUser: RequestUser,
     @I18n() i18n: I18nContext,
   ): Promise<boolean> {
     if (model.userRole && requestUser.role !== UserRole.Administrator) {
       throw new ForbiddenError(
         await i18n.tv(
-          'error.forbidden_role',
+          'core.error.forbidden_role',
           `Access denied, You don't have permission (role "${UserRole.Administrator}" required) for this action!`,
           {
             args: {
@@ -148,7 +148,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   updateUserStatus(
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @Args('status', { type: () => UserStatus, description: 'User status' }) status: UserStatus,
-    @RequestUser() requestUser: JwtPayloadWithLang,
+    @RequestUser() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.userDataSource.updateStatus(id, status, requestUser);
   }
@@ -157,7 +157,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   @Mutation((returns) => Boolean, { description: 'Delete user permanently.' })
   deleteUser(
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
-    @RequestUser() requestUser: JwtPayloadWithLang,
+    @RequestUser() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.userDataSource.delete(id, requestUser);
   }
@@ -166,7 +166,7 @@ export class UserResolver extends createMetaResolver(BaseUser, UserMeta, NewUser
   @Mutation((returns) => Boolean, { description: 'Delete bulk of users permanently.' })
   bulkDeleteUsers(
     @Args('ids', { type: () => [ID!], description: 'User ids' }) ids: number[],
-    @RequestUser() requestUser: JwtPayloadWithLang,
+    @RequestUser() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.userDataSource.bulkDelete(ids, requestUser);
   }

@@ -1,7 +1,7 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { isUndefined } from 'lodash';
-import { ForbiddenError } from '@/common/utils/gql-errors.util';
+import { ValidationError } from '@/common/utils/errors.util';
 import { TermTaxonomy } from '@/common/utils/term-taxonomy.util';
 import { UserCapability } from '@/common/utils/user-capability.util';
 import { OptionKeys } from '@/common/utils/option-keys.util';
@@ -48,7 +48,10 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     const count = await this.models.Posts.count({
       where: {
         name: {
-          [this.Op.like]: `${name}%`,
+          [this.Op.or]: {
+            [this.Op.like]: `${name}-%`,
+            [this.Op.eq]: name,
+          },
         },
       },
     });
@@ -65,7 +68,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param post Post
    * @param requestUser 登录用户
    */
-  private async hasEditCapability(post: PostAttributes, requestUser: JwtPayloadWithLang) {
+  private async hasEditCapability(post: PostAttributes, requestUser: RequestUser) {
     // 是否有编辑权限
     await this.hasCapability(
       post.type === PostType.Post ? UserCapability.EditPosts : UserCapability.EditPages,
@@ -104,7 +107,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param post Post
    * @param requestUser 登录用户
    */
-  private async hasDeleteCapability(post: PostAttributes, requestUser: JwtPayloadWithLang) {
+  private async hasDeleteCapability(post: PostAttributes, requestUser: RequestUser) {
     // 是否有删除文章的权限
     await this.hasCapability(
       post.type === PostType.Post ? UserCapability.DeletePosts : UserCapability.DeletePages,
@@ -170,13 +173,15 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * 批量记录修改为 Trash 状态之前的状态
    * @param postIds Post ids
    */
-  private async bulkStoreTrashStatus(postIds: number[], t?: Transaction) {
-    const posts = await this.models.Posts.findAll({
-      attributes: ['id', 'status'],
-      where: {
-        id: postIds,
-      },
-    });
+  private async bulkStoreTrashStatus(postsOrPostIds: PostAttributes[] | number[], t?: Transaction) {
+    const posts = (postsOrPostIds as any[]).every((postOrId) => typeof postOrId === 'number')
+      ? await this.models.Posts.findAll({
+          attributes: ['id', 'status'],
+          where: {
+            id: postsOrPostIds as number[],
+          },
+        })
+      : (postsOrPostIds as PostAttributes[]);
 
     return await this.models.PostMeta.bulkCreate(
       Array.prototype.concat.apply(
@@ -226,7 +231,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param fields 返回字段
    * @param requestUser 请求的用户
    */
-  async get(id: number, type: PostType, fields: string[], requestUser?: JwtPayloadWithLang): Promise<PostModel | null> {
+  async get(id: number, type: PostType, fields: string[], requestUser?: RequestUser): Promise<PostModel | undefined> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
       fields.push('id');
@@ -254,7 +259,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
         return post.toJSON() as PostModel;
       }
-      return null;
+      return;
     }
   }
 
@@ -278,19 +283,19 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     query: PagedPostArgs,
     type: PostType.Post,
     fields: string[],
-    requestUser?: JwtPayloadWithLang,
+    requestUser?: RequestUser,
   ): Promise<PagedPostModel>;
   async getPaged(
     query: PagedPageArgs,
     type: PostType.Page,
     fields: string[],
-    requestUser?: JwtPayloadWithLang,
+    requestUser?: RequestUser,
   ): Promise<PagedPostModel>;
   async getPaged(
     { offset, limit, ...query }: PagedPostArgs | PagedPageArgs,
     type: PostType,
     fields: string[],
-    requestUser?: JwtPayloadWithLang,
+    requestUser?: RequestUser,
   ): Promise<PagedPostModel> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
@@ -393,22 +398,18 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       const tagId = (query as PagedPostArgs).tagId;
       const tagName = (query as PagedPostArgs).tagName;
       if (categoryId || tagId) {
-        include.push(
-          ...[
+        include.push({
+          model: this.models.TermRelationships,
+          as: 'TermRelationships',
+          include: [
             {
-              model: this.models.TermRelationships,
-              as: 'TermRelationships',
-              include: [
-                {
-                  model: this.models.TermTaxonomy,
-                  as: 'TermTaxonomy',
-                  duplicating: false,
-                },
-              ],
+              model: this.models.TermTaxonomy,
+              as: 'TermTaxonomy',
               duplicating: false,
             },
           ],
-        );
+          duplicating: false,
+        });
         /** 如果是默认分类（未分类）的话，包含所有没有分类的内容 */
         const defaultCategory = await this.getOption(OptionKeys.DefaultCategory);
         andWhere.push({
@@ -445,9 +446,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
         });
 
         andWhere.push({
-          [`$TermRelationships.TermTaxonomy.Terms.${this.field('name', this.models.Terms)}$`]: categoryName
-            ? categoryName
-            : tagName,
+          [`$TermRelationships.TermTaxonomy.Terms.${this.field('name', this.models.Terms)}$`]: categoryName || tagName,
           [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', this.models.TermTaxonomy)}$`]: categoryName
             ? TermTaxonomy.Category
             : TermTaxonomy.Tag,
@@ -477,7 +476,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param type 类型
    * @param requestUser 请求的用户
    */
-  async getCountByStatus(type: PostType, requestUser: JwtPayloadWithLang) {
+  async getCountByStatus(type: PostType, requestUser: RequestUser) {
     const andWhere: WhereOptions<PostAttributes>[] | WhereValue<PostAttributes>[] = [];
     const where: WhereOptions<PostAttributes> = {
       type,
@@ -489,7 +488,10 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     };
 
     // 如果没有编辑私有权限，则不返回非自己私有的内容
-    const hasEditPrivateCapability = await this.hasCapability(UserCapability.EditPrivatePosts, requestUser);
+    const hasEditPrivateCapability = await this.hasCapability(
+      type === PostType.Post ? UserCapability.EditPrivatePosts : UserCapability.EditPrivatePages,
+      requestUser,
+    );
     if (!hasEditPrivateCapability) {
       andWhere.push({
         [this.Op.not]: {
@@ -503,7 +505,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
     // 如果没有发布权限的，不返回待发布的内容
     const hasPublishCapability = await this.hasCapability(
-      type === PostType.Post ? UserCapability.PublishPosts : UserCapability.PublishPosts,
+      type === PostType.Post ? UserCapability.PublishPosts : UserCapability.PublishPages,
       requestUser,
     );
     if (!hasPublishCapability) {
@@ -533,7 +535,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param type 类型
    * @param requestUser 请求的用户
    */
-  getCountBySelf(type: PostType, requestUser: JwtPayloadWithLang) {
+  getCountBySelf(type: PostType, requestUser: RequestUser) {
     return this.models.Posts.count({
       where: {
         type,
@@ -642,11 +644,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param type 类型
    * @param requestUser 请求的用户
    */
-  async create(
-    model: NewPostInput | NewPageInput,
-    type: PostType,
-    requestUser: JwtPayloadWithLang,
-  ): Promise<PostModel> {
+  async create(model: NewPostInput | NewPageInput, type: PostType, requestUser: RequestUser): Promise<PostModel> {
     await this.hasCapability(
       type === PostType.Post ? UserCapability.EditPosts : UserCapability.EditPages,
       requestUser,
@@ -707,7 +705,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
   /**
    * 修改文章
    * name 没有值的话，通过 title 生成
-   * trash 状态下不可修改(抛出 ForbiddenError)
+   * trash 状态下不可修改(抛出 ValidationError)
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -726,20 +724,16 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param model 修改实体模型
    * @param requestUser 请求的用户
    */
-  async update(
-    id: number,
-    model: UpdatePostInput | UpdatePageInput,
-    requestUser: JwtPayloadWithLang,
-  ): Promise<boolean> {
+  async update(id: number, model: UpdatePostInput | UpdatePageInput, requestUser: RequestUser): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 如果状态为 Trash, 不被允许修改，先使用 restore 统一处理状态逻辑
       // 需要恢复到移入Trash前的状态，并删除记录等逻辑
       if (post.status === PostStatus.Trash) {
-        throw new ForbiddenError(
+        throw new ValidationError(
           await this.i18nService.tv(
-            'datasource.post.update_trash_forbidden',
-            `Cound not update with "trush" status, use "restore" function first!`,
+            'core.datasource.post.update_trash_forbidden',
+            `Must not be in "trush" status, use "restore" function first!`,
             { lang: requestUser.lang },
           ),
         );
@@ -828,7 +822,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param id Post id
    * @param name 唯一标识
    */
-  async updateName(id: number, name: string, requestUser: JwtPayloadWithLang): Promise<string | false> {
+  async updateName(id: number, name: string, requestUser: RequestUser): Promise<string | false> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 是否有编辑权限
@@ -844,7 +838,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 修改状态（如果post id 不在在返回 false）
-   * trash 状态下不可以修改（抛出 ForbiddenError）
+   * trash 状态下不可以修改（抛出 ValidationError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -862,7 +856,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param id Post id
    * @param status 状态
    */
-  async updateStatus(id: number, status: PostStatus, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async updateStatus(id: number, status: PostStatus, requestUser: RequestUser): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 状态相同，忽略
@@ -873,10 +867,10 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       // 如果状态为 Trash, 不被允许修改，先使用 restore 统一处理状态逻辑
       // 需要恢复到移入Trash前的状态等逻辑
       if (post.status === PostStatus.Trash) {
-        throw new ForbiddenError(
+        throw new ValidationError(
           await this.i18nService.tv(
-            'datasource.post.update_trash_forbidden',
-            `Cound not update with "trush" status, use "restore" function first!"`,
+            'core.datasource.post.update_status_forbidden_in_trash_status',
+            `Must not be in "trush" status, use "restore" function first!"`,
             { lang: requestUser.lang },
           ),
         );
@@ -921,7 +915,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 批量修改状态
-   * 任意一条是 trash 状态下不可以修改（抛出 ForbiddenError）
+   * 任意一条是 trash 状态下不可以修改（抛出 ValidationError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -939,7 +933,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param ids Post ids
    * @param status 状态
    */
-  async bulkUpdateStatus(ids: number[], status: PostStatus, requestUser: JwtPayloadWithLang): Promise<true> {
+  async bulkUpdateStatus(ids: number[], status: PostStatus, requestUser: RequestUser): Promise<true> {
     const posts = await this.models.Posts.findAll({
       where: {
         id: ids,
@@ -950,10 +944,10 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     const trushedIds = posts.filter((post) => post.status === PostStatus.Trash).map((post) => post.id);
     if (trushedIds.length > 0) {
       const ids = trushedIds.join(',');
-      throw new ForbiddenError(
+      throw new ValidationError(
         await this.i18nService.tv(
-          'datasource.post.update_trash_forbidden_with_ids',
-          `Cound not update with "trush" status, use "restore" function first, ids: ${ids}!`,
+          'core.datasource.post.bluk_update_status_forbidden_in_trash_status',
+          `Id(s) "${ids}" must not be in "trush" status, use "restore" function first!`,
           {
             lang: requestUser.lang,
             args: { ids },
@@ -988,7 +982,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     try {
       // 移到 Trash 之前记录状态
       if (status === PostStatus.Trash) {
-        await this.bulkStoreTrashStatus(ids, t);
+        await this.bulkStoreTrashStatus(posts, t);
       }
 
       await this.models.Posts.update(
@@ -1013,7 +1007,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 重置Trash到之前状态（如果历史状态没有记录或 post id 不在在返回 false）
-   * 非 trash 状态不可重置（抛出 ForbiddenError）
+   * 非 trash 状态不可重置（抛出 ValidationError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -1025,7 +1019,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * ]
    * @param id Post id
    */
-  async restore(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async restore(id: number, requestUser: RequestUser): Promise<boolean> {
     const metaStatus = await this.models.PostMeta.findOne({
       attributes: ['metaValue'],
       where: {
@@ -1039,11 +1033,13 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
       if (post) {
         // 如果状态为非 Trash, 不被允许重置
         if (post.status !== PostStatus.Trash) {
-          throw new ForbiddenError(
+          throw new ValidationError(
             await this.i18nService.tv(
-              'datasource.post.restore_without_trash_forbidden',
-              `Could not restore without "trush" status!`,
-              { lang: requestUser.lang },
+              'core.datasource.post.restore_forbidden_not_in_trash_status',
+              `Must be in "trush" status!`,
+              {
+                lang: requestUser.lang,
+              },
             ),
           );
         }
@@ -1074,7 +1070,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 批量重置
-   * 任意一条是非 trash 状态不可重置（抛出 ForbiddenError）
+   * 任意一条是非 trash 状态不可重置（抛出 ValidationError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -1086,7 +1082,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * ]
    * @param ids Post ids
    */
-  async bulkRestore(ids: number[], requestUser: JwtPayloadWithLang): Promise<true> {
+  async bulkRestore(ids: number[], requestUser: RequestUser): Promise<true> {
     const posts = await this.models.Posts.findAll({
       where: {
         id: ids,
@@ -1097,10 +1093,10 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     const notWithTrushedIds = posts.filter((post) => post.status !== PostStatus.Trash).map((post) => post.id);
     if (notWithTrushedIds.length > 0) {
       const ids = notWithTrushedIds.join(',');
-      throw new ForbiddenError(
+      throw new ValidationError(
         await this.i18nService.tv(
-          'datasource.post.restore_without_trash_forbidden_with_ids',
-          `Could not restore without "trush" status, ids: ${ids}!`,
+          'core.datasource.post.bluk_restore_forbidden_not_in_trash_status',
+          `Id(s) "${ids}" must be in "trush" status!`,
           {
             lang: requestUser.lang,
             args: { ids },
@@ -1161,11 +1157,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * @param id Post id/副本 post id
    * @param status 状态
    */
-  async updateCommentStatus(
-    id: number,
-    commentStatus: PostCommentStatus,
-    requestUser: JwtPayloadWithLang,
-  ): Promise<boolean> {
+  async updateCommentStatus(id: number, commentStatus: PostCommentStatus, requestUser: RequestUser): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 是否有编辑权限
@@ -1180,7 +1172,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 根据 Id 删除（如果post id 不在在返回 false）
-   * 非 trash 状态下不可以删除（抛出 ForbiddenError）
+   * 非 trash 状态下不可以删除（抛出 ValidationError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -1192,15 +1184,15 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * ]
    * @param id Post id
    */
-  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async delete(id: number, requestUser: RequestUser): Promise<boolean> {
     const post = await this.models.Posts.findByPk(id);
     if (post) {
       // 非 trash 状态下不可以删除
       if (post.status !== PostStatus.Trash) {
-        throw new ForbiddenError(
+        throw new ValidationError(
           await this.i18nService.tv(
-            'datasource.post.delete_without_trash_forbidden',
-            `Could not delete without "trash" status!`,
+            'core.datasource.post.delete_forbidden_not_in_trash_status',
+            `Must be in "trash" status!`,
             {
               lang: requestUser.lang,
             },
@@ -1243,7 +1235,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
 
   /**
    * 批量删除
-   * 任意一条是非 trash 状态下不可以删除（抛出 ForbiddenError）
+   * 任意一条是非 trash 状态下不可以删除（抛出 ValidationError）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -1255,7 +1247,7 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
    * ]
    * @param id Post id
    */
-  async bulkDelete(ids: number[], requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async bulkDelete(ids: number[], requestUser: RequestUser): Promise<true> {
     const posts = await this.models.Posts.findAll({
       where: {
         id: ids,
@@ -1266,10 +1258,10 @@ export class PostDataSource extends MetaDataSource<PostMetaModel, NewPostMetaInp
     const notWithTrushedIds = posts.filter((post) => post.status !== PostStatus.Trash).map((post) => post.id);
     if (notWithTrushedIds.length > 0) {
       const ids = notWithTrushedIds.join(',');
-      throw new ForbiddenError(
+      throw new ValidationError(
         await this.i18nService.tv(
-          'datasource.post.delete_without_trash_forbidden_with_ids',
-          `Could not delete without "trash" status, ids: ${ids}!`,
+          'core.datasource.post.bluk_delete_forbidden_not_in_trash_status',
+          `Ids "${ids}" must be in "trash" status!`,
           {
             lang: requestUser.lang,
             args: { ids },

@@ -84,7 +84,7 @@ export class CommentResolver extends createMetaResolver(Comment, CommentMeta, Ne
 
   @Authorized()
   @Mutation((returns) => Comment, { description: 'Create a new comment.' })
-  createComment(@Args('model') model: NewCommentInput, @User() requestUser: JwtPayloadWithLang): Promise<Comment> {
+  createComment(@Args('model') model: NewCommentInput, @User() requestUser: RequestUser): Promise<Comment> {
     return this.commentDataSource.create(model, requestUser);
   }
 
@@ -93,7 +93,7 @@ export class CommentResolver extends createMetaResolver(Comment, CommentMeta, Ne
   updateComment(
     @Args('id', { type: () => ID, description: 'Comment id' }) id: number,
     @Args('model') model: UpdateCommentInput,
-    @User() requestUser: JwtPayloadWithLang,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.commentDataSource.update(id, model, requestUser);
   }
@@ -102,7 +102,7 @@ export class CommentResolver extends createMetaResolver(Comment, CommentMeta, Ne
   @Mutation((returns) => Boolean, { description: 'Delete comment permanently.' })
   deleteComment(
     @Args('id', { type: () => ID, description: 'Comment id' }) id: number,
-    @User() requestUser: JwtPayloadWithLang,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.commentDataSource.delete(id, requestUser);
   }

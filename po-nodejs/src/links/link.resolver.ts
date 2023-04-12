@@ -64,7 +64,7 @@ export class LinkResolver extends BaseResolver {
 
   @Authorized()
   @Mutation((returns) => Link, { description: 'Create a new link.' })
-  createLink(@Args('model') model: NewLinkInput, @User() requestUser: JwtPayloadWithLang): Promise<Link> {
+  createLink(@Args('model') model: NewLinkInput, @User() requestUser: RequestUser): Promise<Link> {
     return this.linkDataSource.create(model, requestUser);
   }
 
@@ -73,7 +73,7 @@ export class LinkResolver extends BaseResolver {
   updateLink(
     @Args('id', { type: () => ID!, description: 'Link id' }) id: number,
     @Args('model') model: UpdateLinkInput,
-    @User() requestUser: JwtPayloadWithLang,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.linkDataSource.update(id, model, requestUser);
   }
@@ -82,7 +82,7 @@ export class LinkResolver extends BaseResolver {
   @Mutation((returns) => Boolean, { description: 'Delete link permanently.' })
   deleteLink(
     @Args('id', { type: () => ID!, description: 'Link id' }) id: number,
-    @User() requestUser: JwtPayloadWithLang,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.linkDataSource.delete(id, requestUser);
   }

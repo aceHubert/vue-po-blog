@@ -2,7 +2,7 @@ import md5 from 'md5';
 import { isUndefined } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ForbiddenError, ValidationError } from '@/common/utils/gql-errors.util';
+import { ForbiddenError, ValidationError } from '@/common/utils/errors.util';
 import { UserCapability } from '@/common/utils/user-capability.util';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/utils/user-meta-keys.util';
 import { uuid } from '@/common/utils/uuid.util';
@@ -40,7 +40,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id 用户 Id（null 则查询请求用户，否则 id 不是自己时需要 EditUsers 权限）
    * @param fields 返回的字段
    */
-  async get(id: number | null, fields: string[], requestUser: JwtPayloadWithLang): Promise<UserModel | null> {
+  async get(id: number | null, fields: string[], requestUser: RequestUser): Promise<UserModel | null> {
     // 查询非自己时，需要权限验证
     if (id && id !== requestUser.id) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
@@ -116,7 +116,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async getPaged(
     { offset, limit, ...query }: PagedUserArgs,
     fields: string[],
-    requestUser: JwtPayloadWithLang,
+    requestUser: RequestUser,
   ): Promise<PagedUserModel> {
     await this.hasCapability(UserCapability.ListUsers, requestUser, true);
 
@@ -274,7 +274,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewUserInput, requestUser: JwtPayloadWithLang): Promise<UserModel> {
+  async create(model: NewUserInput, requestUser: RequestUser): Promise<UserModel> {
     await this.hasCapability(UserCapability.CreateUsers, requestUser, true);
 
     if (await this.isLoginNameExists(model.loginName)) {
@@ -398,7 +398,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param model 修改实体模型
    * @param requestUser 请求的用户
    */
-  async update(id: number, model: UpdateUserInput, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async update(id: number, model: UpdateUserInput, requestUser: RequestUser): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
@@ -548,7 +548,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param email Email
    * @param requestUser 请求的用户
    */
-  async updateEmail(id: number, email: string, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async updateEmail(id: number, email: string, requestUser: RequestUser): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
@@ -585,7 +585,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param mobile 手机号码
    * @param requestUser 请求的用户
    */
-  async updateMobile(id: number, mobile: string, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async updateMobile(id: number, mobile: string, requestUser: RequestUser): Promise<boolean> {
     // 修改非自己信息
     if (String(id) !== String(requestUser.id)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
@@ -621,7 +621,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id 用户 Id
    * @param status 状态
    */
-  async updateStatus(id: number, status: UserStatus, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async updateStatus(id: number, status: UserStatus, requestUser: RequestUser): Promise<boolean> {
     await this.hasCapability(UserCapability.EditUsers, requestUser, true);
 
     return await this.models.Users.update(
@@ -643,7 +643,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access capabilities: [DeleteUsers]
    * @param id 用户 Id
    */
-  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<true> {
+  async delete(id: number, requestUser: RequestUser): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     // graphql ID is a string
@@ -697,7 +697,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access capabilities: [DeleteUsers]
    * @param id 用户 Id
    */
-  async bulkDelete(ids: number[], requestUser: JwtPayloadWithLang): Promise<true> {
+  async bulkDelete(ids: number[], requestUser: RequestUser): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
     // graphql ID is a string

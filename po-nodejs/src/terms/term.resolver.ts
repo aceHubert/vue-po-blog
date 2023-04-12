@@ -81,7 +81,7 @@ export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, New
   @Mutation((returns) => TermTaxonomy, { description: 'Create a new term.' })
   createTerm(
     @Args('model', { type: () => NewTermInput }) model: NewTermInput,
-    @User() requestUser: JwtPayloadWithLang,
+    @User() requestUser: RequestUser,
   ): Promise<TermTaxonomy> {
     return this.termDataSource.create(model, requestUser);
   }
@@ -90,7 +90,7 @@ export class TermResolver extends createMetaResolver(TermTaxonomy, TermMeta, New
   @Mutation((returns) => TermRelationship, { description: 'Create a new term relationship.' })
   createTermRelationship(
     @Args('model', { type: () => NewTermRelationshipInput }) model: NewTermRelationshipInput,
-    @User() requestUser: JwtPayloadWithLang,
+    @User() requestUser: RequestUser,
   ): Promise<TermRelationship> {
     return this.termDataSource.createRelationship(model, requestUser);
   }

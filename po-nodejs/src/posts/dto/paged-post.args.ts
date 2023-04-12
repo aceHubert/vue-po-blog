@@ -1,5 +1,5 @@
 import { Field, ArgsType, ID } from '@nestjs/graphql';
-import { PagedArgs } from '@/common/models/general.model';
+import { PagedArgs } from '@/common/resolvers/dto/paged.args';
 import { PostStatus } from '../enums';
 
 /**

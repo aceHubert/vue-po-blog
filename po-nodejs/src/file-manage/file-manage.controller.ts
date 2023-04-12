@@ -31,7 +31,7 @@ export class FileManageController extends BaseController {
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @I18n() i18n: I18nContext,
-    @User() requestUser?: JwtPayloadWithLang,
+    @User() requestUser?: RequestUser,
   ) {
     const result = await this.fileService.uploadFile(
       {
@@ -74,7 +74,7 @@ export class FileManageController extends BaseController {
   async uploadFiles(
     @UploadedFiles() files: Express.Multer.File[],
     @I18n() i18n: I18nContext,
-    @User() requestUser?: JwtPayloadWithLang,
+    @User() requestUser?: RequestUser,
   ) {
     const result = await Promise.all(
       files.map((file) =>

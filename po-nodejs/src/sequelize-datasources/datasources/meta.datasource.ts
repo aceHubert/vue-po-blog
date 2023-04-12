@@ -1,6 +1,6 @@
-import { lowerFirst, flattenDeep } from 'lodash';
+import { lowerFirst, flattenDeep, groupBy } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
-import { RuntimeError, ValidationError } from '@/common/utils/gql-errors.util';
+import { UserInputError, RuntimeError, ValidationError } from '@/common/utils/errors.util';
 import { BaseDataSource } from './base.datasource';
 
 // Types
@@ -233,6 +233,9 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
     models.forEach((model) => {
       model.metaKey = this.fixMetaKey(model.metaKey);
     });
+    if (Object.values(groupBy(models, (meta) => meta.metaKey)).some((arr) => arr.length > 1)) {
+      throw new UserInputError(`The "metaKey" must be unique!`);
+    }
     const falseOrMetaKeys = await this.isMetaExists(
       modelId,
       models.map((model) => model.metaKey),

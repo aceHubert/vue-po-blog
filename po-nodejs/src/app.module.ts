@@ -30,7 +30,7 @@ import { TermModule } from '@/terms/term.module';
 import { UserModule } from '@/users/user.module';
 
 const isProduction = process.env.NODE_ENV === 'production';
-const contentPath = isProduction ? path.join(process.cwd(), 'po-content') : path.join(__dirname, '../../po-content');
+const contentPath = isProduction ? path.join(process.cwd(), '../po-content') : path.join(__dirname, '../../po-content');
 
 @Module({
   imports: [
@@ -71,17 +71,6 @@ const contentPath = isProduction ? path.join(process.cwd(), 'po-content') : path
       path: path.join(contentPath, '/languages'),
       sites: ['admin', 'web'],
     }),
-    DataSourceModule,
-    AuthModule,
-    DbInitModule,
-    CommentModule,
-    LinkModule,
-    MediaModule,
-    OptionModule,
-    PageModule,
-    PostModule,
-    TermModule,
-    UserModule,
     GraphQLModule.forRoot({
       debug: !isProduction,
       playground: !isProduction,
@@ -101,6 +90,17 @@ const contentPath = isProduction ? path.join(process.cwd(), 'po-content') : path
         }
       },
     }),
+    DataSourceModule,
+    AuthModule,
+    DbInitModule,
+    CommentModule,
+    LinkModule,
+    MediaModule,
+    OptionModule,
+    PageModule,
+    PostModule,
+    TermModule,
+    UserModule,
   ],
   providers: [
     {

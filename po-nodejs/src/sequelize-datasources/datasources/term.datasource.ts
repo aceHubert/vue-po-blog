@@ -2,7 +2,7 @@ import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { isUndefined } from 'lodash';
 import { TermTaxonomy as TermTaxonomyEnum } from '@/common/utils/term-taxonomy.util';
-import { ValidationError } from '@/common/utils/gql-errors.util';
+import { ValidationError } from '@/common/utils/errors.util';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
@@ -65,7 +65,8 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
 
   /**
    * 获取协议列表
-   * @param query 过滤的字段
+   * 当 query 是 parendIds 时用于解决graphql n+1 问题，只执行一次查询
+   * @param parendIdsOrQuery 过滤的字段
    * @param fields 返回的字段
    */
   getList(parentIds: number[], fields: string[]): Promise<Record<number, TermTaxonomyModel[]>>;
@@ -229,7 +230,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    * 新建协议
    * @param model 新建协议实体
    */
-  async create(model: NewTermInput, requestUser: JwtPayloadWithLang): Promise<TermTaxonomyModel> {
+  async create(model: NewTermInput, requestUser: RequestUser): Promise<TermTaxonomyModel> {
     const t = await this.sequelize.transaction();
     const { name, slug, group, taxonomy, description, parentId, metas } = model;
     try {
@@ -301,7 +302,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
    */
   async createRelationship(
     model: NewTermRelationshipInput,
-    requestUser: JwtPayloadWithLang,
+    requestUser: RequestUser,
     transaction?: Transaction,
   ): Promise<TermRelationshipModel> {
     const isExists =
@@ -315,7 +316,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
     if (isExists) {
       throw new ValidationError(
         await this.i18nService.tv(
-          'datasource.termrelationship_duplicate_definition',
+          'core.datasource.termrelationship_duplicate_definition',
           'Term relationship has been defined!',
           { lang: requestUser.lang },
         ),
@@ -346,6 +347,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
         where: {
           id,
         },
+        transaction: t,
       });
       await this.models.TermTaxonomy.update(
         {
@@ -356,6 +358,7 @@ export class TermDataSource extends MetaDataSource<TermMetaModel, NewTermMetaInp
           where: {
             termId: id,
           },
+          transaction: t,
         },
       );
 

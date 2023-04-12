@@ -49,13 +49,13 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
   page(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Fields() fields: ResolveTree,
-    @User() requestUser?: JwtPayloadWithLang,
+    @User() requestUser?: RequestUser,
   ): Promise<Page | null> {
     return this.postDataSource.get(id, PostType.Page, this.getFieldNames(fields.fieldsByTypeName.Page), requestUser);
   }
 
   @Query((returns) => PagedPage, { description: 'Get paged pages.' })
-  pages(@Args() args: PagedPageArgs, @Fields() fields: ResolveTree, @User() requestUser?: JwtPayloadWithLang) {
+  pages(@Args() args: PagedPageArgs, @Fields() fields: ResolveTree, @User() requestUser?: RequestUser) {
     return this.postDataSource.getPaged(
       args,
       PostType.Page,
@@ -68,13 +68,13 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
   @Query((returns) => [PostStatusCount], {
     description: "Get page count by status (include other's Pages, depends on your role).",
   })
-  pageCountByStatus(@User() requestUser: JwtPayloadWithLang) {
+  pageCountByStatus(@User() requestUser: RequestUser) {
     return this.postDataSource.getCountByStatus(PostType.Page, requestUser);
   }
 
   @Authorized()
   @Query((returns) => Int, { description: "Get yourself's page count" })
-  pageCountBySelf(@User() requestUser: JwtPayloadWithLang) {
+  pageCountBySelf(@User() requestUser: RequestUser) {
     return this.postDataSource.getCountBySelf(PostType.Page, requestUser);
   }
 
@@ -113,7 +113,7 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
   @Mutation((returns) => Page, { description: 'Create a new page.' })
   createPage(
     @Args('model', { type: () => NewPageInput }) model: NewPageInput,
-    @User() requestUser: JwtPayloadWithLang,
+    @User() requestUser: RequestUser,
   ): Promise<Page> {
     return this.postDataSource.create(model, PostType.Page, requestUser);
   }
@@ -123,7 +123,7 @@ export class PageResolver extends createMetaResolver(Page, PostMeta, NewPostMeta
   updatePage(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Args('model', { type: () => UpdatePageInput }) model: UpdatePageInput,
-    @User() requestUser: JwtPayloadWithLang,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.postDataSource.update(id, model, requestUser);
   }

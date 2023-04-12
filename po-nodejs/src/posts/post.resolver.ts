@@ -7,9 +7,9 @@ import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
 import { Authorized } from '@/common/decorators/authorized.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { PostType } from '@/orm-entities/interfaces';
-import { PostDataSource, UserDataSource, TermDataSource } from '@/sequelize-datasources/datasources';
 
 // Types
+import { PostDataSource, UserDataSource, TermDataSource } from '@/sequelize-datasources/datasources';
 import { UserSimpleModel, TermTaxonomyModel } from '@/sequelize-datasources/interfaces';
 import { SimpleUser } from '@/users/models/user.model';
 import { TermTaxonomy } from '@/terms/models/term.model';
@@ -84,13 +84,13 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   post(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Fields() fields: ResolveTree,
-    @User() requestUser?: JwtPayloadWithLang,
-  ): Promise<Post | null> {
+    @User() requestUser?: RequestUser,
+  ): Promise<Post | undefined> {
     return this.postDataSource.get(id, PostType.Post, this.getFieldNames(fields.fieldsByTypeName.Post), requestUser);
   }
 
   @Query((returns) => PagedPost, { description: 'Get paged posts.' })
-  posts(@Args() args: PagedPostArgs, @Fields() fields: ResolveTree, @User() requestUser?: JwtPayloadWithLang) {
+  posts(@Args() args: PagedPostArgs, @Fields() fields: ResolveTree, @User() requestUser?: RequestUser) {
     return this.postDataSource.getPaged(
       args,
       PostType.Post,
@@ -129,13 +129,13 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Query((returns) => [PostStatusCount], {
     description: "Get post count by status (include other's Posts, depends on your role).",
   })
-  postCountByStatus(@User() requestUser: JwtPayloadWithLang) {
+  postCountByStatus(@User() requestUser: RequestUser) {
     return this.postDataSource.getCountByStatus(PostType.Post, requestUser);
   }
 
   @Authorized()
   @Query((returns) => Int, { description: "Get yourself's post count" })
-  postCountBySelf(@User() requestUser: JwtPayloadWithLang) {
+  postCountBySelf(@User() requestUser: RequestUser) {
     return this.postDataSource.getCountBySelf(PostType.Post, requestUser);
   }
 
@@ -166,7 +166,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Mutation((returns) => Post, { description: 'Create a new post.' })
   createPost(
     @Args('model', { type: () => NewPostInput }) model: NewPostInput,
-    @User() requestUser: JwtPayload,
+    @User() requestUser: RequestUser,
   ): Promise<Post> {
     return this.postDataSource.create(model, PostType.Post, requestUser);
   }
@@ -176,17 +176,18 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   updatePost(
     @Args('id', { type: () => ID, description: 'Post id/副本 Post id' }) id: number,
     @Args('model', { type: () => UpdatePostInput }) model: UpdatePostInput,
-    @User() requestUser: JwtPayload,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.postDataSource.update(id, model, requestUser);
   }
 
   // Page 状共用以下方法
+  @Authorized()
   @Mutation((returns) => Boolean, { description: 'Update post stauts (not allow to update in "trash" status)' })
   updatePostStatus(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
-    @Args('status', { type: () => PostStatus, description: 'status' }) status: PostStatus,
-    @User() requestUser: JwtPayload,
+    @Args('status', { type: () => PostStatus, description: 'Status' }) status: PostStatus,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.postDataSource.updateStatus(id, status, requestUser);
   }
@@ -197,8 +198,8 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   })
   bulkUpdatePostStatus(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
-    @Args('status', { type: () => PostStatus, description: '状态' }) status: PostStatus,
-    @User() requestUser: JwtPayload,
+    @Args('status', { type: () => PostStatus, description: 'Status' }) status: PostStatus,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.postDataSource.bulkUpdateStatus(ids, status, requestUser);
   }
@@ -208,7 +209,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   updatePostCommentStatus(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Args('status', { type: () => PostCommentStatus, description: 'Comment status' }) status: PostCommentStatus,
-    @User() requestUser: JwtPayload,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.postDataSource.updateCommentStatus(id, status, requestUser);
   }
@@ -217,7 +218,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Mutation((returns) => Boolean, { description: 'Restore post from trash' })
   restorePost(
     @Args('id', { type: () => ID, description: 'Post/Page id' }) id: number,
-    @User() requestUser: JwtPayload,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.postDataSource.restore(id, requestUser);
   }
@@ -226,7 +227,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Mutation((returns) => Boolean, { description: 'Restore bulk of post from trash' })
   bulkRestorePost(
     @Args('ids', { type: () => [ID!], description: 'Post/Page ids' }) ids: number[],
-    @User() requestUser: JwtPayload,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.postDataSource.bulkRestore(ids, requestUser);
   }
@@ -235,7 +236,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Mutation((returns) => Boolean, { description: 'Delete post permanently (must be in "trash" status).' })
   deletePost(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
-    @User() requestUser: JwtPayload,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.postDataSource.delete(id, requestUser);
   }
@@ -244,7 +245,7 @@ export class PostResolver extends createMetaResolver(Post, PostMeta, NewPostMeta
   @Mutation((returns) => Boolean, { description: 'Delete bulk of posts permanently (must be in "trash" status).' })
   bulkDeletePost(
     @Args('ids', { type: () => [ID!], description: 'Post ids' }) ids: number[],
-    @User() requestUser: JwtPayload,
+    @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.postDataSource.bulkDelete(ids, requestUser);
   }

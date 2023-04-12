@@ -444,6 +444,11 @@ export default class UserIndex extends Vue {
           showPagination="auto"
           rowSelection={{
             selectedRowKeys: this.selectedRowKeys,
+            getCheckboxProps: (record) => ({
+              props: {
+                disabled: record.id === userStore.id,
+              },
+            }),
             onChange: this.handleSelectChange.bind(this),
           }}
           rowClassName={() => classes.tableRow}

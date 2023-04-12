@@ -1,6 +1,6 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { PagedResponse } from '@/common/models/general.model';
-import { Meta } from '@/common/models/meta.model';
+import { PagedResponse } from '@/common/resolvers/models/paged.model';
+import { Meta } from '@/common/resolvers/models/meta.model';
 import { CommentType } from '../enums';
 
 @ObjectType({ description: 'Comment model' })

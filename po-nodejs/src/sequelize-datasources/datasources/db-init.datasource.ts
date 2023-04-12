@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRoles } from '@/common/utils/user-roles.util';
 import { OptionKeys, OptionTablePrefixKeys } from '@/common/utils/option-keys.util';
 import { UserMetaKeys, UserMetaTablePrefixKeys } from '@/common/utils/user-meta-keys.util';
-import { defaultSupportLanguages } from '~/common/utils/default-support-languages.util';
+import { defaultSupportLanguages } from '@/common/utils/default-support-languages.util';
 import { UserRole } from '@/users/enums';
 import { PostCommentStatus } from '@/posts/enums';
 import { adminName } from '../utils';
@@ -33,7 +33,7 @@ export class DbInitDataSource extends BaseDataSource {
   ): Promise<boolean> {
     try {
       await this.sequelize.authenticate();
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(`Unable to connect to the database, Error: ${err.message}`);
       throw err;
     }
@@ -49,7 +49,7 @@ export class DbInitDataSource extends BaseDataSource {
         return true;
       }
       return false;
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(`Unable to sync to the database, Error: ${err.message}`);
       throw err;
     }

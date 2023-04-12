@@ -45,7 +45,7 @@ export interface PagedPostArgs extends PagedArgs {
   date?: string;
 }
 
-export interface PagedPageArgs extends Omit<PagedPostArgs, 'categoryIds'> {}
+export interface PagedPageArgs extends Omit<PagedPostArgs, 'categoryId' | 'categoryName' | 'tagId' | 'tagName'> {}
 
 export interface PagedPostModel extends Paged<PostModel> {}
 

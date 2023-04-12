@@ -1,22 +1,6 @@
 import { Type } from '@nestjs/common';
-import { ArgsType, ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { GraphQLScalarType } from 'graphql';
-
-@ArgsType()
-export class PagedArgs {
-  @Field((type) => Int, { nullable: true, defaultValue: 0, description: 'Page offset' })
-  offset!: number;
-
-  @Field((type) => Int, { nullable: true, defaultValue: 10, description: 'Page size' })
-  limit!: number;
-
-  // get startIndex(): number {
-  //   return this.offset;
-  // }
-  // get endIndex(): number {
-  //   return this.offset + this.limit;
-  // }
-}
 
 // export function PagedResponse<IItem>(TItemClass: ClassType<IItem>) {
 //   @ObjectType(`Paged${TItemClass.name}`)

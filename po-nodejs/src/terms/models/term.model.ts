@@ -1,5 +1,5 @@
 import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
-import { Meta } from '@/common/models/meta.model';
+import { Meta } from '@/common/resolvers/models/meta.model';
 
 @ObjectType({ description: 'Term model (include taxonomy)' })
 export class TermTaxonomy {
@@ -33,7 +33,7 @@ export class TermTaxonomy {
 
 @ObjectType({ description: 'Term relationship model' })
 export class TermRelationship {
-  @Field(() => ID, { description: 'Object id (Post, Link, etc...)' })
+  @Field(() => ID, { description: 'Object id (Template, Link, etc...)' })
   objectId!: number;
 
   @Field(() => ID, { description: 'Taxonomy id' })

@@ -71,7 +71,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
 
   @Authorized()
   @Mutation((returns) => Media, { description: 'Create a new media.' })
-  createMedia(@Args('model') model: NewMediaInput, @User() requestUser: JwtPayloadWithLang): Promise<Media> {
+  createMedia(@Args('model') model: NewMediaInput, @User() requestUser: RequestUser): Promise<Media> {
     return this.mediaDataSource.create(model, requestUser);
   }
 }

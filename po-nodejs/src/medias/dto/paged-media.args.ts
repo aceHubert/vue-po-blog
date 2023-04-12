@@ -1,5 +1,5 @@
 import { Field, ArgsType } from '@nestjs/graphql';
-import { PagedArgs } from '@/common/models/general.model';
+import { PagedArgs } from '@/common/resolvers/dto/paged.args';
 
 /**
  * 媒体查询分页参数

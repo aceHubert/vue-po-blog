@@ -11,7 +11,7 @@ declare global {
     createdAt: Date;
   };
 
-  export type JwtPayloadWithLang = JwtPayload & {
+  export type RequestUser = JwtPayload & {
     lang?: string;
   };
 

@@ -15,11 +15,11 @@
     "relationship_duplicate_definition": "关系定义已在在！"
   },
   "post": {
-    "update_trash_forbidden": "不可以修改\"回收站\"中的内容, 请先使用\"重置\"方法！",
-    "update_trash_forbidden_with_ids": "不可以修改\"回收站\"中的内容, 请先使用\"重置\"方法, ids: {ids}!",
-    "restore_without_trash_forbidden": "不可以重置非\"回收站\"中的内容！",
-    "restore_without_trash_forbidden_with_ids": "不可以重置非\"回收站\"中的内容, ids: {ids}!",
-    "delete_without_trash_forbidden": "不可以删除非\"回收站\"中的内容！",
-    "delete_without_trash_forbidden_with_ids": "不可以删除非\"回收站\"中的内容！, ids: {ids}!"
+    "update_status_forbidden_in_trash_status": "不可以修改\"回收站\"中的内容, 请先使用\"重置\"方法！",
+    "bluk_update_status_forbidden_in_trash_status": "不可以修改\"回收站\"中的内容, 请先使用\"重置\"方法, ids: {ids}!",
+    "restore_forbidden_not_in_trash_status": "不可以重置非\"回收站\"中的内容！",
+    "bluk_restore_forbidden_not_in_trash_status": "不可以重置非\"回收站\"中的内容, ids: {ids}!",
+    "delete_forbidden_not_in_trash_status": "不可以删除非\"回收站\"中的内容！",
+    "bluk_delete_forbidden_not_in_trash_status": "不可以删除非\"回收站\"中的内容！, ids: {ids}!"
   }
 }

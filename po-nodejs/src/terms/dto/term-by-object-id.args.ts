@@ -5,7 +5,7 @@ import { Field, ArgsType, ID, Int } from '@nestjs/graphql';
  */
 @ArgsType()
 export class TermByObjectIdArgs {
-  @Field((type) => ID, { description: 'Object id (Post, Link, etc...)' })
+  @Field((type) => ID, { description: 'Object id (Template, Link, etc...)' })
   objectId!: number;
 
   @Field({ description: 'Taxonomy name' })

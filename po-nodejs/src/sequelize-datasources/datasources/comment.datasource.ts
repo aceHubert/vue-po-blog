@@ -61,7 +61,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewCommentInput, requestUser: JwtPayloadWithLang): Promise<CommentModel> {
+  async create(model: NewCommentInput, requestUser: RequestUser): Promise<CommentModel> {
     const { metas, ...rest } = model;
 
     const t = await this.sequelize.transaction();
@@ -104,7 +104,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @param id Link Id
    * @param model 修改实体模型
    */
-  async update(id: number, model: UpdateCommentInput, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async update(id: number, model: UpdateCommentInput, requestUser: RequestUser): Promise<boolean> {
     const comment = await this.models.Comments.findByPk(id, {
       attributes: ['userId'],
     });
@@ -129,7 +129,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @access capabilities: [ModerateComments (if not yours)]
    * @param id comment id
    */
-  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async delete(id: number, requestUser: RequestUser): Promise<boolean> {
     const comment = await this.models.Comments.findByPk(id);
     if (comment) {
       if (comment.userId !== requestUser.id) {

@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { NewMetaInput } from '@/common/models/meta.model';
+import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
 
 @InputType({ description: 'New page input' })
 export class NewPageInput {

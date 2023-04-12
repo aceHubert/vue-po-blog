@@ -2,7 +2,7 @@ import { parseResolveInfo, ResolveTree, FieldsByTypeName, ParseOptions } from 'g
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { GraphQLResolveInfo } from 'graphql';
-import { SyntaxError } from '@/common/utils/gql-errors.util';
+import { SyntaxError } from '@/common/utils/errors.util';
 
 const Fields = createParamDecorator((options: ParseOptions, context: ExecutionContext):
   | ResolveTree

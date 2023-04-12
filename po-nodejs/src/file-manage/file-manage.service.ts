@@ -128,7 +128,7 @@ export class FileManageService {
    */
   async uploadFile(
     options: FileUploadOptions,
-    requestUser?: JwtPayloadWithLang,
+    requestUser?: RequestUser,
   ): Promise<Dictionary<{ fileName: string; path: string }>> {
     const md5 = await this.getFileMd5(options.file);
     let media = await this.mediaDataSource.getByName(md5, ['originalFileName', 'extension', 'mimeType', 'path']);

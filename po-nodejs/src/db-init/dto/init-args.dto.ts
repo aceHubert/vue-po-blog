@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, MinLength, IsLocale, IsUrl, IsEmail } from 'class-validator';
+import { InitArgs } from '@/sequelize-datasources/interfaces/init-args.interface';
 
-export class InitArgs {
+export class InitArgsDto implements Omit<InitArgs, 'siteUrl'> {
   @ApiProperty({ description: 'Site title' })
   @IsNotEmpty({ message: 'field $property is required' })
   title!: string;

@@ -5,9 +5,8 @@ import { I18nService } from 'nestjs-i18n';
 import { ConfigService } from '@/config/config.service';
 import { EntityService } from '@/sequelize-entities/entity.service';
 import { kebabCase, isUndefined } from 'lodash';
-import { ForbiddenError } from '@/common/utils/gql-errors.util';
+import { ForbiddenError } from '@/common/utils/errors.util';
 import { UserCapability } from '@/common/utils/user-capability.util';
-
 import { OptionAutoload } from '@/options/enums';
 
 // Types
@@ -153,15 +152,15 @@ export abstract class BaseDataSource implements OnModuleInit {
    * @param requestUser 请求的用户
    * @param callbackOrThrow 当为 function 时如果验证不过参数 error 将是 ForbiddenError，否则为null; 为 ture 时，验证不过则抛出异常
    */
-  protected async hasCapability(capability: UserCapability, requestUser: JwtPayloadWithLang): Promise<boolean>;
+  protected async hasCapability(capability: UserCapability, requestUser: RequestUser): Promise<boolean>;
   protected async hasCapability(
     capability: UserCapability,
-    requestUser: JwtPayloadWithLang,
+    requestUser: RequestUser,
     callbackOrThrow: true | ((error: Error | null) => void),
   ): Promise<void>;
   protected async hasCapability(
     capability: UserCapability,
-    requestUser: JwtPayloadWithLang,
+    requestUser: RequestUser,
     callbackOrThrow?: true | ((error: Error | null) => void),
   ): Promise<boolean | void> {
     const userRoleCapabilities =
@@ -183,7 +182,7 @@ export abstract class BaseDataSource implements OnModuleInit {
         !result
           ? new ForbiddenError(
               await this.i18nService.tv(
-                'error.forbidden_capability',
+                'core.error.forbidden_capability',
                 `Access denied, You don't have capability "${kebabCase(capability)}" for this action!`,
                 {
                   lang: requestUser.lang,

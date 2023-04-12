@@ -41,7 +41,7 @@ export class AuthController extends BaseController {
       } else {
         return this.faild(await i18n.tv('core.error.invalid_token', 'Invalid token!'));
       }
-    } catch (err) {
+    } catch (err: any) {
       return this.faild(err);
     }
   }

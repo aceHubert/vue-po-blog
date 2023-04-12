@@ -1,5 +1,5 @@
 import { Field, InputType, ID, Int } from '@nestjs/graphql';
-import { NewMetaInput } from '@/common/models/meta.model';
+import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
 
 @InputType({ description: 'New term input' })
 export class NewTermInput {
@@ -9,9 +9,6 @@ export class NewTermInput {
   @Field({ nullable: true, description: 'Term slug' })
   slug?: string;
 
-  @Field((type) => Int, { nullable: true, description: '分组' })
-  group?: number;
-
   @Field({ description: 'Taxonomy name' })
   taxonomy!: string;
 
@@ -20,6 +17,9 @@ export class NewTermInput {
 
   @Field((type) => ID, { nullable: true, defaultValue: 0, description: 'Parent id (taxonomyId, default: 0)' })
   parentId!: number;
+
+  @Field((type) => Int, { nullable: true, description: 'Group' })
+  group?: number;
 
   @Field((type) => ID, {
     nullable: true,

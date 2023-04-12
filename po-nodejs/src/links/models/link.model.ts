@@ -1,5 +1,5 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { PagedResponse } from '@/common/models/general.model';
+import { PagedResponse } from '@/common/resolvers/models/paged.model';
 import { LinkTarget, LinkVisible } from '../enums';
 
 @ObjectType({ description: 'Link model' })

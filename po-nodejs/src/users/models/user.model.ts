@@ -1,7 +1,7 @@
 import { Field, ObjectType, InterfaceType, ID } from '@nestjs/graphql';
 import { FieldAuthorized } from '@/common/decorators/authorized.decorator';
-import { PagedResponse, Count } from '@/common/models/general.model';
-import { Meta } from '@/common/models/meta.model';
+import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';
+import { Meta } from '@/common/resolvers/models/meta.model';
 import { UserRole, UserRoleWithNone, UserStatus } from '../enums';
 
 @InterfaceType()

@@ -1,7 +1,7 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { UserCapability } from '@/common/utils/user-capability.util';
-import { ValidationError } from '@/common/utils/gql-errors.util';
+import { ValidationError } from '@/common/utils/errors.util';
 import { BaseDataSource } from './base.datasource';
 
 // Types
@@ -68,18 +68,22 @@ export class OptionDataSource extends BaseDataSource {
    * 反回第一个匹配name,或加上table 前缀后的name的值
    * @param optionName optionName
    */
-  getOptionValue(optionName: string): Promise<OptionModel['optionValue'] | null> {
-    return this.models.Options.findOne({
-      attributes: ['optionValue'],
+  getOptionValue(optionName: string): Promise<OptionModel['optionValue'] | undefined> {
+    return this.models.Options.findAll({
+      attributes: ['optionName', 'optionValue'],
       where: {
-        optionName: {
-          [this.Op.or]: {
-            [this.Op.eq]: optionName,
-            [this.Op.eq]: `${this.tablePrefix}${optionName}`,
-          },
-        },
+        optionName: [optionName, `${this.tablePrefix}${optionName}`],
       },
-    }).then((option) => option?.optionValue as string);
+    }).then((options) => {
+      // 先找带有当前网站前缀的参数
+      let result = options.find((option) => option.optionName === `${this.tablePrefix}${optionName}`)?.optionValue;
+
+      if (result === void 0) {
+        result = options.find((option) => option.optionName === optionName)?.optionValue;
+      }
+
+      return result;
+    });
   }
 
   /**
@@ -90,12 +94,7 @@ export class OptionDataSource extends BaseDataSource {
     return (
       (await this.models.Options.count({
         where: {
-          optionName: {
-            [this.Op.or]: {
-              [this.Op.eq]: optionName,
-              [this.Op.eq]: `${this.tablePrefix}${optionName}`,
-            },
-          },
+          optionName: [optionName, `${this.tablePrefix}${optionName}`],
         },
       })) > 0
     );
@@ -105,7 +104,7 @@ export class OptionDataSource extends BaseDataSource {
    * 新建 Options
    * @param model 新建模型
    */
-  async create(model: NewOptionInput, requestUser: JwtPayloadWithLang): Promise<OptionModel> {
+  async create(model: NewOptionInput, requestUser: RequestUser): Promise<OptionModel> {
     await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
 
     if (await this.isExists(model.optionName)) {
@@ -133,7 +132,7 @@ export class OptionDataSource extends BaseDataSource {
    * @param id Options id
    * @param model 修改实体模型
    */
-  async update(id: number, model: UpdateOptionInput, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async update(id: number, model: UpdateOptionInput, requestUser: RequestUser): Promise<boolean> {
     await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
 
     const result = await this.models.Options.update(model, {
@@ -147,7 +146,7 @@ export class OptionDataSource extends BaseDataSource {
    * 删除 Options
    * @param id Option Id
    */
-  async delete(id: number, requestUser: JwtPayloadWithLang): Promise<boolean> {
+  async delete(id: number, requestUser: RequestUser): Promise<boolean> {
     await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
 
     const result = await this.models.Options.destroy({

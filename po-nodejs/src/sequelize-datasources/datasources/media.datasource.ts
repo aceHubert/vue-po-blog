@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError } from '@/common/utils/gql-errors.util';
+import { ValidationError } from '@/common/utils/errors.util';
 import { MetaDataSource } from './meta.datasource';
 
 // Types
@@ -102,7 +102,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewMediaInput, requestUser?: JwtPayloadWithLang): Promise<MediaModel> {
+  async create(model: NewMediaInput, requestUser?: RequestUser): Promise<MediaModel> {
     if (await this.isExists(model.fileName)) {
       throw new ValidationError(`The media filename "${model.fileName}" has existed!`);
     }

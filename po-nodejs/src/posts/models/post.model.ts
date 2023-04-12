@@ -1,6 +1,6 @@
 import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
-import { PagedResponse, Count } from '@/common/models/general.model';
-import { Meta } from '@/common/models/meta.model';
+import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';
+import { Meta } from '@/common/resolvers/models/meta.model';
 import { PostStatus, PostCommentStatus } from '../enums';
 
 @ObjectType({ description: 'Post model' })
@@ -40,7 +40,7 @@ export class PagedPost extends PagedResponse(Post) {
 
 @ObjectType({ description: 'Post count by status' })
 export class PostStatusCount extends Count {
-  @Field((type) => PostStatus, { description: 'Post staus' })
+  @Field((type) => PostStatus, { description: 'Post status' })
   status!: PostStatus;
 }
 

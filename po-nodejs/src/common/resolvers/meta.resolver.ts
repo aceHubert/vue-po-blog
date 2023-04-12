@@ -11,7 +11,8 @@ import { BaseResolver } from './base.resolver';
 
 // Types
 import { MetaDataSource } from '@/sequelize-datasources/interfaces';
-import { Meta, NewMetaInput } from '../models/meta.model';
+import { NewMetaInput } from './dto/new-meta.input';
+import { Meta } from './models/meta.model';
 
 export type Options = {
   /**

@@ -1,6 +1,6 @@
 import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
 import { PostStatus, PostCommentStatus } from '@/posts/enums';
-import { PagedResponse } from '@/common/models/general.model';
+import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
 @ObjectType({ description: 'Page model' })
 export class Page {
